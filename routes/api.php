@@ -13,9 +13,13 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post('/login', 'AuthController@login');
+
+// public endpoints here
+Route::post('/login', 'AuthController@login'); // for student
+Route::post('/personnel/login', 'AuthController@loginPersonnel'); // for personnels
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
+    // secured endpoints here
     return $request->user();
 });
 

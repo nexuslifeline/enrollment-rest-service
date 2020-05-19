@@ -1,5 +1,6 @@
 <?php
 
+use App\Personnel;
 use Illuminate\Database\Seeder;
 
 class UsersTableSeeder extends Seeder
@@ -11,10 +12,23 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
-            'name' => 'Paul Christian Rueda',
-            'email' => 'chrisrueda14@yahoo.com',
-            'password' => bcrypt('password'),
-        ]);
+        $users = [
+            [
+                'personnel' => [
+                    'name' => 'Paul Christian Rueda',
+                    'first_name' => 'Paul Christian',
+                    'last_name' => 'Rueda'
+                ],
+                'account' => [
+                    'username' => 'admin@nexuslifeline.com',
+                    'password' => bcrypt('password')
+                ]
+            ]
+        ];
+
+        foreach($users as $user) {
+            $personnel = Personnel::create($user['personnel']);
+            $personnel->user()->create($user['account']);
+        }
     }
 }
