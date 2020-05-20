@@ -14,8 +14,8 @@ Available Options for enrollment-rest:install
 
 | Name  | Description  |
 | :---- | :----------- |
-| --fresh | this option will drop all the database tables then running up all the migration again. If not provided migration will only run those that are not yet executed(You can see the list of executed migrations on the table **migrations)  |
-| ---with-test-data | this option provides a test data for the application development. If not provided no test data will be added to the tables |
+| --fresh | this option will drop all the database tables then running up all the migration again. If not provided migration will only run those that are not yet executed(You can see the list of executed migrations on the table **migrations**)  |
+| --with-test-data | this option provides a test data for the application development. If not provided no test data will be added to the tables |
 
 
 ## Environment Variables
@@ -31,5 +31,5 @@ If these environment variables do not exist on your .env file, we need to add th
 | Endpoint  | Params/Payload | Method | Description  |
 | :-------- | :------------- | :----- | :----------- |
 | api/v1/students | ?paginate=true/false&perPage=N&page=N | GET | returns the list of students. |
-| api/v1/login | { username: value, password: value }  | POST | returns tokens after successfull authentication(if credentials are corrent). access token from here will the be one to include on every http request. Secured Http Request should have **Authorization header with **Bearer {Token} |
-| api/v1/personnel/login | { username: value, password: value }  | POST | returns tokens after successfull authentication(if credentials are corrent). access token from here will the be one to include on every http request. Secured Http Request should have **Authorization header with **Bearer {Token} |
+| api/v1/login | { username: value, password: value }  | POST | returns tokens after successfull authentication(if credentials are corrent). access token from here will the be one to include on every http request. Secured Http Request should have **Authorization** header with **Bearer** {Token} |
+| api/v1/personnel/login | { username: value, password: value }  | POST | returns tokens after successfull authentication(if credentials are corrent). access token from here will the be one to include on every http request. Secured Http Request should have **Authorization** header with **Bearer** {Token} |
