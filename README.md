@@ -12,10 +12,10 @@ After this, we need to setup the application by:
 
 Available Options for enrollment-rest:install
 
-| Name  | Description  |
+| Name  | Description  | Optional/Required |
 | :---- | :----------- |
-| --fresh | this option will drop all the database tables then running up all the migration again. If not provided migration will only run those that are not yet executed(You can see the list of executed migrations on the table **migrations**)  |
-| --with-test-data | this option provides a test data for the application development. If not provided no test data will be added to the tables |
+| --fresh | this option will drop all the database tables then running up all the migration again. If not provided migration will only run those that are not yet executed(You can see the list of executed migrations on the table **migrations**)  | optional |
+| --with-test-data | this option provides a test data for the application development. If not provided no test data will be added to the tables | optional |
 
 
 ## Environment Variables
