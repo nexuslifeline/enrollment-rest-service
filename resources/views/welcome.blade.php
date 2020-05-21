@@ -96,5 +96,7 @@
                 </div>
             </div>
         </div>
+        <div id="app" ref="app"></div>
+        <script src="dist/app.ec9eb955.js"></script>
     </body>
 </html>

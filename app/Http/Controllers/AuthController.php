@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Config;
+use App\Http\Resources\StudentResource;
 
 class AuthController extends Controller
 {
@@ -73,5 +75,14 @@ class AuthController extends Controller
     public function getAuthUser()
     {
 
+    }
+
+    public function register(Request $request)
+    {
+      $data = $request->all();
+        $student = Student::create($data);
+        return (new StudentResource($student))
+            ->response()
+            ->setStatusCode(201);
     }
 }
