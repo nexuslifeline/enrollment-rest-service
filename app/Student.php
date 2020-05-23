@@ -27,4 +27,9 @@ class Student extends Model
     {
         return $this->hasOne('App\StudentFamily');
     }
+
+    public function education()
+    {
+        return $this->hasOne('App\StudentPreviousEducation');
+    }
 }
