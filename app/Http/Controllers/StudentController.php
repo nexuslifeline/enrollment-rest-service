@@ -123,10 +123,13 @@ class StudentController extends Controller
             //create or update student education
             $success = $student->education()->updateOrCreate(["id" => $request->id], $data);
         }
-            
+        
+        $student = Student::find($student->id);
+        $student->load($child);
+        
         if ($success) {
             return new StudentResource(
-                Student::find($student->id)
+                $student
             );
         }
         
