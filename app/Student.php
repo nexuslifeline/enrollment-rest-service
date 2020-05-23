@@ -5,6 +5,7 @@ namespace App;
 use App\User;
 use App\StudentFamily;
 use App\StudentAddress;
+use App\StudentPreviousEducation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

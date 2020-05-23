@@ -92,6 +92,7 @@ class StudentController extends Controller
         $student = Student::findOrFail(auth("api")->user()->userable_id);
         $student->load("address");
         $student->load("family");
+        $student->load("education");
 
         return new StudentResource($student);
     }
@@ -109,11 +110,18 @@ class StudentController extends Controller
         
         if($child == "address")
         {
+            //create or update student address
             $success = $student->address()->updateOrCreate(["id" => $request->id], $data);
         }
         else if($child == "family")
         {
+            //create or update student family
             $success = $student->family()->updateOrCreate(["id" => $request->id], $data);
+        }
+        else if($child == "education")
+        {
+            //create or update student education
+            $success = $student->education()->updateOrCreate(["id" => $request->id], $data);
         }
             
         if ($success) {
@@ -121,6 +129,7 @@ class StudentController extends Controller
                 Student::find($student->id)
             );
         }
+        
         return response()->json([], 400); // Note! add error here
     }
 }

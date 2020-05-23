@@ -9,4 +9,10 @@ class StudentFamily extends Model
 {
     use SoftDeletes;
     protected $guarded = [];
+
+    /* Get the student that owns the student family */
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
 }
