@@ -27,6 +27,10 @@ Route::group(['prefix' => 'v1'], function()
         // secured endpoints here
         Route::resource('/students', 'StudentController');
         Route::resource('/me', 'AuthController@getAuthUser');
+        Route::post('/logout', 'AuthController@logout');
+
+        Route::get('/studentinfo', 'StudentController@getStudentInfo');
+        Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');
     });
 });
 

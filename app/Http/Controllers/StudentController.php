@@ -64,7 +64,7 @@ class StudentController extends Controller
         $success = $student->update($data);
         if ($success) {
             return new StudentResource(
-                Student::find($studentId)
+                Student::find($student->id)
             );
         }
         return response()->json([], 400); // Note! add error here
@@ -82,4 +82,45 @@ class StudentController extends Controller
         return response()->json([], 204);
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getStudentInfo()
+    {
+        $student = Student::findOrFail(auth("api")->user()->userable_id);
+        $student->load("address");
+        $student->load("family");
+
+        return new StudentResource($student);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Student  $student
+     * @return \Illuminate\Http\Response
+     */
+    public function updateStudentInfo(Request $request, $child, Student $student)
+    {
+        $data = $request->all();
+        
+        if($child == "address")
+        {
+            $success = $student->address()->updateOrCreate(["id" => $request->id], $data);
+        }
+        else if($child == "family")
+        {
+            $success = $student->family()->updateOrCreate(["id" => $request->id], $data);
+        }
+            
+        if ($success) {
+            return new StudentResource(
+                Student::find($student->id)
+            );
+        }
+        return response()->json([], 400); // Note! add error here
+    }
 }
