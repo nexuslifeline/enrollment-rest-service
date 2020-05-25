@@ -83,7 +83,7 @@ class AuthController extends Controller
 
     public function getAuthUser()
     {
-      $user = User::with(['userable'])->where('id', Auth::id())->get();
+      $user = User::with(['userable'])->where('id', Auth::id())->first();
       return new UserResource($user);
     }
 
