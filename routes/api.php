@@ -28,6 +28,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/students', 'StudentController');
         Route::resource('/me', 'AuthController@getAuthUser');
         Route::post('/logout', 'AuthController@logout');
+        Route::resource('/subjects', 'SubjectController');
+        Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
 
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');

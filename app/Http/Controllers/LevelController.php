@@ -82,4 +82,9 @@ class LevelController extends Controller
     {
         //
     }
+
+    public function getSubjects(Request $request, $level_id)
+    {
+        return Subject::where('level_id', $level_id)->get();
+    }
 }
