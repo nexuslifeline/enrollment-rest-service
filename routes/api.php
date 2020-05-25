@@ -26,7 +26,7 @@ Route::group(['prefix' => 'v1'], function()
     Route::group(['middleware' => ['auth:api']], function() {
         // secured endpoints here
         Route::resource('/students', 'StudentController');
-        Route::resource('/me', 'AuthController@getAuthUser');
+        Route::get('/me', 'AuthController@getAuthUser');
         Route::post('/logout', 'AuthController@logout');
         Route::resource('/subjects', 'SubjectController');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
