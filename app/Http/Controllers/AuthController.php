@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Student;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\StudentResource;
@@ -81,7 +83,8 @@ class AuthController extends Controller
 
     public function getAuthUser()
     {
-
+      $user = User::with(['userable'])->where('id', Auth::id())->get();
+      return new UserResource($user);
     }
 
     public function registerStudent(Request $request)

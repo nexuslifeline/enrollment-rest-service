@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Student;
+use App\Personnel;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,7 +29,12 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
+        'api_token',
+        'email_verified_at',
+        'userable_id',
+        'userable_type'
     ];
 
     /**
@@ -47,5 +54,15 @@ class User extends Authenticatable
     public function findForPassport($username)
     {
         return $this->where('username', $username)->first();
+    }
+
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
+
+    public function personnel()
+    {
+        return $this->belongsTo('App\Personnel');
     }
 }
