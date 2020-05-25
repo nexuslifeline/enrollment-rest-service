@@ -32,6 +32,7 @@ class TestDataSeeder extends Seeder
             $email = strtolower(str_replace('', ' ', $firstName . $lastName . '@nexuslifeline.com'));
 
             $student = Student::create([
+                'name' => $firstName . ' ' . $lastName,
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'email' => $email,
@@ -42,6 +43,12 @@ class TestDataSeeder extends Seeder
                 'username' => $email,
                 'password' => bcrypt('password')
             ]);
+
+            if ($i < 50) { // atleast half of student have address
+                $student->address()->create([
+                    'address' => $faker->address
+                ]);
+            }
         }
     }
 

@@ -48,6 +48,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
+        $student->load(['address', 'family', 'education']);
         return new StudentResource($student);
     }
 
@@ -60,14 +61,22 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        $data = $request->all();
-        $success = $student->update($data);
-        if ($success) {
-            return new StudentResource(
-                Student::find($student->id)
-            );
+        try {
+            $related = ['address', 'family', 'education'];
+            $data = $request->except($related);
+            $student->update($data);
+
+            foreach($related as $item) {
+                if ($request->has($item)) {
+                    $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+                }
+            }
+
+            $student->load($related)->fresh();
+            return new StudentResource($student);
+        } catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
         }
-        return response()->json([], 400); // Note! add error here
     }
 
     /**
