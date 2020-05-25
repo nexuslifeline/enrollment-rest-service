@@ -84,7 +84,7 @@ class AuthController extends Controller
 
     }
 
-    public function register(Request $request)
+    public function registerStudent(Request $request)
     {
       $this->validate($request, [
         'first_name' => 'required|string|max:255',

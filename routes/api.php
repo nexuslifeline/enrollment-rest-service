@@ -21,7 +21,7 @@ Route::group(['prefix' => 'v1'], function()
     // public endpoints here
     Route::post('/login', 'AuthController@login'); // for student
     Route::post('/personnel/login', 'AuthController@loginPersonnel'); // for personnels
-    Route::post('/register', 'AuthController@register');
+    Route::post('/register', 'AuthController@registerStudent');
 
     Route::group(['middleware' => ['auth:api']], function() {
         // secured endpoints here
