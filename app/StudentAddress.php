@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class StudentAddress extends Model
 {
     use SoftDeletes;
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     /* Get the student that owns the student address */
     public function student()

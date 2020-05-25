@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Personnel extends Model
 {
     use SoftDeletes;
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     public function user()
     {

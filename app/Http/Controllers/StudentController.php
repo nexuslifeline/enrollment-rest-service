@@ -33,8 +33,17 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->all();
+        $related = ['address', 'family', 'education'];
+        $data = $request->except($related);
         $student = Student::create($data);
+
+        foreach($related as $item) {
+            if ($request->has($item)) {
+                $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+            }
+        }
+
+        $student->load($related);
         return (new StudentResource($student))
             ->response()
             ->setStatusCode(201);

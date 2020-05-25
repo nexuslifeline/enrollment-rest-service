@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class SchoolCategory extends Model
 {
     use SoftDeletes;
-    protected $guarded = [];
+    protected $guarded = ['id'];
 }

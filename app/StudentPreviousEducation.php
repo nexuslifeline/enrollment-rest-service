@@ -9,7 +9,7 @@ class StudentPreviousEducation extends Model
 {
     use SoftDeletes;
     protected $table = 'student_previous_educations';
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     /* Get the student that owns the student previous education */
     public function student()

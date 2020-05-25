@@ -10,7 +10,7 @@ class Level extends Model
 {
     //
     use SoftDeletes;
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
     /* Get the school category that owns the level */
     public function student()

@@ -9,6 +9,6 @@ class Course extends Model
 {
     //
     use SoftDeletes;
-    protected $guarded = [];
+    protected $guarded = ['id'];
 
 }
