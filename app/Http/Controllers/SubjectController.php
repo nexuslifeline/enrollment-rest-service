@@ -15,9 +15,15 @@ class SubjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $perPage = $request->perPage ?? 20;
+        $subjects = !$request->has('paginate') || $request->paginate === 'true'
+            ? Subject::paginate($perPage)
+            : Subject::all();
+        return SubjectResource::collection(
+            $subjects
+        );
     }
 
     /**
@@ -88,6 +94,7 @@ class SubjectController extends Controller
 
     public function getSubjectsOfLevel($levelId, Request $request)
     {
+        
         $perPage = $request->perPage ?? 20;
         $query = Level::find($levelId)->subjects();
 

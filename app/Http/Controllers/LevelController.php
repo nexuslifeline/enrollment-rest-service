@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Level;
 use Illuminate\Http\Request;
+use App\Http\Resources\LevelResource;
 
 class LevelController extends Controller
 {
@@ -12,9 +13,15 @@ class LevelController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $perPage = $request->perPage ?? 20;
+        $levels = !$request->has('paginate') || $request->paginate === 'true'
+            ? Level::paginate($perPage)
+            : Level::all();
+        return LevelResource::collection(
+            $levels
+        );
     }
 
     /**
@@ -87,4 +94,6 @@ class LevelController extends Controller
     {
         return Subject::where('level_id', $level_id)->get();
     }
+
+    
 }

@@ -30,6 +30,9 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/logout', 'AuthController@logout');
         Route::resource('/subjects', 'SubjectController');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
+        Route::resource('/levels', 'LevelController');
+        Route::resource('/courses', 'CourseController');
+        Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
 
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Course;
+use App\Level;
 use Illuminate\Http\Request;
+use App\Http\Resources\CourseResource;
 
 class CourseController extends Controller
 {
@@ -12,9 +14,15 @@ class CourseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $perPage = $request->perPage ?? 20;
+        $courses = $request->has('paginate') || $request->paginate === 'true'
+            ? Courses::paginate($perPage)
+            : Courses::all();
+        return CourseResource::collection(
+            $courses
+        );
     }
 
     /**
@@ -81,5 +89,33 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         //
+    }
+
+    public function getCoursesOfLevel($levelId,Request $request)
+    {
+
+        $perPage = $request->perPage ?? 20;
+        $query = Level::find($levelId)->courses();
+
+        // filters
+        $courseId = $request->course_id ?? false;
+        $query->when($courseId, function($q) use ($courseId, $levelId) {
+            return $q->whereHas('courses', function($query) use ($courseId, $levelId) {
+                return $query->where('course_id', $courseId)->where('level_id', $levelId);
+            });
+        });
+
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
+            return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
+                return $query->where('school_category_id', $semesterId)->where('level_id', $levelId);
+            });
+        });
+
+        $courses = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+
+        return CourseResource::collection($courses);
     }
 }
