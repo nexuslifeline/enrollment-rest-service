@@ -15,10 +15,13 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $students = !$request->has('paginate') || $request->paginate === 'true'
             ? Student::paginate($perPage)
             : Student::all();
+
+        $students->load(['address', 'family', 'education']);
+
         return StudentResource::collection(
             $students
         );

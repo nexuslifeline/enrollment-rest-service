@@ -36,15 +36,7 @@ class AuthController extends Controller
             'scope' => '',
           ],
         ]);
-        
-        $student = $user->userable;
-        $student->load("address");
-        $student->load("family");
-        
-        $data["student"] = new StudentResource($student);
-        $data["token"] = json_decode((string) $response->getBody(), true);
-
-        return $data;
+        return json_encode(json_decode((string) $response->getBody(), true));
       } else {
         return response()->json(['error' => 'Unauthenticated.'], 401);
       }
@@ -87,7 +79,7 @@ class AuthController extends Controller
       return new UserResource($user);
     }
 
-    public function registerStudent(Request $request)
+    public function register(Request $request)
     {
       $this->validate($request, [
         'first_name' => 'required|string|max:255',
@@ -96,7 +88,7 @@ class AuthController extends Controller
         'password' => 'required|string|min:6|confirmed',
       ]);
 
-      $student = Student::create([
+      $user = Student::create([
         'first_name' => $request->first_name,
         'middle_name' => $request->middle_name,
         'last_name' => $request->last_name,
@@ -106,7 +98,9 @@ class AuthController extends Controller
         'password' => Hash::make($request->password)
       ]);
 
-      return $this->login($request);
+      return (new UserResource($user))
+                ->response()
+                ->setStatusCode(201);
     }
 
     public function logout()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Course;
 use App\Level;
+use App\SchoolCategory;
 use Illuminate\Http\Request;
 use App\Http\Resources\CourseResource;
 
@@ -91,24 +92,17 @@ class CourseController extends Controller
         //
     }
 
-    public function getCoursesOfLevel($levelId,Request $request)
+    public function getCoursesOfLevel($levelId, Request $request)
     {
 
         $perPage = $request->perPage ?? 20;
         $query = Level::find($levelId)->courses();
 
         // filters
-        $courseId = $request->course_id ?? false;
-        $query->when($courseId, function($q) use ($courseId, $levelId) {
-            return $q->whereHas('courses', function($query) use ($courseId, $levelId) {
-                return $query->where('course_id', $courseId)->where('level_id', $levelId);
-            });
-        });
-
         $schoolCategoryId = $request->school_category_id ?? false;
         $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
             return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
-                return $query->where('school_category_id', $semesterId)->where('level_id', $levelId);
+                return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
             });
         });
 
@@ -117,5 +111,25 @@ class CourseController extends Controller
             : $query->get();
 
         return CourseResource::collection($courses);
+    }
+
+    public function getCoursesOfSchoolCategory($schoolCategoryId, Request $request)
+    {
+        $perPage = $request->per_page ?? 20;
+        $query = SchoolCategory::find($schoolCategoryId)->courses();
+
+        //filters
+        $levelId = $request->level_id ?? false;
+        $query->when($levelId, function($q) use ($levelId, $schoolCategoryId) {
+            return $q->whereHas('levels', function($query) use ($levelId, $schoolCategoryId) {
+                return $query->where('level_id', $levelId)->where('level_courses.school_category_id', $schoolCategoryId);
+            });
+        });
+
+        $course = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+
+        return CourseResource::collection($course);
     }
 }

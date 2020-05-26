@@ -33,6 +33,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/levels', 'LevelController');
         Route::resource('/courses', 'CourseController');
         Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
+        Route::resource('/school-categories', 'CourseController');
+        Route::get('/school-categories/{schoolCategoryId}/courses', 'CourseController@getCoursesOfSchoolCategory');
 
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');
