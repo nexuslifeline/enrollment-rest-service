@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\SchoolYear;
 use Illuminate\Http\Request;
-use App\Http\Resources\SchoolYearResource;
+use App\Semester;
+use App\Http\Resources\SemesterResource;
 
-class SchoolYearController extends Controller
+class SemesterController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,11 +16,11 @@ class SchoolYearController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->perPage ?? 20;
-        $schoolYears = $request->has('paginate') || $request->paginate === 'true'
-            ? SchoolYear::paginate($perPage)
-            : SchoolYear::all();
-        return SchoolYearResource::collection(
-            $schoolYears
+        $semesters = $request->has('paginate') || $request->paginate === 'true'
+            ? Semester::paginate($perPage)
+            : Semester::all();
+        return SemesterResource::collection(
+            $semesters
         );
     }
 
@@ -34,9 +34,9 @@ class SchoolYearController extends Controller
     {
         $data = $request->all();
 
-        $schoolYear = SchoolYear::create($data);
+        $semester = Semester::create($data);
 
-        return (new SchoolYearResource($schoolYear))
+        return (new SemesterResource($semester))
                 ->response()
                 ->setStatusCode(201);
     }
@@ -44,29 +44,29 @@ class SchoolYearController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\SchoolYear  $schoolYear
+     * @param  \App\Semester  $semester
      * @return \Illuminate\Http\Response
      */
-    public function show(SchoolYear $schoolYear)
+    public function show(Semester $semester)
     {
-        return new SchoolYearResource($schoolYear);
+        return new SemesterResource($semester);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\SchoolYear  $schoolYear
+     * @param  \App\Semester  $semester
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, SchoolYear $schoolYear)
+    public function update(Request $request, Semester $semester)
     {
         $data = $request->all();
 
-        $success = $schoolYear->update($data);
+        $success = $semester->update($data);
 
         if($success){
-            return (new SchoolYearResource($schoolYear))
+            return (new SemesterResource($semester))
                 ->response()
                 ->setStatusCode(200);
         }
@@ -75,12 +75,12 @@ class SchoolYearController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\SchoolYear  $schoolYear
+     * @param  \App\Semester  $semester
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SchoolYear $schoolYear)
+    public function destroy(Semester $semester)
     {
-        $schoolYear->delete();
+        $semester->delete();
         return response()->json([], 204);
     }
 }

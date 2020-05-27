@@ -25,16 +25,6 @@ class LevelController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -43,6 +33,17 @@ class LevelController extends Controller
     public function store(Request $request)
     {
         //
+        try{
+            $data = $request->all();
+
+            $level = Level::create($data);
+            
+            return (new LevelResource($level))
+                ->response()
+                ->setStatusCode(201);
+        }catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
@@ -53,18 +54,7 @@ class LevelController extends Controller
      */
     public function show(Level $level)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Level  $level
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Level $level)
-    {
-        //
+        return new LevelResource($level);
     }
 
     /**
@@ -76,7 +66,19 @@ class LevelController extends Controller
      */
     public function update(Request $request, Level $level)
     {
-        //
+        try{
+            $data = $request->all();
+
+            $success = $level->update($data);
+
+            if ($success) {
+                return (new LevelResource($level))
+                    ->response() 
+                    ->setStatusCode(200);
+            }
+        }catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
@@ -87,7 +89,8 @@ class LevelController extends Controller
      */
     public function destroy(Level $level)
     {
-        //
+        $level->delete();
+        return response()->json([], 204);
     }
 
     public function getSubjects(Request $request, $level_id)

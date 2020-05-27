@@ -27,16 +27,6 @@ class CourseController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -44,7 +34,17 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try{
+            $data = $request->all();
+
+            $course = Course::create($data);
+            
+            return (new CourseResource($course))
+                ->response()
+                ->setStatusCode(201);
+        }catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
@@ -55,18 +55,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Course  $course
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Course $course)
-    {
-        //
+        return new CourseResource($course);
     }
 
     /**
@@ -78,7 +67,19 @@ class CourseController extends Controller
      */
     public function update(Request $request, Course $course)
     {
-        //
+        try{
+            $data = $request->all();
+
+            $success = $course->update($data);
+
+            if ($success) {
+                return (new CourseResource($course))
+                ->response()
+                ->setStatusCode(200);
+            }
+        }catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
@@ -89,7 +90,8 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        //
+        $course->delete();
+        return response()->json([], 204);
     }
 
     public function getCoursesOfLevel($levelId, Request $request)

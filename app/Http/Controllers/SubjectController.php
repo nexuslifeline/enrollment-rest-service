@@ -27,16 +27,6 @@ class SubjectController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -44,7 +34,17 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try{
+            $data = $request->all();
+
+            $subject = Subject::create($data);
+            
+            return (new SubjectResource($subject))
+                ->response()
+                ->setStatusCode(201);
+        }catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
@@ -55,18 +55,7 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Subject  $subject
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Subject $subject)
-    {
-        //
+        return new LevelResource($subject);
     }
 
     /**
@@ -78,7 +67,19 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        //
+        try{
+            $data = $request->all();
+
+            $success = $subject->udpate($data);
+            
+            if($success){
+                return (new SubjectResource($subject))
+                ->response()
+                ->setStatusCode(200);
+            }
+        }catch (Throwable $e) {
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
@@ -89,7 +90,8 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        //
+        $subject->delete();
+        return response()->json([], 204);
     }
 
     public function getSubjectsOfLevel($levelId, Request $request)
