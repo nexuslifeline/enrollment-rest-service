@@ -13,9 +13,9 @@ class Level extends Model
     protected $guarded = ['id'];
 
     /* Get the school category that owns the level */
-    public function student()
+    public function schoolCategories()
     {
-        return $this->belongsTo('App\Student');
+        return $this->belongsTo('App\SchoolCategory');
     }
 
     public function subjects()

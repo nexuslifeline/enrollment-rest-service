@@ -17,6 +17,6 @@ class SchoolCategory extends Model
 
     public function levels()
     {
-        return $this->belongsToMany('App\Level', 'level_courses', 'school_category_id','level_id');
+        return $this->hasMany('App\Level');
     }
 }

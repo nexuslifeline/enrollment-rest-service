@@ -35,6 +35,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
         Route::resource('/school-categories', 'SchoolCategoryController');
         Route::get('/school-categories/{schoolCategoryId}/courses', 'CourseController@getCoursesOfSchoolCategory');
+        Route::get('/school-categories/{schoolCategoryId}/levels', 'LevelController@getLevelsOfSchoolCategory');
         Route::resource('/school-years', 'SchoolYearController');
         Route::resource('/semesters', 'SemesterController');
 

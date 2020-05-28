@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Level;
 use Illuminate\Http\Request;
 use App\Http\Resources\LevelResource;
+use App\Http\Resources\SchoolCategoryResource;
+use App\SchoolCategory;
 
 class LevelController extends Controller
 {
@@ -103,5 +105,15 @@ class LevelController extends Controller
         return Subject::where('level_id', $level_id)->get();
     }
 
-    
+    public function getLevelsOfSchoolCategory($schoolCategoryId, Request $request)
+    {
+        $perPage = $request->perPage ?? 20;
+        $levels = SchoolCategory::find($schoolCategoryId)->levels();
+
+        $levels = !$request->has('paginate') || $request->paginate === 'true'
+            ? $levels->paginate($perPage)
+            : $levels->get();
+
+        return SchoolCategoryResource::collection($levels);
+    }    
 }
