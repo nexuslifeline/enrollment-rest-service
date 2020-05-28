@@ -19,8 +19,8 @@ class CourseController extends Controller
     {
         $perPage = $request->perPage ?? 20;
         $courses = !$request->has('paginate') || $request->paginate === 'true'
-            ? Courses::paginate($perPage)
-            : Courses::all();
+            ? Course::paginate($perPage)
+            : Course::all();
         return CourseResource::collection(
             $courses
         );
@@ -116,25 +116,5 @@ class CourseController extends Controller
             : $query->get();
 
         return CourseResource::collection($courses);
-    }
-
-    public function getCoursesOfSchoolCategory($schoolCategoryId, Request $request)
-    {
-        $perPage = $request->per_page ?? 20;
-        $query = SchoolCategory::find($schoolCategoryId)->courses();
-
-        //filters
-        $levelId = $request->level_id ?? false;
-        $query->when($levelId, function($q) use ($levelId, $schoolCategoryId) {
-            return $q->whereHas('levels', function($query) use ($levelId, $schoolCategoryId) {
-                return $query->where('level_id', $levelId)->where('level_courses.school_category_id', $schoolCategoryId);
-            });
-        });
-
-        $course = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-
-        return CourseResource::collection($course);
     }
 }

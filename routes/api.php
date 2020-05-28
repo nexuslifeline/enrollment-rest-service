@@ -30,11 +30,11 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/logout', 'AuthController@logout');
         Route::resource('/subjects', 'SubjectController');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
+        Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
         Route::resource('/levels', 'LevelController');
         Route::resource('/courses', 'CourseController');
         Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
         Route::resource('/school-categories', 'SchoolCategoryController');
-        Route::get('/school-categories/{schoolCategoryId}/courses', 'CourseController@getCoursesOfSchoolCategory');
         Route::get('/school-categories/{schoolCategoryId}/levels', 'LevelController@getLevelsOfSchoolCategory');
         Route::resource('/school-years', 'SchoolYearController');
         Route::resource('/semesters', 'SemesterController');
