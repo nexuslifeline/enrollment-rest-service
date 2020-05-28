@@ -17,7 +17,7 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
             ? Subject::paginate($perPage)
             : Subject::all();
