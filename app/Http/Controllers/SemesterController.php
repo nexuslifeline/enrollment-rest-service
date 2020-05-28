@@ -16,7 +16,7 @@ class SemesterController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->perPage ?? 20;
-        $semesters = $request->has('paginate') || $request->paginate === 'true'
+        $semesters = !$request->has('paginate') || $request->paginate === 'true'
             ? Semester::paginate($perPage)
             : Semester::all();
         return SemesterResource::collection(
@@ -32,6 +32,11 @@ class SemesterController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
+
         $data = $request->all();
 
         $semester = Semester::create($data);
@@ -61,6 +66,11 @@ class SemesterController extends Controller
      */
     public function update(Request $request, Semester $semester)
     {
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
+
         $data = $request->all();
 
         $success = $semester->update($data);
@@ -70,6 +80,7 @@ class SemesterController extends Controller
                 ->response()
                 ->setStatusCode(200);
         }
+        return response()->json([], 400); // Note! add error here
     }
 
     /**

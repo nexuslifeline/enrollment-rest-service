@@ -34,17 +34,19 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        try{
-            $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
 
-            $subject = Subject::create($data);
-            
-            return (new SubjectResource($subject))
-                ->response()
-                ->setStatusCode(201);
-        }catch (Throwable $e) {
-            return response()->json([], 400); // Note! add error here
-        }
+        $data = $request->all();
+
+        $subject = Subject::create($data);
+        
+        return (new SubjectResource($subject))
+            ->response()
+            ->setStatusCode(201);
+        
     }
 
     /**
@@ -67,19 +69,21 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        try{
-            $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
+        
+        $data = $request->all();
 
-            $success = $subject->udpate($data);
-            
-            if($success){
-                return (new SubjectResource($subject))
-                ->response()
-                ->setStatusCode(200);
-            }
-        }catch (Throwable $e) {
-            return response()->json([], 400); // Note! add error here
+        $success = $subject->udpate($data);
+        
+        if($success){
+            return (new SubjectResource($subject))
+            ->response()
+            ->setStatusCode(200);
         }
+        return response()->json([], 400); // Note! add error here
     }
 
     /**

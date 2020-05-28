@@ -16,7 +16,7 @@ class SchoolYearController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->perPage ?? 20;
-        $schoolYears = $request->has('paginate') || $request->paginate === 'true'
+        $schoolYears = !$request->has('paginate') || $request->paginate === 'true'
             ? SchoolYear::paginate($perPage)
             : SchoolYear::all();
         return SchoolYearResource::collection(
@@ -32,6 +32,12 @@ class SchoolYearController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191',
+            'start_date' => 'required|date'
+        ]);
+
         $data = $request->all();
 
         $schoolYear = SchoolYear::create($data);
@@ -61,6 +67,12 @@ class SchoolYearController extends Controller
      */
     public function update(Request $request, SchoolYear $schoolYear)
     {
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191',
+            'start_date' => 'required|date'
+        ]);
+
         $data = $request->all();
 
         $success = $schoolYear->update($data);
@@ -70,6 +82,7 @@ class SchoolYearController extends Controller
                 ->response()
                 ->setStatusCode(200);
         }
+        return response()->json([], 400); // Note! add error here
     }
 
     /**

@@ -32,18 +32,20 @@ class LevelController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        try{
-            $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191',
+            'school_category_id' => 'nullable'
+        ]);
 
-            $level = Level::create($data);
-            
-            return (new LevelResource($level))
-                ->response()
-                ->setStatusCode(201);
-        }catch (Throwable $e) {
-            return response()->json([], 400); // Note! add error here
-        }
+        $data = $request->all();
+
+        $level = Level::create($data);
+        
+        return (new LevelResource($level))
+            ->response()
+            ->setStatusCode(201);
+        
     }
 
     /**
@@ -66,19 +68,22 @@ class LevelController extends Controller
      */
     public function update(Request $request, Level $level)
     {
-        try{
-            $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191',
+            'school_category_id' => 'nullable'
+        ]);
 
-            $success = $level->update($data);
+        $data = $request->all();
 
-            if ($success) {
-                return (new LevelResource($level))
-                    ->response() 
-                    ->setStatusCode(200);
-            }
-        }catch (Throwable $e) {
-            return response()->json([], 400); // Note! add error here
+        $success = $level->update($data);
+
+        if ($success) {
+            return (new LevelResource($level))
+                ->response() 
+                ->setStatusCode(200);
         }
+        return response()->json([], 400); // Note! add error here
     }
 
     /**

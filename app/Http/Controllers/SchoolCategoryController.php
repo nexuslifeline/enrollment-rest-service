@@ -33,6 +33,11 @@ class SchoolCategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
+
         $data = $request->all();
         $schoolCategory = SchoolCategory::create($data);
 
@@ -61,6 +66,11 @@ class SchoolCategoryController extends Controller
      */
     public function update(Request $request, SchoolCategory $schoolCategory)
     {
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
+        
         $data = $request->all();
         $success = $schoolCategory->update($data);
 

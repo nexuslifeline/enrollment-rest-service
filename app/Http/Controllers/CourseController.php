@@ -18,7 +18,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->perPage ?? 20;
-        $courses = $request->has('paginate') || $request->paginate === 'true'
+        $courses = !$request->has('paginate') || $request->paginate === 'true'
             ? Courses::paginate($perPage)
             : Courses::all();
         return CourseResource::collection(
@@ -34,17 +34,18 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        try{
-            $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
 
-            $course = Course::create($data);
-            
-            return (new CourseResource($course))
-                ->response()
-                ->setStatusCode(201);
-        }catch (Throwable $e) {
-            return response()->json([], 400); // Note! add error here
-        }
+        $data = $request->all();
+
+        $course = Course::create($data);
+        
+        return (new CourseResource($course))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -67,19 +68,21 @@ class CourseController extends Controller
      */
     public function update(Request $request, Course $course)
     {
-        try{
-            $data = $request->all();
+        $this->validate($request, [
+            'name' => 'required|max:191',
+            'description' => 'required|max:191'
+        ]);
 
-            $success = $course->update($data);
+        $data = $request->all();
 
-            if ($success) {
-                return (new CourseResource($course))
-                ->response()
-                ->setStatusCode(200);
-            }
-        }catch (Throwable $e) {
-            return response()->json([], 400); // Note! add error here
+        $success = $course->update($data);
+
+        if ($success) {
+            return (new CourseResource($course))
+            ->response()
+            ->setStatusCode(200);
         }
+        return response()->json([], 400); // Note! add error here
     }
 
     /**
