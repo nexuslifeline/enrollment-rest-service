@@ -43,11 +43,11 @@ class LevelController extends Controller
         $data = $request->all();
 
         $level = Level::create($data);
-        
+
         return (new LevelResource($level))
             ->response()
             ->setStatusCode(201);
-        
+
     }
 
     /**
@@ -82,7 +82,7 @@ class LevelController extends Controller
 
         if ($success) {
             return (new LevelResource($level))
-                ->response() 
+                ->response()
                 ->setStatusCode(200);
         }
         return response()->json([], 400); // Note! add error here
