@@ -20,11 +20,11 @@ class Level extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany('App\Subject', 'level_subjects', 'level_id','subject_id');
+        return $this->belongsToMany('App\Subject', 'level_subjects', 'level_id','subject_id')->withTimestamps();
     }
 
     public function courses()
     {
-        return $this->belongsToMany('App\Course', 'level_courses', 'level_id','course_id');
+        return $this->belongsToMany('App\Course', 'level_courses', 'level_id','course_id')->withTimestamps();;
     }
 }

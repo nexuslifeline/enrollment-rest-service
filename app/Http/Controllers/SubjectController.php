@@ -35,8 +35,9 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191'
+          'code' => 'required|max:191',
+          'name' => 'required|max:191',
+          'description' => 'required|max:191'
         ]);
 
         $data = $request->all();
@@ -70,13 +71,14 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191'
+          'code' => 'required|max:191',
+          'name' => 'required|max:191',
+          'description' => 'required|max:191'
         ]);
         
         $data = $request->all();
 
-        $success = $subject->udpate($data);
+        $success = $subject->update($data);
         
         if($success){
             return (new SubjectResource($subject))

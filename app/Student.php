@@ -33,4 +33,14 @@ class Student extends Model
     {
         return $this->hasOne('App\StudentPreviousEducation');
     }
+
+    public function applications()
+    {
+        return $this->hasMany('App\StudentApplication');
+    }
+
+    public function transcripts()
+    {
+        return $this->hasMany('App\Transcript');
+    }
 }

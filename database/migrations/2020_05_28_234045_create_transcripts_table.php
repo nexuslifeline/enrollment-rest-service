@@ -23,6 +23,8 @@ class CreateTranscriptsTable extends Migration
             $table->unsignedBigInteger('school_year_id')->nullable();
             $table->foreign('level_id')->references('id')->on('levels');
             $table->unsignedBigInteger('level_id')->nullable();
+            $table->foreign('course_id')->references('id')->on('courses');
+            $table->unsignedBigInteger('course_id')->nullable();
             $table->foreign('semester_id')->references('id')->on('semesters');
             $table->unsignedBigInteger('semester_id')->nullable();
             $table->foreign('school_category_id')->references('id')->on('school_categories');

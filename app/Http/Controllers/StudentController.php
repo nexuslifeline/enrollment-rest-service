@@ -20,7 +20,7 @@ class StudentController extends Controller
             ? Student::paginate($perPage)
             : Student::all();
 
-        $students->load(['address', 'family', 'education']);
+        $students->load(['address', 'family', 'education', 'applications']);
 
         return StudentResource::collection(
             $students
@@ -36,7 +36,7 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $related = ['address', 'family', 'education'];
+        $related = ['address', 'family', 'education', 'applications'];
         $data = $request->except($related);
         $student = Student::create($data);
 
@@ -60,7 +60,13 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        $student->load(['address', 'family', 'education']);
+        $schoolYearId = 1;
+        $student->load(['address', 'family', 'education'])->load(['transcripts' => function ($query) use($schoolYearId){
+            $query->with('application')->where('school_year_id', $schoolYearId)->first();
+        }]);
+
+        // return $student->load(['address', 'family', 'education'])->transcripts()->first()->application()->get();
+
         return new StudentResource($student);
     }
 
@@ -74,16 +80,20 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         try {
-            $related = ['address', 'family', 'education'];
-            $data = $request->except($related);
+            $related = ['address', 'family', 'education', 'applications'];
+            $except = ['address', 'family', 'education', 'applications', 'transcript', 'subjects'];
+            $data = $request->except($except);
             $student->update($data);
-
             foreach($related as $item) {
-                if ($request->has($item)) {
-                    $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
-                }
+              if ($request->has($item)) {
+                if($item === 'applications') {
+                  $application = $student->applications()->create($request->applications);
+                  $application->transcript()->create($request->transcript)->subjects()->attach($request->subjects);
+                } else {
+                  $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+                }         
+              }
             }
-
             $student->load($related)->fresh();
             return new StudentResource($student);
         } catch (Throwable $e) {
@@ -101,59 +111,5 @@ class StudentController extends Controller
     {
         $student->delete();
         return response()->json([], 204);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function getStudentInfo()
-    {
-        $student = Student::findOrFail(auth("api")->user()->userable_id);
-        $student->load("address");
-        $student->load("family");
-        $student->load("education");
-
-        return new StudentResource($student);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Student  $student
-     * @return \Illuminate\Http\Response
-     */
-    public function updateStudentInfo(Request $request, $child, Student $student)
-    {
-        $data = $request->all();
-        
-        if($child == "address")
-        {
-            //create or update student address
-            $success = $student->address()->updateOrCreate(["id" => $request->id], $data);
-        }
-        else if($child == "family")
-        {
-            //create or update student family
-            $success = $student->family()->updateOrCreate(["id" => $request->id], $data);
-        }
-        else if($child == "education")
-        {
-            //create or update student education
-            $success = $student->education()->updateOrCreate(["id" => $request->id], $data);
-        }
-        
-        $student = Student::find($student->id);
-        $student->load($child);
-        
-        if ($success) {
-            return new StudentResource(
-                $student
-            );
-        }
-        
-        return response()->json([], 400); // Note! add error here
     }
 }
