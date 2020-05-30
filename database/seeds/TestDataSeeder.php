@@ -19,7 +19,44 @@ class TestDataSeeder extends Seeder
         $this->createFakeCourses();
         $this->createFakeSubjects();
         $this->createFakeLevelWithAttachSubjectAndCourses();
+        $this->createFakeSchoolFees();
+        $this->createFakeRateSheets();
     }
+
+    public function createFakeSchoolFees()
+    {
+        DB::table('school_fees')->insert([
+            ['name' => 'Tuition Fee'],
+            ['name' => 'Miscellaneous Fee'],
+            ['name' => 'Basic Fee'],
+            ['name' => 'Registration Fee'],
+            ['name' => 'Computer Fee'],
+            ['name' => 'Medical and Dental Fee'],
+            ['name' => 'Application Fee']
+        ]);
+    }
+
+    public function createFakeRateSheets()
+    {
+        for ($i = 1; $i < 21; $i++) {
+            $course_id = rand(1, 5);
+            DB::table('rate_sheets')->insert([
+                'level_id' => $i,
+                'course_id' => $i > 12 ? $course_id : null
+            ]);
+
+            for ($x = 1; $x < 7; $x++) {
+                $amount = rand(5, 10) * 100;
+                DB::table('rate_sheet_items')->insert([
+                    'rate_sheet_id' => $i,
+                    'school_fee_id' => $x,
+                    'amount' => $amount
+                ]);
+            }
+        }
+
+    }
+
 
     public function createFakeStudentAccount()
     {

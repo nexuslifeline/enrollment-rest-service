@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSubjectsTable extends Migration
+class CreateSchoolFeesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,11 @@ class CreateSubjectsTable extends Migration
      */
     public function up()
     {
-        Schema::create('subjects', function (Blueprint $table) {
+        Schema::create('school_fees', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->default('');
             $table->string('name')->default('')->nullable();
             $table->string('description')->default('')->nullable();
-            $table->decimal('amount_per_unit', 13, 2)->default(0)->nullable();
-            $table->decimal('amount_per_lab', 13, 2)->default(0)->nullable();
-            $table->integer('units')->default(0)->nullable();
-            $table->integer('labs')->default(0)->nullable();
-            $table->decimal('total_amount', 13, 2)->default(0)->nullable();
+            $table->tinyInteger('is_integrated')->default(0)->nullable();
             $table->integer('deleted_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('created_by')->nullable();
@@ -38,6 +33,6 @@ class CreateSubjectsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('subjects');
+        Schema::dropIfExists('school_fees');
     }
 }

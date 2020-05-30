@@ -17,6 +17,7 @@ class CreateSchoolYearsTable extends Migration
             $table->id();
             $table->string('name')->default('')->nullable();
             $table->string('description')->default('')->nullable();
+            $table->tinyInteger('is_active')->default(1)->nullable();
             $table->date('start_date')->nullable();
             $table->integer('deleted_by')->nullable();
             $table->integer('updated_by')->nullable();
