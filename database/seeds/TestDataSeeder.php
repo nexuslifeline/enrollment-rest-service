@@ -47,7 +47,7 @@ class TestDataSeeder extends Seeder
 
             for ($x = 1; $x < 7; $x++) {
                 $amount = rand(5, 10) * 100;
-                DB::table('rate_sheet_items')->insert([
+                DB::table('rate_sheet_fees')->insert([
                     'rate_sheet_id' => $i,
                     'school_fee_id' => $x,
                     'amount' => $amount

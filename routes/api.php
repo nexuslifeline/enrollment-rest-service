@@ -51,8 +51,6 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/school-fees', 'SchoolFeeController');
         // rate sheets
         Route::resource('/rate-sheets', 'RateSheetController');
-        Route::get('/levels/{levelId}/rate-sheets', 'RateSheetController@getRateSheetOfLevel');
-
 
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');

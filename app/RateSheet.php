@@ -4,7 +4,7 @@ namespace App;
 
 use App\Level;
 use App\Course;
-use App\RateSheetItem;
+use App\SchoolFee;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -13,9 +13,14 @@ class RateSheet extends Model
     use SoftDeletes;
     protected $guarded = ['id'];
 
-    public function items()
+    public function fees()
     {
-        return $this->hasMany('App\RateSheetItem');
+        return $this->belongsToMany(
+            'App\SchoolFee',
+            'rate_sheet_fees',
+            'rate_sheet_id',
+            'school_fee_id'
+        )->withPivot(['amount']);
     }
 
     public function level()

@@ -43,11 +43,11 @@ class SubjectController extends Controller
         $data = $request->all();
 
         $subject = Subject::create($data);
-        
+
         return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(201);
-        
+
     }
 
     /**
@@ -75,11 +75,11 @@ class SubjectController extends Controller
           'name' => 'required|max:191',
           'description' => 'required|max:191'
         ]);
-        
+
         $data = $request->all();
 
         $success = $subject->update($data);
-        
+
         if($success){
             return (new SubjectResource($subject))
             ->response()
@@ -102,7 +102,7 @@ class SubjectController extends Controller
 
     public function getSubjectsOfLevel($levelId, Request $request)
     {
-        
+
         $perPage = $request->perPage ?? 20;
         $query = Level::find($levelId)->subjects();
 
@@ -132,7 +132,7 @@ class SubjectController extends Controller
         $subjects = Level::find($levelId)->subjects();
         $subjects->detach();
         $subjects->attach($request->subjects);
-        
+
         return SubjectResource::collection($subjects->get());
-    } 
+    }
 }

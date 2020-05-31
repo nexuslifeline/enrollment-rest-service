@@ -11,7 +11,19 @@ class RateSheetController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->perPage ?? 20;
-        $query = RateSheet::with(['items', 'level', 'course', 'items.schoolFee']);
+        $query = RateSheet::with(['level', 'course', 'fees']);
+
+        // filters
+        $levelId = $request->level_id ?? false;
+        $query->when($levelId, function($q) use ($levelId) {
+            return $q->where('level_id', $levelId);
+        });
+
+        $courseId = $request->course_id ?? false;
+        $query->when($courseId, function($q) use ($courseId) {
+            return $q->where('course_id', $courseId);
+        });
+
         $rates = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
             : $query->all();
@@ -20,33 +32,63 @@ class RateSheetController extends Controller
         );
     }
 
-    public function getRateSheetOfLevel(Request $request, $levelId)
+    public function store(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
-        $query = RateSheet::with(['items', 'level', 'course', 'items.schoolFee'])->where('level_id', $levelId);
-        $rates = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-        return RateSheetResource::collection(
-            $rates
-        );
-    }
+        $this->validate($request, [
+            'level_id' => 'required'
+        ]);
 
-    public function store()
-    {
+        $data = $request->except(['fees']);
+        $rate = RateSheet::create($data);
 
-    }
+        if ($request->has('fees')) {
+            $fees = $request->fees;
+            $items = [];
+            foreach ($fees as $fee) {
+                $items[$fee['school_fee_id']] = [
+                    'amount' => $fee['amount']
+                ];
+            }
+            $rate->fees()->sync($items);
+        }
 
-    public function update()
-    {
-
-    }
-
-    public function show($levelId, $rateSheetId)
-    {
-        $rate = RateSheet::with(['items', 'level', 'course', 'items.schoolFee'])
-            ->where('id', $rateSheetId)
-            ->get();
+        $rate->load(['level', 'course', 'fees']);
         return new RateSheetResource($rate);
+    }
+
+    public function update(Request $request, RateSheet $rateSheet)
+    {
+        $this->validate($request, [
+            'level_id' => 'required'
+        ]);
+
+        $data = $request->except(['fees']);
+        $rateSheet->update($data);
+
+        if ($request->has('fees')) {
+            $fees = $request->fees;
+            $items = [];
+            foreach ($fees as $fee) {
+                $items[$fee['school_fee_id']] = [
+                    'amount' => $fee['amount']
+                ];
+            }
+            $rateSheet->fees()->sync($items);
+        }
+
+        $rateSheet->load(['level', 'course', 'fees']);
+        return new RateSheetResource($rateSheet);
+    }
+
+    public function show(RateSheet $rateSheet)
+    {
+        $rateSheet->load(['level', 'course', 'fees']);
+        return new RateSheetResource($rateSheet);
+    }
+
+    public function destroy(RateSheet $rateSheet)
+    {
+        $rateSheet->delete();
+        return response()->json([], 204);
     }
 }

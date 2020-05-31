@@ -13,7 +13,7 @@ class CreateRateSheetItemsTable extends Migration
      */
     public function up()
     {
-        Schema::create('rate_sheet_items', function (Blueprint $table) {
+        Schema::create('rate_sheet_fees', function (Blueprint $table) {
             $table->id();
             $table->foreign('rate_sheet_id')->references('id')->on('rate_sheets');
             $table->unsignedBigInteger('rate_sheet_id')->nullable();
@@ -32,6 +32,6 @@ class CreateRateSheetItemsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rate_sheet_items');
+        Schema::dropIfExists('rate_sheet_fees');
     }
 }
