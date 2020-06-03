@@ -20,7 +20,7 @@ class RateSheet extends Model
             'rate_sheet_fees',
             'rate_sheet_id',
             'school_fee_id'
-        )->withPivot(['amount']);
+        )->withPivot(['amount','notes']);
     }
 
     public function level()
@@ -31,6 +31,11 @@ class RateSheet extends Model
     public function course()
     {
         return $this->belongsTo('App\Course');
+    }
+
+    public function semester()
+    {
+        return $this->belongsTo('App\Semester');
     }
 
 }
