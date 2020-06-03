@@ -19,6 +19,7 @@ class CreateRateSheetItemsTable extends Migration
             $table->unsignedBigInteger('rate_sheet_id')->nullable();
             $table->foreign('school_fee_id')->references('id')->on('school_fees');
             $table->unsignedBigInteger('school_fee_id')->nullable();
+            $table->string('notes')->default('')->nullable();
             $table->decimal('amount', 13, 2)->default(0)->nullable();
             $table->timestamps();
             $table->softDeletes();
