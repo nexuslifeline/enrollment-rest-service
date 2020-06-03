@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStudentApplicationsTable extends Migration
+class CreateStudentAdmissionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,17 @@ class CreateStudentApplicationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('student_applications', function (Blueprint $table) {
+        Schema::create('student_admissions', function (Blueprint $table) {
             $table->id();
             $table->dateTime('applied_date')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
+            $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('school_year_id')->references('id')->on('school_years');
             $table->unsignedBigInteger('school_year_id')->nullable();
-            $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('application_status_id')->references('id')->on('application_statuses');
             $table->unsignedBigInteger('application_status_id')->nullable();
-            $table->foreign('application_step_id')->references('id')->on('application_steps');
-            $table->unsignedBigInteger('application_step_id')->nullable();
+            $table->foreign('admission_step_id')->references('id')->on('admission_steps');
+            $table->unsignedBigInteger('admission_step_id')->nullable();
             $table->string('approval_notes')->default('')->nullable();
             $table->string('disapproval_notes')->default('')->nullable();
             $table->integer('approved_by')->nullable();
@@ -42,6 +42,6 @@ class CreateStudentApplicationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('student_applications');
+        Schema::dropIfExists('student_admissions');
     }
 }

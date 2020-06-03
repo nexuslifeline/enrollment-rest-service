@@ -24,8 +24,8 @@ class CreateStudentsTable extends Migration
             $table->string('mobile_no')->default('')->nullable();
             $table->string('phone_no')->default('')->nullable();
             $table->string('birth_date')->default('')->nullable();
-            $table->foreign('student_category_id')->references('id')->on('student_categories');
-            $table->unsignedBigInteger('student_category_id')->nullable(); 
+            // $table->foreign('student_category_id')->references('id')->on('student_categories');
+            // $table->unsignedBigInteger('student_category_id')->nullable(); 
             $table->integer('deleted_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('created_by')->nullable();
