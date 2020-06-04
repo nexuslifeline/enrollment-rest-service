@@ -39,6 +39,11 @@ class Student extends Model
         return $this->hasMany('App\StudentApplication');
     }
 
+    public function admission()
+    {
+        return $this->hasOne('App\StudentAdmission');
+    }
+
     public function transcripts()
     {
         return $this->hasMany('App\Transcript');
