@@ -60,7 +60,10 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute($value)
     {
-        return $this->admission()->first();
+        $pendingStatus = 2;
+        return $this->admission()
+            ->where('application_status_id', $pendingStatus)
+            ->first();
     }
 
     public function getActiveApplicationAttribute($value)
