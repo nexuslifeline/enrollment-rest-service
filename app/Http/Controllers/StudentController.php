@@ -62,7 +62,7 @@ class StudentController extends Controller
     {
         $schoolYearId = 1;
         $student->load(['address', 'family', 'education'])->load(['transcripts' => function ($query) use($schoolYearId){
-            $query->with('application')->where('school_year_id', $schoolYearId)->first();
+            $query->with(['application', 'admission'])->where('school_year_id', $schoolYearId)->first();
         }]);
 
         // return $student->load(['address', 'family', 'education'])->transcripts()->first()->application()->get();
@@ -80,21 +80,22 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         try {
-            $related = ['address', 'family', 'education', 'applications'];
-            $except = ['address', 'family', 'education', 'applications', 'transcript', 'subjects'];
+            $related = ['address', 'family', 'education', 'applications', 'admission', 'transcripts'];
+            $except = ['address', 'family', 'education', 'applications', 'admission', 'transcripts', 'subjects'];
             $data = $request->except($except);
             $student->update($data);
             foreach($related as $item) {
               if ($request->has($item)) {
-                if($item === 'applications') {
-                  $application = $student->applications()->create($request->applications);
-                  $application->transcript()->create($request->transcript)->subjects()->attach($request->subjects);
-                } else {
-                  $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
-                }         
+                  $query = $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+                  if ($item === 'transcripts') {
+                    $query->subjects()->sync($request->subjects);
+                  } 
               }
             }
-            $student->load($related)->fresh();
+            $student->load(['address', 'family', 'education'])->load(['transcripts' => function ($query) {
+                $query->with(['application', 'admission'])->where('school_year_id', 1)->first();
+            }]);
+            // $student->load($related)->fresh();
             return new StudentResource($student);
         } catch (Throwable $e) {
             return response()->json([], 400); // Note! add error here

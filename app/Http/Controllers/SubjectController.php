@@ -130,9 +130,9 @@ class SubjectController extends Controller
     public function storeSubjectsOfLevel($levelId, Request $request)
     {
         $subjects = Level::find($levelId)->subjects();
-        $subjects->detach();
-        $subjects->attach($request->subjects);
-
+        // $subjects->detach();
+        // $subjects->attach($request->subjects);
+        $subjects->sync($request->subjects);
         return SubjectResource::collection($subjects->get());
     }
 }

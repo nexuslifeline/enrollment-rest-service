@@ -88,15 +88,39 @@ class AuthController extends Controller
         'password' => 'required|string|min:6|confirmed',
       ]);
 
-      $user = Student::create([
+      $student = Student::create([
         'first_name' => $request->first_name,
         'middle_name' => $request->middle_name,
         'last_name' => $request->last_name,
         'email' => $request->username
-      ])->user()->create([
+      ]);
+
+      $studentCategoryId = $request->student_category_id;
+      if ($studentCategoryId == 1) {
+        $student->admission()->create([
+          'school_year_id' =>  1, // active_school_year_id
+          'admission_step_id' => 1
+        ])->transcript()->create([
+          'school_year_id' => 1, // active_school_year_id
+          'student_id' => $student->id,
+          'student_category_id' => $studentCategoryId
+        ]);
+      } else {
+        $student->applications()->create([
+          'school_year_id' =>  1, // active_school_year_id
+          'application_step_id' => 1
+        ])->transcript()->create([
+          'school_year_id' => 1, // active_school_year_id
+          'student_id' => $student->id,
+          'student_category_id' => $studentCategoryId
+        ]);
+      }
+
+      $user = $student->user()->create([
         'username' => $request->username,
         'password' => Hash::make($request->password)
       ]);
+      
 
       return (new UserResource($user))
                 ->response()

@@ -19,4 +19,9 @@ class Transcript extends Model
     {
         return $this->belongsTo('App\StudentApplication', 'student_application_id');
     }
+
+    public function admission()
+    {
+        return $this->belongsTo('App\StudentAdmission', 'student_admission_id');
+    }
 }
