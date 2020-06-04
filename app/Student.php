@@ -13,6 +13,15 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
+    protected $appends = ['active_admission', 'active_application'];
+    protected $hidden = [
+        'created_at',
+        'deleted_at',
+        'updated_at',
+        'created_by',
+        'updated_by',
+        'deleted_by'
+    ];
 
     public function user()
     {
@@ -47,5 +56,18 @@ class Student extends Model
     public function transcripts()
     {
         return $this->hasMany('App\Transcript');
+    }
+
+    public function getActiveAdmissionAttribute($value)
+    {
+        return $this->admission()->first();
+    }
+
+    public function getActiveApplicationAttribute($value)
+    {
+        $pendingStatus = 2;
+        return $this->applications()
+            ->where('application_status_id', $pendingStatus)
+            ->first();
     }
 }

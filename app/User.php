@@ -34,7 +34,13 @@ class User extends Authenticatable
         'api_token',
         'email_verified_at',
         'userable_id',
-        'userable_type'
+        'userable_type',
+        'created_at',
+        'deleted_at',
+        'updated_at',
+        'created_by',
+        'updated_by',
+        'deleted_by'
     ];
 
     /**
