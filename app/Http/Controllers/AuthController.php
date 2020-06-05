@@ -100,7 +100,7 @@ class AuthController extends Controller
         $student->admission()->create([
           'school_year_id' =>  1, // active_school_year_id
           'admission_step_id' => 1,
-          'admission_status_id' => 2
+          'application_status_id' => 2
         ])->transcript()->create([
           'school_year_id' => 1, // active_school_year_id
           'student_id' => $student->id,
