@@ -62,6 +62,7 @@ class Student extends Model
     {
         $pendingStatus = 2;
         return $this->admission()
+            ->with('transcript')
             ->where('application_status_id', $pendingStatus)
             ->first();
     }
@@ -70,6 +71,7 @@ class Student extends Model
     {
         $pendingStatus = 2;
         return $this->applications()
+            ->with('transcript')
             ->where('application_status_id', $pendingStatus)
             ->first();
     }
