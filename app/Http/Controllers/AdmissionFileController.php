@@ -34,7 +34,9 @@ class AdmissionFileController extends Controller
                 'path' => $path,
                 'name' => $request->file('file')->getClientOriginalName()
             ]);
-            return new AdmissionFileResource($admissionFile);
+            return (new AdmissionFileResource($admissionFile))
+            ->response()
+            ->setStatusCode(201);
         } catch (Throwable $e) {
             Log::error('Message occured => ' . $e->getMessage());
             return response()->json([], 400);
@@ -58,6 +60,17 @@ class AdmissionFileController extends Controller
             Log::error('Message occured => ' . $e->getMessage());
             return response()->json([], 400);
         }
+    }
+
+    public function destroy($admissionId, $fileId)
+    {
+        //AdmissionFile::find($fileId)->delete();
+        Admission::find($admissionId)
+            ->files()
+            ->where('id', $fileId)
+            ->first()
+            ->delete();
+        return response()->json([], 204);
     }
 
 }
