@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Validation\Rule;
 
 class IsStudentUserMatchPword implements Rule
@@ -30,7 +31,7 @@ class IsStudentUserMatchPword implements Rule
         $user = User::where('username', $this->_username)
         ->where('userable_type', 'App\Student')
         ->first();
-        return false;
+        return $user && Hash::check($value, $user->password);
     }
 
     /**
