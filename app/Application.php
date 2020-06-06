@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentAdmission extends Model
+class Application extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
@@ -29,9 +29,9 @@ class StudentAdmission extends Model
         return $this->hasOne('App\Transcript');
     }
 
-    public function admissionStep()
+    public function applicationStep()
     {
-        return $this->hasOne('App\AdmissionStep');
+        return $this->hasOne('App\ApplicationStep');
     }
 
     public function schoolYear()

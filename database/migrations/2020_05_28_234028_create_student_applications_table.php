@@ -13,7 +13,7 @@ class CreateStudentApplicationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('student_applications', function (Blueprint $table) {
+        Schema::create('applications', function (Blueprint $table) {
             $table->id();
             $table->dateTime('applied_date')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
@@ -42,6 +42,6 @@ class CreateStudentApplicationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('student_applications');
+        Schema::dropIfExists('applications');
     }
 }

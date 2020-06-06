@@ -21,6 +21,40 @@ class TestDataSeeder extends Seeder
         $this->createFakeLevelWithAttachSubjectAndCourses();
         $this->createFakeSchoolFees();
         $this->createFakeRateSheets();
+        $this->createFakeAdmissions();
+        $this->createFakeApplications();
+    }
+
+    public function createFakeAdmissions()
+    {
+        $faker = Faker\Factory::create();
+        $limit = 30;
+        for ($i = 1; $i < $limit; $i++) {
+            $date = $faker->dateTimeBetween('-3 years', 'now');
+            DB::table('admissions')->insert([
+                'student_id' => $i ,
+                'school_year_id' => 1,
+                'admission_step_id' => 1,
+                'application_status_id' => 2,
+                'applied_date' => $date->format('Y-m-d')
+            ]);
+        }
+    }
+
+    public function createFakeApplications()
+    {
+        $faker = Faker\Factory::create();
+        $limit = 30;
+        for ($i = 1; $i < $limit; $i++) {
+            $date = $faker->dateTimeBetween('-2 years', 'now');
+            DB::table('applications')->insert([
+                'student_id' => $i ,
+                'school_year_id' => 1,
+                'application_step_id' => 1,
+                'application_status_id' => 2,
+                'applied_date' => $date->format('Y-m-d')
+            ]);
+        }
     }
 
     public function createFakeSchoolFees()

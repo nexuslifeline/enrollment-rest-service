@@ -55,6 +55,10 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/application-steps', 'ApplicationStepController');
         // admission steps
         Route::resource('/admission-steps', 'ApplicationStepController');
+        // admissions
+        Route::resource('/admissions', 'AdmissionController');
+        Route::resource('/admissions/{admissionId}/files', 'AdmissionFileController');
+        Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
 
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');

@@ -13,7 +13,7 @@ class CreateStudentAdmissionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('student_admissions', function (Blueprint $table) {
+        Schema::create('admissions', function (Blueprint $table) {
             $table->id();
             $table->dateTime('applied_date')->nullable();
             $table->foreign('student_id')->references('id')->on('students');

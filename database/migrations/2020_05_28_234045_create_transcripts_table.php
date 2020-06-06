@@ -17,10 +17,10 @@ class CreateTranscriptsTable extends Migration
             $table->id();
             $table->foreign('student_id')->references('id')->on('students');
             $table->unsignedBigInteger('student_id')->nullable();
-            $table->foreign('student_application_id')->references('id')->on('student_applications');
-            $table->unsignedBigInteger('student_application_id')->nullable();
-            $table->foreign('student_admission_id')->references('id')->on('student_admissions');
-            $table->unsignedBigInteger('student_admission_id')->nullable();
+            $table->foreign('application_id')->references('id')->on('applications');
+            $table->unsignedBigInteger('application_id')->nullable();
+            $table->foreign('admission_id')->references('id')->on('admissions');
+            $table->unsignedBigInteger('admission_id')->nullable();
             $table->foreign('school_year_id')->references('id')->on('school_years');
             $table->unsignedBigInteger('school_year_id')->nullable();
             $table->foreign('level_id')->references('id')->on('levels');

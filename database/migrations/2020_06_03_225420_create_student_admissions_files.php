@@ -13,13 +13,13 @@ class CreateStudentAdmissionsFiles extends Migration
      */
     public function up()
     {
-        Schema::create('student_admissions_files', function (Blueprint $table) {
+        Schema::create('admission_files', function (Blueprint $table) {
             $table->id();
             $table->string('name')->default('')->nullable();
             $table->string('notes')->default('')->nullable();
             $table->string('path')->default('')->nullable();
-            $table->foreign('student_admission_id')->references('id')->on('student_admissions');
-            $table->unsignedBigInteger('student_admission_id')->nullable();
+            $table->foreign('admission_id')->references('id')->on('admissions');
+            $table->unsignedBigInteger('admission_id')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -32,6 +32,6 @@ class CreateStudentAdmissionsFiles extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('student_admissions_files');
+        Schema::dropIfExists('admission_files');
     }
 }
