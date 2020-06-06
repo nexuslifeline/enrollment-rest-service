@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentApplication extends Model
+class Admission extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
@@ -29,13 +29,18 @@ class StudentApplication extends Model
         return $this->hasOne('App\Transcript');
     }
 
-    public function applicationStep()
+    public function admissionStep()
     {
-        return $this->hasOne('App\ApplicationStep');
+        return $this->hasOne('App\AdmissionStep');
     }
 
     public function schoolYear()
     {
         return $this->hasOne('App\SchoolYear');
+    }
+
+    public function files()
+    {
+        return $this->hasMany('App\AdmissionFile');
     }
 }

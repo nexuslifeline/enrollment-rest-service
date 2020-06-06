@@ -55,6 +55,13 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/application-steps', 'ApplicationStepController');
         // admission steps
         Route::resource('/admission-steps', 'ApplicationStepController');
+        // admissions
+        Route::resource('/admissions', 'AdmissionController');
+        Route::get('/admissions/{admissionId}/files', 'AdmissionFileController@index');
+        Route::post('/admissions/{admissionId}/files', 'AdmissionFileController@store');
+        Route::get('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@view');
+        Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
+        Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
 
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');

@@ -25,11 +25,11 @@ class Transcript extends Model
 
     public function application()
     {
-        return $this->belongsTo('App\StudentApplication', 'student_application_id');
+        return $this->belongsTo('App\Application', 'student_application_id');
     }
 
     public function admission()
     {
-        return $this->belongsTo('App\StudentAdmission', 'student_admission_id');
+        return $this->belongsTo('App\Admission', 'student_admission_id');
     }
 }
