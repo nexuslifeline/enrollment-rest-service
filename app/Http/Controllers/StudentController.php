@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Student;
+use App\Admission;
+use App\Application;
 use Illuminate\Http\Request;
 use App\Http\Resources\StudentResource;
 
@@ -79,14 +81,28 @@ class StudentController extends Controller
             $data = $request->except($except);
             $student->update($data);
 
+
             if ($request->has('active_application')) {
-                $query = $student->active_application->updateOrCreate(['student_id' => $student->id], $request->active_application);
-                
+                // Notes! should have id field on active_application
+                $application = Application::find($request->active_application['id']);
+                if ($application) {
+                    $application->update($request->active_application);
+                }
+                //$query = $student->active_application->updateOrCreate(['student_id' => $student->id], $request->active_application);
             }
-            
+
             if ($request->has('active_admission')) {
-                $query = $student->active_admission->updateOrCreate(['student_id' => $student->id], $request->active_admission);
+                // Notes! should have id field on active_admission
+                $admission = Admission::find($request->active_admission['id']);
+                if ($admission) {
+                    $admission->update($request->active_admission);
+                }
+                //$query = $student->active_application->updateOrCreate(['student_id' => $student->id], $request->active_application);
             }
+
+            // if ($request->has('active_admission')) {
+            //     $query = $student->active_admission->updateOrCreate(['student_id' => $student->id], $request->active_admission);
+            // }
 
             if ($request->has('transcript')) {
                 $transcript = $query->transcript()->first();
@@ -106,7 +122,7 @@ class StudentController extends Controller
                     // $student->active_application->update
                 }
             }
-           
+
             $student->load(['address', 'family', 'education'])->fresh();
             return new StudentResource($student);
         } catch (Throwable $e) {
