@@ -6,7 +6,9 @@ use App\Student;
 use App\Admission;
 use App\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
+use App\Http\Requests\StudentUpdateRequest;
 
 class StudentController extends Controller
 {
@@ -73,36 +75,28 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Student $student)
+    public function update(StudentUpdateRequest $request, Student $student)
     {
+
         try {
             $related = ['address', 'family', 'education'];
             $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects'];
             $data = $request->except($except);
             $student->update($data);
 
-
-            if ($request->has('active_application')) {
-                // Notes! should have id field on active_application
+            if ($request->has('active_application') && count($request->active_application) > 0) {
                 $application = Application::find($request->active_application['id']);
                 if ($application) {
                     $application->update($request->active_application);
                 }
-                //$query = $student->active_application->updateOrCreate(['student_id' => $student->id], $request->active_application);
             }
 
-            if ($request->has('active_admission')) {
-                // Notes! should have id field on active_admission
+            if ($request->has('active_admission') && count($request->active_admission) > 0) {
                 $admission = Admission::find($request->active_admission['id']);
                 if ($admission) {
                     $admission->update($request->active_admission);
                 }
-                //$query = $student->active_application->updateOrCreate(['student_id' => $student->id], $request->active_application);
             }
-
-            // if ($request->has('active_admission')) {
-            //     $query = $student->active_admission->updateOrCreate(['student_id' => $student->id], $request->active_admission);
-            // }
 
             if ($request->has('transcript')) {
                 $transcript = $query->transcript()->first();
@@ -126,6 +120,7 @@ class StudentController extends Controller
             $student->load(['address', 'family', 'education'])->fresh();
             return new StudentResource($student);
         } catch (Throwable $e) {
+            Log::info($e->getMessage());
             return response()->json([], 400); // Note! add error here
         }
     }
