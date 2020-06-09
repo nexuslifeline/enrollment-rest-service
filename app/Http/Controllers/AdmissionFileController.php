@@ -64,12 +64,14 @@ class AdmissionFileController extends Controller
 
     public function destroy($admissionId, $fileId)
     {
-        //AdmissionFile::find($fileId)->delete();
+        $file = AdmissionFile::find($fileId);
+
         Admission::find($admissionId)
             ->files()
             ->where('id', $fileId)
             ->first()
             ->delete();
+        Storage::delete($file->path);
         return response()->json([], 204);
     }
 
