@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Student;
 use App\Admission;
 use App\Application;
+use App\Transcript;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
@@ -22,9 +23,9 @@ class StudentController extends Controller
         $perPage = $request->per_page ?? 20;
         $students = !$request->has('paginate') || $request->paginate === 'true'
             ? Student::paginate($perPage)
-            : Student::all();
-
-        $students->load(['address', 'family', 'education', 'applications']);
+            : Student::all();    
+        
+        $students->load(['address', 'family', 'education']);
 
         return StudentResource::collection(
             $students
@@ -99,9 +100,18 @@ class StudentController extends Controller
             }
 
             if ($request->has('transcript')) {
-                $transcript = $query->transcript()->first();
-                $query->transcript()->update($request->transcript);
-                $transcript->subjects()->sync($request->subjects);
+                $transcript = Transcript::find($request->transcript['id']);
+                if ($transcript) {
+                    $transcript->update($request->transcript);
+                    if($request->has('subjects')) {
+                        $subjects = $request->subjects;
+                        $items = [];
+                        foreach ($subjects as $subject) {
+                          $items[$subject['id']] = [];
+                        }  
+                      $transcript->subjects()->sync($items);
+                    }
+                }
             }
 
             // if ($request->has('transcript')) {

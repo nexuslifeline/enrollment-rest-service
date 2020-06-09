@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Level;
 use App\Subject;
+use App\Transcript;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\SubjectResource;
@@ -120,6 +121,18 @@ class SubjectController extends Controller
                 return $query->where('semester_id', $semesterId)->where('level_id', $levelId);
             });
         });
+
+        $subjects = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+        return SubjectResource::collection($subjects);
+    }
+
+    public function getSubjectsOfTranscript($transcriptId, Request $request)
+    {
+
+        $perPage = $request->perPage ?? 20;
+        $query = Transcript::find($transcriptId)->subjects();
 
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
