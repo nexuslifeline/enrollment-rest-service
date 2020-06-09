@@ -19,12 +19,30 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $students = !$request->has('paginate') || $request->paginate === 'true'
-            ? Student::paginate($perPage)
-            : Student::all();
+        $perPage = $request->per_page ?? 20;    
+        $query = Student::with(['address', 'family', 'education']);
+        
+        $courseId = $request->course_id ?? false;
+        $query->when($courseId, function($q) use ($courseId) {
+            return $q->whereHas('transcripts', function($q) use ($courseId) {
+                return $q->whereHas('course', function($query) use ($courseId) {
+                    return $query->where('course_id', $courseId);
+                });
+            });
+        });
 
-        $students->load(['address', 'family', 'education', 'applications']);
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            return $q->whereHas('transcripts', function($q) use ($schoolCategoryId) {
+                return $q->whereHas('schoolCategory', function($query) use ($schoolCategoryId) {
+                    return $query->where('school_category_id', $schoolCategoryId);
+                });
+            });
+        });
+
+        $students = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->all();
 
         return StudentResource::collection(
             $students
@@ -99,9 +117,18 @@ class StudentController extends Controller
             }
 
             if ($request->has('transcript')) {
-                $transcript = $query->transcript()->first();
-                $query->transcript()->update($request->transcript);
-                $transcript->subjects()->sync($request->subjects);
+                $transcript = Transcript::find($request->transcript['id']);
+                if ($transcript) {
+                    $transcript->update($request->transcript);
+                    if($request->has('subjects')) {
+                        $subjects = $request->subjects;
+                        $items = [];
+                        foreach ($subjects as $subject) {
+                          $items[$subject['id']] = [];
+                        }  
+                      $transcript->subjects()->sync($items);
+                    }
+                }
             }
 
             // if ($request->has('transcript')) {
