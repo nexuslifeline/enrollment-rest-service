@@ -21,11 +21,29 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
+        $query = Student::with(['address', 'family', 'education']);
+
+        $courseId = $request->course_id ?? false;
+        $query->when($courseId, function($q) use ($courseId) {
+            return $q->whereHas('transcripts', function($q) use ($courseId) {
+                return $q->whereHas('course', function($query) use ($courseId) {
+                    return $query->where('course_id', $courseId);
+                });
+            });
+        });
+
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            return $q->whereHas('transcripts', function($q) use ($schoolCategoryId) {
+                return $q->whereHas('schoolCategory', function($query) use ($schoolCategoryId) {
+                    return $query->where('school_category_id', $schoolCategoryId);
+                });
+            });
+        });
+
         $students = !$request->has('paginate') || $request->paginate === 'true'
-            ? Student::paginate($perPage)
-            : Student::all();    
-        
-        $students->load(['address', 'family', 'education']);
+            ? $query->paginate($perPage)
+            : $query->all();
 
         return StudentResource::collection(
             $students
