@@ -13,7 +13,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
-    protected $appends = ['active_admission', 'active_application'];
+    protected $appends = ['active_admission', 'active_application', 'transcript'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -75,7 +75,6 @@ class Student extends Model
         $pendingStatus = 2;
         $submittedStatus = 4;
         return $this->applications()
-            ->with('transcript')
             ->where('application_status_id', $pendingStatus)
             ->orWhere('application_status_id', $submittedStatus)
             ->where('student_id', $this->id)
@@ -98,5 +97,15 @@ class Student extends Model
             
             
         return $transcript->first();
+    }
+
+    public function getTranscriptAttribute($value)
+    {
+        $pendingStatus = 2;
+        return $this->transcripts()
+            ->with(['schoolYear', 'level', 'course', 'semester', 'schoolCategory', 'studentCategory', 'studentType'])
+            ->where('application_id', $this->getActiveApplicationAttribute(2)['id'])
+            ->where('admission_id', $this->getActiveAdmissionAttribute(2)['id'])
+            ->first();
     }
 }

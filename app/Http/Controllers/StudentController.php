@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Student;
 use App\Admission;
 use App\Application;
+use App\Transcript;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
