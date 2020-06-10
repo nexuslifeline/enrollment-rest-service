@@ -85,8 +85,7 @@ class Student extends Model
 
     public function getTranscriptAttribute()
     {
-        $transcript = $this->transcripts()
-            ->with(['schoolYear', 'level', 'course', 'semester', 'schoolCategory', 'studentCategory', 'studentType', 'subjects']);
+        $transcript = $this->transcripts();
 
         $application = $this->active_application ?? false;
         $admission = $this->active_admission ?? false;

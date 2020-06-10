@@ -97,6 +97,7 @@ class AuthController extends Controller
         'first_name' => $request->first_name,
         'middle_name' => $request->middle_name,
         'last_name' => $request->last_name,
+        'mobile_no' => $request->mobile_no,
         'email' => $request->username
       ]);
 
