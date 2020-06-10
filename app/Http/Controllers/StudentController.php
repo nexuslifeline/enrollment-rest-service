@@ -84,6 +84,7 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $student->load(['address', 'family', 'education']);
+        $student->append(['active_admission', 'active_application', 'transcript']);
         return new StudentResource($student);
     }
 
@@ -121,22 +122,16 @@ class StudentController extends Controller
                 $transcript = Transcript::find($request->transcript['id']);
                 if ($transcript) {
                     $transcript->update($request->transcript);
-                    if($request->has('subjects')) {
+                    if($request->has('subjects') && $request->subjects) {
                         $subjects = $request->subjects;
-                        $items = [];
-                        foreach ($subjects as $subject) {
-                          $items[$subject['id']] = [];
-                        }  
-                      $transcript->subjects()->sync($items);
+                        // $items = [];
+                        // foreach ($subjects as $subject) {
+                        //   $items[$subject['id']] = [];
+                        // }
+                      $transcript->subjects()->sync($subjects);
                     }
                 }
             }
-
-            // if ($request->has('transcript')) {
-            //     $transcript = 
-            //     // $transcript->update($request->transcript);
-            //     // $transcript->subjects()->sync($request->subjects);
-            // } 
 
             foreach($related as $item) {
                 if ($request->has($item)) {
@@ -146,6 +141,8 @@ class StudentController extends Controller
             }
 
             $student->load(['address', 'family', 'education'])->fresh();
+            $student->append(['active_admission', 'active_application', 'transcript']);
+
             return new StudentResource($student);
         } catch (Throwable $e) {
             Log::info($e->getMessage());
