@@ -18,6 +18,11 @@ class Transcript extends Model
         'deleted_by'
     ];
 
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
+
     public function subjects()
     {
         return $this->belongsToMany('App\Subject', 'transcript_subjects', 'transcript_id', 'subject_id')->withTimestamps();
@@ -25,12 +30,12 @@ class Transcript extends Model
 
     public function application()
     {
-        return $this->belongsTo('App\Application', 'student_application_id');
+        return $this->belongsTo('App\Application');
     }
 
     public function admission()
     {
-        return $this->belongsTo('App\Admission', 'student_admission_id');
+        return $this->belongsTo('App\Admission');
     }
 
     public function schoolYear()
