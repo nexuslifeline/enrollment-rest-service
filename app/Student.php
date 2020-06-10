@@ -63,7 +63,6 @@ class Student extends Model
         $pendingStatus = 2;
         $submittedStatus = 4;
         return $this->admission()
-            ->with(['files'])
             ->where('application_status_id', $pendingStatus)
             ->orWhere('application_status_id', $submittedStatus)
             ->where('student_id', $this->id)
