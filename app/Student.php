@@ -98,5 +98,4 @@ class Student extends Model
 
         return $transcript->first();
     }
-
 }
