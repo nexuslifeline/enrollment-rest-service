@@ -13,7 +13,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
-    protected $appends = ['active_admission', 'active_application', 'transcript'];
+    protected $appends = [];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -58,7 +58,7 @@ class Student extends Model
         return $this->hasMany('App\Transcript');
     }
 
-    public function getActiveAdmissionAttribute($value)
+    public function getActiveAdmissionAttribute()
     {
         $pendingStatus = 2;
         $submittedStatus = 4;
@@ -67,10 +67,11 @@ class Student extends Model
             ->where('application_status_id', $pendingStatus)
             ->orWhere('application_status_id', $submittedStatus)
             ->where('student_id', $this->id)
-            ->latest()->first();
+            ->latest()
+            ->first();
     }
 
-    public function getActiveApplicationAttribute($value)
+    public function getActiveApplicationAttribute()
     {
         $pendingStatus = 2;
         $submittedStatus = 4;
@@ -78,34 +79,23 @@ class Student extends Model
             ->where('application_status_id', $pendingStatus)
             ->orWhere('application_status_id', $submittedStatus)
             ->where('student_id', $this->id)
-            ->latest()->first();
+            ->latest()
+            ->first();
     }
 
-    public function getTranscriptAttribute($value)
+    public function getTranscriptAttribute()
     {
-        $transcript = $this->transcripts()
-            ->with(['schoolYear', 'level', 'course', 'semester', 'schoolCategory', 'studentCategory', 'studentType', 'subjects']);
+        $transcript = $this->transcripts();
 
-        $application = $this->getActiveApplicationAttribute(2);
-        $admission = $this->getActiveAdmissionAttribute(2);
+        $application = $this->active_application ?? false;
+        $admission = $this->active_admission ?? false;
         $transcript->when($application, function($query) use ($application){
           return $query->where('application_id', $application['id']);
         });
         $transcript->when($admission, function($query) use ($admission){
           return $query->where('admission_id', $admission['id']);
         });
-            
-            
-        return $transcript->first();
-    }
 
-    public function getTranscriptAttribute($value)
-    {
-        $pendingStatus = 2;
-        return $this->transcripts()
-            ->with(['schoolYear', 'level', 'course', 'semester', 'schoolCategory', 'studentCategory', 'studentType'])
-            ->where('application_id', $this->getActiveApplicationAttribute(2)['id'])
-            ->where('admission_id', $this->getActiveAdmissionAttribute(2)['id'])
-            ->first();
+        return $transcript->first();
     }
 }

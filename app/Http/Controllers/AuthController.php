@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -73,7 +74,13 @@ class AuthController extends Controller
 
     public function getAuthUser()
     {
-      $user = User::with(['userable'])->where('id', Auth::id())->first();
+      $user = Auth::user();
+      $user->load(['userable']);
+
+      if ($user->userable_type === 'App\\Student') {
+        $user->userable->append(['active_admission', 'active_application', 'transcript']);
+      }
+
       return new UserResource($user);
     }
 
@@ -90,6 +97,7 @@ class AuthController extends Controller
         'first_name' => $request->first_name,
         'middle_name' => $request->middle_name,
         'last_name' => $request->last_name,
+        'mobile_no' => $request->mobile_no,
         'email' => $request->username
       ]);
 

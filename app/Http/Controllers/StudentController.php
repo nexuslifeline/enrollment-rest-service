@@ -20,26 +20,8 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;    
+        $perPage = $request->per_page ?? 20;
         $query = Student::with(['address', 'family', 'education']);
-        
-        $courseId = $request->course_id ?? false;
-        $query->when($courseId, function($q) use ($courseId) {
-            return $q->whereHas('transcripts', function($q) use ($courseId) {
-                return $q->whereHas('course', function($query) use ($courseId) {
-                    return $query->where('course_id', $courseId);
-                });
-            });
-        });
-
-        $schoolCategoryId = $request->school_category_id ?? false;
-        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-            return $q->whereHas('transcripts', function($q) use ($schoolCategoryId) {
-                return $q->whereHas('schoolCategory', function($query) use ($schoolCategoryId) {
-                    return $query->where('school_category_id', $schoolCategoryId);
-                });
-            });
-        });
 
         $students = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
@@ -84,6 +66,7 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $student->load(['address', 'family', 'education']);
+        $student->append(['active_admission', 'active_application', 'transcript']);
         return new StudentResource($student);
     }
 
@@ -121,22 +104,16 @@ class StudentController extends Controller
                 $transcript = Transcript::find($request->transcript['id']);
                 if ($transcript) {
                     $transcript->update($request->transcript);
-                    if($request->has('subjects')) {
+                    if($request->has('subjects') && $request->subjects) {
                         $subjects = $request->subjects;
-                        $items = [];
-                        foreach ($subjects as $subject) {
-                          $items[$subject['id']] = [];
-                        }  
-                      $transcript->subjects()->sync($items);
+                        // $items = [];
+                        // foreach ($subjects as $subject) {
+                        //   $items[$subject['id']] = [];
+                        // }
+                      $transcript->subjects()->sync($subjects);
                     }
                 }
             }
-
-            // if ($request->has('transcript')) {
-            //     $transcript = 
-            //     // $transcript->update($request->transcript);
-            //     // $transcript->subjects()->sync($request->subjects);
-            // } 
 
             foreach($related as $item) {
                 if ($request->has($item)) {
@@ -146,6 +123,8 @@ class StudentController extends Controller
             }
 
             $student->load(['address', 'family', 'education'])->fresh();
+            $student->append(['active_admission', 'active_application', 'transcript']);
+
             return new StudentResource($student);
         } catch (Throwable $e) {
             Log::info($e->getMessage());

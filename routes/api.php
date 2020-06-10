@@ -63,7 +63,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@view');
         Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
-
+        // transcript
+        Route::resource('/transcripts', 'TranscriptController');
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');
     });

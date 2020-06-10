@@ -18,6 +18,11 @@ class Transcript extends Model
         'deleted_by'
     ];
 
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
+
     public function subjects()
     {
         return $this->belongsToMany('App\Subject', 'transcript_subjects', 'transcript_id', 'subject_id')->withTimestamps();
@@ -25,12 +30,47 @@ class Transcript extends Model
 
     public function application()
     {
-        return $this->belongsTo('App\Application', 'student_application_id');
+        return $this->belongsTo('App\Application');
     }
 
     public function admission()
     {
-        return $this->belongsTo('App\Admission', 'student_admission_id');
+        return $this->belongsTo('App\Admission');
+    }
+
+    public function schoolYear()
+    {
+        return $this->belongsTo('App\SchoolYear');
+    }
+
+    public function level()
+    {
+        return $this->belongsTo('App\Level');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo('App\Course');
+    }
+
+    public function semester()
+    {
+        return $this->belongsTo('App\Semester');
+    }
+
+    public function schoolCategory()
+    {
+        return $this->belongsTo('App\SchoolCategory');
+    }
+
+    public function studentCategory()
+    {
+        return $this->belongsTo('App\StudentCategory');
+    }
+
+    public function studentType()
+    {
+        return $this->belongsTo('App\StudentType');
     }
 
     public function schoolYear()
