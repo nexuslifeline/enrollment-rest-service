@@ -58,12 +58,19 @@ class TranscriptController extends Controller
         // application status
         $applicationStatusId = $request->application_status_id ?? false;
         $query->when($applicationStatusId, function($q) use ($applicationStatusId) {
-            $q->whereHas('application', function($query) use ($applicationStatusId) {
-                return $query->where('application_status_id', $applicationStatusId);
+            return $q->where(function($q) use ($applicationStatusId) {
+                return $q->whereHas('application', function($query) use ($applicationStatusId) {
+                    return $query->where('application_status_id', $applicationStatusId);
+                })->orWhereHas('admission', function($query) use ($applicationStatusId) {
+                    return $query->where('application_status_id', $applicationStatusId);
+                });
             });
-            $q->whereHas('admission', function($query) use ($applicationStatusId) {
-                return $query->where('application_status_id', $applicationStatusId);
-            });
+        });
+
+        // transcript status
+        $transcriptStatusId = $request->transcript_status_id ?? false;
+        $query->when($transcriptStatusId, function($query) use ($transcriptStatusId) {
+            return $query->where('transcript_status_id', $transcriptStatusId);
         });
 
         $transcripts = !$request->has('paginate') || $request->paginate === 'true'
