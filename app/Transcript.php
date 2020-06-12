@@ -73,38 +73,4 @@ class Transcript extends Model
         return $this->belongsTo('App\StudentType');
     }
 
-    public function schoolYear()
-    {
-        return $this->belongsTo('App\SchoolYear');
-    }
-
-    public function level()
-    {
-        return $this->belongsTo('App\Level');
-    }
-
-    public function course()
-    {
-        return $this->belongsTo('App\Course');
-    }
-
-    public function semester()
-    {
-        return $this->belongsTo('App\Semester');
-    }
-
-    public function schoolCategory()
-    {
-        return $this->belongsTo('App\SchoolCategory');
-    }
-
-    public function studentCategory()
-    {
-        return $this->belongsTo('App\StudentCategory');
-    }
-
-    public function studentType()
-    {
-        return $this->belongsTo('App\StudentType');
-    }
 }
