@@ -126,11 +126,14 @@ class TestDataSeeder extends Seeder
     public function createFakeCourses()
     {
         $courses = [
-            ['name' => 'BSIT', 'description' => ''],
-            ['name' => 'COMENG', 'description' => ''],
-            ['name' => 'HRM', 'description' => ''],
-            ['name' => 'COMSCI', 'description' => ''],
-            ['name' => 'CHS', 'description' => '']
+            ['name' => 'BSIT', 'description' => 'Bachelor of Science in Information Technology'],
+            ['name' => 'BSCE', 'description' => 'Bachelor of Science in Computer Engineering'],
+            ['name' => 'BSA', 'description' => 'Bachelor of Science in Accountancy'],
+            ['name' => 'BSED', 'description' => 'Bachelor in Secondary Education'],
+            ['name' => 'BEED', 'description' => 'Bachelor in Elementary Education'],
+            ['name' => 'BSMT', 'description' => 'Bachelor of Science in Marine Transportation'],
+            ['name' => 'AB Broadcasting', 'description' => 'Bachelor of Arts in Broadcasting'],
+            ['name' => 'AB Journalism', 'description' => 'Bachelor of Arts in Journalism']
         ];
 
         foreach($courses as $course) {
@@ -144,11 +147,22 @@ class TestDataSeeder extends Seeder
         $faker = Faker\Factory::create();
         $limit = 100;
         for ($i = 0; $i < $limit; $i++) {
+            $code = $faker->word;
             $name = $faker->unique()->word;
             $description = $faker->sentence;
+            $labs = rand(1, 3);
+            $units = rand(1, 6);
+            $amount_per_unit = rand(3, 8) * 20;
+            $amount_per_lab = rand(3, 8) * 20;
             $subject = Subject::create([
+                'code' => $code,
                 'name' => $name,
-                'description' => $description
+                'description' => $description,
+                'labs' => $labs,
+                'units' => $units,
+                'amount_per_unit' => $amount_per_unit,
+                'amount_per_lab' => $amount_per_lab,
+                'total_amount' => $amount_per_unit + $amount_per_lab,
             ]);
         }
     }
@@ -168,20 +182,22 @@ class TestDataSeeder extends Seeder
             ['name' => 'Grade 8', 'school_category_id' => 3],
             ['name' => 'Grade 9', 'school_category_id' => 3],
             ['name' => 'Grade 10', 'school_category_id' => 3],
-            ['name' => 'First Year College', 'school_category_id' => 4],
-            ['name' => 'Second Year College', 'school_category_id' => 4],
-            ['name' => 'Third Year College', 'school_category_id' => 4],
-            ['name' => 'Fourth Year College', 'school_category_id' => 4],
-            ['name' => 'Fifth Year College', 'school_category_id' => 4],
-            ['name' => 'Grad School 1', 'school_category_id' => 5],
-            ['name' => 'Grad School 2', 'school_category_id' => 5],
-            ['name' => 'Grad School 3', 'school_category_id' => 5],
-            ['name' => 'Grad School 4', 'school_category_id' => 5],
+            ['name' => 'Grade 11', 'school_category_id' => 4],
+            ['name' => 'Grade 12', 'school_category_id' => 4],
+            ['name' => 'First Year College', 'school_category_id' => 5],
+            ['name' => 'Second Year College', 'school_category_id' => 5],
+            ['name' => 'Third Year College', 'school_category_id' => 5],
+            ['name' => 'Fourth Year College', 'school_category_id' => 5],
+            ['name' => 'Fifth Year College', 'school_category_id' => 5],
+            ['name' => 'Grad School 1', 'school_category_id' => 6],
+            ['name' => 'Grad School 2', 'school_category_id' => 6],
+            ['name' => 'Grad School 3', 'school_category_id' => 6],
+            ['name' => 'Grad School 4', 'school_category_id' => 6],
         ];
 
         foreach($levels as $level) {
             $resource = Level::create($level);
-            if ($level['school_category_id'] > 3) {
+            if ($level['school_category_id'] > 4) {
                 $course_id = rand(1, 5);
             }
 

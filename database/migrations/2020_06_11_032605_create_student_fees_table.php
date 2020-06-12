@@ -17,6 +17,8 @@ class CreateStudentFeesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
+            $table->unsignedBigInteger('transcript_id')->nullable();
+            $table->foreign('transcript_id')->references('id')->on('transcripts');
             $table->unsignedBigInteger('school_year_id')->nullable();
             $table->foreign('school_year_id')->references('id')->on('school_years');
             $table->unsignedBigInteger('semester_id')->nullable();

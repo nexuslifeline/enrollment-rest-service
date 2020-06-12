@@ -86,14 +86,18 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+      $transcriptStatusId = 1;
+
       $this->validate($request, [
+        'student_no' => 'required_if:student_category_id,==,2',
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'username' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:6|confirmed',
-      ]);
+      ], ['required_if' => 'The :attribute field is required.']);
 
       $student = Student::create([
+        'student_no' => $request->student_no,
         'first_name' => $request->first_name,
         'middle_name' => $request->middle_name,
         'last_name' => $request->last_name,
@@ -102,6 +106,7 @@ class AuthController extends Controller
       ]);
 
       $studentCategoryId = $request->student_category_id;
+
       if ($studentCategoryId == 1) {
         $student->admission()->create([
           'school_year_id' =>  1, // active_school_year_id
@@ -110,7 +115,8 @@ class AuthController extends Controller
         ])->transcript()->create([
           'school_year_id' => 1, // active_school_year_id
           'student_id' => $student->id,
-          'student_category_id' => $studentCategoryId
+          'student_category_id' => $studentCategoryId,
+          'transcript_status_id' => $transcriptStatusId
         ]);
       } else {
         $student->applications()->create([
@@ -120,7 +126,8 @@ class AuthController extends Controller
         ])->transcript()->create([
           'school_year_id' => 1, // active_school_year_id
           'student_id' => $student->id,
-          'student_category_id' => $studentCategoryId
+          'student_category_id' => $studentCategoryId,
+          'transcript_status_id' => $transcriptStatusId
         ]);
       }
 
