@@ -137,9 +137,68 @@ class TranscriptController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Transcript $transcript)
     {
-        //
+        try {
+          // return $request;
+          $except = ['application', 'admission', 'student_fee', 'subjects', 'fees'];
+          $data = $request->except($except);
+          // return $data;
+          $transcript->update($data);
+
+          if ($request->has('application') && count($request->application) > 0) {
+              $application = $transcript->application();
+              if ($application) {
+                  $application->update($request->application);
+              }
+          }
+
+          if ($request->has('admission') && count($request->admission) > 0) {
+              $admission = $transcript->admission();
+              if ($admission) {
+                  $admission->update($request->admission);
+              }
+          }
+
+          if ($request->has('student_fee')) {
+              $student = $transcript->student()->first();
+              $student->studentFees()->updateOrCreate(['transcript_id' => $transcript->id], $request->student_fee);
+              if ($request->has('fees')) {
+                $fees = $request->fees;
+                $items = [];
+                foreach ($fees as $fee) {
+                    $items[$fee['school_fee_id']] = [
+                        'amount' => $fee['amount'],
+                        'notes' => $fee['notes']
+                    ];
+                }
+                $student->studentFees()->first()->studentFeeItems()->sync($items);
+              }
+          }
+
+          if ($request->has('subjects')) {
+              $transcript->subjects()->sync($request->subjects);
+          }
+
+          $transcript->load([
+            'schoolYear', 
+            'level', 
+            'course', 
+            'semester', 
+            'schoolCategory', 
+            'studentCategory',
+            'studentType', 
+            'application', 
+            'admission',
+            'student' => function($query) {
+                $query->with(['address']);
+            }])->fresh();
+
+          return new TranscriptResource($transcript);
+        } catch (Throwable $e) {
+            Log::info($e->getMessage());
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**
