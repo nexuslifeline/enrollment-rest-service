@@ -58,6 +58,11 @@ class Student extends Model
         return $this->hasMany('App\Transcript');
     }
 
+    public function studentFees()
+    {
+        return $this->hasMany('App\StudentFee');
+    }
+
     public function getActiveAdmissionAttribute()
     {
         $pendingStatus = 2;

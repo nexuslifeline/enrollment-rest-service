@@ -104,13 +104,9 @@ class StudentController extends Controller
                 $transcript = Transcript::find($request->transcript['id']);
                 if ($transcript) {
                     $transcript->update($request->transcript);
-                    if($request->has('subjects') && $request->subjects) {
+                    if ($request->has('subjects') && $request->subjects) {
                         $subjects = $request->subjects;
-                        // $items = [];
-                        // foreach ($subjects as $subject) {
-                        //   $items[$subject['id']] = [];
-                        // }
-                      $transcript->subjects()->sync($subjects);
+                        $transcript->subjects()->sync($subjects);
                     }
                 }
             }

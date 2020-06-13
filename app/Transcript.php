@@ -38,6 +38,11 @@ class Transcript extends Model
         return $this->belongsTo('App\Admission');
     }
 
+    public function studentFee()
+    {
+        return $this->belongsTo('App\StudentFee');
+    }
+
     public function schoolYear()
     {
         return $this->belongsTo('App\SchoolYear');
