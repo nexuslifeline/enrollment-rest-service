@@ -48,7 +48,7 @@ class TestDataSeeder extends Seeder
         for ($i = 1; $i < $limit; $i++) {
             $date = $faker->dateTimeBetween('-2 years', 'now');
             DB::table('applications')->insert([
-                'student_id' => $i ,
+                'student_id' => $i + 30,
                 'school_year_id' => 1,
                 'application_step_id' => 1,
                 'application_status_id' => 2,
