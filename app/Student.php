@@ -67,9 +67,11 @@ class Student extends Model
     {
         $pendingStatus = 2;
         $submittedStatus = 4;
+        $approvedStatus = 1;
         return $this->admission()
             ->where('application_status_id', $pendingStatus)
             ->orWhere('application_status_id', $submittedStatus)
+            ->orWhere('application_status_id', $approvedStatus)
             ->where('student_id', $this->id)
             ->latest()
             ->first();
@@ -79,9 +81,11 @@ class Student extends Model
     {
         $pendingStatus = 2;
         $submittedStatus = 4;
+        $approvedStatus = 1;
         return $this->applications()
             ->where('application_status_id', $pendingStatus)
             ->orWhere('application_status_id', $submittedStatus)
+            ->orWhere('application_status_id', $approvedStatus)
             ->where('student_id', $this->id)
             ->latest()
             ->first();

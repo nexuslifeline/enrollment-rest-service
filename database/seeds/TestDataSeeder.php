@@ -16,10 +16,10 @@ class TestDataSeeder extends Seeder
     public function run()
     {
         $this->createFakeStudentAccount();
-        $this->createFakeCourses();
+        //$this->createFakeCourses();
         $this->createFakeSubjects();
         $this->createFakeLevelWithAttachSubjectAndCourses();
-        $this->createFakeSchoolFees();
+        // $this->createFakeSchoolFees();
         $this->createFakeRateSheets();
         $this->createFakeAdmissions();
         $this->createFakeApplications();
@@ -117,7 +117,7 @@ class TestDataSeeder extends Seeder
 
             if ($i < 50) { // atleast half of student have address
                 $student->address()->create([
-                    'address' => $faker->address
+                    'current_complete_address' => $faker->address
                 ]);
             }
         }

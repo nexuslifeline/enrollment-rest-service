@@ -14,8 +14,10 @@ class AddCountriesForeignKeyToStudentAddressesTable extends Migration
     public function up()
     {
         Schema::table('student_addresses', function (Blueprint $table) {
-            $table->unsignedBigInteger('country_id')->nullable();
-            $table->foreign('country_id')->references('id')->on('countries');
+            $table->unsignedBigInteger('current_country_id')->nullable();
+            $table->foreign('current_country_id')->references('id')->on('countries');
+            $table->unsignedBigInteger('permanent_country_id')->nullable();
+            $table->foreign('permanent_country_id')->references('id')->on('countries');
         });
     }
 
@@ -27,7 +29,8 @@ class AddCountriesForeignKeyToStudentAddressesTable extends Migration
     public function down()
     {
         Schema::table('student_addresses', function (Blueprint $table) {
-            $table->dropColumn('country_id');
+            $table->dropColumn('current_country_id');
+            $table->dropColumn('permanent_country_id');
         });
     }
 }
