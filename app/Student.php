@@ -65,13 +65,9 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $pendingStatus = 2;
-        $submittedStatus = 4;
-        $approvedStatus = 1;
+        $completedStatus = 5;
         return $this->admission()
-            ->where('application_status_id', $pendingStatus)
-            ->orWhere('application_status_id', $submittedStatus)
-            ->orWhere('application_status_id', $approvedStatus)
+            ->where('application_status_id', '!=', $completedStatus)
             ->where('student_id', $this->id)
             ->latest()
             ->first();
@@ -79,13 +75,9 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $pendingStatus = 2;
-        $submittedStatus = 4;
-        $approvedStatus = 1;
+        $completedStatus = 5;
         return $this->applications()
-            ->where('application_status_id', $pendingStatus)
-            ->orWhere('application_status_id', $submittedStatus)
-            ->orWhere('application_status_id', $approvedStatus)
+            ->where('application_status_id', '!=', $completedStatus)
             ->where('student_id', $this->id)
             ->latest()
             ->first();
