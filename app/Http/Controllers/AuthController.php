@@ -89,12 +89,12 @@ class AuthController extends Controller
       $transcriptStatusId = 1;
 
       $this->validate($request, [
-        'student_no' => 'required_if:student_category_id,==,2',
+        'student_no' => 'sometimes|required|string|max:255',
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'username' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:6|confirmed',
-      ], ['required_if' => 'The :attribute field is required.']);
+      ]);
 
       $student = Student::create([
         'student_no' => $request->student_no,
