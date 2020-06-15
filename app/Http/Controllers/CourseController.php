@@ -17,7 +17,7 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $courses = !$request->has('paginate') || $request->paginate === 'true'
             ? Course::paginate($perPage)
             : Course::all();

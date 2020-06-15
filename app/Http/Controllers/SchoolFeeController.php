@@ -15,7 +15,7 @@ class SchoolFeeController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $schoolFees = !$request->has('paginate') || $request->paginate === 'true'
             ? SchoolFee::paginate($perPage)
             : SchoolFee::all();
