@@ -17,6 +17,7 @@ class CreateStudentPhotosTable extends Migration
             $table->id();
             $table->string('name')->default('')->nullable();
             $table->string('path')->default('')->nullable();
+            $table->string('hash_name')->default('')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
             $table->unsignedBigInteger('student_id')->nullable();
             $table->timestamps();
