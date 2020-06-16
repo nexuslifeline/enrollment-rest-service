@@ -17,7 +17,8 @@ class ApplicationStepsTableSeeder extends Seeder
                 ['name' => 'Address', 'description' => ''],
                 ['name' => 'Family', 'description' => ''],
                 ['name' => 'Education', 'description' => ''],
-                ['name' => 'Academic Year - Application', 'description' => '']
+                ['name' => 'Academic Year - Application', 'description' => ''],
+                ['name' => 'Status', 'description' => '']
             ]
         );
     }
