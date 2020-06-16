@@ -59,7 +59,7 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        return new LevelResource($subject);
+        return new SubjectResource($subject);
     }
 
     /**
