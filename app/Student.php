@@ -71,7 +71,7 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $completedStatus = 5;
+        $completedStatus = 7;
         return $this->admission()
             ->where('application_status_id', '!=', $completedStatus)
             ->where('student_id', $this->id)
@@ -81,7 +81,7 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $completedStatus = 5;
+        $completedStatus = 7;
         return $this->applications()
             ->where('application_status_id', '!=', $completedStatus)
             ->where('student_id', $this->id)
