@@ -25,6 +25,8 @@ class CreateStudentFamiliesTable extends Migration
             $table->string('father_mobile_no')->default('')->nullable();
             $table->string('father_phone_no')->default('')->nullable();
             $table->string('father_email')->default('')->nullable();
+            $table->string('parent_guardian_name')->default('')->nullable();
+            $table->string('parent_guardian_contact_no')->default('')->nullable();
             $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
             $table->integer('deleted_by')->nullable();
