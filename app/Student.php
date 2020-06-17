@@ -6,6 +6,7 @@ use App\User;
 use App\StudentFamily;
 use App\StudentAddress;
 use App\StudentPreviousEducation;
+use App\StudentPhoto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -41,6 +42,11 @@ class Student extends Model
     public function education()
     {
         return $this->hasOne('App\StudentPreviousEducation');
+    }
+
+    public function photo()
+    {
+        return $this->hasOne('App\StudentPhoto');
     }
 
     public function applications()

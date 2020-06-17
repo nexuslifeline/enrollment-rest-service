@@ -20,7 +20,9 @@ class AdmissionStepsTableSeeder extends Seeder
                 ['name' => 'Academic Year - Application', 'description' => ''], // application for current SY level, course, semester, subjects, etc,
                                                                                 // same with the old student application
                 ['name' => 'Requirements', 'description' => ''],
-                ['name' => 'Status', 'description' => '']
+                ['name' => 'Status', 'description' => ''],
+                ['name' => 'Payments', 'description' => ''],
+                ['name' => 'Waiting', 'description' => '']
             ]
         );
     }
