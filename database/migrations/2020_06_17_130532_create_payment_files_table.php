@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStudentsTable extends Migration
+class CreatePaymentFilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,14 @@ class CreateStudentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('students', function (Blueprint $table) {
+        Schema::create('payment_files', function (Blueprint $table) {
             $table->id();
-            $table->string('student_no')->default('')->nullable();
             $table->string('name')->default('')->nullable();
-            $table->string('first_name')->default('')->nullable();
-            $table->string('middle_name')->default('')->nullable();
-            $table->string('last_name')->default('')->nullable();
-            $table->string('email')->default('')->nullable();
-            $table->string('mobile_no')->default('')->nullable();
-            $table->string('phone_no')->default('')->nullable();
-            $table->date('birth_date')->nullable();
+            $table->string('notes')->default('')->nullable();
+            $table->string('path')->default('')->nullable();
+            $table->string('hash_name')->default('')->nullable();
+            $table->foreign('payment_id')->references('id')->on('payments');
+            $table->unsignedBigInteger('payment_id')->nullable();
             $table->integer('deleted_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('created_by')->nullable();
@@ -39,6 +36,6 @@ class CreateStudentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('students');
+        Schema::dropIfExists('payment_files');
     }
 }
