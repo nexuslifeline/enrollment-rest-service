@@ -15,6 +15,7 @@ class TranscriptStatusesTableSeeder extends Seeder
             [
                 ['name' => 'Draft', 'description' => 'Draft'],
                 ['name' => 'Finalized', 'description' => 'Finalized'],
+                ['name' => 'Enrolled', 'description' => 'Enrolled'],
             ]
         );
     }

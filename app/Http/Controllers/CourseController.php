@@ -36,12 +36,15 @@ class CourseController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
+            'description' => 'required|max:191',
+            'degree_type_id' => 'required'
+        ], [], ['degree_type_id' => 'degree type']);
 
-        $data = $request->all();
+        $data = $request->except('levels');
+        // $data = $request->all();
 
         $course = Course::create($data);
+        $course->levels()->sync($request->levels);
         
         return (new CourseResource($course))
             ->response()
@@ -70,12 +73,15 @@ class CourseController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
+            'description' => 'required|max:191',
+            'degree_type_id' => 'required'
+        ], [], ['degree_type_id' => 'degree type']);
 
-        $data = $request->all();
+        $data = $request->except('levels');
+        // $data = $request->all();
 
         $success = $course->update($data);
+        $course->levels()->sync($request->levels);
 
         if ($success) {
             return (new CourseResource($course))
