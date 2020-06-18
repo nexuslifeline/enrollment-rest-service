@@ -73,6 +73,17 @@ class TranscriptController extends Controller
             return $query->where('transcript_status_id', $transcriptStatusId);
         });
 
+        // filter by student name
+        $criteria = $request->criteria ?? false;
+        $query->when($criteria, function($q) use ($criteria) {
+          return $q->whereHas('student', function($query) use ($criteria) {
+            return $query->where('name', 'like', '%'.$criteria.'%')
+                      ->orWhere('first_name', 'like', '%'.$criteria.'%')
+                      ->orWhere('middle_name', 'like', '%'.$criteria.'%')
+                      ->orWhere('last_name', 'like', '%'.$criteria.'%');
+          });
+        });
+
         $transcripts = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
             : $query->all();
