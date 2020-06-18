@@ -49,8 +49,6 @@ class StudentUpdateRequest extends FormRequest
             'last_name' => 'sometimes|required|string|max:255',
             'birth_date' => 'sometimes|required|date',
             'civil_status_id' => 'sometimes|required',
-            'parent_guardian_name' => 'sometimes|required|string|max:255',
-            'parent_guardian_contact_no' => 'sometimes|required|string|max:255',
             // student address
             'address.current_house_no_street' => 'sometimes|required|string|max:255',
             'address.current_city_town' => 'sometimes|required|string|max:255',
@@ -69,6 +67,8 @@ class StudentUpdateRequest extends FormRequest
             'family.mother_name' => 'sometimes|required|string|max:255',
             'family.father_email' => 'sometimes|nullable|email',
             'family.mother_email' => 'sometimes|nullable|email',
+            'family.parent_guardian_name' => 'sometimes|required|string|max:255',
+            'family.parent_guardian_contact_no' => 'sometimes|required|string|max:255',
             // transcript
             'transcript.level_id' => 'sometimes|required',
             'subjects' => 'sometimes|array|min:1'
@@ -95,6 +95,8 @@ class StudentUpdateRequest extends FormRequest
             'family.mother_name' => 'mother name',
             'family.father_email' => 'email',
             'family.mother_email' => 'email',
+            'family.parent_guardian_name' => 'parent/guardian name',
+            'family.parent_guardian_contact_no' => 'parent/guardian contact no.',
             'transcript.level_id' => 'level',
         ];
     }

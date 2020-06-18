@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'username', 'password',
+        'name', 'username', 'password', 'user_group_id'
     ];
 
     /**
@@ -69,5 +69,10 @@ class User extends Authenticatable
     public function personnel()
     {
         return $this->belongsTo('App\Personnel');
+    }
+
+    public function userGroup()
+    {
+        return $this->belongsTo('App\UserGroup');
     }
 }

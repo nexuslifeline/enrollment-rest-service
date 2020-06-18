@@ -21,7 +21,7 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
-        $query = Student::with(['address', 'family', 'education']);
+        $query = Student::with(['address', 'family', 'education', 'photo']);
 
         $students = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
@@ -41,7 +41,7 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $related = ['address', 'family', 'education'];
+        $related = ['address', 'family', 'education', 'photo'];
         $data = $request->except($related);
         $student = Student::create($data);
 
@@ -65,7 +65,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        $student->load(['address', 'family', 'education']);
+        $student->load(['address', 'family', 'education', 'photo']);
         $student->append(['active_admission', 'active_application', 'transcript']);
         return new StudentResource($student);
     }
@@ -118,7 +118,7 @@ class StudentController extends Controller
                 }
             }
 
-            $student->load(['address', 'family', 'education'])->fresh();
+            $student->load(['address', 'family', 'education','photo'])->fresh();
             $student->append(['active_admission', 'active_application', 'transcript']);
 
             return new StudentResource($student);

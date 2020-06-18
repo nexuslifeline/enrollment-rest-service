@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStudentPhotosTable extends Migration
+class CreatePaymentFilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,17 @@ class CreateStudentPhotosTable extends Migration
      */
     public function up()
     {
-        Schema::create('student_photos', function (Blueprint $table) {
+        Schema::create('payment_files', function (Blueprint $table) {
             $table->id();
             $table->string('name')->default('')->nullable();
+            $table->string('notes')->default('')->nullable();
             $table->string('path')->default('')->nullable();
             $table->string('hash_name')->default('')->nullable();
-            $table->foreign('student_id')->references('id')->on('students');
-            $table->unsignedBigInteger('student_id')->nullable();
+            $table->foreign('payment_id')->references('id')->on('payments');
+            $table->unsignedBigInteger('payment_id')->nullable();
+            $table->integer('deleted_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -32,6 +36,6 @@ class CreateStudentPhotosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('student_photos');
+        Schema::dropIfExists('payment_files');
     }
 }

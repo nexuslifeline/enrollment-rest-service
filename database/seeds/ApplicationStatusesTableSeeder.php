@@ -17,6 +17,8 @@ class ApplicationStatusesTableSeeder extends Seeder
                 ['name' => 'Draft', 'description' => 'Draft/Pending'],
                 ['name' => 'Rejected', 'description' => ''],
                 ['name' => 'Submitted', 'description' => ''],
+                ['name' => 'Approved Assesment', 'description' => ''],
+                ['name' => 'Payment Submitted', 'description' => ''],
                 ['name' => 'Completed', 'description' => ''],
             ]
         );

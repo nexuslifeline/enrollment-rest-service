@@ -69,6 +69,10 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/transcripts', 'TranscriptController');
         Route::get('/studentinfo', 'StudentController@getStudentInfo');
         Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');
+        // user groups
+        Route::resource('/user-groups', 'UserGroupController');
+        // user
+        Route::resource('/personnels', 'PersonnelController');
     });
 });
 

@@ -6,6 +6,7 @@ use App\User;
 use App\StudentFamily;
 use App\StudentAddress;
 use App\StudentPreviousEducation;
+use App\StudentPhoto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -43,6 +44,11 @@ class Student extends Model
         return $this->hasOne('App\StudentPreviousEducation');
     }
 
+    public function photo()
+    {
+        return $this->hasOne('App\StudentPhoto');
+    }
+
     public function applications()
     {
         return $this->hasMany('App\Application');
@@ -65,7 +71,7 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $completedStatus = 5;
+        $completedStatus = 7;
         return $this->admission()
             ->where('application_status_id', '!=', $completedStatus)
             ->where('student_id', $this->id)
@@ -75,7 +81,7 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $completedStatus = 5;
+        $completedStatus = 7;
         return $this->applications()
             ->where('application_status_id', '!=', $completedStatus)
             ->where('student_id', $this->id)
