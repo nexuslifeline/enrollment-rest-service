@@ -15,13 +15,14 @@ class UsersTableSeeder extends Seeder
         $users = [
             [
                 'personnel' => [
-                    'name' => 'Paul Christian Rueda',
-                    'first_name' => 'Paul Christian',
-                    'last_name' => 'Rueda'
+                    'name' => 'Nexuslifeline',
+                    'first_name' => 'Nexus',
+                    'last_name' => 'Lifeline'
                 ],
                 'account' => [
                     'username' => 'admin@nexuslifeline.com',
-                    'password' => bcrypt('password')
+                    'password' => bcrypt('password'),
+                    'user_group_id' => 1,
                 ]
             ]
         ];
