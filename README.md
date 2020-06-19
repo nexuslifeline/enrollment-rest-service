@@ -7,7 +7,7 @@ And then, we need to install all the application dependencies by executing:
 
 After this, we need to setup the application by:
 
-`php artisan enrollment-rest:install --fresh ---with-test-data`
+`php artisan enrollment-rest:install --fresh --with-test-data`
 
 
 Available Options for enrollment-rest:install

@@ -18,9 +18,9 @@ class TestDataSeeder extends Seeder
         $this->createFakeStudentAccount();
         //$this->createFakeCourses();
         $this->createFakeSubjects();
-        $this->createFakeLevelWithAttachSubjectAndCourses();
+        //$this->createFakeLevelWithAttachSubjectAndCourses();
         // $this->createFakeSchoolFees();
-        $this->createFakeRateSheets();
+        // $this->createFakeRateSheets();
         $this->createFakeAdmissions();
         $this->createFakeApplications();
     }
