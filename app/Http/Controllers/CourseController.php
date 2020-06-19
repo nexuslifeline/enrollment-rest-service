@@ -44,7 +44,15 @@ class CourseController extends Controller
         // $data = $request->all();
 
         $course = Course::create($data);
-        $course->levels()->sync($request->levels);
+        $levels = $request->levels;
+        $items = [];
+        foreach ($levels as $level) {
+            $items[$level['level_id']] = [
+                'school_category_id' => $level['school_category_id']
+            ];
+        }
+
+        $course->levels()->sync($items);
         
         return (new CourseResource($course))
             ->response()
@@ -81,7 +89,16 @@ class CourseController extends Controller
         // $data = $request->all();
 
         $success = $course->update($data);
-        $course->levels()->sync($request->levels);
+
+        $levels = $request->levels;
+        $items = [];
+        foreach ($levels as $level) {
+            $items[$level['level_id']] = [
+                'school_category_id' => $level['school_category_id']
+            ];
+        }
+
+        $course->levels()->sync($items);
 
         if ($success) {
             return (new CourseResource($course))
