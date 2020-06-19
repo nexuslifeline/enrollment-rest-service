@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Config;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StudentLoginRequest;
+use App\Http\Requests\PersonnelLoginRequest;
 
 class AuthController extends Controller
 {
@@ -42,27 +43,23 @@ class AuthController extends Controller
     }
 
 
-    public function loginPersonnel(Request $request)
+    public function loginPersonnel(PersonnelLoginRequest $request)
     {
+      $data = $request->validated();
 
-      $this->validate($request, [
-        'username' => 'required',
-        'password' => 'required',
-      ]);
-
-      $user = User::where('username', $request->username)
+      $user = User::where('username', $data['username'])
         ->where('userable_type', 'App\Personnel')
         ->first();
 
-      if ($user && Hash::check($request->password, $user->password)) {
+      if ($user) {
         $http = new \GuzzleHttp\Client;
         $response = $http->post(url('/') . '/oauth/token', [
           'form_params' => [
             'grant_type' => 'password',
             'client_id' => Config::get('client.id'),
             'client_secret' => Config::get('client.secret'),
-            'username' => $request->username,
-            'password' => $request->password,
+            'username' => $data['username'],
+            'password' => $data['password'],
             'scope' => '',
           ],
         ]);
