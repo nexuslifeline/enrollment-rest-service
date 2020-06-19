@@ -73,6 +73,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/user-groups', 'UserGroupController');
         // user
         Route::resource('/personnels', 'PersonnelController');
+        // payments
+        Route::resource('/payments', 'PaymentController');
     });
 });
 
