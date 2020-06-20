@@ -36,12 +36,23 @@ class CourseController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
+            'description' => 'required|max:191',
+            'degree_type_id' => 'required'
+        ], [], ['degree_type_id' => 'degree type']);
 
-        $data = $request->all();
+        $data = $request->except('levels');
+        // $data = $request->all();
 
         $course = Course::create($data);
+        $levels = $request->levels;
+        $items = [];
+        foreach ($levels as $level) {
+            $items[$level['level_id']] = [
+                'school_category_id' => $level['school_category_id']
+            ];
+        }
+
+        $course->levels()->sync($items);
         
         return (new CourseResource($course))
             ->response()
@@ -70,12 +81,24 @@ class CourseController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
+            'description' => 'required|max:191',
+            'degree_type_id' => 'required'
+        ], [], ['degree_type_id' => 'degree type']);
 
-        $data = $request->all();
+        $data = $request->except('levels');
+        // $data = $request->all();
 
         $success = $course->update($data);
+
+        $levels = $request->levels;
+        $items = [];
+        foreach ($levels as $level) {
+            $items[$level['level_id']] = [
+                'school_category_id' => $level['school_category_id']
+            ];
+        }
+
+        $course->levels()->sync($items);
 
         if ($success) {
             return (new CourseResource($course))

@@ -142,10 +142,18 @@ class SubjectController extends Controller
 
     public function storeSubjectsOfLevel($levelId, Request $request)
     {
-        $subjects = Level::find($levelId)->subjects();
-        // $subjects->detach();
-        // $subjects->attach($request->subjects);
-        $subjects->sync($request->subjects);
-        return SubjectResource::collection($subjects->get());
+        $subjects = $request->subjects;
+        $items = [];
+        foreach ($subjects as $subject) {
+            $items[$subject['subject_id']] = [
+                'course_id' => $subject['course_id'],
+                'semester_id' => $subject['semester_id'],
+                'school_category_id' => $subject['school_category_id']
+            ];
+        }
+        // return $items;
+        $data = Level::find($levelId)->subjects();
+        $data->sync($items);
+        return SubjectResource::collection($data->get());
     }
 }

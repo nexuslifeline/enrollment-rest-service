@@ -13,23 +13,86 @@ class CoursesTableSeeder extends Seeder
     public function run()
     {
         $data = [
-            ['name' => 'BSTM', 'description' => 'Bachelor of Science in Tourism Management'],
-            ['name' => 'BSHRM', 'description' => 'Bachelor of Science in Hotel and Restaurant Management'],
-            ['name' => 'BSED', 'description' => 'Bachelor of Secondary Education'],
-            ['name' => 'BSIT', 'description' => 'Bachelor of Science in Information Technology'],
-            ['name' => 'BSBA', 'description' => 'Bachelor of Science in Business Administration'],
-            ['name' => 'BSC', 'description' => 'Bachelor of Science in Criminology'],
-            ['name' => 'BA ENG LAN', 'description' => 'Bachelor of Arts in English Language Studies'],
-            ['name' => 'BSA', 'description' => 'Bachelor of Science in Accountancy'],
-            ['name' => 'BS MATH', 'description' => 'Bachelor of Science in Mathematics'],
-            ['name' => 'BSAIS', 'description' => 'Bachelor of Science in Accounting Information System'], 
-            ['name' => 'BSAT', 'description' => 'Bachelor of Science in Accounting Technology'],
-            ['name' => 'BEED', 'description' => 'Bachelor of Elementary Education'],
-            ['name' => 'BSPA', 'description' => 'Bachelor of Science in Public Affairs'],
-            ['name' => 'BSOA', 'description' => 'Bachelor of Science in Office Administration']
+            ['name' => 'BSTM', 'description' => 'Bachelor of Science in Tourism Management', 'degree_type_id' => 3],
+            ['name' => 'BSHRM', 'description' => 'Bachelor of Science in Hotel and Restaurant Management', 'degree_type_id' => 3],
+            ['name' => 'BSED', 'description' => 'Bachelor of Secondary Education', 'degree_type_id' => 3],
+            ['name' => 'BSIT', 'description' => 'Bachelor of Science in Information Technology', 'degree_type_id' => 3],
+            ['name' => 'BSBA', 'description' => 'Bachelor of Science in Business Administration', 'degree_type_id' => 3],
+            ['name' => 'BSC', 'description' => 'Bachelor of Science in Criminology', 'degree_type_id' => 3],
+            ['name' => 'BA ENG LAN', 'description' => 'Bachelor of Arts in English Language Studies', 'degree_type_id' => 3],
+            ['name' => 'BSA', 'description' => 'Bachelor of Science in Accountancy', 'degree_type_id' => 4],
+            ['name' => 'BS MATH', 'description' => 'Bachelor of Science in Mathematics', 'degree_type_id' => 3],
+            ['name' => 'BSAIS', 'description' => 'Bachelor of Science in Accounting Information System', 'degree_type_id' => 3], 
+            ['name' => 'BSAT', 'description' => 'Bachelor of Science in Accounting Technology', 'degree_type_id' => 3],
+            ['name' => 'BEED', 'description' => 'Bachelor of Elementary Education', 'degree_type_id' => 3],
+            ['name' => 'BSPA', 'description' => 'Bachelor of Science in Public Affairs', 'degree_type_id' => 3],
+            ['name' => 'BSOA', 'description' => 'Bachelor of Science in Office Administration', 'degree_type_id' => 3]
         ];
+
+        $level_courses = collect([
+            ['course_id' => 1, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 1, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 1, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 1, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 2, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 2, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 2, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 2, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 3, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 3, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 3, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 3, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 4, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 4, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 4, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 4, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 5, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 5, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 5, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 5, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 6, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 6, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 6, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 6, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 7, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 7, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 7, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 7, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 8, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 8, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 8, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 8, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 8, 'level_id' => 19, 'school_category_id' => 5],
+            ['course_id' => 9, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 9, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 9, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 9, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 10, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 10, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 10, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 10, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 11, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 11, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 11, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 11, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 12, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 12, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 12, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 12, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 13, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 13, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 13, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 13, 'level_id' => 18, 'school_category_id' => 5],
+            ['course_id' => 14, 'level_id' => 15, 'school_category_id' => 5],
+            ['course_id' => 14, 'level_id' => 16, 'school_category_id' => 5],
+            ['course_id' => 14, 'level_id' => 17, 'school_category_id' => 5],
+            ['course_id' => 14, 'level_id' => 18, 'school_category_id' => 5]
+        ]);
+
         foreach($data as $item){
-            Course::create($item);
+          $course = Course::create($item);
+          $levels = $level_courses->where('course_id', $course->id);
+          $course->levels()->sync($levels);
         }
     }
 }
