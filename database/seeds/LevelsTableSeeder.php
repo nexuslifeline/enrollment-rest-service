@@ -32,15 +32,8 @@ class LevelsTableSeeder extends Seeder
         ['name' => 'Third Year College', 'school_category_id' => 5],
         ['name' => 'Fourth Year College', 'school_category_id' => 5],
         ['name' => 'Fifth Year College', 'school_category_id' => 5],
-        ['name' => 'Year 1 - Masters Degree', 'school_category_id' => 6],
-        ['name' => 'Year 2 - Masters Degree', 'school_category_id' => 6],
-        ['name' => 'Year 1 - Doctorate Degree', 'school_category_id' => 6],
-        ['name' => 'Year 2 - Doctorate Degree', 'school_category_id' => 6],
-        ['name' => 'Year 3 - Doctorate Degree', 'school_category_id' => 6],
-        ['name' => 'Year 4 - Doctorate Degree', 'school_category_id' => 6],
-        ['name' => 'Year 5 - Doctorate Degree', 'school_category_id' => 6],
-        ['name' => 'Year 6 - Doctorate Degree', 'school_category_id' => 6],
-        ['name' => 'Year 7 - Doctorate Degree', 'school_category_id' => 6],
+        ['name' => 'Masters Degree', 'school_category_id' => 6],
+        ['name' => 'Doctorate Degree', 'school_category_id' => 6],
       ]
     );
   }

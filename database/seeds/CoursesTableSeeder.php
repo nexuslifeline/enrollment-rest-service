@@ -13,20 +13,20 @@ class CoursesTableSeeder extends Seeder
     public function run()
     {
         $data = [
-            ['name' => 'BSTM', 'description' => 'Bachelor of Science in Tourism Management', 'degree_type_id' => 2],
-            ['name' => 'BSHRM', 'description' => 'Bachelor of Science in Hotel and Restaurant Management', 'degree_type_id' => 2],
-            ['name' => 'BSED', 'description' => 'Bachelor of Secondary Education', 'degree_type_id' => 2],
-            ['name' => 'BSIT', 'description' => 'Bachelor of Science in Information Technology', 'degree_type_id' => 2],
-            ['name' => 'BSBA', 'description' => 'Bachelor of Science in Business Administration', 'degree_type_id' => 2],
-            ['name' => 'BSC', 'description' => 'Bachelor of Science in Criminology', 'degree_type_id' => 2],
-            ['name' => 'BA ENG LAN', 'description' => 'Bachelor of Arts in English Language Studies', 'degree_type_id' => 2],
-            ['name' => 'BSA', 'description' => 'Bachelor of Science in Accountancy', 'degree_type_id' => 3],
-            ['name' => 'BS MATH', 'description' => 'Bachelor of Science in Mathematics', 'degree_type_id' => 2],
-            ['name' => 'BSAIS', 'description' => 'Bachelor of Science in Accounting Information System', 'degree_type_id' => 2], 
-            ['name' => 'BSAT', 'description' => 'Bachelor of Science in Accounting Technology', 'degree_type_id' => 2],
-            ['name' => 'BEED', 'description' => 'Bachelor of Elementary Education', 'degree_type_id' => 2],
-            ['name' => 'BSPA', 'description' => 'Bachelor of Science in Public Affairs', 'degree_type_id' => 2],
-            ['name' => 'BSOA', 'description' => 'Bachelor of Science in Office Administration', 'degree_type_id' => 2]
+            ['name' => 'BSTM', 'description' => 'Bachelor of Science in Tourism Management', 'degree_type_id' => 3],
+            ['name' => 'BSHRM', 'description' => 'Bachelor of Science in Hotel and Restaurant Management', 'degree_type_id' => 3],
+            ['name' => 'BSED', 'description' => 'Bachelor of Secondary Education', 'degree_type_id' => 3],
+            ['name' => 'BSIT', 'description' => 'Bachelor of Science in Information Technology', 'degree_type_id' => 3],
+            ['name' => 'BSBA', 'description' => 'Bachelor of Science in Business Administration', 'degree_type_id' => 3],
+            ['name' => 'BSC', 'description' => 'Bachelor of Science in Criminology', 'degree_type_id' => 3],
+            ['name' => 'BA ENG LAN', 'description' => 'Bachelor of Arts in English Language Studies', 'degree_type_id' => 3],
+            ['name' => 'BSA', 'description' => 'Bachelor of Science in Accountancy', 'degree_type_id' => 4],
+            ['name' => 'BS MATH', 'description' => 'Bachelor of Science in Mathematics', 'degree_type_id' => 3],
+            ['name' => 'BSAIS', 'description' => 'Bachelor of Science in Accounting Information System', 'degree_type_id' => 3], 
+            ['name' => 'BSAT', 'description' => 'Bachelor of Science in Accounting Technology', 'degree_type_id' => 3],
+            ['name' => 'BEED', 'description' => 'Bachelor of Elementary Education', 'degree_type_id' => 3],
+            ['name' => 'BSPA', 'description' => 'Bachelor of Science in Public Affairs', 'degree_type_id' => 3],
+            ['name' => 'BSOA', 'description' => 'Bachelor of Science in Office Administration', 'degree_type_id' => 3]
         ];
 
         $level_courses = collect([

@@ -13,6 +13,7 @@ class DegreeTypesTableSeeder extends Seeder
     {
       DB::table('degree_types')->insert(
         [
+          ['name' => 'Senior High', 'description' => 'Senior High'],
           ['name' => 'Associate Degree', 'description' => 'Associate Degree'],
           ['name' => 'Bachelors Degree(4 yrs)', 'description' => 'Bachelors Degree(4 yrs)'],
           ['name' => 'Bachelors Degree(5 yrs)', 'description' => 'Bachelors Degree(5 yrs)'],
