@@ -41,20 +41,24 @@ class PersonnelController extends Controller
         $this->validate($request, [
           'first_name' => 'required|string|max:255',
           'last_name' => 'required|string|max:255',
-          'username' => 'required|string|email|max:255|unique:users',
-          'password' => 'required|string|min:6|confirmed',
-          'user_group_id' => 'required',
+          'user.username' => 'required|string|email|max:255|unique:users,username',
+          'user.password' => 'required|string|min:6|confirmed',
+          'user.user_group_id' => 'required',
           'birth_date' => 'required|date'
+        ], [], [
+          'user.username' => 'email',
+          'user.password' => 'password',
+          'user.user_group_id' => 'user group'
         ]);
 
-        $data = $request->except('username', 'password', 'password_confirmation', 'user_group_id');
+        $data = $request->except('user');
 
         $personnel = Personnel::create($data);
 
         $user = $personnel->user()->create([
-          'username' => $request->username,
-          'user_group_id' => $request->user_group_id,
-          'password' => Hash::make($request->password)
+          'username' => $request->user['username'],
+          'user_group_id' => $request->user['user_group_id'],
+          'password' => Hash::make($request->user['password'])
         ]);
 
         $personnel->load(['user' => function($query) {
@@ -89,25 +93,31 @@ class PersonnelController extends Controller
      */
     public function update(Request $request, Personnel $personnel)
     {
-        $this->validate($request, [
-          'first_name' => 'required|string|max:255',
-          'last_name' => 'required|string|max:255',
-          'username' => 'required|string|email|max:255|unique:users,username,'.$personnel->id.',userable_id',
-          // 'password' => 'string|min:6|confirmed',
-          'user_group_id' => 'required',
-          'birth_date' => 'required|date'
-        ]);
+      $this->validate($request, [
+        'first_name' => 'sometimes|required|string|max:255',
+        'last_name' => 'sometimes|required|string|max:255',
+        'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$personnel->id.',userable_id',
+        'user.password' => 'sometimes|required|string|min:6|confirmed',
+        'user.user_group_id' => 'sometimes|required',
+        'birth_date' => 'sometimes|required|date'
+      ], [], [
+        'user.username' => 'email',
+        'user.password' => 'password',
+        'user.user_group_id' => 'user group'
+      ]);
 
-        $data = $request->except('username', 'password', 'password_confirmation', 'user_group_id');
+        $data = $request->except('user');
 
         $success = $personnel->update($data);
-
-        $user = $personnel->user()->update([
-          'username' => $request->username,
-          'user_group_id' => $request->user_group_id,
-          //'password' => Hash::make($request->password)
-        ]);
-
+        
+        if ($request->has('user')) {
+          $user = $personnel->user()->update([
+            'username' => $request->user['username'],
+            'user_group_id' => $request->user['user_group_id'],
+            'password' => Hash::make($request->user['password'])
+          ]);
+        }
+        
         $personnel->load(['user' => function($query) {
           $query->with('userGroup');
         }]);
