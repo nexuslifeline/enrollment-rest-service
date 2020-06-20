@@ -18,6 +18,18 @@ class CreateStudentPreviousEducationsTable extends Migration
             $table->string('last_school_attended')->default('')->nullable();
             $table->string('last_school_address')->default('')->nullable();
             $table->string('year')->default('')->nullable();
+            $table->string('elementary_course')->default('')->nullable();
+            $table->string('elementary_course_year')->default('')->nullable();
+            $table->string('elementary_course_honors')->default('')->nullable();
+            $table->string('high_school_course')->default('')->nullable();
+            $table->string('high_school_course_year')->default('')->nullable();
+            $table->string('high_school_course_honors')->default('')->nullable();
+            $table->string('senior_school_course')->default('')->nullable();
+            $table->string('senior_school_course_year')->default('')->nullable();
+            $table->string('senior_school_course_honors')->default('')->nullable();
+            $table->string('college_degree')->default('')->nullable();
+            $table->string('college_degree_year')->default('')->nullable();
+            $table->string('college_degree_honors')->default('')->nullable();
             $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
             $table->integer('deleted_by')->nullable();

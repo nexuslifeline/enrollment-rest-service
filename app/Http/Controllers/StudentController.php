@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Student;
+use App\Admission;
+use App\Application;
+use App\Transcript;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
+use App\Http\Requests\StudentUpdateRequest;
 
 class StudentController extends Controller
 {
@@ -15,10 +20,13 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
+        $query = Student::with(['address', 'family', 'education', 'photo']);
+
         $students = !$request->has('paginate') || $request->paginate === 'true'
-            ? Student::paginate($perPage)
-            : Student::all();
+            ? $query->paginate($perPage)
+            : $query->all();
+
         return StudentResource::collection(
             $students
         );
@@ -33,8 +41,17 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->all();
+        $related = ['address', 'family', 'education', 'photo'];
+        $data = $request->except($related);
         $student = Student::create($data);
+
+        foreach($related as $item) {
+            if ($request->has($item)) {
+                $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+            }
+        }
+
+        $student->load($related);
         return (new StudentResource($student))
             ->response()
             ->setStatusCode(201);
@@ -48,6 +65,8 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
+        $student->load(['address', 'family', 'education', 'photo']);
+        $student->append(['active_admission', 'active_application', 'transcript']);
         return new StudentResource($student);
     }
 
@@ -58,16 +77,55 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Student $student)
+    public function update(StudentUpdateRequest $request, Student $student)
     {
-        $data = $request->all();
-        $success = $student->update($data);
-        if ($success) {
-            return new StudentResource(
-                Student::find($studentId)
-            );
+
+        try {
+            $related = ['address', 'family', 'education'];
+            $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects'];
+            $data = $request->except($except);
+            $student->update($data);
+
+            if ($request->has('active_application') && count($request->active_application) > 0) {
+                $application = Application::find($request->active_application['id']);
+                if ($application) {
+                    $application->update($request->active_application);
+                }
+            }
+
+            if ($request->has('active_admission') && count($request->active_admission) > 0) {
+                $admission = Admission::find($request->active_admission['id']);
+                if ($admission) {
+                    $admission->update($request->active_admission);
+                }
+            }
+
+            if ($request->has('transcript')) {
+                $transcript = Transcript::find($request->transcript['id']);
+                if ($transcript) {
+                    $transcript->update($request->transcript);
+                    if ($request->has('subjects') && $request->subjects) {
+                        $subjects = $request->subjects;
+                        $transcript->subjects()->sync($subjects);
+                    }
+                }
+            }
+
+            foreach($related as $item) {
+                if ($request->has($item)) {
+                    $query = $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+                    // $student->active_application->update
+                }
+            }
+
+            $student->load(['address', 'family', 'education','photo'])->fresh();
+            $student->append(['active_admission', 'active_application', 'transcript']);
+
+            return new StudentResource($student);
+        } catch (Throwable $e) {
+            Log::info($e->getMessage());
+            return response()->json([], 400); // Note! add error here
         }
-        return response()->json([], 400); // Note! add error here
     }
 
     /**
@@ -81,5 +139,4 @@ class StudentController extends Controller
         $student->delete();
         return response()->json([], 204);
     }
-
 }

@@ -15,11 +15,22 @@ class CreateStudentAddressesTable extends Migration
     {
         Schema::create('student_addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('address')->default('')->nullable();
-            $table->string('city')->default('')->nullable();
-            $table->string('postal_code')->default('')->nullable();
-            $table->string('province')->default('')->nullable();
-            $table->string('country')->default('')->nullable();
+            $table->string('current_house_no_street')->default('')->nullable();
+            $table->string('current_city_town')->default('')->nullable();
+            $table->string('current_province')->default('')->nullable();
+            $table->string('current_region')->default('')->nullable();
+            $table->string('current_district')->default('')->nullable();
+            $table->string('current_postal_code')->default('')->nullable();
+            $table->string('current_complete_address')->default('')->nullable();
+            $table->string('current_home_landline_mobile_no')->default('')->nullable();
+            $table->string('permanent_house_no_street')->default('')->nullable();
+            $table->string('permanent_city_town')->default('')->nullable();
+            $table->string('permanent_province')->default('')->nullable();
+            $table->string('permanent_region')->default('')->nullable();
+            $table->string('permanent_district')->default('')->nullable();
+            $table->string('permanent_postal_code')->default('')->nullable();
+            $table->string('permanent_complete_address')->default('')->nullable();
+            $table->string('permanent_home_landline_mobile_no')->default('')->nullable();
             $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('student_id')->references('id')->on('students');
             $table->integer('deleted_by')->nullable();

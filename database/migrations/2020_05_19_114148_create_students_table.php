@@ -23,7 +23,7 @@ class CreateStudentsTable extends Migration
             $table->string('email')->default('')->nullable();
             $table->string('mobile_no')->default('')->nullable();
             $table->string('phone_no')->default('')->nullable();
-            $table->string('birth_date')->default('')->nullable();
+            $table->date('birth_date')->nullable();
             $table->integer('deleted_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('created_by')->nullable();
