@@ -15,7 +15,7 @@ class AddDepartmentForeignKeyToSubjectsTable extends Migration
     {
         Schema::table('subjects', function (Blueprint $table) {
             $table->foreign('department_id')->references('id')->on('departments');
-            $table->unsignedBigInteger('department_id')->nullable();
+            $table->unsignedBigInteger('department_id')->after('school_category_id')->nullable();
         });
     }
 
@@ -27,6 +27,7 @@ class AddDepartmentForeignKeyToSubjectsTable extends Migration
     public function down()
     {
         Schema::table('subjects', function (Blueprint $table) {
+            $table->dropForeign(['department_id']);
             $table->dropColumn('department_id');
         });
     }
