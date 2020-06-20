@@ -105,7 +105,7 @@ class PersonnelController extends Controller
         $user = $personnel->user()->update([
           'username' => $request->username,
           'user_group_id' => $request->user_group_id,
-          'password' => Hash::make($request->password)
+          //'password' => Hash::make($request->password)
         ]);
 
         $personnel->load(['user' => function($query) {
