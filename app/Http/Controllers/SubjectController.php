@@ -19,9 +19,18 @@ class SubjectController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
+        $query = Subject::with(['department', 'schoolCategory']);
+
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            return $q->where('school_category_id', $schoolCategoryId);
+        });
+
+
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
-            ? Subject::paginate($perPage)
-            : Subject::all();
+            ? $query->paginate($perPage)
+            : $query->get();        
+
         return SubjectResource::collection(
             $subjects
         );
@@ -38,13 +47,19 @@ class SubjectController extends Controller
         $this->validate($request, [
           'code' => 'required|max:191',
           'name' => 'required|max:191',
-          'description' => 'required|max:191'
+          'description' => 'required|max:191',
+          'school_category_id' => 'required',
+          'department_id' => 'required'
+        ], [], [
+          'school_category_id' => 'school category',
+          'department_id' => 'department'
         ]);
 
         $data = $request->all();
 
         $subject = Subject::create($data);
-
+        
+        $subject->load(['department', 'schoolCategory']);
         return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(201);
@@ -59,6 +74,7 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
+        $subject->load(['department', 'schoolCategory']);
         return new SubjectResource($subject);
     }
 
@@ -74,7 +90,12 @@ class SubjectController extends Controller
         $this->validate($request, [
           'code' => 'required|max:191',
           'name' => 'required|max:191',
-          'description' => 'required|max:191'
+          'description' => 'required|max:191',
+          'school_category_id' => 'required',
+          'department_id' => 'required'
+        ], [], [
+          'school_category_id' => 'school category',
+          'department_id' => 'department'
         ]);
 
         $data = $request->all();
@@ -82,6 +103,7 @@ class SubjectController extends Controller
         $success = $subject->update($data);
 
         if($success){
+            $subject->load(['department', 'schoolCategory']);
             return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(200);

@@ -129,7 +129,7 @@ class PersonnelController extends Controller
     public function destroy(Personnel $personnel)
     {
         $personnel->delete();
-        // $personnel->user()->delete();
+        $personnel->user()->delete();
         return response()->json([], 204);
     }
 }
