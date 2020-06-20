@@ -93,7 +93,7 @@ class PersonnelController extends Controller
           'first_name' => 'required|string|max:255',
           'last_name' => 'required|string|max:255',
           'username' => 'required|string|email|max:255|unique:users,username,'.$personnel->id.',userable_id',
-          'password' => 'required|string|min:6|confirmed',
+          // 'password' => 'string|min:6|confirmed',
           'user_group_id' => 'required',
           'birth_date' => 'required|date'
         ]);
