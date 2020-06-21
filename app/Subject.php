@@ -34,4 +34,14 @@ class Subject extends Model
     {
         return $this->belongsToMany('App\Semester', 'level_subjects', 'subject_id','semester_id');
     }
+
+    public function department()
+    {
+        return $this->belongsTo('App\Department');
+    }
+
+    public function schoolCategory()
+    {
+        return $this->belongsTo('App\SchoolCategory');
+    }
 }
