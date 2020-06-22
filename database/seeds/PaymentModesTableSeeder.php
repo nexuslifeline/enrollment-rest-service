@@ -13,8 +13,8 @@ class PaymentModesTableSeeder extends Seeder
     {
         DB::table('payment_modes')->insert(
             [
-                ['name' => 'Bank Deposit', 'description' => 'Bank Deposit'],
-                ['name' => '7-Eleven', 'description' => '7-Eleven'],
+                ['name' => 'Bank Deposit/Transfer', 'description' => 'Bank Deposit'],
+                ['name' => 'E-Wallet', 'description' => '7-Eleven'],
                 ['name' => 'Others', 'description' => 'Others'],
             ]
         );
