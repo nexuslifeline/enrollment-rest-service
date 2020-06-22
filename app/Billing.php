@@ -43,4 +43,9 @@ class Billing extends Model
         return $this->belongsTo('App\BillingType');
     }
 
+    public function billingItems()
+    {
+        return $this->hasMany('App\BillingItem');
+    }
+
 }
