@@ -13,7 +13,7 @@ class CreateEwalletAccountsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ewallet_accounts', function (Blueprint $table) {
+        Schema::create('e_wallet_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('provider')->default('')->nullable();
             $table->string('account_name')->default('')->nullable();
@@ -33,6 +33,6 @@ class CreateEwalletAccountsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ewallet_accounts');
+        Schema::dropIfExists('e_wallet_accounts');
     }
 }

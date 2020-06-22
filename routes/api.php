@@ -79,6 +79,10 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/departments', 'DepartmentController');
         // billings
         Route::resource('/billings', 'BillingController');
+        // eWallets
+        Route::resource('/e-wallet-accounts', 'EWalletAccountController');
+        // bankAccounts
+        Route::resource('/bank-accounts', 'BankAccountController');
     });
 });
 
