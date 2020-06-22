@@ -31,7 +31,7 @@ class RateSheetController extends Controller
 
         $rates = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
-            : $query->all();
+            : $query->get();
         return RateSheetResource::collection(
             $rates
         );

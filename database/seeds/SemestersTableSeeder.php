@@ -15,7 +15,8 @@ class SemestersTableSeeder extends Seeder
         $data = [
             ['name' => '1st Sem', 'description' => 'First Semester'],
             ['name' => '2nd Sem', 'description' => 'Second Semester'],
-            ['name' => '3rd Sem', 'description' => 'Third Semester']
+            ['name' => '3rd Sem', 'description' => 'Third Semester'],
+            ['name' => 'Summer', 'description' => 'Summer']
         ];
         foreach($data as $item){
             Semester::create($item);
