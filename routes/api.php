@@ -77,6 +77,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/payments', 'PaymentController');
         // departments
         Route::resource('/departments', 'DepartmentController');
+        // billings
+        Route::resource('/billings', 'BillingController');
     });
 });
 
