@@ -75,6 +75,11 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/personnels', 'PersonnelController');
         // payments
         Route::resource('/payments', 'PaymentController');
+        Route::get('/payments/{admissionId}/files', 'PaymentFileController@index');
+        Route::post('/payments/{admissionId}/files', 'PaymentFileController@store');
+        Route::get('/payments/{admissionId}/files/{fileId}', 'PaymentFileController@view');
+        Route::get('/payments/{admissionId}/files/{fileId}/preview', 'PaymentFileController@preview');
+        Route::delete('/payments/{admissionId}/files/{fileId}', 'PaymentFileController@destroy');
         // departments
         Route::resource('/departments', 'DepartmentController');
         // billings

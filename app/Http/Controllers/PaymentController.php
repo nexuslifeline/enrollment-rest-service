@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Payment;
+use App\PaymentFile;
 use Illuminate\Http\Request;
 use App\Http\Resources\PaymentResource;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,38 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $this->validate($request, [
+            'amount' => 'required|numeric',
+            'payment_mode_id' => 'required',
+            'notes' => 'required_if:payment_mode_id,==,3'
+        ], 
+        [
+            'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
+        ], 
+        [
+            'payment_mode_id' => 'payment mode'
+        ]);
+
+        $data = $request->all();
+
+        $payment = Payment::create($data);
+
+        if ($request->hasFile('files')) {
+            $files = $request->file('files');
+            foreach ($files as $file) {
+                $path = $file->store('files');
+                $paymentFile = PaymentFile::create([
+                    'payment_id' => $payment->id,
+                    'path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                    'hash_name' => $file->hashName()
+                ]);
+            }
+        }
+       
+        return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -49,17 +81,6 @@ class PaymentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Payment  $payment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Payment $payment)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -68,7 +89,42 @@ class PaymentController extends Controller
      */
     public function update(Request $request, Payment $payment)
     {
-        //
+        // return $request->notes;
+        $this->validate($request, [
+            'amount' => 'required|numeric|min:0|not_in:0',
+            'reference_no' => 'required|max:191',
+            'date_paid' => 'required',
+            'payment_mode_id' => 'required',
+            'notes' => 'required_if:payment_mode_id,==,3'
+        ], 
+        [
+            'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
+        ], 
+        [
+            'payment_mode_id' => 'payment mode'
+        ]);
+
+        $data = $request->all();
+
+        $success = $payment->update($data);
+
+        // $files = $request->file('files');
+        // foreach ($files as $file) {
+        //     $path = $file->store('files');
+        //     $paymentFile = PaymentFile::create([
+        //         'payment_id' => $payment->id,
+        //         'path' => $path,
+        //         'name' => $file->getClientOriginalName(),
+        //         'hash_name' => $file->hashName()
+        //     ]);
+        // }
+
+        if($success){
+            return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(200);
+        }
+        return response()->json([], 400); // Note! add error here
     }
 
     /**

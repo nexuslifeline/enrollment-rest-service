@@ -17,7 +17,7 @@ class PaymentFile extends Model
         'deleted_by'
     ];
 
-    public function admission()
+    public function payment()
     {
         return $this->belongsTo('App\Payment');
     }

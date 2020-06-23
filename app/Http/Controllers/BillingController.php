@@ -16,7 +16,7 @@ class BillingController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
-        $query = Billing::with(['schoolYear', 'semester', 'billingType', 'studentFee']);
+        $query = Billing::with(['schoolYear', 'semester', 'billingType', 'studentFee', 'payments']);
 
         // filters
 

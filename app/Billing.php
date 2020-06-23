@@ -48,4 +48,9 @@ class Billing extends Model
         return $this->hasMany('App\BillingItem');
     }
 
+    public function payments()
+    {
+        return $this->hasMany('App\Payment');
+    }
+
 }
