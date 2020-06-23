@@ -33,9 +33,29 @@ class PaymentFileController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $paymentId)
     {
-        //
+        try {
+
+            $this->validate($request, [
+                'file' => 'required'
+            ]);
+
+            $path = $request->file('file')->store('files');
+
+            $paymentFile = PaymentFile::create([
+                'payment_id' => $paymentId,
+                'path' => $path,
+                'name' => $request->file('file')->getClientOriginalName(),
+                'hash_name' => $request->file('file')->hashName()
+            ]);
+            return (new PaymentFileResource($paymentFile))
+            ->response()
+            ->setStatusCode(201);
+        } catch (Throwable $e) {
+            Log::error('Message occured => ' . $e->getMessage());
+            return response()->json([], 400);
+        }
     }
 
     /**

@@ -28,6 +28,7 @@ class AddBillingTypesForeignKeyToBillingsTable extends Migration
     {
         Schema::table('billings', function (Blueprint $table) {
             $table->dropForeign(['billing_type_id']);
+            $table->dropColumn(['billing_type_id']);
         });
     }
 }

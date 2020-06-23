@@ -19,7 +19,7 @@ class Payment extends Model
         'deleted_by'
     ];
 
-    public function paymentFiles()
+    public function files()
     {
         return $this->hasMany('App\PaymentFile');
     }
