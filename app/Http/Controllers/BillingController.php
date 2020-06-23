@@ -91,7 +91,8 @@ class BillingController extends Controller
      */
     public function show(Billing $billing)
     {
-        //
+        $billing->load(['billingItems', 'billingType', 'student']);
+        return new BillingResource($billing);
     }
 
     /**

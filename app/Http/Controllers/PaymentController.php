@@ -16,11 +16,13 @@ class PaymentController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_age ?? 20;
-        $query = Payment::with(['paymentFiles']);
+        $perPage = $request->per_page ?? 20;
+
         $payment = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
+            ? Payment::paginate($perPage)
+            : Payment::all();
+
+        $payment->load(['paymentMode']);
         return PaymentResource::collection(
             $payment
         );
