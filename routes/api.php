@@ -75,6 +75,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/personnels', 'PersonnelController');
         // payments
         Route::resource('/payments', 'PaymentController');
+        Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');
+        Route::get('/payments/{paymentId}/files/{fileId}/preview', 'PaymentFileController@preview');
         // departments
         Route::resource('/departments', 'DepartmentController');
         // billings

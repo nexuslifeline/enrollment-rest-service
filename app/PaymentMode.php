@@ -5,9 +5,8 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Payment extends Model
+class PaymentMode extends Model
 {
-    //
     use SoftDeletes;
     protected $guarded = ['id'];
     protected $hidden = [
@@ -18,16 +17,4 @@ class Payment extends Model
         'updated_by',
         'deleted_by'
     ];
-
-    public function paymentFiles()
-    {
-        return $this->hasMany('App\PaymentFile');
-    }
-
-    public function paymentMode()
-    {
-      return $this->belongsTo('App\PaymentMode');
-    }
-
-
 }

@@ -24,6 +24,7 @@ class AdmissionFileController extends Controller
 
     public function store(Request $request, $admissionId)
     {
+      return $request;
         try {
             $this->validate($request, [
                 'file' => 'required'
