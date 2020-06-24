@@ -17,8 +17,8 @@ class PaymentFileController extends Controller
      */
     public function index(Request $request, $paymentId)
     {
-        $perPage = $request->perPage ?? 20;
-        $query = Payment::where('id', $paymentId)->first()->paymentFiles();
+        $perPage = $request->per_age ?? 20;
+        $query = Payment::where('id', $paymentId)->first()->files();
         $files = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
             : $query->get();
@@ -89,9 +89,24 @@ class PaymentFileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $paymentId,  $fileId)
     {
-        //
+        $this->validate($request, [
+            'notes' => 'required|max:191',
+        ]);
+
+        $data = $request->all();
+
+        $paymentFile = PaymentFile::find($fileId);
+        
+        $success = $paymentFile->update($data);
+    
+        if ($success) {
+            return (new PaymentFileResource($paymentFile))
+                ->response()
+                ->setStatusCode(200);
+        }
+        //return response()->json([], 400); // Note! add error here
     }
 
     /**
@@ -100,8 +115,17 @@ class PaymentFileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($paymentId, $fileId)
     {
-        //
+        $file = PaymentFile::find($fileId);
+
+        Payment::find($paymentId)
+            ->files()
+            ->where('id', $fileId)
+            ->first()
+            ->delete();
+            
+        Storage::delete($file->path);
+        return response()->json([], 204);
     }
 }
