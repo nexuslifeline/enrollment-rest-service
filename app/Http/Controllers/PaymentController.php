@@ -19,13 +19,30 @@ class PaymentController extends Controller
     {
         $perPage = $request->per_page ?? 20;
 
-        $payment = !$request->has('paginate') || $request->paginate === 'true'
-            ? Payment::paginate($perPage)
-            : Payment::all();
+        $query = Payment::with(['paymentMode']);
+        
+        //filter
+        //payment status
+        $paymentStatusId = $request->payment_status_id ?? false;
+        $query->when($paymentStatusId, function($q) use ($paymentStatusId) {
+            return $q->where('payment_status_id', $paymentStatusId);
+        });
 
-        $payment->load(['paymentMode']);
+        //criteria
+        $criteria = $request->criteria ?? false;
+        $query->when($criteria, function($q) use ($criteria) {
+            return $q->where('date_paid', 'like', '%'.$criteria.'%')
+                    ->orWhere('amount', 'like', '%'.$criteria.'%')
+                    ->orWhere('reference_no', 'like', '%'.$criteria.'%');
+        });
+
+        $payments = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+
+        
         return PaymentResource::collection(
-            $payment
+            $payments
         );
     }
 
@@ -93,11 +110,11 @@ class PaymentController extends Controller
     {
         // return $request->notes;
         $this->validate($request, [
-            'amount' => 'required|numeric|min:0|not_in:0',
-            'reference_no' => 'required|max:191',
-            'date_paid' => 'required',
-            'payment_mode_id' => 'required',
-            'notes' => 'required_if:payment_mode_id,==,3'
+            'amount' => 'sometimes|required|numeric|min:0|not_in:0',
+            'reference_no' => 'sometimes|required|max:191',
+            'date_paid' => 'sometimes|required',
+            'payment_mode_id' => 'sometimes|required',
+            'notes' => 'sometimes|required_if:payment_mode_id,==,3'
         ], 
         [
             'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
@@ -109,7 +126,7 @@ class PaymentController extends Controller
         $data = $request->all();
 
         $success = $payment->update($data);
-
+        
         // $files = $request->file('files');
         // foreach ($files as $file) {
         //     $path = $file->store('files');

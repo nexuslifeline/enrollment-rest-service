@@ -153,7 +153,7 @@ class TranscriptController extends Controller
       // return $request->student_fee;
         try {
           // return $request;
-          $except = ['application', 'admission', 'student_fee', 'subjects', 'fees'];
+					$except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
           $data = $request->except($except);
           // return $data;
           $transcript->update($data);
@@ -174,7 +174,8 @@ class TranscriptController extends Controller
 
           if ($request->has('student_fee')) {
               $student = $transcript->student()->first();
-              $studentFee = $student->studentFees()->updateOrCreate(['transcript_id' => $transcript->id], $request->student_fee);
+              $studentFee = $student->studentFees()
+                ->updateOrCreate(['transcript_id' => $transcript->id], $request->student_fee);
 
               if ($request->has('fees')) {
                   $fees = $request->fees;
@@ -187,26 +188,19 @@ class TranscriptController extends Controller
                   }
                   $studentFee->studentFeeItems()->sync($items);
               }
+					}
+					
+					if ($request->has('billing')) {
+							$billing = $studentFee->billings()->create($request->billing);
 
-              $billing = $studentFee->billings()->create([
-                  'due_date' => '2020-08-24',
-                  'total_amount' => $request->student_fee['enrollment_fee'],
-                  'student_id' => $student->id,
-                  'billing_type_id' => 1,
-                  'billing_status_id' => 2,
-                  'school_year_id' => $studentFee->school_year_id,
-                  'semester_id' => $studentFee->semester_id
-              ]);
+							if ($request->has('billing_item')) {
+								$billing->billingItems()->create($request->billing_item);
+							}
 
-              $billing->billingItems()->create([
-                  'item' => 'Registration Fee',
-                  'amount' => $request->student_fee['enrollment_fee']
-              ]);
-
-              $billing->update([
-                  'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
-              ]);
-          }
+							$billing->update([
+								'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+							]);
+					}
 
           if ($request->has('subjects')) {
               $transcript->subjects()->sync($request->subjects);
