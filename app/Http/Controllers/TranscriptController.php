@@ -27,7 +27,7 @@ class TranscriptController extends Controller
             'application', 
             'admission',
             'student' => function($query) {
-                $query->with(['address']);
+                $query->with(['address', 'photo']);
             }]);
 
         // filters
@@ -76,12 +76,14 @@ class TranscriptController extends Controller
         // filter by student name
         $criteria = $request->criteria ?? false;
         $query->when($criteria, function($q) use ($criteria) {
-          return $q->whereHas('student', function($query) use ($criteria) {
-            return $query->where('name', 'like', '%'.$criteria.'%')
-                      ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                      ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                      ->orWhere('last_name', 'like', '%'.$criteria.'%');
-          });
+          	return $q->whereHas('student', function($query) use ($criteria) {
+								return $query->where(function($q) use ($criteria) {
+            				return $q->where('name', 'like', '%'.$criteria.'%')
+												->orWhere('first_name', 'like', '%'.$criteria.'%')
+												->orWhere('middle_name', 'like', '%'.$criteria.'%')
+												->orWhere('last_name', 'like', '%'.$criteria.'%');
+								});
+          	});
         });
 
         $transcripts = !$request->has('paginate') || $request->paginate === 'true'

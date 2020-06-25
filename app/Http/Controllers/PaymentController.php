@@ -31,9 +31,11 @@ class PaymentController extends Controller
         //criteria
         $criteria = $request->criteria ?? false;
         $query->when($criteria, function($q) use ($criteria) {
-            return $q->where('date_paid', 'like', '%'.$criteria.'%')
+            return $q->where(function($q) use ($criteria) {
+                return $q->where('date_paid', 'like', '%'.$criteria.'%')
                     ->orWhere('amount', 'like', '%'.$criteria.'%')
                     ->orWhere('reference_no', 'like', '%'.$criteria.'%');
+            });
         });
 
         $payments = !$request->has('paginate') || $request->paginate === 'true'
