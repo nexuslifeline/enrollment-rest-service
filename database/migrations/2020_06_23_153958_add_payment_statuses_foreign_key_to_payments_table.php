@@ -14,7 +14,7 @@ class AddPaymentStatusesForeignKeyToPaymentsTable extends Migration
     public function up()
     {
         Schema::table('payments', function (Blueprint $table) {
-            $table->foreign('payment_status_id')->references('id')->on('payments');
+            $table->foreign('payment_status_id')->references('id')->on('payment_statuses');
             $table->unsignedBigInteger('payment_status_id')->after('notes')->default(1)->nullable();
         });
     }
