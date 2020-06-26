@@ -187,19 +187,19 @@ class TranscriptController extends Controller
                     }
                     $studentFee->studentFeeItems()->sync($items);
                 }
-                        }
+            }
                         
-                        if ($request->has('billing')) {
-                                $billing = $studentFee->billings()->create($request->billing);
+            if ($request->has('billing')) {
+                $billing = $studentFee->billings()->create($request->billing);
 
-                                if ($request->has('billing_item')) {
-                                    $billing->billingItems()->create($request->billing_item);
-                                }
+                if ($request->has('billing_item')) {
+                    $billing->billingItems()->create($request->billing_item);
+                }
 
-                                $billing->update([
-                                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
-                                ]);
-                        }
+                $billing->update([
+                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                ]);
+            }
 
             if ($request->has('subjects')) {
                 $transcript->subjects()->sync($request->subjects);

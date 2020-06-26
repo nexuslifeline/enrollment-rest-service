@@ -19,7 +19,7 @@ class PaymentController extends Controller
     {
         $perPage = $request->per_page ?? 20;
 
-        $query = Payment::with(['paymentMode'])
+        $query = Payment::with(['paymentMode', 'student'])
                     ->where('payment_status_id', '!=', 1);
         //filter
         //payment status
@@ -34,7 +34,15 @@ class PaymentController extends Controller
             return $q->where(function($q) use ($criteria) {
                 return $q->where('date_paid', 'like', '%'.$criteria.'%')
                     ->orWhere('amount', 'like', '%'.$criteria.'%')
-                    ->orWhere('reference_no', 'like', '%'.$criteria.'%');
+                    ->orWhere('reference_no', 'like', '%'.$criteria.'%')
+                    ->orWhereHas('student', function($query) use ($criteria) {
+                        return $query->where(function($q) use ($criteria) {
+                            return $q->where('name', 'like', '%'.$criteria.'%')
+                                ->orWhere('first_name', 'like', '%'.$criteria.'%')
+                                ->orWhere('middle_name', 'like', '%'.$criteria.'%')
+                                ->orWhere('last_name', 'like', '%'.$criteria.'%');
+                        });
+                    });
             });
         });
 
