@@ -29,5 +29,8 @@ class Payment extends Model
       return $this->belongsTo('App\PaymentMode');
     }
 
-
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
 }
