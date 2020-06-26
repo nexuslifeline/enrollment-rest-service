@@ -83,7 +83,7 @@ class AdmissionFileController extends Controller
     }
 
     public function destroy($admissionId, $fileId)
-    {
+    {  
         $file = AdmissionFile::find($fileId);
 
         Admission::find($admissionId)
