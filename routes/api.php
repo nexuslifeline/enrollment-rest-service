@@ -63,7 +63,6 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/admissions/{admissionId}/files', 'AdmissionFileController@index');
         Route::post('/admissions/{admissionId}/files', 'AdmissionFileController@store');
         Route::put('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@update');
-        Route::get('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@view');
         Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
         // transcript
@@ -80,7 +79,6 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/payments/{paymentId}/files/{fileId}/preview', 'PaymentFileController@preview');
         Route::post('/payments/{paymentId}/files', 'PaymentFileController@store');
         Route::put('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@update');
-        Route::get('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@view');
         Route::delete('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@destroy');
         // departments
         Route::resource('/departments', 'DepartmentController');
