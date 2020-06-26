@@ -19,8 +19,8 @@ class PaymentController extends Controller
     {
         $perPage = $request->per_page ?? 20;
 
-        $query = Payment::with(['paymentMode']);
-        
+        $query = Payment::with(['paymentMode'])
+                    ->where('payment_status_id', '!=', 1);
         //filter
         //payment status
         $paymentStatusId = $request->payment_status_id ?? false;
