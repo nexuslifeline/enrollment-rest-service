@@ -88,6 +88,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/e-wallet-accounts', 'EWalletAccountController');
         // bankAccounts
         Route::resource('/bank-accounts', 'BankAccountController');
+        // sections
+        Route::resource('/sections', 'SectionController');
     });
 });
 

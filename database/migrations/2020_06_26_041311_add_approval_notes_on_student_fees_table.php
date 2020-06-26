@@ -15,8 +15,8 @@ class AddApprovalNotesOnStudentFeesTable extends Migration
     {
         Schema::table('student_fees', function (Blueprint $table) {
             $table->string('approval_notes', 1255)->after('student_fee_status_id')->default('')->nullable();
-            $table->integer('approved_by', 1255)->after('approval_notes')->nullable();
-            $table->dateTime('approved_date', 1255)->after('approved_by')->nullable();
+            $table->integer('approved_by')->after('approval_notes')->nullable();
+            $table->dateTime('approved_date')->after('approved_by')->nullable();
         });
     }
 
