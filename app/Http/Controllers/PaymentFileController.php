@@ -17,7 +17,7 @@ class PaymentFileController extends Controller
      */
     public function index(Request $request, $paymentId)
     {
-        $perPage = $request->per_age ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = Payment::where('id', $paymentId)->first()->files();
         $files = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)

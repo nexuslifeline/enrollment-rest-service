@@ -152,77 +152,74 @@ class TranscriptController extends Controller
      */
     public function update(Request $request, Transcript $transcript)
     {
-      // return $request->student_fee;
         try {
-          // return $request;
-					$except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
-          $data = $request->except($except);
-          // return $data;
-          $transcript->update($data);
+            $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
+            $data = $request->except($except);
+            $transcript->update($data);
 
-          if ($request->has('application') && count($request->application) > 0) {
-              $application = $transcript->application();
-              if ($application) {
-                  $application->update($request->application);
-              }
-          }
+            if ($request->has('application') && count($request->application) > 0) {
+                $application = $transcript->application();
+                if ($application) {
+                    $application->update($request->application);
+                }
+            }
 
-          if ($request->has('admission') && count($request->admission) > 0) {
-              $admission = $transcript->admission();
-              if ($admission) {
-                  $admission->update($request->admission);
-              }
-          }
+            if ($request->has('admission') && count($request->admission) > 0) {
+                $admission = $transcript->admission();
+                if ($admission) {
+                    $admission->update($request->admission);
+                }
+            }
 
-          if ($request->has('student_fee')) {
-              $student = $transcript->student()->first();
-              $studentFee = $student->studentFees()
-                ->updateOrCreate(['transcript_id' => $transcript->id], $request->student_fee);
+            if ($request->has('student_fee')) {
+                $student = $transcript->student()->first();
+                $studentFee = $student->studentFees()
+                    ->updateOrCreate(['transcript_id' => $transcript->id], $request->student_fee);
 
-              if ($request->has('fees')) {
-                  $fees = $request->fees;
-                  $items = [];
-                  foreach ($fees as $fee) {
-                      $items[$fee['school_fee_id']] = [
-                          'amount' => $fee['amount'],
-                          'notes' => $fee['notes']
-                      ];
-                  }
-                  $studentFee->studentFeeItems()->sync($items);
-              }
-					}
-					
-					if ($request->has('billing')) {
-							$billing = $studentFee->billings()->create($request->billing);
+                if ($request->has('fees')) {
+                    $fees = $request->fees;
+                    $items = [];
+                    foreach ($fees as $fee) {
+                        $items[$fee['school_fee_id']] = [
+                            'amount' => $fee['amount'],
+                            'notes' => $fee['notes']
+                        ];
+                    }
+                    $studentFee->studentFeeItems()->sync($items);
+                }
+            }
+                        
+            if ($request->has('billing')) {
+                $billing = $studentFee->billings()->create($request->billing);
 
-							if ($request->has('billing_item')) {
-								$billing->billingItems()->create($request->billing_item);
-							}
+                if ($request->has('billing_item')) {
+                    $billing->billingItems()->create($request->billing_item);
+                }
 
-							$billing->update([
-								'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
-							]);
-					}
+                $billing->update([
+                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                ]);
+            }
 
-          if ($request->has('subjects')) {
-              $transcript->subjects()->sync($request->subjects);
-          }
+            if ($request->has('subjects')) {
+                $transcript->subjects()->sync($request->subjects);
+            }
 
-          $transcript->load([
-            'schoolYear', 
-            'level', 
-            'course', 
-            'semester', 
-            'schoolCategory', 
-            'studentCategory',
-            'studentType', 
-            'application', 
-            'admission',
-            'student' => function($query) {
-                $query->with(['address']);
-            }])->fresh();
+            $transcript->load([
+                'schoolYear', 
+                'level', 
+                'course', 
+                'semester', 
+                'schoolCategory', 
+                'studentCategory',
+                'studentType', 
+                'application', 
+                'admission',
+                'student' => function($query) {
+                    $query->with(['address']);
+                }])->fresh();
 
-          return new TranscriptResource($transcript);
+            return new TranscriptResource($transcript);
         } catch (Throwable $e) {
             Log::info($e->getMessage());
             return response()->json([], 400); // Note! add error here
