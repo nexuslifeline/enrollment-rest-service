@@ -17,6 +17,7 @@ class TranscriptController extends Controller
     {
         $perPage = $request->per_page ?? 20;
         $query = Transcript::with([
+            'section',
             'schoolYear', 
             'level', 
             'course', 
