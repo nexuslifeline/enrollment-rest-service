@@ -49,7 +49,7 @@ class SubjectController extends Controller
           'name' => 'required|max:191',
           'description' => 'required|max:191',
           'school_category_id' => 'required',
-          'department_id' => 'required_if:school_category_id,4,5,6'
+          'department_id' => 'required'
         ], ['required_if' => 'The :attribute field is required.'], [
           'school_category_id' => 'school category',
           'department_id' => 'department'
@@ -92,7 +92,7 @@ class SubjectController extends Controller
           'name' => 'required|max:191',
           'description' => 'required|max:191',
           'school_category_id' => 'required',
-          'department_id' => 'required_if:school_category_id,4,5,6'
+          'department_id' => 'required'
         ], ['required_if' => 'The :attribute field is required.'], [
           'school_category_id' => 'school category',
           'department_id' => 'department'

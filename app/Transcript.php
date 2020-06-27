@@ -78,4 +78,8 @@ class Transcript extends Model
         return $this->belongsTo('App\StudentType');
     }
 
+    public function section()
+    {
+        return $this->belongsTo('App\Section');
+    }
 }

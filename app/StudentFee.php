@@ -20,4 +20,9 @@ class StudentFee extends Model
         'school_fee_id'
       )->withPivot(['amount','notes']);
   }
+
+  public function billings()
+  {
+      return $this->hasMany('App\Billing');
+  }
 }

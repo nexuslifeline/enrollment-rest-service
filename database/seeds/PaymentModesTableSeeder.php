@@ -15,7 +15,7 @@ class PaymentModesTableSeeder extends Seeder
             [
                 ['name' => 'Bank Deposit', 'description' => 'Bank Deposit'],
                 ['name' => '7-Eleven', 'description' => '7-Eleven'],
-                ['name' => 'Others', 'description' => 'Others'],
+                ['name' => 'Others', 'description' => 'Others']
             ]
         );
     }

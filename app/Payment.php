@@ -19,10 +19,18 @@ class Payment extends Model
         'deleted_by'
     ];
 
-    public function paymentFiles()
+    public function files()
     {
         return $this->hasMany('App\PaymentFile');
     }
 
+    public function paymentMode()
+    {
+      return $this->belongsTo('App\PaymentMode');
+    }
 
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
 }

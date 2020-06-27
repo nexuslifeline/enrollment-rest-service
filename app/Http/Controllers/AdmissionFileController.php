@@ -12,7 +12,7 @@ class AdmissionFileController extends Controller
 {
     public function index(Request $request, $admissionId)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = Admission::where('id', $admissionId)->first()->files();
         $files = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
@@ -43,6 +43,26 @@ class AdmissionFileController extends Controller
         }
     }
 
+    public function update(Request $request, $admissionId,  $fileId)
+    {
+        $this->validate($request, [
+            'notes' => 'required|max:191',
+        ]);
+
+        $data = $request->all();
+
+        $admissionFile = AdmissionFile::find($fileId);
+        
+        $success = $admissionFile->update($data);
+    
+        if ($success) {
+            return (new AdmissionFileResource($admissionFile))
+                ->response()
+                ->setStatusCode(200);
+        }
+        //return response()->json([], 400); // Note! add error here
+    }
+
     public function show($admissionId, $fileId)
     {
         $admissionFile = AdmissionFile::find($fileId);
@@ -63,7 +83,7 @@ class AdmissionFileController extends Controller
     }
 
     public function destroy($admissionId, $fileId)
-    {
+    {  
         $file = AdmissionFile::find($fileId);
 
         Admission::find($admissionId)
