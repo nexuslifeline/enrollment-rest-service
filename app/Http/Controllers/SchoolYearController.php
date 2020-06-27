@@ -15,7 +15,7 @@ class SchoolYearController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $schoolYears = !$request->has('paginate') || $request->paginate === 'true'
             ? SchoolYear::paginate($perPage)
             : SchoolYear::all();
