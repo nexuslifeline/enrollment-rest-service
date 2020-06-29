@@ -14,7 +14,7 @@ class StudentFee extends Model
   public function studentFeeItems()
   {
       return $this->belongsToMany(
-        'App\StudentFeeItem',
+        'App\SchoolFee',
         'student_fee_items',
         'student_fee_id',
         'school_fee_id'

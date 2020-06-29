@@ -92,7 +92,7 @@ class PaymentFileController extends Controller
     public function update(Request $request, $paymentId,  $fileId)
     {
         $this->validate($request, [
-            'notes' => 'required|max:191',
+            'notes' => 'required',
         ]);
 
         $data = $request->all();
