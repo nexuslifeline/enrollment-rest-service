@@ -73,6 +73,7 @@ class StudentUpdateRequest extends FormRequest
             'family.parent_guardian_contact_no' => 'sometimes|required|string|max:255',
             // transcript
             'transcript.level_id' => 'sometimes|required',
+            'transcript.section_id' => 'sometimes|required',
             'transcript.course_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
             'transcript.semester_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
             'subjects' => 'sometimes|array|min:1'
@@ -104,6 +105,7 @@ class StudentUpdateRequest extends FormRequest
             'family.parent_guardian_name' => 'parent/guardian name',
             'family.parent_guardian_contact_no' => 'parent/guardian contact no.',
             'transcript.level_id' => 'level',
+            'transcript.section_id' => 'section',
             'transcript.course_id' => 'course',
             'transcript.semester_id' => 'semester'
         ];
