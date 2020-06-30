@@ -45,7 +45,7 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-          'code' => 'required|max:191',
+          // 'code' => 'required|max:191',
           'name' => 'required|max:191',
           'description' => 'required|max:191',
           'school_category_id' => 'required',
@@ -88,7 +88,7 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $this->validate($request, [
-          'code' => 'required|max:191',
+          // 'code' => 'required|max:191',
           'name' => 'required|max:191',
           'description' => 'required|max:191',
           'school_category_id' => 'required',
@@ -160,19 +160,30 @@ class SubjectController extends Controller
 
     public function storeSubjectsOfLevel($levelId, Request $request)
     {
+        // return $request;
+        $this->validate($request, [
+          'subjects' => 'array|min:1',
+        ]);
+
         $subjects = $request->subjects;
         $items = [];
+
         foreach ($subjects as $subject) {
             $items[$subject['subject_id']] = [
-                'course_id' => $subject['course_id'],
-                'semester_id' => $subject['semester_id'],
-                'school_category_id' => $subject['school_category_id']
+                'course_id' => $request->course_id,
+                'semester_id' => $request->semester_id,
+                'school_category_id' => $request->school_category_id
             ];
         }
 
-        $data = Level::find($levelId)->subjects()
-                  ->wherePivot('course_id', $subject['course_id'])
-                  ->wherePivot('semester_id', $subject['semester_id']);
+        $data = Level::find($levelId)->subjects();
+        if ($request->course_id) {
+            $data->wherePivot('course_id', $request->course_id);
+        }
+        if ($request->semester_id) {
+            $data->wherePivot('semester_id', $request->semester_id);
+        }  
+                  
         $data->sync($items);
         return SubjectResource::collection($data->get());
     }
