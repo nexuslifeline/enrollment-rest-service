@@ -131,17 +131,13 @@ class SubjectController extends Controller
 
         // filters
         $courseId = $request->course_id ?? false;
-        $query->when($courseId, function($q) use ($courseId, $levelId) {
-            return $q->whereHas('courses', function($query) use ($courseId, $levelId) {
-                return $query->where('course_id', $courseId)->where('level_id', $levelId);
-            });
+        $query->when($courseId, function($q) use ($courseId) {
+            return $q->where('course_id', $courseId);
         });
 
         $semesterId = $request->semester_id ?? false;
-        $query->when($semesterId, function($q) use ($semesterId, $levelId) {
-            return $q->whereHas('semesters', function($query) use ($semesterId, $levelId) {
-                return $query->where('semester_id', $semesterId)->where('level_id', $levelId);
-            });
+        $query->when($semesterId, function($q) use ($semesterId) {
+            return $q->where('semester_id', $semesterId);
         });
 
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
@@ -173,8 +169,10 @@ class SubjectController extends Controller
                 'school_category_id' => $subject['school_category_id']
             ];
         }
-        // return $items;
-        $data = Level::find($levelId)->subjects();
+
+        $data = Level::find($levelId)->subjects()
+                  ->wherePivot('course_id', $subject['course_id'])
+                  ->wherePivot('semester_id', $subject['semester_id']);
         $data->sync($items);
         return SubjectResource::collection($data->get());
     }
