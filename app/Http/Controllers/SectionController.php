@@ -40,7 +40,7 @@ class SectionController extends Controller
 
         $semesterId = $request->semester_id ?? false;        
         $query->when($semesterId, function($q) use ($semesterId) {
-            return $q->where('course_id', $semesterId);
+            return $q->where('semester_id', $semesterId);
         });
 
 

@@ -46,7 +46,7 @@ class AdmissionFileController extends Controller
     public function update(Request $request, $admissionId,  $fileId)
     {
         $this->validate($request, [
-            'notes' => 'required|max:191',
+            'notes' => 'required',
         ]);
 
         $data = $request->all();
