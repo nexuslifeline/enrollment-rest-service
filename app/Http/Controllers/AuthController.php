@@ -86,7 +86,7 @@ class AuthController extends Controller
       $transcriptStatusId = 1;
 
       $this->validate($request, [
-        'student_no' => 'required_if:student_category_id,==,2',
+        'student_no' => 'required_if:student_category_id,==,2|nullable|unique:students',
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'username' => 'required|string|email|max:255|unique:users',
