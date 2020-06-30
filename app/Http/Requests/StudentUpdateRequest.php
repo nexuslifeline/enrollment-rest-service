@@ -56,12 +56,14 @@ class StudentUpdateRequest extends FormRequest
             'address.current_postal_code' => 'sometimes|required|string|max:255',
             'address.current_country_id' => 'sometimes|required',
             'address.current_home_landline_mobile_no' => 'sometimes|required|string|max:255',
+            'address.current_complete_address' => 'max:755',
             'address.permanent_house_no_street' => 'sometimes|required|string|max:255',
             'address.permanent_city_town' => 'sometimes|required|string|max:255',
             'address.permanent_province' => 'sometimes|required|string|max:255',
             'address.permanent_postal_code' => 'sometimes|required|string|max:255',
             'address.permanent_country_id' => 'sometimes|required',
             'address.permanent_home_landline_mobile_no' => 'sometimes|required|string|max:255',
+            'address.permanent_complete_address' => 'max:755',
             // student family
             'family.father_name' => 'sometimes|required|string|max:255',
             'family.mother_name' => 'sometimes|required|string|max:255',
@@ -71,6 +73,9 @@ class StudentUpdateRequest extends FormRequest
             'family.parent_guardian_contact_no' => 'sometimes|required|string|max:255',
             // transcript
             'transcript.level_id' => 'sometimes|required',
+            'transcript.section_id' => 'sometimes|required',
+            'transcript.course_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
+            'transcript.semester_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
             'subjects' => 'sometimes|array|min:1'
         ];
     }
@@ -85,12 +90,14 @@ class StudentUpdateRequest extends FormRequest
             'address.current_postal_code' => 'postal code',
             'address.current_country_id' => 'country',
             'address.current_home_landline_mobile_no' => 'home landline/mobile no',
+            'address.current_complete_address' => 'complete address',
             'address.permanent_house_no_street' => 'house no/street',
             'address.permanent_city_town' => 'city/town',
             'address.permanent_province' => 'province',
             'address.permanent_postal_code' => 'postal code',
             'address.permanent_country_id' => 'country',
             'address.permanent_home_landline_mobile_no' => 'home landline/mobile no',
+            'address.permanent_complete_address' => 'complete address',
             'family.father_name' => 'father name',
             'family.mother_name' => 'mother name',
             'family.father_email' => 'email',
@@ -98,6 +105,16 @@ class StudentUpdateRequest extends FormRequest
             'family.parent_guardian_name' => 'parent/guardian name',
             'family.parent_guardian_contact_no' => 'parent/guardian contact no.',
             'transcript.level_id' => 'level',
+            'transcript.section_id' => 'section',
+            'transcript.course_id' => 'course',
+            'transcript.semester_id' => 'semester'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'required_if' => 'The :attribute field is required.'
         ];
     }
     

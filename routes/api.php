@@ -67,8 +67,6 @@ Route::group(['prefix' => 'v1'], function()
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
         // transcript
         Route::resource('/transcripts', 'TranscriptController');
-        Route::get('/studentinfo', 'StudentController@getStudentInfo');
-        Route::put('/studentinfo/{child}/{student}', 'StudentController@updateStudentInfo');
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
         // user
@@ -90,6 +88,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/bank-accounts', 'BankAccountController');
         // sections
         Route::resource('/sections', 'SectionController');
+        // student fee
+        Route::get('/transcripts/{transcriptId}/student-fees', 'StudentFeeController@getStudentFeeOfTranscript');
     });
 });
 

@@ -40,7 +40,7 @@ class Transcript extends Model
 
     public function studentFee()
     {
-        return $this->belongsTo('App\StudentFee');
+        return $this->hasOne('App\StudentFee');
     }
 
     public function schoolYear()
