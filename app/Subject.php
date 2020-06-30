@@ -22,7 +22,12 @@ class Subject extends Model
 
     public function levels()
     {
-        return $this->belongsToMany('App\Level', 'level_subjects', 'subject_id','level_id');
+        return $this->belongsToMany(
+          'App\Level', 
+          'level_subjects', 
+          'subject_id',
+          'level_id'
+        );
     }
 
     public function courses()
