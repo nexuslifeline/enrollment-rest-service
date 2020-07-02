@@ -169,9 +169,9 @@ class SubjectController extends Controller
     public function storeSubjectsOfLevel($levelId, Request $request)
     {
         // return $request;
-        $this->validate($request, [
-          'subjects' => 'array|min:1',
-        ]);
+        // $this->validate($request, [
+        //   'subjects' => 'array|min:1',
+        // ]);
 
         $subjects = $request->subjects;
         $items = [];
