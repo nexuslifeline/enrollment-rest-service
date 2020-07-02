@@ -49,4 +49,14 @@ class Subject extends Model
     {
         return $this->belongsTo('App\SchoolCategory');
     }
+
+    public function prerequisites()
+    {
+        return $this->belongsToMany(
+            'App\Subject',
+            'subject_prerequisites',
+            'subject_id',
+            'prerequisite_subject_id'
+        );
+    }
 }

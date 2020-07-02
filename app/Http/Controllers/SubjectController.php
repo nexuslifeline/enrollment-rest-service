@@ -19,13 +19,13 @@ class SubjectController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
-        $query = Subject::with(['department', 'schoolCategory']);
+        $query = Subject::with(['department', 'schoolCategory', 'prerequisites']);
 
+        //filter by school category
         $schoolCategoryId = $request->school_category_id ?? false;
         $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
             return $q->where('school_category_id', $schoolCategoryId);
         });
-
 
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
@@ -55,11 +55,15 @@ class SubjectController extends Controller
           'department_id' => 'department'
         ]);
 
-        $data = $request->all();
+        $data = $request->except('prerequisites');
 
         $subject = Subject::create($data);
         
-        $subject->load(['department', 'schoolCategory']);
+        if ($request->has('prerequisites')) {
+            $subject->prerequisites()->sync($request->prerequisites);
+        }
+        
+        $subject->load(['department', 'schoolCategory', 'prerequisites']);
         return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(201);
@@ -98,12 +102,16 @@ class SubjectController extends Controller
           'department_id' => 'department'
         ]);
 
-        $data = $request->all();
+        $data = $request->except('prerequisites');
 
         $success = $subject->update($data);
+        
+        if ($request->has('prerequisites')) {
+            $subject->prerequisites()->sync($request->prerequisites);
+        }
 
         if($success){
-            $subject->load(['department', 'schoolCategory']);
+            $subject->load(['department', 'schoolCategory', 'prerequisites']);
             return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(200);
