@@ -16,7 +16,7 @@ class AdmissionController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = Admission::with(['files']);
         $admission = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Level;
+use App\Course;
 use Illuminate\Http\Request;
 use App\Http\Resources\LevelResource;
 use App\Http\Resources\SchoolCategoryResource;
@@ -17,7 +18,7 @@ class LevelController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $levels = !$request->has('paginate') || $request->paginate === 'true'
             ? Level::paginate($perPage)
             : Level::all();
@@ -107,13 +108,30 @@ class LevelController extends Controller
 
     public function getLevelsOfSchoolCategory($schoolCategoryId, Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $levels = SchoolCategory::find($schoolCategoryId)->levels();
 
         $levels = !$request->has('paginate') || $request->paginate === 'true'
             ? $levels->paginate($perPage)
             : $levels->get();
 
-        return SchoolCategoryResource::collection($levels);
+        return LevelResource::collection($levels);
     }    
+
+    public function getLevelsOfCourses($courseId, Request $request)
+    {
+        $perPage = $request->per_page ?? 20;
+        $query = Course::find($courseId)->levels();
+
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            return $q->where('school_category_id', $schoolCategoryId);
+        });
+
+        $levels = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+
+        return LevelResource::collection($levels);
+    }
 }
