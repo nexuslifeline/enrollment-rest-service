@@ -15,7 +15,17 @@ class CurriculumController extends Controller
      */
     public function index(Request $request)
     {
-        //
+        $perPage = $request->per_page ?? 20;
+
+        $curriculums = !$request->has('paginate') || $request->paginate === 'true'
+            ? Curriculum::paginate($perPage)
+            : Curriculum::all();        
+
+        $curriculums->load(['schoolCategory']);
+          
+        return CurriculumResource::collection(
+            $curriculums
+        );
     }
 
     /**
@@ -28,7 +38,16 @@ class CurriculumController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|string|max:191',
-            'major' => 'required|string|max:191'
+            'school_category_id' => 'required|numeric',
+            'course_id' => 'required_if:school_category_id,4,5,6',
+            'effective_year' => 'required|numeric'
+        ],
+        [
+            'required_if' => 'The :attribute field is required.'
+        ], 
+        [
+            'school_category_id' => 'school category',
+            'course_id' => 'course'
         ]);
 
         $data = $request->except('subjects');
@@ -48,51 +67,87 @@ class CurriculumController extends Controller
             }
             $curriculum->subjects()->sync($items);
         }
+
+        $curriculum->load(['schoolCategory']);
+        return (new CurriculumResource($curriculum))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Curriculum  $curriculum
      * @return \Illuminate\Http\Response
      */
     public function show(Curriculum $curriculum)
     {
-        $curriculum->load(['subjects']);
+        $curriculum->load(['subjects' => function($query) {
+          return $query->with(['prerequisites']);
+        }]);
         return new CurriculumResource($curriculum);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Curriculum  $curriculum
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Curriculum $curriculum)
     {
-        //
+        $this->validate($request, [
+            'name' => 'required|string|max:191',
+            'school_category_id' => 'required|numeric',
+            'course_id' => 'required_if:school_category_id,4,5,6',
+            'effective_year' => 'required|numeric'
+        ],
+        [
+            'required_if' => 'The :attribute field is required.'
+        ], 
+        [
+            'school_category_id' => 'school category',
+            'course_id' => 'course'
+        ]);
+
+        $data = $request->except('subjects');
+
+        $success = $curriculum->update($data);
+
+        if ($request->has('subjects')) {
+            $subjects = $request->subjects;
+            $items = [];
+            foreach ($subjects as $subject) {
+                $items[$subject['subject_id']] = [
+                    'course_id' => $request->course_id,
+                    'school_category_id' => $request->school_category_id,
+                    'level_id' => $subject['level_id'],
+                    'semester_id' => $subject['semester_id']
+                ];
+            }
+            $curriculum->subjects()->sync($items);
+        }
+
+        
+        if($success){
+            $curriculum->load(['schoolCategory']);
+            return (new CurriculumResource($curriculum))
+            ->response()
+            ->setStatusCode(200);
+        }
+      return response()->json([], 400); // Note! add error here
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Curriculum  $curriculum
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Curriculum $curriculum)
     {
-        //
+        $curriculum->delete();
+        return response()->json([], 204);
     }
 }
