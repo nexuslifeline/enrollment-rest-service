@@ -122,8 +122,7 @@ class CourseController extends Controller
 
     public function getCoursesOfLevel($levelId, Request $request)
     {
-
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = Level::find($levelId)->courses();
 
         // filters
@@ -133,6 +132,18 @@ class CourseController extends Controller
                 return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
             });
         });
+
+        $courses = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+
+        return CourseResource::collection($courses);
+    }
+
+    public function getCoursesOfSchoolCategory($schoolCategoryId, Request $request)
+    {
+        $perPage = $request->per_page ?? 20;
+        $query = SchoolCategory::find($schoolCategoryId)->courses()->distinct('course_id');
 
         $courses = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)

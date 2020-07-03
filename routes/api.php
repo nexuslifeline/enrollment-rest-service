@@ -41,8 +41,10 @@ Route::group(['prefix' => 'v1'], function()
         // levels
         Route::resource('/levels', 'LevelController');
         Route::get('/school-categories/{schoolCategoryId}/levels', 'LevelController@getLevelsOfSchoolCategory');
+        Route::get('/school-categories/{schoolCategoryId}/courses', 'CourseController@getCoursesOfSchoolCategory');
         // courses
         Route::resource('/courses', 'CourseController');
+        Route::get('/courses/{courseId}/levels', 'LevelController@getLevelsOfCourses');
         Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
         // school categories
         Route::resource('/school-categories', 'SchoolCategoryController');
@@ -90,6 +92,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/sections', 'SectionController');
         // student fee
         Route::get('/transcripts/{transcriptId}/student-fees', 'StudentFeeController@getStudentFeeOfTranscript');
+        // curriculum
+        Route::resource('curriculums', 'CurriculumController');
     });
 });
 

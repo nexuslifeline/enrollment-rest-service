@@ -15,7 +15,7 @@ class SemesterController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $semesters = !$request->has('paginate') || $request->paginate === 'true'
             ? Semester::paginate($perPage)
             : Semester::all();

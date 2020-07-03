@@ -134,7 +134,7 @@ class SubjectController extends Controller
     public function getSubjectsOfLevel($levelId, Request $request)
     {
 
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = Level::find($levelId)->subjects();
 
         // filters
@@ -157,7 +157,7 @@ class SubjectController extends Controller
     public function getSubjectsOfTranscript($transcriptId, Request $request)
     {
 
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = Transcript::find($transcriptId)->subjects();
 
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
