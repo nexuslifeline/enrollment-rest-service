@@ -21,7 +21,7 @@ class CurriculumController extends Controller
             ? Curriculum::paginate($perPage)
             : Curriculum::all();        
 
-        $curriculums->load(['schoolCategory']);
+        $curriculums->load(['schoolCategory', 'course']);
           
         return CurriculumResource::collection(
             $curriculums
