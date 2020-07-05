@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StudentUpdateRequest;
+use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
 {
@@ -21,7 +22,17 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
-        $query = Student::with(['address', 'family', 'education', 'photo']);
+        $query = Student::with(['address', 'family', 'education', 'photo', 'user']);
+
+        $criteria = $request->criteria ?? false;
+        $query->when($criteria, function($query) use ($criteria) {
+            return $query->where(function($q) use ($criteria) {
+                return $q->where('name', 'like', '%'.$criteria.'%')
+                    ->orWhere('first_name', 'like', '%'.$criteria.'%')
+                    ->orWhere('middle_name', 'like', '%'.$criteria.'%')
+                    ->orWhere('last_name', 'like', '%'.$criteria.'%');
+                });
+        });
 
         $students = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
@@ -39,23 +50,31 @@ class StudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StudentUpdateRequest $request)
     {
-        $related = ['address', 'family', 'education', 'photo'];
-        $data = $request->except($related);
-        $student = Student::create($data);
+        try{
+            
+            $related = ['address', 'family', 'education', 'photo', 'user'];
+            $data = $request->except($related);
+            $student = Student::create($data);
 
-        foreach($related as $item) {
-            if ($request->has($item)) {
-                $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+            foreach($related as $item) {
+                if ($request->has($item)) {
+                    $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
+                }
             }
-        }
 
-        $student->load($related);
-        return (new StudentResource($student))
-            ->response()
-            ->setStatusCode(201);
+            $student->load($related);
+            return (new StudentResource($student))
+                ->response()
+                ->setStatusCode(201);
+
+        } catch (Throwable $e) {
+            Log::info($e->getMessage());
+            return response()->json([], 400); // Note! add error here
+        }
     }
+        
 
     /**
      * Display the specified resource.
@@ -79,10 +98,9 @@ class StudentController extends Controller
      */
     public function update(StudentUpdateRequest $request, Student $student)
     {
-
         try {
             $related = ['address', 'family', 'education'];
-            $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects'];
+            $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects', 'user'];
             $data = $request->except($except);
             $student->update($data);
 
@@ -117,8 +135,20 @@ class StudentController extends Controller
                     // $student->active_application->update
                 }
             }
+            
+            if ($request->has('user')) {
+                $user = $student->user()->updateOrCreate(
+                    [   
+                        'userable_id' => $student->id
+                    ],
+                    [ 
+                        'username' => $request->user['username'],
+                        'password' => Hash::make($request->user['password'])
+                    ]
+                );
+            }
 
-            $student->load(['address', 'family', 'education','photo'])->fresh();
+            $student->load(['address', 'family', 'education','photo', 'user'])->fresh();
             $student->append(['active_admission', 'active_application', 'transcript']);
 
             return new StudentResource($student);
@@ -137,6 +167,7 @@ class StudentController extends Controller
     public function destroy(Student $student)
     {
         $student->delete();
+        $student->user()->delete();
         return response()->json([], 204);
     }
 }
