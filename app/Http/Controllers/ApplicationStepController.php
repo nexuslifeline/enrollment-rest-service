@@ -15,7 +15,7 @@ class ApplicationStepController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $applicationSteps = !$request->has('paginate') || $request->paginate === 'true'
             ? ApplicationStep::paginate($perPage)
             : ApplicationStep::all();

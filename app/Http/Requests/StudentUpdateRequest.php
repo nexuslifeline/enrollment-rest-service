@@ -28,6 +28,7 @@ class StudentUpdateRequest extends FormRequest
     {
         $activeApplication = $this->active_application ?? false;
         $activeAdmission = $this->active_admission ?? false;
+
         return [
             'active_application.*' => [
                 function ($attribute, $value, $fail) use($activeApplication) {
@@ -76,7 +77,10 @@ class StudentUpdateRequest extends FormRequest
             'transcript.section_id' => 'sometimes|required',
             'transcript.course_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
             'transcript.semester_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
-            'subjects' => 'sometimes|array|min:1'
+            'subjects' => 'sometimes|array|min:1',
+            // user account
+            'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$this->id.',userable_id',
+            'user.password' => 'sometimes|required|string|min:6|confirmed|',
         ];
     }
 
@@ -107,7 +111,9 @@ class StudentUpdateRequest extends FormRequest
             'transcript.level_id' => 'level',
             'transcript.section_id' => 'section',
             'transcript.course_id' => 'course',
-            'transcript.semester_id' => 'semester'
+            'transcript.semester_id' => 'semester',
+            'user.username' => 'username',
+            'user.password' => 'password',
         ];
     }
 

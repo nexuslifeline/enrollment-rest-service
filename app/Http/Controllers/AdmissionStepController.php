@@ -15,7 +15,7 @@ class AdmissionStepController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $admissionStep = !$request->has('paginate') || $request->paginate === 'true'
             ? AdmissionStep::paginate($perPage)
             : AdmissionStep::all();

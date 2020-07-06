@@ -10,7 +10,7 @@ class RateSheetController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->perPage ?? 20;
+        $perPage = $request->per_page ?? 20;
         $query = RateSheet::with(['level', 'course', 'semester', 'fees']);
 
         // filters
