@@ -21,7 +21,7 @@ class CurriculumController extends Controller
             ? Curriculum::paginate($perPage)
             : Curriculum::all();        
 
-        $curriculums->load(['schoolCategory', 'course']);
+        $curriculums->load(['schoolCategory', 'course', 'level']);
           
         return CurriculumResource::collection(
             $curriculums
@@ -68,7 +68,7 @@ class CurriculumController extends Controller
             $curriculum->subjects()->sync($items);
         }
 
-        $curriculum->load(['schoolCategory']);
+        $curriculum->load(['schoolCategory', 'course', 'level']);
         return (new CurriculumResource($curriculum))
             ->response()
             ->setStatusCode(201);
@@ -131,7 +131,7 @@ class CurriculumController extends Controller
 
         
         if($success){
-            $curriculum->load(['schoolCategory']);
+            $curriculum->load(['schoolCategory', 'course', 'level']);
             return (new CurriculumResource($curriculum))
             ->response()
             ->setStatusCode(200);

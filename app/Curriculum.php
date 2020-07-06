@@ -29,6 +29,11 @@ class Curriculum extends Model
         return $this->belongsTo('App\Course');
     }
 
+    public function level()
+    {
+        return $this->belongsTo('App\Level');
+    }
+
     public function subjects()
     {
         return $this->belongsToMany(
