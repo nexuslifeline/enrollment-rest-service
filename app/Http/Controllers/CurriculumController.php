@@ -21,7 +21,7 @@ class CurriculumController extends Controller
             ? Curriculum::paginate($perPage)
             : Curriculum::all();        
 
-        $curriculums->load(['schoolCategory', 'course']);
+        $curriculums->load(['schoolCategory', 'course', 'level']);
           
         return CurriculumResource::collection(
             $curriculums
@@ -39,7 +39,8 @@ class CurriculumController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:191',
             'school_category_id' => 'required|numeric',
-            'course_id' => 'required_if:school_category_id,4,5,6',
+            'course_id' => 'required_if:school_category_id,4,5,6,7',
+            'level_id' => 'required_if:school_category_id,1,2,3,6,7',
             'effective_year' => 'required|numeric'
         ],
         [
@@ -68,7 +69,17 @@ class CurriculumController extends Controller
             $curriculum->subjects()->sync($items);
         }
 
-        $curriculum->load(['schoolCategory']);
+        if ($request->active) {
+          $curriculums = Curriculum::where('school_category_id', $request->school_category_id)
+          ->where('course_id', $request->course_id)
+          ->where('level_id', $request->level_id)
+          ->where('id', '!=', $curriculum->id);
+          $curriculums->update([
+            'active' => 0
+          ]);
+        }   
+
+        $curriculum->load(['schoolCategory', 'course', 'level']);
         return (new CurriculumResource($curriculum))
             ->response()
             ->setStatusCode(201);
@@ -82,7 +93,7 @@ class CurriculumController extends Controller
      */
     public function show(Curriculum $curriculum)
     {
-        $curriculum->load(['subjects' => function($query) {
+        $curriculum->load(['schoolCategory', 'course', 'level', 'subjects' => function($query) {
           return $query->with(['prerequisites']);
         }]);
         return new CurriculumResource($curriculum);
@@ -100,7 +111,8 @@ class CurriculumController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:191',
             'school_category_id' => 'required|numeric',
-            'course_id' => 'required_if:school_category_id,4,5,6',
+            'course_id' => 'required_if:school_category_id,4,5,6,7',
+            'level_id' => 'required_if:school_category_id,1,2,3,6,7',
             'effective_year' => 'required|numeric'
         ],
         [
@@ -128,10 +140,19 @@ class CurriculumController extends Controller
             }
             $curriculum->subjects()->sync($items);
         }
-
+        
+        if ($request->active) {
+          $curriculums = Curriculum::where('school_category_id', $request->school_category_id)
+          ->where('course_id', $request->course_id)
+          ->where('level_id', $request->level_id)
+          ->where('id', '!=', $curriculum->id);
+          $curriculums->update([
+            'active' => 0
+          ]);
+        }   
         
         if($success){
-            $curriculum->load(['schoolCategory']);
+            $curriculum->load(['schoolCategory', 'course', 'level']);
             return (new CurriculumResource($curriculum))
             ->response()
             ->setStatusCode(200);
