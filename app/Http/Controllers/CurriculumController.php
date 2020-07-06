@@ -82,7 +82,7 @@ class CurriculumController extends Controller
      */
     public function show(Curriculum $curriculum)
     {
-        $curriculum->load(['subjects' => function($query) {
+        $curriculum->load(['schoolCategory', 'course', 'level', 'subjects' => function($query) {
           return $query->with(['prerequisites']);
         }]);
         return new CurriculumResource($curriculum);
