@@ -36,6 +36,7 @@ class CurriculumController extends Controller
      */
     public function store(Request $request)
     {
+      // return $request->prerequisites;
         $this->validate($request, [
             'name' => 'required|string|max:191',
             'school_category_id' => 'required|numeric',
@@ -51,10 +52,10 @@ class CurriculumController extends Controller
             'course_id' => 'course'
         ]);
 
-        $data = $request->except('subjects');
+        $data = $request->except('subjects', 'prerequisites');
 
         $curriculum = Curriculum::create($data);
-
+        
         if ($request->has('subjects')) {
             $subjects = $request->subjects;
             $items = [];
@@ -65,6 +66,21 @@ class CurriculumController extends Controller
                     'level_id' => $subject['level_id'],
                     'semester_id' => $subject['semester_id']
                 ];
+
+                if ($request->has('prerequisites')) {
+                    $prerequisites = $request->prerequisites;
+                    $prerequisiteItems = [];
+                    foreach ($prerequisites as $prerequisite) {
+                        if ($subject['subject_id'] === $prerequisite['subject_id']) {
+                            $prerequisiteItems[$prerequisite['prerequisite_subject_id']] = [
+                                'subject_id' => $prerequisite['subject_id'],
+                            ];
+                        }
+                    }
+                    $curriculum->prerequisites()
+                    ->wherePivot('subject_id', $subject['subject_id'])
+                    ->sync($prerequisiteItems);
+                }
             }
             $curriculum->subjects()->sync($items);
         }
@@ -93,8 +109,11 @@ class CurriculumController extends Controller
      */
     public function show(Curriculum $curriculum)
     {
-        $curriculum->load(['schoolCategory', 'course', 'level', 'subjects' => function($query) {
-          return $query->with(['prerequisites']);
+        // return $curriculum->id;
+        $curriculum->load(['schoolCategory', 'course', 'level', 'subjects' => function($query) use ($curriculum) {
+            return $query->with(['prerequisites' => function ($query) use ($curriculum) {
+                $query->where('curriculum_id', $curriculum->id);
+            }]);
         }]);
         return new CurriculumResource($curriculum);
     }
@@ -123,7 +142,7 @@ class CurriculumController extends Controller
             'course_id' => 'course'
         ]);
 
-        $data = $request->except('subjects');
+        $data = $request->except('subjects', 'prerequisites');
 
         $success = $curriculum->update($data);
 
@@ -137,6 +156,21 @@ class CurriculumController extends Controller
                     'level_id' => $subject['level_id'],
                     'semester_id' => $subject['semester_id']
                 ];
+
+                if ($request->has('prerequisites')) {
+                    $prerequisites = $request->prerequisites;
+                    $prerequisiteItems = [];
+                    foreach ($prerequisites as $prerequisite) {
+                        if ($subject['subject_id'] === $prerequisite['subject_id']) {
+                            $prerequisiteItems[$prerequisite['prerequisite_subject_id']] = [
+                                'subject_id' => $prerequisite['subject_id'],
+                            ];
+                        }
+                    }
+                    $curriculum->prerequisites()
+                    ->wherePivot('subject_id', $subject['subject_id'])
+                    ->sync($prerequisiteItems);
+                }
             }
             $curriculum->subjects()->sync($items);
         }
