@@ -19,7 +19,7 @@ class SubjectController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
-        $query = Subject::with(['department', 'schoolCategory', 'prerequisites']);
+        $query = Subject::with(['department', 'schoolCategory']);
 
         //filter by school category
         $schoolCategoryId = $request->school_category_id ?? false;
@@ -59,11 +59,11 @@ class SubjectController extends Controller
 
         $subject = Subject::create($data);
         
-        if ($request->has('prerequisites')) {
-            $subject->prerequisites()->sync($request->prerequisites);
-        }
+        // if ($request->has('prerequisites')) {
+        //     $subject->prerequisites()->sync($request->prerequisites);
+        // }
         
-        $subject->load(['department', 'schoolCategory', 'prerequisites']);
+        $subject->load(['department', 'schoolCategory']);
         return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(201);
@@ -106,12 +106,12 @@ class SubjectController extends Controller
 
         $success = $subject->update($data);
         
-        if ($request->has('prerequisites')) {
-            $subject->prerequisites()->sync($request->prerequisites);
-        }
+        // if ($request->has('prerequisites')) {
+        //     $subject->prerequisites()->sync($request->prerequisites);
+        // }
 
         if($success){
-            $subject->load(['department', 'schoolCategory', 'prerequisites']);
+            $subject->load(['department', 'schoolCategory']);
             return (new SubjectResource($subject))
             ->response()
             ->setStatusCode(200);
