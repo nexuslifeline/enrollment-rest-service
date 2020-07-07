@@ -54,9 +54,9 @@ class Subject extends Model
     {
         return $this->belongsToMany(
             'App\Subject',
-            'subject_prerequisites',
+            'curriculum_prerequisites',
             'subject_id',
             'prerequisite_subject_id'
-        );
+        )->withTimestamps();
     }
 }

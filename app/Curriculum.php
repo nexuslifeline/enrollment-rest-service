@@ -43,4 +43,14 @@ class Curriculum extends Model
             'subject_id'
         )->withPivot(['level_id','semester_id'])->withTimestamps();
     }
+
+    public function prerequisites()
+    {
+        return $this->belongsToMany(
+            'App\Subject',
+            'curriculum_prerequisites',
+            'curriculum_id',
+            'prerequisite_subject_id'
+        )->withPivot(['subject_id'])->withTimestamps();
+    }
 }
