@@ -20,7 +20,7 @@ class SchoolFeeController extends Controller
             ? SchoolFee::paginate($perPage)
             : SchoolFee::all();
         return SchoolFeeResource::collection(
-            $schoolFees
+            $schoolFees->load(['schoolFeeCategory'])
         );
     }
 
@@ -34,13 +34,19 @@ class SchoolFeeController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:255',
-            'description' => 'required|max:755'
+            'description' => 'required|max:755',
+            'school_fee_category_id' => 'required'
+        ],[],
+        [
+            'school_fee_category_id' => 'school fee category'
         ]);
 
         $data = $request->all();
 
         $schoolFee = SchoolFee::create($data);
-        return (new SchoolFeeResource($schoolFee))
+        return (new SchoolFeeResource(
+            $schoolFee->load(['schoolFeeCategory'])
+        ))
                 ->response()
                 ->setStatusCode(201);
     }
@@ -53,7 +59,9 @@ class SchoolFeeController extends Controller
      */
     public function show(SchoolFee $schoolFee)
     {
-        return new SchoolFeeResource($schoolFee);
+        return new SchoolFeeResource(
+            $schoolFee->load(['schoolFeeCategory'])
+        );
     }
 
     /**
@@ -67,7 +75,11 @@ class SchoolFeeController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:255',
-            'description' => 'required|max:755'
+            'description' => 'required|max:755',
+            'school_fee_category_id' => 'required'
+        ],[],
+        [
+            'school_fee_category_id' => 'school fee category'
         ]);
 
         $data = $request->all();
@@ -75,7 +87,9 @@ class SchoolFeeController extends Controller
         $success = $schoolFee->update($data);
 
         if($success){
-            return (new SchoolFeeResource($schoolFee))
+            return (new SchoolFeeResource(
+                $schoolFee->load(['schoolFeeCategory'])
+            ))
                 ->response()
                 ->setStatusCode(200);
         }

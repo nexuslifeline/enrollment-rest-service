@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SchoolFee extends Model
+class SchoolFeeCategory extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
@@ -18,8 +18,9 @@ class SchoolFee extends Model
         'deleted_by'
     ];
 
-    public function schoolFeeCategory()
+    public function schooFeeCategory()
     {
         return $this->belongsTo('App\SchoolFeeCategory');
+        //return $this->hasOne('App\SchoolFeeCategory');
     }
 }

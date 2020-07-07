@@ -94,6 +94,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/transcripts/{transcriptId}/student-fees', 'StudentFeeController@getStudentFeeOfTranscript');
         // curriculum
         Route::resource('curriculums', 'CurriculumController');
+        // school fee categories
+        Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
     });
 });
 
