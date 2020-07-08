@@ -35,10 +35,6 @@ class SchoolFeeController extends Controller
         $this->validate($request, [
             'name' => 'required|max:255',
             'description' => 'required|max:755',
-            'school_fee_category_id' => 'required'
-        ],[],
-        [
-            'school_fee_category_id' => 'school fee category'
         ]);
 
         $data = $request->all();
@@ -76,10 +72,6 @@ class SchoolFeeController extends Controller
         $this->validate($request, [
             'name' => 'required|max:255',
             'description' => 'required|max:755',
-            'school_fee_category_id' => 'required'
-        ],[],
-        [
-            'school_fee_category_id' => 'school fee category'
         ]);
 
         $data = $request->all();
