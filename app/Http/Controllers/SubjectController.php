@@ -8,6 +8,7 @@ use App\Transcript;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\SubjectResource;
+use Illuminate\Validation\Rule;
 
 class SubjectController extends Controller
 {
@@ -47,12 +48,17 @@ class SubjectController extends Controller
         $this->validate($request, [
           // 'code' => 'required|max:191',
           'name' => 'required|max:191',
-          'description' => 'required|max:191',
-          'school_category_id' => 'required',
-          'department_id' => 'required'
-        ], ['required_if' => 'The :attribute field is required.'], [
-          'school_category_id' => 'school category',
-          'department_id' => 'department'
+          'description' => 'required|max:191|'.Rule::unique('subjects')->where(function ($query) use ($request) {
+            return $query->where('name', $request->name);
+          }),
+          'school_category_id' => 'required'
+          // 'department_id' => 'required'
+        ], [
+          'required_if' => 'The :attribute field is required.',
+          'description.unique' => 'The code and description are already taken'
+        ], [
+          'school_category_id' => 'school category'
+          // 'department_id' => 'department'
         ]);
 
         $data = $request->except('prerequisites');
@@ -94,12 +100,18 @@ class SubjectController extends Controller
         $this->validate($request, [
           // 'code' => 'required|max:191',
           'name' => 'required|max:191',
-          'description' => 'required|max:191',
-          'school_category_id' => 'required',
-          'department_id' => 'required'
-        ], ['required_if' => 'The :attribute field is required.'], [
-          'school_category_id' => 'school category',
-          'department_id' => 'department'
+          'description' => 'required|max:191|'.Rule::unique('subjects')->ignore($subject->id)
+          ->where(function ($query) use ($request) {
+            return $query->where('name', $request->name);
+          }),
+          'school_category_id' => 'required'
+          // 'department_id' => 'required'
+        ], [
+          'required_if' => 'The :attribute field is required.',
+          'description.unique' => 'The code and description are already taken'
+        ], [
+          'school_category_id' => 'school category'
+          // 'department_id' => 'department'
         ]);
 
         $data = $request->except('prerequisites');
