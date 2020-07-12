@@ -27,10 +27,10 @@ class CreateEvaluatuionsTable extends Migration
             $table->unsignedBigInteger('course_id')->nullable();
             $table->foreign('evaluation_status_id')->references('id')->on('evaluation_statuses');
             $table->unsignedBigInteger('evaluation_status_id')->nullable();
-            $table->unsignedBigInteger('last_year_attended,')->nullable();
-            $table->string('last_school_attended,')->default('')->nullable();
-            $table->unsignedBigInteger('enrolled_year,')->nullable();
-            $table->text('notes,')->nullable();
+            $table->unsignedBigInteger('last_year_attended')->nullable();
+            $table->string('last_school_attended')->default('')->nullable();
+            $table->unsignedBigInteger('enrolled_year')->nullable();
+            $table->text('notes')->nullable();
             $table->text('approval_notes')->nullable();
             $table->text('disapproval_notes')->nullable();
             $table->integer('approved_by')->nullable();
