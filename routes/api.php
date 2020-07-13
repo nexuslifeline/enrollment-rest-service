@@ -96,6 +96,12 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('curriculums', 'CurriculumController');
         // school fee categories
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
+        // evaluation file
+        Route::get('/evaluations/{evaluationId}/files', 'EvaluationFileController@index');
+        Route::post('/evaluations/{evaluationId}/files', 'EvaluationFileController@store');
+        Route::put('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@update');
+        Route::get('/evaluations/{evaluationId}/files/{fileId}/preview', 'EvaluationFileController@preview');
+        Route::delete('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@destroy');
     });
 });
 
