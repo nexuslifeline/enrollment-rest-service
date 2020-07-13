@@ -21,6 +21,7 @@ class EvaluationController extends Controller
             'level', 
             'course', 
             'studentCategory',
+            'curriculum',
             'student' => function($query) {
                 $query->with(['address', 'photo']);
             }])
@@ -33,6 +34,12 @@ class EvaluationController extends Controller
             return $q->whereHas('student', function($query) use ($studentId) {
                 return $query->where('student_id', $studentId);
             });
+        });
+
+        //school category
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            return $q->where('school_category_id', $schoolCategoryId);
         });
 
         // course
@@ -49,6 +56,12 @@ class EvaluationController extends Controller
             return $q->whereHas('level', function($query) use ($levelId) {
                 return $query->where('level_id', $levelId);
             });
+        });
+
+        // evaluation status
+        $evaluationStatusId = $request->evaluation_status_id ?? false;
+        $query->when($evaluationStatusId, function($query) use ($evaluationStatusId) {
+            return $query->where('evaluation_status_id', $evaluationStatusId);
         });
 
         // filter by student name
@@ -79,16 +92,6 @@ class EvaluationController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -111,26 +114,44 @@ class EvaluationController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Evaluation
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Evaluation $evaluation)
     {
-        //
+        try {
+            $except = ['subjects'];
+            $data = $request->except($except);
+            $evaluation->update($data);
+
+            if ($request->has('subjects')) {
+                $subjects = $request->subjects;
+                $items = [];
+                foreach ($subjects as $subject) {
+                    $items[$subject['subject_id']] = [
+                        'level_id' => $subject['level_id'],
+                        'semester_id' => $subject['semester_id']
+                    ];
+                }
+                $evaluation->subjects()->sync($items);
+            }
+
+            $evaluation->load([
+                'level', 
+                'course', 
+                'studentCategory',
+                'student' => function($query) {
+                    $query->with(['address', 'photo']);
+            }])->fresh();
+
+            return new EvaluationResource($evaluation);
+        } catch (Throwable $e) {
+            Log::info($e->getMessage());
+            return response()->json([], 400); // Note! add error here
+        }
     }
 
     /**

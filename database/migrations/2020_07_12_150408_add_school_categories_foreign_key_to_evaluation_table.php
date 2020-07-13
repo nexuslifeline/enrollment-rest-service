@@ -15,7 +15,7 @@ class AddSchoolCategoriesForeignKeyToEvaluationTable extends Migration
     {
         Schema::table('evaluations', function (Blueprint $table) {
             $table->foreign('school_category_id')->references('id')->on('school_categories');
-            $table->unsignedBigInteger('school_category_id')-after('student_category_id')->nullable();
+            $table->unsignedBigInteger('school_category_id')->after('student_category_id')->nullable();
         });
     }
 

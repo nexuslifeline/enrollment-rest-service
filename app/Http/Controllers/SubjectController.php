@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Level;
 use App\Subject;
 use App\Transcript;
+use App\Evaluation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\SubjectResource;
@@ -178,13 +179,26 @@ class SubjectController extends Controller
         return SubjectResource::collection($subjects);
     }
 
+    public function getSubjectsOfEvaluation($evaluationId, Request $request)
+    {
+
+        $perPage = $request->per_page ?? 20;
+        $evaluation = Evaluation::find($evaluationId);
+        $query = $evaluation->subjects()
+        ->with(['prerequisites' => function($query) use ($evaluation) {
+            return $query->with(['prerequisites' => function ($query) use ($evaluation) {
+                $query->where('curriculum_id', $evaluation->curriculum_id);
+            }]);
+        }]);
+
+        $subjects = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+        return SubjectResource::collection($subjects);
+    }
+
     public function storeSubjectsOfLevel($levelId, Request $request)
     {
-        // return $request;
-        // $this->validate($request, [
-        //   'subjects' => 'array|min:1',
-        // ]);
-
         $subjects = $request->subjects;
         $items = [];
 
