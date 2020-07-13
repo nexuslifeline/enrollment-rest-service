@@ -22,4 +22,11 @@ class Evaluation extends Model
     {
         return $this->hasMany('App\EvaluationFile');
     }
+
+    public function subjects()
+    {
+        return $this->belongsToMany('App\Subject', 'evaluation_subjects', 'evaluation_id', 'subject_id')
+                ->withPivot('level_id','semester_id')
+                ->withTimestamps();
+    }
 }
