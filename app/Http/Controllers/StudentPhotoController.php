@@ -18,6 +18,7 @@ class StudentPhotoController extends Controller
             // Note! will add resize here
 
             $path = $request->file('photo')->store('public');
+            
             $studentPhoto = StudentPhoto::updateOrCreate(
             ['student_id' => $studentId],
             [

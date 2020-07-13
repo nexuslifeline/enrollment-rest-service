@@ -85,10 +85,12 @@ class AuthController extends Controller
     public function register(Request $request)
     {
       $transcriptStatusId = 1;
+      $evaluationStatusId = 1;
+      $isEnrolled = $request->is_enrolled;
       $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
       $this->validate($request, [
-        'student_no' => 'required_if:student_category_id,==,2|nullable|unique:students',
+        'student_no' => 'sometimes|nullable|unique:students',
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'username' => 'required|string|email|max:255|unique:users',
@@ -104,22 +106,16 @@ class AuthController extends Controller
         'email' => $request->username
       ]);
 
+      // student category
+      // 1 - new
+      // 2 - old
+      // 3 - transferee
       $studentCategoryId = $request->student_category_id;
 
-      if ($studentCategoryId == 1) {
-        $student->admission()->create([
-          'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-          'admission_step_id' => 1,
-          'application_status_id' => 2
-        ])->transcript()->create([
-          'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-          'student_id' => $student->id,
-          'student_category_id' => $studentCategoryId,
-          'transcript_status_id' => $transcriptStatusId
-        ]);
-      } else {
+
+      if ($isEnrolled) {
         $student->applications()->create([
-          'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+          'school_year_id' =>  1, // active_school_year_id
           'application_step_id' => 1,
           'application_status_id' => 2
         ])->transcript()->create([
@@ -128,7 +124,73 @@ class AuthController extends Controller
           'student_category_id' => $studentCategoryId,
           'transcript_status_id' => $transcriptStatusId
         ]);
+
+        $student->evaluation()->create([
+          'student_id' => $student->id,
+          'student_category_id' => $studentCategoryId,
+          'evaluation_status_id' => $evaluationStatusId
+        ]);
+        
+      } else {
+        if ($studentCategoryId === 2) {
+          $student->applications()->create([
+            'school_year_id' =>  1, // active_school_year_id
+            'application_step_id' => 1,
+            'application_status_id' => 2
+          ])->transcript()->create([
+            'school_year_id' => 1, // active_school_year_id
+            'student_id' => $student->id,
+            'student_category_id' => $studentCategoryId,
+            'transcript_status_id' => $transcriptStatusId
+          ]);
+
+          $student->evaluation()->create([
+            'student_id' => $student->id,
+            'student_category_id' => $studentCategoryId,
+            'evaluation_status_id' => $evaluationStatusId
+          ]);
+        } else {
+          $student->admission()->create([
+            'school_year_id' =>  1, // active_school_year_id
+            'admission_step_id' => 1,
+            'application_status_id' => 2
+          ])->transcript()->create([
+            'school_year_id' => 1, // active_school_year_id
+            'student_id' => $student->id,
+            'student_category_id' => $studentCategoryId,
+            'transcript_status_id' => $transcriptStatusId
+          ]);
+          $student->evaluation()->create([
+            'student_id' => $student->id,
+            'student_category_id' => $studentCategoryId,
+            'evaluation_status_id' => $evaluationStatusId
+          ]);
+        }
       }
+
+      // if ($studentCategoryId == 1) {
+      //   $student->admission()->create([
+      //     'school_year_id' =>  1, // active_school_year_id
+      //     'admission_step_id' => 1,
+      //     'application_status_id' => 2
+      //   ])->transcript()->create([
+      //     'school_year_id' => 1, // active_school_year_id
+      //     'student_id' => $student->id,
+      //     'student_category_id' => $studentCategoryId,
+      //     'transcript_status_id' => $transcriptStatusId
+      //   ]);
+      // } else {
+      //   $student->applications()->create([
+      //     'school_year_id' =>  1, // active_school_year_id
+      //     'application_step_id' => 1,
+      //     'application_status_id' => 2
+      //   ])->transcript()->create([
+      //     'school_year_id' => 1, // active_school_year_id
+      //     'student_id' => $student->id,
+      //     'student_category_id' => $studentCategoryId,
+      //     'transcript_status_id' => $transcriptStatusId
+      //   ]);
+      // }
 
       $user = $student->user()->create([
         'username' => $request->username,

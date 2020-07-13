@@ -17,8 +17,8 @@ class InsertDataOnEvaluationStatusesTable extends Migration
             [
                 ['name' => 'Pending', 'description' => 'Pending'],
                 ['name' => 'Submitted', 'description' => 'Submitted'],
-                ['name' => 'Approve', 'description' => 'Approve'],
-                ['name' => 'Reject', 'description' => 'Reject'],
+                ['name' => 'Approved', 'description' => 'Approved'],
+                ['name' => 'Rejected', 'description' => 'Rejected'],
             ]
         );
     }

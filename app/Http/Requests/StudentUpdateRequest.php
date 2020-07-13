@@ -81,6 +81,12 @@ class StudentUpdateRequest extends FormRequest
             // user account
             'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$this->id.',userable_id',
             'user.password' => 'sometimes|required|string|min:6|confirmed|',
+            //evaluation
+            'evaluation.last_school_attended' => 'sometimes|required',
+            'evaluation.last_year_attended' => 'sometimes|required',
+            'evaluation.enrolled_year' => 'sometimes|required|nullable',
+            'evaluation.level_id' => 'sometimes|required',
+            'evaluation.course_id' => 'sometimes|required_if:evaluation.school_category_id,4,5,6',
         ];
     }
 
@@ -114,6 +120,10 @@ class StudentUpdateRequest extends FormRequest
             'transcript.semester_id' => 'semester',
             'user.username' => 'username',
             'user.password' => 'password',
+            'evaluation.level_id' => 'level',
+            'evaluation.last_school_attended' => 'last school attended',
+            'evaluation.last_year_attended' => 'last school year',
+            'evaluation.enrolled_year' => 'enrolled year',
         ];
     }
 
