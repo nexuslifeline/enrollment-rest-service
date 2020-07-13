@@ -16,12 +16,39 @@ class CurriculumController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
+        $query = Curriculum::with(['schoolCategory', 'course', 'level']);
+
+        // filters
+        $levelId = $request->level_id ?? false;
+        $query->when($levelId, function($q) use ($levelId) {
+            return $q->where('level_id', $levelId);
+        });
+
+        $courseId = $request->course_id ?? false;
+        $query->when($courseId, function($q) use ($courseId) {
+            return $q->where('course_id', $courseId);
+        });
+
+        $active = $request->active ?? false;
+        $query->when($active, function($q) use ($active) {
+            return $q->where('active', $active);
+        });
+
+        $subjects = $request->subjects ?? false;
+        $query->when($active, function($q) use ($active) {
+            return $q->with('subjects');
+        });
+
+        $semesterId = $request->semester_id ?? false;
+        $query->when($semesterId, function($q) use ($semesterId) {
+            return $q->where('semester_id', $semesterId);
+        });
 
         $curriculums = !$request->has('paginate') || $request->paginate === 'true'
-            ? Curriculum::paginate($perPage)
-            : Curriculum::all();        
+            ? $query->paginate($perPage)
+            : $query->get();        
 
-        $curriculums->load(['schoolCategory', 'course', 'level']);
+        // $curriculums->load(['schoolCategory', 'course', 'level']);
           
         return CurriculumResource::collection(
             $curriculums

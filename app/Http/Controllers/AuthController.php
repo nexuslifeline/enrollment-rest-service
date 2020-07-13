@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Student;
+use App\SchoolYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
@@ -84,6 +85,7 @@ class AuthController extends Controller
     public function register(Request $request)
     {
       $transcriptStatusId = 1;
+      $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
 
       $this->validate($request, [
         'student_no' => 'required_if:student_category_id,==,2|nullable|unique:students',
@@ -106,22 +108,22 @@ class AuthController extends Controller
 
       if ($studentCategoryId == 1) {
         $student->admission()->create([
-          'school_year_id' =>  1, // active_school_year_id
+          'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
           'admission_step_id' => 1,
           'application_status_id' => 2
         ])->transcript()->create([
-          'school_year_id' => 1, // active_school_year_id
+          'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
           'student_id' => $student->id,
           'student_category_id' => $studentCategoryId,
           'transcript_status_id' => $transcriptStatusId
         ]);
       } else {
         $student->applications()->create([
-          'school_year_id' =>  1, // active_school_year_id
+          'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
           'application_step_id' => 1,
           'application_status_id' => 2
         ])->transcript()->create([
-          'school_year_id' => 1, // active_school_year_id
+          'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
           'student_id' => $student->id,
           'student_category_id' => $studentCategoryId,
           'transcript_status_id' => $transcriptStatusId
