@@ -69,10 +69,11 @@ class CurriculumController extends Controller
             'school_category_id' => 'required|numeric',
             'course_id' => 'required_if:school_category_id,4,5,6,7',
             'level_id' => 'required_if:school_category_id,1,2,3,6,7',
-            'effective_year' => 'required|numeric'
+            'effective_year' => 'required|digits:4|integer|min:1950|max:2100'
         ],
         [
-            'required_if' => 'The :attribute field is required.'
+            'required_if' => 'The :attribute field is required.',
+            'effective_year.digits' => 'The :attribute field is invalid.'
         ], 
         [
             'school_category_id' => 'school category',
@@ -159,10 +160,11 @@ class CurriculumController extends Controller
             'school_category_id' => 'required|numeric',
             'course_id' => 'required_if:school_category_id,4,5,6,7',
             'level_id' => 'required_if:school_category_id,1,2,3,6,7',
-            'effective_year' => 'required|numeric'
+            'effective_year' => 'required|digits:4|integer|min:1950|max:2100'
         ],
         [
-            'required_if' => 'The :attribute field is required.'
+            'required_if' => 'The :attribute field is required.',
+            'effective_year.digits' => 'The :attribute field is invalid.'
         ], 
         [
             'school_category_id' => 'school category',

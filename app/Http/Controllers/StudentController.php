@@ -6,6 +6,7 @@ use App\Student;
 use App\Admission;
 use App\Application;
 use App\Transcript;
+use App\Evaluation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
@@ -84,8 +85,8 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        $student->load(['address', 'family', 'education', 'photo']);
-        $student->append(['active_admission', 'active_application', 'transcript']);
+        $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
+        $student->append(['active_admission', 'active_application', 'transcript',]);
         return new StudentResource($student);
     }
 
@@ -99,8 +100,8 @@ class StudentController extends Controller
     public function update(StudentUpdateRequest $request, Student $student)
     {
         try {
-            $related = ['address', 'family', 'education'];
-            $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects', 'user'];
+            $related = ['address', 'family', 'education', 'evaluation'];
+            $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects', 'user', 'evaluation'];
             $data = $request->except($except);
             $student->update($data);
 
@@ -148,7 +149,7 @@ class StudentController extends Controller
                 );
             }
 
-            $student->load(['address', 'family', 'education','photo', 'user'])->fresh();
+            $student->load(['address', 'family', 'education','photo', 'user', 'evaluation'])->fresh();
             $student->append(['active_admission', 'active_application', 'transcript']);
 
             return new StudentResource($student);

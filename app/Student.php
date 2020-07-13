@@ -7,6 +7,7 @@ use App\StudentFamily;
 use App\StudentAddress;
 use App\StudentPreviousEducation;
 use App\StudentPhoto;
+use App\Evaluation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -62,6 +63,11 @@ class Student extends Model
     public function transcripts()
     {
         return $this->hasMany('App\Transcript');
+    }
+
+    public function evaluation()
+    {
+        return $this->hasOne('App\Evaluation');
     }
 
     public function studentFees()
