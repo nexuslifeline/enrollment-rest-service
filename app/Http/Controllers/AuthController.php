@@ -115,7 +115,7 @@ class AuthController extends Controller
 
       if ($isEnrolled) {
         $student->applications()->create([
-          'school_year_id' =>  1, // active_school_year_id
+          'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
           'application_step_id' => 1,
           'application_status_id' => 2
         ])->transcript()->create([
@@ -134,11 +134,11 @@ class AuthController extends Controller
       } else {
         if ($studentCategoryId === 2) {
           $student->applications()->create([
-            'school_year_id' =>  1, // active_school_year_id
+            'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
             'application_step_id' => 1,
             'application_status_id' => 2
           ])->transcript()->create([
-            'school_year_id' => 1, // active_school_year_id
+            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
             'student_id' => $student->id,
             'student_category_id' => $studentCategoryId,
             'transcript_status_id' => $transcriptStatusId
@@ -151,11 +151,11 @@ class AuthController extends Controller
           ]);
         } else {
           $student->admission()->create([
-            'school_year_id' =>  1, // active_school_year_id
+            'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
             'admission_step_id' => 1,
             'application_status_id' => 2
           ])->transcript()->create([
-            'school_year_id' => 1, // active_school_year_id
+            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
             'student_id' => $student->id,
             'student_category_id' => $studentCategoryId,
             'transcript_status_id' => $transcriptStatusId
