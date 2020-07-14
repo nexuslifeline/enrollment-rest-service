@@ -108,7 +108,18 @@ class EvaluationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Evaluation $evaluation)
+    {
+        $evaluation->load(['subjects']);
+        return new EvaluationResource($evaluation);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     {
         //
     }

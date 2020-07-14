@@ -105,6 +105,9 @@ Route::group(['prefix' => 'v1'], function()
         Route::put('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@update');
         Route::get('/evaluations/{evaluationId}/files/{fileId}/preview', 'EvaluationFileController@preview');
         Route::delete('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@destroy');
+        // evaluations
+        Route::resource('evaluations', 'EvaluationController');
+
     });
 });
 
