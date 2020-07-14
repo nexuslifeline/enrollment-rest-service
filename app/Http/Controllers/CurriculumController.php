@@ -19,6 +19,11 @@ class CurriculumController extends Controller
         $query = Curriculum::with(['schoolCategory', 'course', 'level']);
 
         // filters
+        $schoolCategoryId = $request->school_category_id ?? false;
+        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            return $q->where('school_category_id', $schoolCategoryId);
+        });
+
         $levelId = $request->level_id ?? false;
         $query->when($levelId, function($q) use ($levelId) {
             return $q->where('level_id', $levelId);

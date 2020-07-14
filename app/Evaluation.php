@@ -22,4 +22,39 @@ class Evaluation extends Model
     {
         return $this->hasMany('App\EvaluationFile');
     }
+    
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
+
+    public function studentCategory()
+    {
+        return $this->belongsTo('App\StudentCategory');
+    }
+
+    public function level()
+    {
+        return $this->belongsTo('App\Level');
+    }
+
+    public function course()
+    {
+        return $this->belongsTo('App\Course');
+    }
+
+    public function curriculum()
+    {
+        return $this->belongsTo('App\Curriculum');
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(
+            'App\Subject', 
+            'evaluation_subjects', 
+            'evaluation_id',
+            'subject_id'
+        )->withPivot(['level_id','semester_id'])->withTimestamps();
+    }
 }

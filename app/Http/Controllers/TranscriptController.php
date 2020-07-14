@@ -89,7 +89,7 @@ class TranscriptController extends Controller
 
         $transcripts = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
-            : $query->all();
+            : $query->get();
 
         // $registrar = $request->registrar ?? false;
         // $students->when($registrar, function($students) {
