@@ -48,6 +48,11 @@ class Evaluation extends Model
         return $this->belongsTo('App\Curriculum');
     }
 
+    public function studentCurriculum()
+    {
+        return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
+    }
+
     public function subjects()
     {
         return $this->belongsToMany(
@@ -55,6 +60,12 @@ class Evaluation extends Model
             'evaluation_subjects', 
             'evaluation_id',
             'subject_id'
-        )->withPivot(['level_id','semester_id'])->withTimestamps();
+        )->withPivot([
+          'level_id',
+          'semester_id',
+          'grade',
+          'notes',
+          'is_taken'
+        ])->withTimestamps();
     }
 }
