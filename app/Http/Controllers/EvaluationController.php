@@ -126,8 +126,8 @@ class EvaluationController extends Controller
     {
         try {
             $this->validate($request, [
-              'curriculum_id' => 'required',
-              'student_curriculum_id' => 'required'
+              'curriculum_id' => 'sometimes|required',
+              'student_curriculum_id' => 'sometimes|required'
             ], [
               'curriculum_id.required' => 'Please select an active curriculum',
               'student_curriculum_id.required' => 'Please specify the curriculum that the student is using.'
