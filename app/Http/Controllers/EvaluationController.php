@@ -22,6 +22,7 @@ class EvaluationController extends Controller
             'course', 
             'studentCategory',
             'curriculum',
+            'studentCurriculum',
             'student' => function($query) {
                 $query->with(['address', 'photo']);
             }])
@@ -115,16 +116,6 @@ class EvaluationController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -134,6 +125,14 @@ class EvaluationController extends Controller
     public function update(Request $request, Evaluation $evaluation)
     {
         try {
+            $this->validate($request, [
+              'curriculum_id' => 'sometimes|required',
+              'student_curriculum_id' => 'sometimes|required'
+            ], [
+              'curriculum_id.required' => 'Please select an active curriculum',
+              'student_curriculum_id.required' => 'Please specify the curriculum that the student is using.'
+            ]);
+            
             $except = ['subjects'];
             $data = $request->except($except);
             $evaluation->update($data);
@@ -144,7 +143,10 @@ class EvaluationController extends Controller
                 foreach ($subjects as $subject) {
                     $items[$subject['subject_id']] = [
                         'level_id' => $subject['level_id'],
-                        'semester_id' => $subject['semester_id']
+                        'semester_id' => $subject['semester_id'],
+                        'is_taken' => $subject['is_taken'],
+                        'grade' => $subject['grade'],
+                        'notes' => $subject['notes']
                     ];
                 }
                 $evaluation->subjects()->sync($items);
