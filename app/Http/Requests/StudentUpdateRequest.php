@@ -87,7 +87,7 @@ class StudentUpdateRequest extends FormRequest
             'evaluation.enrolled_year' => 'sometimes|required_if:evaluation.student_category_id,2',
             'evaluation.level_id' => 'sometimes|required',
             'evaluation.course_id' => 'sometimes|required_if:evaluation.school_category_id,4,5,6',
-            'evaluation.semester_id' => 'sometimes|required_if:evaluation.school_category_id,4,5,6',
+            'evaluation.semester_id' => 'sometimes|required_if:evaluation.school_category_id,4,5',
         ];
     }
 

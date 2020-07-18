@@ -22,8 +22,8 @@ class UpdateDataOfAdmissionSteps extends Migration
 
         DB::table('admission_steps')->where(['id' => 5])->update(['name' => 'Request Evaluation']);
         DB::table('admission_steps')->where(['id' => 6])->update(['name' => 'Waiting Evaluation']); 
-        DB::table('admission_steps')->where(['id' => 7])->update(['name' => 'Academic Year - Application']);
-        DB::table('admission_steps')->where(['id' => 8])->update(['name' => 'Requirements']);
-        DB::table('admission_steps')->where(['id' => 9])->update(['name' => 'Status']);
+        DB::table('admission_steps')->where(['id' => 7])->update(['name' => 'Academic Year - Admission']);
+        // DB::table('admission_steps')->where(['id' => 8])->update(['name' => 'Requirements']);
+        DB::table('admission_steps')->where(['id' => 8])->update(['name' => 'Status']);
     }
 }
