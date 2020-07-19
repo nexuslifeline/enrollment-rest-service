@@ -80,6 +80,12 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/payments/{paymentId}/files', 'PaymentFileController@store');
         Route::put('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@update');
         Route::delete('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@destroy');
+        // payment receipt files
+        Route::get('/payments/{paymentId}/payment-receipt-files', 'PaymentReceiptFileController@index');
+        Route::post('/payments/{paymentId}/payment-receipt-files', 'PaymentReceiptFileController@store');
+        Route::put('/payments/{paymentId}/payment-receipt-files/{fileId}', 'PaymentReceiptFileController@update');
+        Route::get('/payments/{paymentId}/payment-receipt-files/{fileId}/preview', 'PaymentReceiptFileController@preview');
+        Route::delete('/payments/{paymentId}/payment-receipt-files/{fileId}', 'PaymentReceiptFileController@destroy');
         // departments
         Route::resource('/departments', 'DepartmentController');
         // billings

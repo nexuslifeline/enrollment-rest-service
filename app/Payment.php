@@ -24,6 +24,11 @@ class Payment extends Model
         return $this->hasMany('App\PaymentFile');
     }
 
+    public function paymentReceiptFiles()
+    {
+        return $this->hasMany('App\PaymentReceiptFile');
+    }
+
     public function paymentMode()
     {
       return $this->belongsTo('App\PaymentMode');
