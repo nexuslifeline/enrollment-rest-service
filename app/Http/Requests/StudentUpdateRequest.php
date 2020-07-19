@@ -52,6 +52,7 @@ class StudentUpdateRequest extends FormRequest
             'civil_status_id' => 'sometimes|required',
             // student address
             'address.current_house_no_street' => 'sometimes|required|string|max:255',
+            'address.current_barangay' => 'sometimes|required|string|max:255',
             'address.current_city_town' => 'sometimes|required|string|max:255',
             'address.current_province' => 'sometimes|required|string|max:255',
             'address.current_postal_code' => 'sometimes|required|string|max:255',
@@ -59,6 +60,7 @@ class StudentUpdateRequest extends FormRequest
             'address.current_home_landline_mobile_no' => 'sometimes|required|string|max:255',
             'address.current_complete_address' => 'max:755',
             'address.permanent_house_no_street' => 'sometimes|required|string|max:255',
+            'address.permanent_barangay' => 'sometimes|required|string|max:255',
             'address.permanent_city_town' => 'sometimes|required|string|max:255',
             'address.permanent_province' => 'sometimes|required|string|max:255',
             'address.permanent_postal_code' => 'sometimes|required|string|max:255',
@@ -96,6 +98,7 @@ class StudentUpdateRequest extends FormRequest
         return [
             'civil_status_id' => 'civil status',
             'address.current_house_no_street' => 'house no/street',
+            'address.current_barangay' => 'barangay',
             'address.current_city_town' => 'city/town',
             'address.current_province' => 'province',
             'address.current_postal_code' => 'postal code',
@@ -103,6 +106,7 @@ class StudentUpdateRequest extends FormRequest
             'address.current_home_landline_mobile_no' => 'home landline/mobile no',
             'address.current_complete_address' => 'complete address',
             'address.permanent_house_no_street' => 'house no/street',
+            'address.permanent_barangay' => 'barangay',
             'address.permanent_city_town' => 'city/town',
             'address.permanent_province' => 'province',
             'address.permanent_postal_code' => 'postal code',
