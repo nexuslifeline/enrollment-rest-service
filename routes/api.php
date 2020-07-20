@@ -113,6 +113,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::delete('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@destroy');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
+        // pera padala accounts
+        Route::resource('pera-padala-accounts', 'PeraPadalaAccountController');
 
     });
 });
