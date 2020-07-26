@@ -73,10 +73,14 @@ class AuthController extends Controller
     public function getAuthUser()
     {
       $user = Auth::user();
-      $user->load(['userable']);
+      $user->load(['userable', 'userable.photo']);
 
       if ($user->userable_type === 'App\\Student') {
-        $user->userable->append(['active_admission', 'active_application', 'transcript']);
+        $user->userable->append([
+          'active_admission',
+          'active_application',
+          'transcript'
+        ]);
       }
 
       return new UserResource($user);

@@ -2,33 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use Image;
 use App\StudentPhoto;
 use Illuminate\Http\Request;
+use App\Services\StudentPhotoService;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\StudentPhotoResource;
+use App\Http\Requests\StudentPhotoStoreRequest;
 
 class StudentPhotoController extends Controller
 {
-    public function store(Request $request, $studentId)
+    public function store(StudentPhotoStoreRequest $request, $studentId)
     {
         try {
-            $this->validate($request, [
-                'photo' => 'required'
-            ]);
-            // Note! will add resize here
-
-            $path = $request->file('photo')->store('public');
-            
-            $studentPhoto = StudentPhoto::updateOrCreate(
-            ['student_id' => $studentId],
-            [
-                'path' => $path,
-                'name' => $request->file('photo')->getClientOriginalName(),
-                'hash_name' => $request->file('photo')->hashName()
-            ]);
+            $file = $request->file('photo');
+            $photoService = new StudentPhotoService();
+            $studentPhoto = $photoService->store($studentId, $file);
             return (new StudentPhotoResource($studentPhoto))
-            ->response()
-            ->setStatusCode(201);
+                ->response()
+                ->setStatusCode(201);
         } catch (Throwable $e) {
             Log::error('Message occured => ' . $e->getMessage());
             return response()->json([], 400);
@@ -38,11 +30,8 @@ class StudentPhotoController extends Controller
     public function destroy($studentId)
     {
         try {
-            $query = StudentPhoto::where('student_id', $studentId);
-            $photo = $query->first();
-            if ($photo) {
-                Storage::delete($photo->path);
-                $query->delete();
+            $photoService = new StudentPhotoService();
+            if ($photoService->delete($studentId)) {
                 return response()->json([], 204);
             }
         } catch (Throwable $e) {
