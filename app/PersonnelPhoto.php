@@ -2,11 +2,10 @@
 
 namespace App;
 
-use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Personnel extends Model
+class PersonnelPhoto extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
@@ -18,14 +17,4 @@ class Personnel extends Model
         'updated_by',
         'deleted_by'
     ];
-
-    public function user()
-    {
-        return $this->morphOne('App\User', 'userable');
-    }
-
-    public function photo()
-    {
-        return $this->hasOne('App\PersonnelPhoto');
-    }
 }
