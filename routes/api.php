@@ -115,11 +115,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('evaluations', 'EvaluationController');
         // pera padala accounts
         Route::resource('pera-padala-accounts', 'PeraPadalaAccountController');
-        // reports
-        
 
     });
-    Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
