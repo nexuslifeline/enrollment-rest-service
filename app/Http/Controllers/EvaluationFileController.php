@@ -28,7 +28,7 @@ class EvaluationFileController extends Controller
             $this->validate($request, [
                 'file' => 'required'
             ]);
-            $path = $request->file('file')->store('files');
+            $path = $request->file('file')->store('files/evaluation');
             $evaluationFile = EvaluationFile::create([
                 'evaluation_id' => $evaluationId,
                 'path' => $path,
