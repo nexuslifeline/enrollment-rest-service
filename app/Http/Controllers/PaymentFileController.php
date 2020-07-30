@@ -41,7 +41,7 @@ class PaymentFileController extends Controller
                 'file' => 'required'
             ]);
 
-            $path = $request->file('file')->store('files');
+            $path = $request->file('file')->store('files/payment');
 
             $paymentFile = PaymentFile::create([
                 'payment_id' => $paymentId,
