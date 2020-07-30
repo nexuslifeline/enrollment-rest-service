@@ -100,7 +100,7 @@
         <table width="100%">
             <tr>
                 <td width="12%">Student No. : </td>
-                <td width="28%">{{ $transcript->student->student_no }}</td>
+                <td width="28%">{{ $transcript->student->student_no ? $transcript->student->student_no : 'Awaiting Confirmation' }}</td>
                 <td width="15%">Level : </td>
                 <td width="45%">{{ $transcript->level->name }}</td>
             </tr>
@@ -145,7 +145,18 @@
             </tr>
             @endforeach
         </table>
-        <div class="table__name">Fees</div>
+        <table width="100%">
+            <tr>
+                <td width="500px" class="float-right total" >TOTAL</td>
+                <td width="100px" class="float-right total">{{ number_format(array_sum(array_column(iterator_to_array($subjects), 'total_amount')), 2) }}</td>
+            </tr>
+        </table>
+        @php
+        $array = []
+        @endphp
+        @foreach($fees as $category)
+        @if(!(in_array($category->school_fee_category_id, $array)))
+        <div class="table__name">{{$category->schoolFeeCategory->name}}</div>
         <table class="table__fees">
             <thead>
                 <tr>
@@ -155,11 +166,13 @@
                 </tr>
             </thead>
             @foreach ($fees as $fee)
+            @if($fee->school_fee_category_id === $category->school_fee_category_id)
             <tr>
                 <td>{{ $fee->name }}</td>
                 <td>{{ $fee->pivot->notes }}</td>
                 <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
             </tr>
+            @endif
             @endforeach
         </table>
         <table width="100%">
@@ -168,7 +181,11 @@
                 <td width="100px" class="float-right total">{{ number_format($student_fee->total_amount, 2) }}</td>
             </tr>
         </table>
-        
+        @php
+        array_push($array, $category->school_fee_category_id)
+        @endphp
+        @endif
+        @endforeach
         <br>
     </body>
 </html>
