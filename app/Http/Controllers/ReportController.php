@@ -34,11 +34,14 @@ class ReportController extends Controller
         $mpdf = new Mpdf();
         $content = view('reports.assessmentform')->with($data);
         $mpdf->WriteHTML($content);
-        // // return 'asdf';
-        // $mpdf->Output('assessmentform.pdf');
-        // $mpdf->WriteHTML('Hello World');
+        return $mpdf->Output('', 'S');
+    }
 
-        // return $mpdf->Output('', 'S');
-        $mpdf->Output();
+    public function requirementList()
+    {
+        $mpdf = new Mpdf();
+        $content = view('reports.requirementlist');
+        $mpdf->WriteHTML($content);
+        return $mpdf->Output('', 'S');
     }
 }
