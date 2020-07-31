@@ -26,16 +26,16 @@
             }
             .header__name {
                 font-size: 13pt;
-                font-weight: 900;
+                font-weight: bold;
             }
             .header__details {
                 font-size: 11pt;
-                font-weight: 900;
+                font-weight: bold;
             }
             .table__subjects {
                 width: 100%;
                 font-size: 9pt;
-                margin-bottom: 10px;
+                margin: 10px 0;
                 border: 0.5px solid gray;
                 border-collapse: collapse;
             }
@@ -48,12 +48,12 @@
             .table__fees {
                 width: 100%;
                 font-size: 9pt;
-                margin-bottom: 10px;
-                border: 0.5px solid gray;
+                /* margin-bottom: 10px; */
+                /* border: 0.5px solid gray; */
                 border-collapse: collapse;
             }
             .table__fees tr td {
-                border: 0.5px solid gray;
+                /* border: 0.5px solid gray; */
             }
             .table__fees td {
                 padding: 3px;
@@ -66,18 +66,25 @@
             }
             .total {
                 font-size: 10pt;
-                font-weight: 900;
+                font-weight: bold;
             }
-            .table__name {
-                margin-bottom: 5px;
+            .table__name-subjects {
                 font-size: 10pt;
-                font-weight: 900;
+                font-weight: bold;
+                margin: 10px 0;
+            }
+            .table__name-fees {
+                font-size: 10pt;
+                font-weight: bold;
             }
             .title {
                 font-size: 12pt;
-                font-weight: 900;
+                font-weight: bold;
                 text-align: center;
                 margin-bottom: 15px;
+            }
+            hr {
+                margin: 2px 0;
             }
         </style>
     </head>
@@ -100,7 +107,7 @@
         <table width="100%">
             <tr>
                 <td width="12%">Student No. : </td>
-                <td width="28%">{{ $transcript->student->student_no }}</td>
+                <td width="28%">{{ $transcript->student->student_no ? $transcript->student->student_no : 'Awaiting Confirmation' }}</td>
                 <td width="15%">Level : </td>
                 <td width="45%">{{ $transcript->level->name }}</td>
             </tr>
@@ -120,7 +127,8 @@
             </tr>
         </table>
         <hr>
-        <div class="table__name">Subjects</div>
+        <br>
+        <div class="table__name-subjects">Subjects</div>
         <table class="table__subjects">
             <thead>
                 <tr>
@@ -145,30 +153,53 @@
             </tr>
             @endforeach
         </table>
-        <div class="table__name">Fees</div>
+        <table width="100%">
+            <tr>
+                <td width="500px" class="float-right total" >TOTAL TUITION FEE</td>
+                <td width="100px" class="float-right total">{{ number_format(array_sum(array_column(iterator_to_array($subjects), 'total_amount')), 2) }}</td>
+            </tr>
+        </table>
+        @php
+        $array = []
+        @endphp
+        <div class="table__name-fees">Fees</div>
+        <hr>
+        
+        @foreach($fees as $category)
+        @if(!(in_array($category->school_fee_category_id, $array)))
+        @if($category->school_fee_category_id)
+        <div class="table__name-fees">{{$category->schoolFeeCategory->name}}</div>
+        @endif
         <table class="table__fees">
-            <thead>
+            {{-- <thead>
                 <tr>
                     <td width="200px">Fee</td>
                     <td width="300px">Notes</td>
                     <td width="100px" class="float-right">Amount</td>
                 </tr>
-            </thead>
+            </thead> --}}
             @foreach ($fees as $fee)
+            @if($fee->school_fee_category_id === $category->school_fee_category_id)
             <tr>
-                <td>{{ $fee->name }}</td>
-                <td>{{ $fee->pivot->notes }}</td>
+                <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
+                {{-- <td>{{ $fee->pivot->notes }}</td> --}}
                 <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
             </tr>
+            @endif
             @endforeach
         </table>
+        @php
+        array_push($array, $category->school_fee_category_id)
+        @endphp
+        @endif
+        @endforeach
+        <hr>
         <table width="100%">
             <tr>
-                <td width="500px" class="float-right total" >TOTAL</td>
+                <td width="500px" class="float-right total">TOTAL</td>
                 <td width="100px" class="float-right total">{{ number_format($student_fee->total_amount, 2) }}</td>
             </tr>
         </table>
-        
         <br>
     </body>
 </html>

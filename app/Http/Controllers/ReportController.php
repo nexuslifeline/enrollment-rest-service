@@ -12,7 +12,9 @@ class ReportController extends Controller
         $transcript = Transcript::find($transcriptId);
         $data['subjects'] = $transcript->subjects()->get();
         $data['student_fee'] = $transcript->studentFee()->first();
-        $data['fees'] = $data['student_fee']->studentFeeItems()->get();
+        $data['fees'] = $data['student_fee']->studentFeeItems()->with('schoolFeeCategory')->get();
+        // $data['categories'] = $data['student_fee']->studentFeeItems()->with('schoolFeeCategory')->get();
+        // return $data['categories'];
         $data['transcript'] = $transcript->load([
             'section',
             'schoolYear', 
@@ -32,6 +34,14 @@ class ReportController extends Controller
         $mpdf = new Mpdf();
         $content = view('reports.assessmentform')->with($data);
         $mpdf->WriteHTML($content);
-        $mpdf->Output();
+        return $mpdf->Output('', 'S');
+    }
+
+    public function requirementList()
+    {
+        $mpdf = new Mpdf();
+        $content = view('reports.requirementlist');
+        $mpdf->WriteHTML($content);
+        return $mpdf->Output('', 'S');
     }
 }
