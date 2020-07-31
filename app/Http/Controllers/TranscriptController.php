@@ -153,7 +153,11 @@ class TranscriptController extends Controller
      */
     public function update(Request $request, Transcript $transcript)
     {
+        // return $request;
         try {
+            $this->validate($request, [
+                'section_id' => 'sometimes|required'
+            ]);
             $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
             $data = $request->except($except);
             $transcript->update($data);

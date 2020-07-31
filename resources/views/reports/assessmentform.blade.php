@@ -128,6 +128,7 @@
         </table>
         <hr>
         <br>
+        @if($student_fee->is_computed_by_units)
         <div class="table__name-subjects">Subjects</div>
         <table class="table__subjects">
             <thead>
@@ -159,12 +160,19 @@
                 <td width="100px" class="float-right total">{{ number_format(array_sum(array_column(iterator_to_array($subjects), 'total_amount')), 2) }}</td>
             </tr>
         </table>
+        @endif
         @php
         $array = []
         @endphp
-        <div class="table__name-fees">Fees</div>
-        <hr>
-        
+        {{-- <div class="table__name-fees">Fees</div>
+        <hr> --}}
+        @if($student_fee->is_computed_by_units)
+        @php
+        $fees = array_filter(iterator_to_array($fees), function($a) {
+            return $a->id !== 2;
+        });
+        @endphp
+        @endif
         @foreach($fees as $category)
         @if(!(in_array($category->school_fee_category_id, $array)))
         @if($category->school_fee_category_id)

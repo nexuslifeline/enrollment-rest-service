@@ -119,6 +119,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
         Route::get('requirement-list', 'ReportController@requirementList');
     });
+    Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
