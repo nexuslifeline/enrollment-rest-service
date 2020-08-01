@@ -42,6 +42,14 @@ class SchoolYearController extends Controller
 
         $schoolYear = SchoolYear::create($data);
 
+        if ($request->is_active) {
+            $schoolYears = SchoolYear::where('id', '!=', $schoolYear->id)
+            ->where('is_active', 1);
+            $schoolYears->update([
+                'is_active' => 0
+            ]);
+        }   
+
         return (new SchoolYearResource($schoolYear))
                 ->response()
                 ->setStatusCode(201);
@@ -76,6 +84,14 @@ class SchoolYearController extends Controller
         $data = $request->all();
 
         $success = $schoolYear->update($data);
+
+        if ($request->is_active) {
+            $schoolYears = SchoolYear::where('id', '!=', $schoolYear->id)
+            ->where('is_active', 1);
+            $schoolYears->update([
+                'is_active' => 0
+            ]);
+        }
 
         if($success){
             return (new SchoolYearResource($schoolYear))
