@@ -53,7 +53,7 @@ class PaymentController extends Controller
             ? $query->paginate($perPage)
             : $query->get();
 
-        
+
         return PaymentResource::collection(
             $payments
         );
@@ -70,11 +70,11 @@ class PaymentController extends Controller
         $this->validate($request, [
             'amount' => 'required|numeric',
             'payment_mode_id' => 'required',
-            'notes' => 'required_if:payment_mode_id,==,3'
-        ], 
+            //'notes' => 'required_if:payment_mode_id,==,3'
+        ],
         [
-            'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
-        ], 
+            //'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
+        ],
         [
             'payment_mode_id' => 'payment mode'
         ]);
@@ -95,7 +95,7 @@ class PaymentController extends Controller
                 ]);
             }
         }
-       
+
         return (new PaymentResource($payment))
             ->response()
             ->setStatusCode(201);
@@ -128,10 +128,10 @@ class PaymentController extends Controller
             'date_paid' => 'sometimes|required',
             'payment_mode_id' => 'sometimes|required',
             'notes' => 'sometimes|required_if:payment_mode_id,==,3'
-        ], 
+        ],
         [
             'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
-        ], 
+        ],
         [
             'payment_mode_id' => 'payment mode'
         ]);
