@@ -18,6 +18,7 @@ class EvaluationController extends Controller
     {
         $perPage = $request->per_page ?? 20;
         $query = Evaluation::with([
+            'lastSchoolLevel',
             'level', 
             'course', 
             'studentCategory',
@@ -153,6 +154,7 @@ class EvaluationController extends Controller
             }
 
             $evaluation->load([
+                'lastSchoolLevel',
                 'level', 
                 'course', 
                 'studentCategory',
