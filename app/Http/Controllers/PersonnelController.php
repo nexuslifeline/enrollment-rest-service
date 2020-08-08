@@ -18,13 +18,25 @@ class PersonnelController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->per_page ?? 20;
-        $personnels = !$request->has('paginate') || $request->paginate === 'true'
-            ? Personnel::paginate($perPage)
-            : Personnel::all();
 
-        $personnels->load(['user' => function($query) {
+        $query = Personnel::with(['user' => function ($query) {
           $query->with('userGroup');
         }]);
+
+        $userGroupId = $request->user_group_id ?? false;
+
+        $query->when($userGroupId, function($q) use ($userGroupId) {
+          return $q->whereHas('user', function($query) use ($userGroupId) {
+            return $query->whereHas('userGroup', function($q) use ($userGroupId) {
+              return $q->where('user_group_id', $userGroupId);
+            });
+          });
+        });
+
+        $personnels = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
+
         return PersonnelResource::collection(
             $personnels
         );

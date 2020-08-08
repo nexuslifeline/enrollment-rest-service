@@ -44,4 +44,22 @@ class Section extends Model
         return $this->belongsTo('App\Semester');
     }
 
+    public function schedules()
+    {
+        // return $this->belongsToMany(
+        //     'App\Subject',
+        //     'section_schedules',
+        //     'section_id',
+        //     'subject_id'
+        // )->withPivot([
+        //     'day_id',
+        //     'personnel_id',
+        //     'start_time',
+        //     'end_time',
+        //     'is_lab',
+        //     'remarks'
+        // ])->withTimestamps();
+        return $this->hasMany('App\SectionSchedule');
+    }
+
 }
