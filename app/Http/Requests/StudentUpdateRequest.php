@@ -45,7 +45,7 @@ class StudentUpdateRequest extends FormRequest
                 }
               ],
             // student
-            'student_no' => 'sometimes|required|string',
+            'student_no' => 'sometimes|required|string|nullable',
             'first_name' => 'sometimes|required|string|max:255',
             'last_name' => 'sometimes|required|string|max:255',
             'birth_date' => 'sometimes|required|date',
