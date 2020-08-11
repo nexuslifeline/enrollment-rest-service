@@ -24,14 +24,14 @@ class CurriculumController extends Controller
             return $q->where('school_category_id', $schoolCategoryId);
         });
 
-        $levelId = $request->level_id ?? false;
-        $query->when($levelId, function($q) use ($levelId) {
-            return $q->where('level_id', $levelId);
-        });
-
         $courseId = $request->course_id ?? false;
         $query->when($courseId, function($q) use ($courseId) {
             return $q->where('course_id', $courseId);
+        });
+
+        $levelId = $request->level_id ?? false;
+        $query->when($levelId && !$courseId, function($q) use ($levelId) {
+            return $q->where('level_id', $levelId);
         });
 
         $active = $request->active ?? false;
@@ -40,13 +40,17 @@ class CurriculumController extends Controller
         });
 
         $subjects = $request->subjects ?? false;
-        $query->when($active, function($q) use ($active) {
-            return $q->with('subjects');
-        });
-
-        $semesterId = $request->semester_id ?? false;
-        $query->when($semesterId, function($q) use ($semesterId) {
-            return $q->where('semester_id', $semesterId);
+        $query->when($subjects, function($q) use ($request) {
+            return $q->with(['subjects' => function ($query) use ($request) {
+                $semesterId = $request->semester_id ?? false;
+                $query->when($semesterId, function($q) use ($semesterId) {
+                    return $q->where('semester_id', $semesterId);
+                });
+                $levelId = $request->level_id ?? false;
+                $query->when($levelId, function($q) use ($levelId) {
+                    return $q->where('level_id', $levelId);
+                });
+            }]);
         });
 
         $curriculums = !$request->has('paginate') || $request->paginate === 'true'

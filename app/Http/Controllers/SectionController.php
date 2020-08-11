@@ -81,15 +81,24 @@ class SectionController extends Controller
             'semester_id' => 'semester',
         ]);
   
-          $data = $request->all();
-  
-          $section = Section::create($data);
-          
+        $data = $request->except('schedules');
+    
+        $section = Section::create($data);
+
+        if ($request->has('schedules')) {
+            $schedules = $request->schedules;
+            $section->schedules()->delete();
+            foreach ($schedules as $schedule) {
+                $section->schedules()->create($schedule);
+            }            
+            // $section->schedules()->sync($schedules);
+        }
+        
         //   $section->load(['department', 'schoolCategory']);
-          $section->load(['schoolYear','schoolCategory','level','course','semester']);
-          return (new SectionResource($section))
-              ->response()
-              ->setStatusCode(201);
+        $section->load(['schoolYear','schoolCategory','level','course','semester']);
+        return (new SectionResource($section))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -100,7 +109,7 @@ class SectionController extends Controller
      */
     public function show(Section $section)
     {
-        $section->load(['schoolYear','schoolCategory','level','course','semester']);
+        $section->load(['schoolYear','schoolCategory','level','course','semester','schedules']);
         return new SectionResource($section);
     }
 
@@ -133,9 +142,19 @@ class SectionController extends Controller
             'semester_id' => 'semester',
         ]);
   
-        $data = $request->all();
-  
+        $data = $request->except('schedules');
+        
         $success = $section->update($data);
+
+        if ($request->has('schedules')) {
+            $schedules = $request->schedules;
+            $section->schedules()->delete();
+            foreach ($schedules as $schedule) {
+                $section->schedules()->create($schedule);
+            }            
+            // $section->schedules()->sync($schedules);
+        }
+
         $section->load(['schoolYear','schoolCategory','level','course','semester']);
         if($success){
             return (new SectionResource($section))

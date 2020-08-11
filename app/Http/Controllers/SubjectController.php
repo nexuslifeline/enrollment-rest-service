@@ -164,7 +164,8 @@ class SubjectController extends Controller
         $subjects = !$request->has('paginate') || $request->paginate === 'true'
             ? $query->paginate($perPage)
             : $query->get();
-        return SubjectResource::collection($subjects);
+
+        return SubjectResource::collection($subjects->unique('id'));
     }
 
     public function getSubjectsOfTranscript($transcriptId, Request $request)
