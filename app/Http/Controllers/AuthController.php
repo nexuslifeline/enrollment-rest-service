@@ -6,6 +6,7 @@ use App\User;
 use App\Student;
 use App\SchoolYear;
 use Illuminate\Http\Request;
+use App\Services\StudentService;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Config;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StudentLoginRequest;
 use App\Http\Requests\PersonnelLoginRequest;
+use App\Http\Requests\StudentRegisterRequest;
 
 class AuthController extends Controller
 {
@@ -86,125 +88,14 @@ class AuthController extends Controller
       return new UserResource($user);
     }
 
-    public function register(Request $request)
+    public function register(StudentRegisterRequest $request)
     {
-      $transcriptStatusId = 1;
-      $evaluationStatusId = 1;
-      $isEnrolled = $request->is_enrolled;
-      $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
-
-      $this->validate($request, [
-        'student_no' => 'sometimes|nullable|unique:students',
-        'first_name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
-        'username' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:6|confirmed',
-      ], ['required_if' => 'The :attribute field is required.']);
-
-      $student = Student::create([
-        'student_no' => $request->student_no,
-        'first_name' => $request->first_name,
-        'middle_name' => $request->middle_name,
-        'last_name' => $request->last_name,
-        'mobile_no' => $request->mobile_no,
-        'email' => $request->username
-      ]);
-
-      // student category
-      // 1 - new
-      // 2 - old
-      // 3 - transferee
-      $studentCategoryId = $request->student_category_id;
-
-
-      if ($isEnrolled) {
-        $student->applications()->create([
-          'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-          'application_step_id' => 1,
-          'application_status_id' => 2
-        ])->transcript()->create([
-          'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-          'student_id' => $student->id,
-          'student_category_id' => $studentCategoryId,
-          'transcript_status_id' => $transcriptStatusId
-        ]);
-
-        $student->evaluation()->create([
-          'student_id' => $student->id,
-          'student_category_id' => $studentCategoryId,
-          'evaluation_status_id' => $evaluationStatusId
-        ]);
-        
-      } else {
-        if ($studentCategoryId === 2) {
-          $student->applications()->create([
-            'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-            'application_step_id' => 1,
-            'application_status_id' => 2
-          ])->transcript()->create([
-            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-            'student_id' => $student->id,
-            'student_category_id' => $studentCategoryId,
-            'transcript_status_id' => $transcriptStatusId
-          ]);
-
-          $student->evaluation()->create([
-            'student_id' => $student->id,
-            'student_category_id' => $studentCategoryId,
-            'evaluation_status_id' => $evaluationStatusId
-          ]);
-        } else {
-          $student->admission()->create([
-            'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-            'admission_step_id' => 1,
-            'application_status_id' => 2
-          ])->transcript()->create([
-            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-            'student_id' => $student->id,
-            'student_category_id' => $studentCategoryId,
-            'transcript_status_id' => $transcriptStatusId
-          ]);
-          $student->evaluation()->create([
-            'student_id' => $student->id,
-            'student_category_id' => $studentCategoryId,
-            'evaluation_status_id' => $evaluationStatusId
-          ]);
-        }
-      }
-
-      // if ($studentCategoryId == 1) {
-      //   $student->admission()->create([
-      //     'school_year_id' =>  1, // active_school_year_id
-      //     'admission_step_id' => 1,
-      //     'application_status_id' => 2
-      //   ])->transcript()->create([
-      //     'school_year_id' => 1, // active_school_year_id
-      //     'student_id' => $student->id,
-      //     'student_category_id' => $studentCategoryId,
-      //     'transcript_status_id' => $transcriptStatusId
-      //   ]);
-      // } else {
-      //   $student->applications()->create([
-      //     'school_year_id' =>  1, // active_school_year_id
-      //     'application_step_id' => 1,
-      //     'application_status_id' => 2
-      //   ])->transcript()->create([
-      //     'school_year_id' => 1, // active_school_year_id
-      //     'student_id' => $student->id,
-      //     'student_category_id' => $studentCategoryId,
-      //     'transcript_status_id' => $transcriptStatusId
-      //   ]);
-      // }
-
-      $user = $student->user()->create([
-        'username' => $request->username,
-        'password' => Hash::make($request->password)
-      ]);
-      
+      $studentService = new StudentService();
+      $user = $studentService->register($request->all());
 
       return (new UserResource($user))
-                ->response()
-                ->setStatusCode(201);
+        ->response()
+        ->setStatusCode(201);
     }
 
     public function logout()
