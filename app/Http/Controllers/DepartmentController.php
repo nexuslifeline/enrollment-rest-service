@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Department;
+use App\Http\Requests\DepartmentStoreRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\DepartmentResource;
+use App\Services\DepartmentService;
 
 class DepartmentController extends Controller
 {
@@ -16,10 +18,8 @@ class DepartmentController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $departments = !$request->has('paginate') || $request->paginate === 'true'
-            ? Department::paginate($perPage)
-            : Department::all();
+        $departmentService = new DepartmentService();
+        $departments = $departmentService->index($request);
 
         return DepartmentResource::collection(
             $departments
@@ -32,16 +32,10 @@ class DepartmentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(DepartmentStoreRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
-
-        $data = $request->all();
-
-        $department = Department::create($data);
+        $departmentService = new DepartmentService();
+        $department = $departmentService->store($request->all());
 
         return (new DepartmentResource($department))
                 ->response()
@@ -68,21 +62,12 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, Department $department)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
+        $departmentService = new DepartmentService();
+        $department = $departmentService->update($request->all(), $department);
 
-        $data = $request->all();
-
-        $success = $department->update($data);
-
-        if($success){
-            return (new DepartmentResource($department))
-                ->response()
-                ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+        return (new DepartmentResource($department))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -93,7 +78,8 @@ class DepartmentController extends Controller
      */
     public function destroy(Department $department)
     {
-        $department->delete();
+        $departmentService = new DepartmentService();
+        $departmentService->delete($department);
         return response()->json([], 204);
     }
 }

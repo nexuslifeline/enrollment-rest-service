@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SchoolYearStoreRequest;
+use App\Http\Requests\SchoolYearUpdateRequest;
 use App\SchoolYear;
 use Illuminate\Http\Request;
 use App\Http\Resources\SchoolYearResource;
+use App\Services\SchoolYearService;
 
 class SchoolYearController extends Controller
 {
@@ -15,10 +18,8 @@ class SchoolYearController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $schoolYears = !$request->has('paginate') || $request->paginate === 'true'
-            ? SchoolYear::paginate($perPage)
-            : SchoolYear::all();
+        $schoolYearService = new SchoolYearService();
+        $schoolYears = $schoolYearService->index($request);
         return SchoolYearResource::collection(
             $schoolYears
         );
@@ -30,25 +31,10 @@ class SchoolYearController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SchoolYearStoreRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191',
-            'start_date' => 'required|date'
-        ]);
-
-        $data = $request->all();
-
-        $schoolYear = SchoolYear::create($data);
-
-        if ($request->is_active) {
-            $schoolYears = SchoolYear::where('id', '!=', $schoolYear->id)
-            ->where('is_active', 1);
-            $schoolYears->update([
-                'is_active' => 0
-            ]);
-        }   
+        $schoolYearService = new SchoolYearService();
+        $schoolYear = $schoolYearService->store($request->all());
 
         return (new SchoolYearResource($schoolYear))
                 ->response()
@@ -73,32 +59,14 @@ class SchoolYearController extends Controller
      * @param  \App\SchoolYear  $schoolYear
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, SchoolYear $schoolYear)
+    public function update(SchoolYearUpdateRequest $request, SchoolYear $schoolYear)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191',
-            'start_date' => 'required|date'
-        ]);
+        $schoolYearService = new SchoolYearService();
+        $schoolYear = $schoolYearService->update($request->all(), $schoolYear);
 
-        $data = $request->all();
-
-        $success = $schoolYear->update($data);
-
-        if ($request->is_active) {
-            $schoolYears = SchoolYear::where('id', '!=', $schoolYear->id)
-            ->where('is_active', 1);
-            $schoolYears->update([
-                'is_active' => 0
-            ]);
-        }
-
-        if($success){
-            return (new SchoolYearResource($schoolYear))
-                ->response()
-                ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+        return (new SchoolYearResource($schoolYear))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -109,7 +77,8 @@ class SchoolYearController extends Controller
      */
     public function destroy(SchoolYear $schoolYear)
     {
-        $schoolYear->delete();
+        $schoolYearService = new SchoolYearService();
+        $schoolYearService->delete($schoolYear);
         return response()->json([], 204);
     }
 }
