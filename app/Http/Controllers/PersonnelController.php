@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PersonnelStoreRequest;
+use App\Http\Requests\PersonnelUpdateRequest;
 use App\Personnel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\PersonnelResource;
+use App\Services\PersonnelService;
+use Faker\Provider\ar_JO\Person;
 
 class PersonnelController extends Controller
 {
@@ -17,29 +21,9 @@ class PersonnelController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-
-        $query = Personnel::with(['user' => function ($query) {
-          $query->with('userGroup');
-        }]);
-
-        $userGroupId = $request->user_group_id ?? false;
-
-        $query->when($userGroupId, function($q) use ($userGroupId) {
-          return $q->whereHas('user', function($query) use ($userGroupId) {
-            return $query->whereHas('userGroup', function($q) use ($userGroupId) {
-              return $q->where('user_group_id', $userGroupId);
-            });
-          });
-        });
-
-        $personnels = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-
-        return PersonnelResource::collection(
-            $personnels
-        );
+        $personnelService = new PersonnelService();
+        $personnels = $personnelService->index($request);
+        return PersonnelResource::collection($personnels);
     }
 
     /**
@@ -48,35 +32,10 @@ class PersonnelController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PersonnelStoreRequest $request)
     {
-        $this->validate($request, [
-          'first_name' => 'required|string|max:255',
-          'last_name' => 'required|string|max:255',
-          'user.username' => 'required|string|email|max:255|unique:users,username',
-          'user.password' => 'required|string|min:6|confirmed',
-          'user.user_group_id' => 'required',
-          'birth_date' => 'required|date'
-        ], [], [
-          'user.username' => 'email',
-          'user.password' => 'password',
-          'user.user_group_id' => 'user group'
-        ]);
-
-        $data = $request->except('user');
-
-        $personnel = Personnel::create($data);
-
-        $user = $personnel->user()->create([
-          'username' => $request->user['username'],
-          'user_group_id' => $request->user['user_group_id'],
-          'password' => Hash::make($request->user['password'])
-        ]);
-
-        $personnel->load(['user' => function($query) {
-          $query->with('userGroup');
-        }]);
-
+        $personnelService = new PersonnelService();
+        $personnel = $personnelService->store($request);
         return (new PersonnelResource($personnel))
             ->response()
             ->setStatusCode(201);
@@ -93,7 +52,7 @@ class PersonnelController extends Controller
         $personnel->load(['user' => function($query) {
           $query->with('userGroup');
         }]);
-        return new UserGroupResource($personnel);
+        return new PersonnelResource($personnel);
     }
 
     /**
@@ -103,43 +62,13 @@ class PersonnelController extends Controller
      * @param  \App\Personnel  $personnel
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Personnel $personnel)
+    public function update(PersonnelUpdateRequest $request, Personnel $personnel)
     {
-      $this->validate($request, [
-        'first_name' => 'sometimes|required|string|max:255',
-        'last_name' => 'sometimes|required|string|max:255',
-        'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$personnel->id.',userable_id',
-        'user.password' => 'sometimes|required|string|min:6|confirmed',
-        'user.user_group_id' => 'sometimes|required',
-        'birth_date' => 'sometimes|required|date'
-      ], [], [
-        'user.username' => 'email',
-        'user.password' => 'password',
-        'user.user_group_id' => 'user group'
-      ]);
-
-        $data = $request->except('user');
-
-        $success = $personnel->update($data);
-        
-        if ($request->has('user')) {
-          $user = $personnel->user()->update([
-            'username' => $request->user['username'],
-            'user_group_id' => $request->user['user_group_id'],
-            'password' => Hash::make($request->user['password'])
-          ]);
-        }
-        
-        $personnel->load(['user' => function($query) {
-          $query->with('userGroup');
-        }]);
-
-        if($success){
-            return (new PersonnelResource($personnel))
-            ->response()
-            ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+        $personnelService = new PersonnelService();
+        $personnel = $personnelService->update($request, $personnel);
+        return (new PersonnelResource($personnel))
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**
@@ -150,8 +79,8 @@ class PersonnelController extends Controller
      */
     public function destroy(Personnel $personnel)
     {
-        $personnel->delete();
-        $personnel->user()->delete();
+        $personnelService = new PersonnelService();
+        $personnelService->delete($personnel);
         return response()->json([], 204);
     }
 }

@@ -2,23 +2,23 @@
 
 namespace App\Services;
 
-use App\Department;
+use App\UserGroup;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class DepartmentService
+class UserGroupService
 {
     public function index(object $request)
     {
         try {
             $perPage = $request->per_page ?? 20;
-            $departments = !$request->has('paginate') || $request->paginate === 'true'
-                ? Department::paginate($perPage)
-                : Department::all();
-            return $departments;
+            $userGroups = !$request->has('paginate') || $request->paginate === 'true'
+                ? UserGroup::paginate($perPage)
+                : UserGroup::all();
+            return $userGroups;
         } catch (Exception $e) {
-            Log::info('Error occured during DepartmentService index method call: ');
+            Log::info('Error occured during UserGroupService index method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -28,39 +28,39 @@ class DepartmentService
     {
         DB::beginTransaction();
         try {
-            $department = Department::create($data);  
+            $userGroup = UserGroup::create($data);  
             DB::commit();
-            return $department;
+            return $userGroup;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during DepartmentService store method call: ');
+            Log::info('Error occured during UserGroupService store method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function update(array $data, Department $department)
+    public function update(array $data, UserGroup $userGroup)
     {
         DB::beginTransaction();
         try {
-            $department->update($data); 
+            $userGroup->update($data); 
             DB::commit();
-            return $department;
+            return $userGroup;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during DepartmentService update method call: ');
+            Log::info('Error occured during UserGroupService update method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function delete(Department $department)
+    public function delete(UserGroup $userGroup)
     {
         try {
-            $department->delete();
+            $userGroup->delete();
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during DepartmentService delete method call: ');
+            Log::info('Error occured during UserGroupService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
         } 

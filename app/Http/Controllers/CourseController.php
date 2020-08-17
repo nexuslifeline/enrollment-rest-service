@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Course;
+use App\Http\Requests\CourseStoreRequest;
+use App\Http\Requests\CourseUpdateRequest;
 use App\Level;
 use App\SchoolCategory;
 use Illuminate\Http\Request;
 use App\Http\Resources\CourseResource;
+use App\Services\CourseService;
 
 class CourseController extends Controller
 {
@@ -17,13 +20,9 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $courses = !$request->has('paginate') || $request->paginate === 'true'
-            ? Course::paginate($perPage)
-            : Course::all();
-        return CourseResource::collection(
-            $courses
-        );
+        $courseService = new CourseService();
+        $courses = $courseService->index($request);
+        return CourseResource::collection($courses);
     }
 
     /**
@@ -32,27 +31,10 @@ class CourseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CourseStoreRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191',
-            'degree_type_id' => 'required'
-        ], [], ['degree_type_id' => 'degree type']);
-
-        $data = $request->except('levels');
-        // $data = $request->all();
-
-        $course = Course::create($data);
-        $levels = $request->levels;
-        $items = [];
-        foreach ($levels as $level) {
-            $items[$level['level_id']] = [
-                'school_category_id' => $level['school_category_id']
-            ];
-        }
-
-        $course->levels()->sync($items);
+        $courseService = new CourseService();
+        $course = $courseService->store($request);
         
         return (new CourseResource($course))
             ->response()
@@ -77,35 +59,13 @@ class CourseController extends Controller
      * @param  \App\Course  $course
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Course $course)
+    public function update(CourseUpdateRequest $request, Course $course)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191',
-            'degree_type_id' => 'required'
-        ], [], ['degree_type_id' => 'degree type']);
-
-        $data = $request->except('levels');
-        // $data = $request->all();
-
-        $success = $course->update($data);
-
-        $levels = $request->levels;
-        $items = [];
-        foreach ($levels as $level) {
-            $items[$level['level_id']] = [
-                'school_category_id' => $level['school_category_id']
-            ];
-        }
-
-        $course->levels()->sync($items);
-
-        if ($success) {
-            return (new CourseResource($course))
-            ->response()
-            ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+        $courseService = new CourseService();
+        $course = $courseService->update($request, $course);
+        return (new CourseResource($course))
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**
@@ -116,39 +76,22 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        $course->delete();
+        $courseService = new CourseService();
+        $courseService->delete($course);
         return response()->json([], 204);
     }
 
     public function getCoursesOfLevel($levelId, Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = Level::find($levelId)->courses();
-
-        // filters
-        $schoolCategoryId = $request->school_category_id ?? false;
-        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
-            return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
-                return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
-            });
-        });
-
-        $courses = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-
+        $courseService = new CourseService();
+        $courses = $courseService->getCoursesOfLevel($levelId, $request);
         return CourseResource::collection($courses);
     }
 
     public function getCoursesOfSchoolCategory($schoolCategoryId, Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = SchoolCategory::find($schoolCategoryId)->courses()->distinct('course_id');
-
-        $courses = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-
+        $courseService = new CourseService();
+        $courses = $courseService->getCoursesOfSchoolCategory($schoolCategoryId, $request);
         return CourseResource::collection($courses);
     }
 }

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserGroupStoreRequest;
+use App\Http\Requests\UserGroupUpdateRequest;
 use App\UserGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserGroupResource;
+use App\Services\UserGroupService;
 
 class UserGroupController extends Controller
 {
@@ -16,13 +19,9 @@ class UserGroupController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $userGroups = !$request->has('paginate') || $request->paginate === 'true'
-            ? UserGroup::paginate($perPage)
-            : UserGroup::all();
-        return UserGroupResource::collection(
-            $userGroups
-        );
+        $userGroupService = new UserGroupService();
+        $userGroups = $userGroupService->index($request);
+        return UserGroupResource::collection($userGroups);
     }
 
     /**
@@ -31,18 +30,10 @@ class UserGroupController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserGroupStoreRequest $request)
     {
-        $this->validate($request, [
-          'code' => 'required|max:191',
-          'name' => 'required|max:191',
-          'description' => 'required|max:191'
-        ]);
-
-        $data = $request->all();
-
-        $userGroup = UserGroup::create($data);
-
+        $userGroupService = new UserGroupService();
+        $userGroup = $userGroupService->store($request->all());
         return (new UserGroupResource($userGroup))
             ->response()
             ->setStatusCode(201);
@@ -66,24 +57,14 @@ class UserGroupController extends Controller
      * @param  \App\UserGroup  $userGroup
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserGroup $userGroup)
+    public function update(UserGroupUpdateRequest $request, UserGroup $userGroup)
     {
-        $this->validate($request, [
-          'code' => 'required|max:191',
-          'name' => 'required|max:191',
-          'description' => 'required|max:191'
-        ]);
-
-        $data = $request->all();
-
-        $success = $userGroup->update($data);
-
-        if($success){
-            return (new UserGroupResource($userGroup))
-            ->response()
-            ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+        $userGroupService = new UserGroupService();
+        $userGroup = $userGroupService->update($request->all(), $userGroup);
+       
+        return (new UserGroupResource($userGroup))
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**
@@ -94,7 +75,8 @@ class UserGroupController extends Controller
      */
     public function destroy(UserGroup $userGroup)
     {
-        $userGroup->delete();
+        $userGroupService = new UserGroupService();
+        $userGroupService->delete($userGroup);
         return response()->json([], 204);
     }
 }

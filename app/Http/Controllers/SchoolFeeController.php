@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SchoolFeeStoreRequest;
+use App\Http\Requests\SchoolFeeUpdateRequest;
 use App\SchoolFee;
 use Illuminate\Http\Request;
 use App\Http\Resources\SchoolFeeResource;
+use App\Services\SchoolFeeService;
 
 class SchoolFeeController extends Controller
 {
@@ -15,13 +18,9 @@ class SchoolFeeController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $schoolFees = !$request->has('paginate') || $request->paginate === 'true'
-            ? SchoolFee::paginate($perPage)
-            : SchoolFee::all();
-        return SchoolFeeResource::collection(
-            $schoolFees->load(['schoolFeeCategory'])
-        );
+        $schoolFeeService = new SchoolFeeService();
+        $schoolFees = $schoolFeeService->index($request);
+        return SchoolFeeResource::collection($schoolFees);
     }
 
     /**
@@ -30,19 +29,11 @@ class SchoolFeeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SchoolFeeStoreRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required|max:255',
-            'description' => 'required|max:755',
-        ]);
-
-        $data = $request->all();
-
-        $schoolFee = SchoolFee::create($data);
-        return (new SchoolFeeResource(
-            $schoolFee->load(['schoolFeeCategory'])
-        ))
+        $schoolFeeService = new SchoolFeeService();
+        $schoolFee = $schoolFeeService->store($request->all());
+        return (new SchoolFeeResource($schoolFee))
                 ->response()
                 ->setStatusCode(201);
     }
@@ -67,25 +58,14 @@ class SchoolFeeController extends Controller
      * @param  \App\SchoolFee  $schoolFee
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, SchoolFee $schoolFee)
+    public function update(SchoolFeeUpdateRequest $request, SchoolFee $schoolFee)
     {
-        $this->validate($request, [
-            'name' => 'required|max:255',
-            'description' => 'required|max:755',
-        ]);
-
-        $data = $request->all();
-
-        $success = $schoolFee->update($data);
-
-        if($success){
-            return (new SchoolFeeResource(
-                $schoolFee->load(['schoolFeeCategory'])
-            ))
+        $schoolFeeService = new SchoolFeeService();
+        $schoolFee = $schoolFeeService->update($request->all(), $schoolFee);
+        return (new SchoolFeeResource($schoolFee))
                 ->response()
                 ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+
     }
 
     /**
@@ -96,7 +76,8 @@ class SchoolFeeController extends Controller
      */
     public function destroy(SchoolFee $schoolFee)
     {
-        $schoolFee->delete();
+        $schoolFeeService = new SchoolFeeService();
+        $schoolFeeService->delete($schoolFee);
         return response()->json([], 204);
     }
 }

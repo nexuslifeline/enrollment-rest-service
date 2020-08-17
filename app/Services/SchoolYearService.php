@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Log;
 
 class SchoolYearService
 {
-    public function index(object $data)
+    public function index(object $request)
     {
         try {
-            $perPage = $data->per_page ?? 20;
-            $schoolYears = !$data->has('paginate') || $data->paginate === 'true'
+            $perPage = $request->per_page ?? 20;
+            $schoolYears = !$request->has('paginate') || $request->paginate === 'true'
                 ? SchoolYear::paginate($perPage)
                 : SchoolYear::all();
             return $schoolYears;

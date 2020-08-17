@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SectionStoreRequest;
 use App\Section;
 use Illuminate\Http\Request;
 use App\Http\Resources\SectionResource;
+use App\Services\SectionService;
 
 class SectionController extends Controller
 {
@@ -15,42 +17,9 @@ class SectionController extends Controller
      */
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = Section::with(['schoolYear','schoolCategory','level','course','semester']);
-
-        $schoolYearId = $request->school_year_id ?? false;        
-        $query->when($schoolYearId, function($q) use ($schoolYearId) {
-            return $q->where('school_year_id', $schoolYearId);
-        });
-
-        $schoolCategoryId = $request->school_category_id ?? false;        
-        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-            return $q->where('level_id', $schoolCategoryId);
-        });
-
-        $levelId = $request->level_id ?? false;        
-        $query->when($levelId, function($q) use ($levelId) {
-            return $q->where('level_id', $levelId);
-        });
-
-        $courseId = $request->course_id ?? false;        
-        $query->when($courseId, function($q) use ($courseId) {
-            return $q->where('course_id', $courseId);
-        });
-
-        $semesterId = $request->semester_id ?? false;        
-        $query->when($semesterId, function($q) use ($semesterId) {
-            return $q->where('semester_id', $semesterId);
-        });
-
-
-        $sections = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();        
-
-        return SectionResource::collection(
-            $sections->load(['schoolYear','schoolCategory','level','course','semester'])
-        );
+        $sectionService = new SectionService();
+        $sections = $sectionService->index($request);
+        return SectionResource::collection($sections);
     }
 
     /**
@@ -59,43 +28,10 @@ class SectionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SectionStoreRequest $request)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191',
-            'school_year_id' => 'required',
-            'school_category_id' => 'required',
-            'level_id' => 'required',
-            'course_id' => 'required_if:school_category_id,4,5,6',
-            'semester_id' => 'required_if:school_category_id,4,5,6'
-        ], 
-        [
-            'required_if' => 'The :attribute field is required.'
-        ], 
-        [
-            'school_year_id' => 'school year',
-            'school_category_id' => 'school category',
-            'level_id' => 'level',
-            'course_id' => 'course',
-            'semester_id' => 'semester',
-        ]);
-  
-        $data = $request->except('schedules');
-    
-        $section = Section::create($data);
-
-        if ($request->has('schedules')) {
-            $schedules = $request->schedules;
-            $section->schedules()->delete();
-            foreach ($schedules as $schedule) {
-                $section->schedules()->create($schedule);
-            }            
-            // $section->schedules()->sync($schedules);
-        }
-        
-        //   $section->load(['department', 'schoolCategory']);
-        $section->load(['schoolYear','schoolCategory','level','course','semester']);
+        $sectionService = new SectionService();
+        $section = $sectionService->store($request);
         return (new SectionResource($section))
             ->response()
             ->setStatusCode(201);
@@ -122,46 +58,11 @@ class SectionController extends Controller
      */
     public function update(Request $request, Section $section)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191',
-            'school_year_id' => 'required',
-            'school_category_id' => 'required',
-            'level_id' => 'required',
-            'course_id' => 'required_if:school_category_id,4,5,6',
-            'semester_id' => 'required_if:school_category_id,4,5,6'
-        ], 
-        [
-            'required_if' => 'The :attribute field is required.'
-        ], 
-        [
-            'school_year_id' => 'school year',
-            'school_category_id' => 'school category',
-            'level_id' => 'level',
-            'course_id' => 'course',
-            'semester_id' => 'semester',
-        ]);
-  
-        $data = $request->except('schedules');
-        
-        $success = $section->update($data);
-
-        if ($request->has('schedules')) {
-            $schedules = $request->schedules;
-            $section->schedules()->delete();
-            foreach ($schedules as $schedule) {
-                $section->schedules()->create($schedule);
-            }            
-            // $section->schedules()->sync($schedules);
-        }
-
-        $section->load(['schoolYear','schoolCategory','level','course','semester']);
-        if($success){
-            return (new SectionResource($section))
-            ->response()
-            ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
+        $sectionService = new SectionService();
+        $section = $sectionService->update($request, $section);
+        return (new SectionResource($section))
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**
@@ -172,7 +73,8 @@ class SectionController extends Controller
      */
     public function destroy(Section $section)
     {
-        $section->delete();
+        $sectionService = new SectionService();
+        $sectionService->delete($section);
         return response()->json([], 204);
     }
 }

@@ -2,89 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RateSheetStoreRequest;
+use App\Http\Requests\RateSheetUpdateRequest;
 use App\RateSheet;
 use Illuminate\Http\Request;
 use App\Http\Resources\RateSheetResource;
+use App\Services\RateSheetService;
 
 class RateSheetController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = RateSheet::with(['level', 'course', 'semester', 'fees']);
-
-        // filters
-        $levelId = $request->level_id ?? false;
-        $query->when($levelId, function($q) use ($levelId) {
-            return $q->where('level_id', $levelId);
-        });
-
-        $courseId = $request->course_id ?? false;
-        $query->when($courseId, function($q) use ($courseId) {
-            return $q->where('course_id', $courseId);
-        });
-
-        $semesterId = $request->semester_id ?? false;
-        $query->when($semesterId, function($q) use ($semesterId) {
-            return $q->where('semester_id', $semesterId);
-        });
-
-        $rates = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
+        $rateSheetService = new RateSheetService();
+        $rateSheets = $rateSheetService->index($request);
         return RateSheetResource::collection(
-            $rates
+            $rateSheets
         );
     }
 
-    public function store(Request $request)
+    public function store(RateSheetStoreRequest $request)
     {
-        $this->validate($request, [
-            'level_id' => 'required'
-        ]);
-
-        $data = $request->except(['fees']);
-        $rate = RateSheet::create($data);
-
-        if ($request->has('fees')) {
-            $fees = $request->fees;
-            $items = [];
-            foreach ($fees as $fee) {
-                $items[$fee['school_fee_id']] = [
-                    'amount' => $fee['amount'],
-                    'notes' => $fee['notes']
-                ];
-            }
-            $rate->fees()->sync($items);
-        }
-
-        $rate->load(['level', 'course', 'semester', 'fees']);
-        return new RateSheetResource($rate);
+        $rateSheetService = new RateSheetService();
+        $rateSheet = $rateSheetService->store($request);
+        return (new RateSheetResource($rateSheet))
+                ->response()
+                ->setStatusCode(201);
     }
 
-    public function update(Request $request, RateSheet $rateSheet)
+    public function update(RateSheetUpdateRequest $request, RateSheet $rateSheet)
     {
-        $this->validate($request, [
-            'level_id' => 'required'
-        ]);
-
-        $data = $request->except(['fees']);
-        $rateSheet->update($data);
-
-        if ($request->has('fees')) {
-            $fees = $request->fees;
-            $items = [];
-            foreach ($fees as $fee) {
-                $items[$fee['school_fee_id']] = [
-                    'amount' => $fee['amount'],
-                    'notes' => $fee['notes']
-                ];
-            }
-            $rateSheet->fees()->sync($items);
-        }
-
-        $rateSheet->load(['level', 'course', 'semester', 'fees']);
-        return new RateSheetResource($rateSheet);
+        $rateSheetService = new RateSheetService();
+        $rateSheet = $rateSheetService->update($request, $rateSheet);
+        return (new RateSheetResource($rateSheet))
+        ->response()
+        ->setStatusCode(200);
     }
 
     public function show(RateSheet $rateSheet)
@@ -95,7 +46,8 @@ class RateSheetController extends Controller
 
     public function destroy(RateSheet $rateSheet)
     {
-        $rateSheet->delete();
+        $rateSheetService = new RateSheetService();
+        $rateSheetService->delete($rateSheet);
         return response()->json([], 204);
     }
 }

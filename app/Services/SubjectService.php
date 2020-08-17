@@ -12,19 +12,19 @@ use Illuminate\Support\Facades\Log;
 
 class SubjectService
 {
-    public function index(object $data)
+    public function index(object $request)
     {
         try {
-            $perPage = $data->per_page ?? 20;
+            $perPage = $request->per_page ?? 20;
             $query = Subject::with(['department', 'schoolCategory']);
 
             //filter by school category
-            $schoolCategoryId = $data->school_category_id ?? false;
+            $schoolCategoryId = $request->school_category_id ?? false;
             $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
-            $subjects = !$data->has('paginate') || $data->paginate === 'true'
+            $subjects = !$request->has('paginate') || $request->paginate === 'true'
                 ? $query->paginate($perPage)
                 : $query->get();
 
