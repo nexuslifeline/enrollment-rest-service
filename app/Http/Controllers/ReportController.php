@@ -34,8 +34,8 @@ class ReportController extends Controller
         $mpdf = new Mpdf();
         $content = view('reports.assessmentform')->with($data);
         $mpdf->WriteHTML($content);
-        // return $mpdf->Output('', 'S');
-        $mpdf->Output();
+        return $mpdf->Output('', 'S');
+        // $mpdf->Output();
     }
 
     public function requirementList()

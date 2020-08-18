@@ -2,19 +2,30 @@
 
 namespace App\Services;
 
+use App\Payment;
 use Image;
-use App\EvaluationFile;
+use App\PaymentReceiptFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-class EvaluationFileService
+class PaymentReceiptFileService
 {
+    public function index(object $request, $paymentId)
+    {
+        $perPage = $request->per_page ?? 20;
+        $query = Payment::where('id', $paymentId)->first()->paymentReceiptFiles();
+        $files = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
 
-    public function store($evaluationId, $file)
+        return $files;
+    }
+
+    public function store($paymentId, $studentId, $file)
     {
         try {
-            if (!$evaluationId) {
-                throw new \Exception('Evaluation id not found!');
+            if (!$paymentId) {
+                throw new \Exception('Payment id not found!');
             }
 
             if (!$file) {
@@ -28,32 +39,31 @@ class EvaluationFileService
             //and the resize value
             if (in_array($extension, $imageExtensions )) {
                 
-                $width = Image::make($file)->width();
+                // $width = Image::make($file)->width();
                 $image = Image::make($file);
-                
-                //if image width is less than 1024 dont resize
-                //not sure if this is necessary ?
+
                 $image->resize(null, 600, function ($constraint) {
                     $constraint->aspectRatio();
                 });
                 
-                $path = 'files/evaluation/' . $file->hashName();
+                $path = 'files/payment-receipt/' . $file->hashName();
                 Storage::put($path, $image->stream());
             }
             else {
-                $path = $file->store('files/evaluation');
+                $path = $file->store('files/payment-receipt');
             }
 
-            $evaluationFile = EvaluationFile::Create(
+            $paymentReceiptFile = PaymentReceiptFile::create(
                 [
-                    'evaluation_id' => $evaluationId,
+                    'payment_id' => $paymentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
-                    'hash_name' => $file->hashName()
+                    'hash_name' => $file->hashName(),
+                    'student_id' => $studentId
                 ]
             );
 
-            return $evaluationFile;
+            return $paymentReceiptFile;
         } catch (Throwable $e) {
             ValidationException::withMessages([
                 'file' => $e->getMessage()
@@ -67,7 +77,7 @@ class EvaluationFileService
             throw new \Exception('File id not found!');
         }
 
-        $query = EvaluationFile::where('id', $fileId);
+        $query = PaymentReceiptFile::where('id', $fileId);
         $file = $query->first();
         if ($file) {
             Storage::delete($file->path);
@@ -83,12 +93,12 @@ class EvaluationFileService
             throw new \Exception('File id not found!');
         }
 
-        $query = EvaluationFile::where('id', $fileId);
-        $evaluationFile = $query->first();
+        $query = PaymentReceiptFile::where('id', $fileId);
+        $paymentReceiptFile = $query->first();
         
-        if ($evaluationFile) {
+        if ($paymentReceiptFile) {
             return  response()->file(
-                storage_path('app/' . $evaluationFile->path)
+                storage_path('app/' . $paymentReceiptFile->path)
             );
         }
         return null;
@@ -100,11 +110,11 @@ class EvaluationFileService
             throw new \Exception('File id not found!');
         }
 
-        $query = EvaluationFile::where('id', $fileId);
-        $evaluationFile = $query->first();
+        $query = PaymentReceiptFile::where('id', $fileId);
+        $paymentReceiptFile = $query->first();
         
-        $evaluationFile->update($data);
+        $paymentReceiptFile->update($data);
         
-        return  $evaluationFile;
+        return  $paymentReceiptFile;
     }
 }

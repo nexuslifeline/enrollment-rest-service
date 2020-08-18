@@ -2,67 +2,55 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PaymentReceiptFileStoreRequest;
+use App\Http\Requests\PaymentReceiptFileUpdateRequest;
 use App\PaymentReceiptFile;
 use App\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\PaymentReceiptFileResource;
+use App\Services\PaymentReceiptFileService;
 
 class PaymentReceiptFileController extends Controller
 {
     public function index(Request $request, $paymentId)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = Payment::where('id', $paymentId)->first()->paymentReceiptFiles();
-        $files = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
+        $paymentFileReceiptService = new PaymentReceiptFileService();
+        $files = $paymentFileReceiptService->index($request, $paymentId);
         return PaymentReceiptFileResource::collection(
             $files
         );
     }
 
-    public function store(Request $request, $paymentId)
+    public function store(PaymentReceiptFileStoreRequest $request, $paymentId)
     {
         try {
-            $this->validate($request, [
-                'file' => 'required'
-            ]);
-            $path = $request->file('file')->store('files');
-            $paymentReceiptFile = PaymentReceiptFile::create([
-                'payment_id' => $paymentId,
-                'path' => $path,
-                'name' => $request->file('file')->getClientOriginalName(),
-                'hash_name' => $request->file('file')->hashName(),
-                'student_id' => $request->student_id
-            ]);
+            $file = $request->file('file');
+            $studentId = $request->student_id;
+            $paymentFileReceiptService = new PaymentReceiptFileService();
+            $paymentReceiptFile = $paymentFileReceiptService->store($paymentId, $studentId, $file);
             return (new PaymentReceiptFileResource($paymentReceiptFile))
-            ->response()
-            ->setStatusCode(201);
+                ->response()
+                ->setStatusCode(201);
         } catch (Throwable $e) {
             Log::error('Message occured => ' . $e->getMessage());
             return response()->json([], 400);
         }
     }
 
-    public function update(Request $request, $paymentId,  $fileId)
+    public function update(PaymentReceiptFileUpdateRequest $request, $paymentId,  $fileId)
     {
-        $this->validate($request, [
-            'notes' => 'required',
-        ]);
-
-        $data = $request->all();
-
-        $paymentReceiptFile = PaymentReceiptFile::find($fileId);
-        
-        $success = $paymentReceiptFile->update($data);
-    
-        if ($success) {
+        try {
+            $data = $request->all();
+            $paymentReceiptFileService = new PaymentReceiptFileService();
+            $paymentReceiptFile = $paymentReceiptFileService->update($data, $fileId);
             return (new PaymentReceiptFileResource($paymentReceiptFile))
                 ->response()
-                ->setStatusCode(200);
+                ->setStatusCode(201);
+        } catch (Throwable $e) {
+            Log::error('Message occured => ' . $e->getMessage());
+            return response()->json([], 400);
         }
-        //return response()->json([], 400); // Note! add error here
     }
 
     public function show($paymentId, $fileId)
@@ -74,10 +62,8 @@ class PaymentReceiptFileController extends Controller
     public function preview($paymentId, $fileId)
     {
         try {
-            $paymentReceiptFile = PaymentReceiptFile::find($fileId);
-            return response()->file(
-                storage_path('app/' . $paymentReceiptFile->path)
-            );
+            $paymentReceiptFileService = new PaymentReceiptFileService();
+            return $paymentReceiptFileService->preview($fileId);
         } catch (Throwable $e) {
             Log::error('Message occured => ' . $e->getMessage());
             return response()->json([], 400);
@@ -86,14 +72,14 @@ class PaymentReceiptFileController extends Controller
 
     public function destroy($paymentId, $fileId)
     {  
-        $file = PaymentReceiptFile::find($fileId);
-
-        Payment::find($paymentId)
-            ->paymentReceiptFiles()
-            ->where('id', $fileId)
-            ->first()
-            ->delete();
-        Storage::delete($file->path);
-        return response()->json([], 204);
+        try {
+            $paymentReceiptFileService = new PaymentReceiptFileService();
+            if ($paymentReceiptFileService->delete($fileId)) {
+                return response()->json([], 204);
+            }
+        } catch (Throwable $e) {
+            Log::error('Message occured => ' . $e->getMessage());
+            return response()->json([], 400);
+        }
     }
 }

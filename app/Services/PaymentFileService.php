@@ -2,19 +2,30 @@
 
 namespace App\Services;
 
+use App\Payment;
 use Image;
-use App\EvaluationFile;
+use App\PaymentFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-class EvaluationFileService
+class PaymentFileService
 {
+    public function index(object $request, $paymentId)
+    {
+        $perPage = $request->per_page ?? 20;
+        $query = Payment::where('id', $paymentId)->first()->files();
+        $files = !$request->has('paginate') || $request->paginate === 'true'
+            ? $query->paginate($perPage)
+            : $query->get();
 
-    public function store($evaluationId, $file)
+        return $files;
+    }
+
+    public function store($paymentId, $file)
     {
         try {
-            if (!$evaluationId) {
-                throw new \Exception('Evaluation id not found!');
+            if (!$paymentId) {
+                throw new \Exception('Payment id not found!');
             }
 
             if (!$file) {
@@ -28,32 +39,30 @@ class EvaluationFileService
             //and the resize value
             if (in_array($extension, $imageExtensions )) {
                 
-                $width = Image::make($file)->width();
+                // $width = Image::make($file)->width();
                 $image = Image::make($file);
-                
-                //if image width is less than 1024 dont resize
-                //not sure if this is necessary ?
+
                 $image->resize(null, 600, function ($constraint) {
                     $constraint->aspectRatio();
                 });
                 
-                $path = 'files/evaluation/' . $file->hashName();
+                $path = 'files/payment/' . $file->hashName();
                 Storage::put($path, $image->stream());
             }
             else {
-                $path = $file->store('files/evaluation');
+                $path = $file->store('files/payment');
             }
 
-            $evaluationFile = EvaluationFile::Create(
+            $paymentFile = PaymentFile::create(
                 [
-                    'evaluation_id' => $evaluationId,
+                    'payment_id' => $paymentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
                     'hash_name' => $file->hashName()
                 ]
             );
 
-            return $evaluationFile;
+            return $paymentFile;
         } catch (Throwable $e) {
             ValidationException::withMessages([
                 'file' => $e->getMessage()
@@ -67,7 +76,7 @@ class EvaluationFileService
             throw new \Exception('File id not found!');
         }
 
-        $query = EvaluationFile::where('id', $fileId);
+        $query = PaymentFile::where('id', $fileId);
         $file = $query->first();
         if ($file) {
             Storage::delete($file->path);
@@ -83,12 +92,12 @@ class EvaluationFileService
             throw new \Exception('File id not found!');
         }
 
-        $query = EvaluationFile::where('id', $fileId);
-        $evaluationFile = $query->first();
+        $query = PaymentFile::where('id', $fileId);
+        $paymentFile = $query->first();
         
-        if ($evaluationFile) {
+        if ($paymentFile) {
             return  response()->file(
-                storage_path('app/' . $evaluationFile->path)
+                storage_path('app/' . $paymentFile->path)
             );
         }
         return null;
@@ -100,11 +109,11 @@ class EvaluationFileService
             throw new \Exception('File id not found!');
         }
 
-        $query = EvaluationFile::where('id', $fileId);
-        $evaluationFile = $query->first();
+        $query = PaymentFile::where('id', $fileId);
+        $paymentFile = $query->first();
         
-        $evaluationFile->update($data);
+        $paymentFile->update($data);
         
-        return  $evaluationFile;
+        return  $paymentFile;
     }
 }
