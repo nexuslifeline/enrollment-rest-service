@@ -20,7 +20,9 @@ class UserGroupController extends Controller
     public function index(Request $request)
     {
         $userGroupService = new UserGroupService();
-        $userGroups = $userGroupService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $userGroups = $userGroupService->list($isPaginated, $perPage);
         return UserGroupResource::collection($userGroups);
     }
 
@@ -45,8 +47,10 @@ class UserGroupController extends Controller
      * @param  \App\UserGroup  $userGroup
      * @return \Illuminate\Http\Response
      */
-    public function show(UserGroup $userGroup)
+    public function show(int $id)
     {
+        $userGroupService = new UserGroupService();
+        $userGroup = $userGroupService->get($id);
         return new UserGroupResource($userGroup);
     }
 
@@ -57,10 +61,10 @@ class UserGroupController extends Controller
      * @param  \App\UserGroup  $userGroup
      * @return \Illuminate\Http\Response
      */
-    public function update(UserGroupUpdateRequest $request, UserGroup $userGroup)
+    public function update(UserGroupUpdateRequest $request, int $id)
     {
         $userGroupService = new UserGroupService();
-        $userGroup = $userGroupService->update($request->all(), $userGroup);
+        $userGroup = $userGroupService->update($request->all(), $id);
        
         return (new UserGroupResource($userGroup))
         ->response()
@@ -73,10 +77,10 @@ class UserGroupController extends Controller
      * @param  \App\UserGroup  $userGroup
      * @return \Illuminate\Http\Response
      */
-    public function destroy(UserGroup $userGroup)
+    public function destroy(int $id)
     {
         $userGroupService = new UserGroupService();
-        $userGroupService->delete($userGroup);
+        $userGroupService->delete($id);
         return response()->json([], 204);
     }
 }

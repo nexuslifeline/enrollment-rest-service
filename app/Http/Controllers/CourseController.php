@@ -21,7 +21,9 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $courseService = new CourseService();
-        $courses = $courseService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $courses = $courseService->list($isPaginated, $perPage);
         return CourseResource::collection($courses);
     }
 
@@ -34,7 +36,9 @@ class CourseController extends Controller
     public function store(CourseStoreRequest $request)
     {
         $courseService = new CourseService();
-        $course = $courseService->store($request);
+        $data = $request->except('levels');
+        $levels = $request->levels ?? [];
+        $course = $courseService->store($data, $levels);
         
         return (new CourseResource($course))
             ->response()
@@ -47,8 +51,10 @@ class CourseController extends Controller
      * @param  \App\Course  $course
      * @return \Illuminate\Http\Response
      */
-    public function show(Course $course)
+    public function show(int $id)
     {
+        $courseService = new CourseService();
+        $course = $courseService->get($id);
         return new CourseResource($course);
     }
 
@@ -59,10 +65,12 @@ class CourseController extends Controller
      * @param  \App\Course  $course
      * @return \Illuminate\Http\Response
      */
-    public function update(CourseUpdateRequest $request, Course $course)
+    public function update(CourseUpdateRequest $request, int $id)
     {
         $courseService = new CourseService();
-        $course = $courseService->update($request, $course);
+        $data = $request->except('levels');
+        $levels = $request->levels ?? [];
+        $course = $courseService->update($data, $levels, $id);
         return (new CourseResource($course))
         ->response()
         ->setStatusCode(200);
@@ -74,24 +82,29 @@ class CourseController extends Controller
      * @param  \App\Course  $course
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Course $course)
+    public function destroy(int $id)
     {
         $courseService = new CourseService();
-        $courseService->delete($course);
+        $courseService->delete($id);
         return response()->json([], 204);
     }
 
     public function getCoursesOfLevel($levelId, Request $request)
     {
         $courseService = new CourseService();
-        $courses = $courseService->getCoursesOfLevel($levelId, $request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $courses = $courseService->getCoursesOfLevel($levelId, $isPaginated, $perPage, $filters);
         return CourseResource::collection($courses);
     }
 
     public function getCoursesOfSchoolCategory($schoolCategoryId, Request $request)
     {
         $courseService = new CourseService();
-        $courses = $courseService->getCoursesOfSchoolCategory($schoolCategoryId, $request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $courses = $courseService->getCoursesOfSchoolCategory($schoolCategoryId, $isPaginated, $perPage);
         return CourseResource::collection($courses);
     }
 }

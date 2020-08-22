@@ -9,16 +9,15 @@ use Illuminate\Support\Facades\Log;
 
 class SchoolFeeCategoryService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage)
     {
         try {
-            $perPage = $request->per_page ?? 20;
-            $schoolFeeCategories = !$request->has('paginate') || $request->paginate === 'true'
+            $schoolFeeCategories = $isPaginated
                 ? SchoolFeeCategory::paginate($perPage)
                 : SchoolFeeCategory::all();
             return $schoolFeeCategories;
         } catch (Exception $e) {
-            Log::info('Error occured during SchoolFeeCategoryService index method call: ');
+            Log::info('Error occured during SchoolFeeCategoryService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -39,10 +38,23 @@ class SchoolFeeCategoryService
         }
     }
 
-    public function update(array $data, SchoolFeeCategory $schoolFeeCategory)
+    public function get(int $id)
+    {
+        try {
+            $schoolFeeCategory = SchoolFeeCategory::find($id);
+            return $schoolFeeCategory;
+        } catch (Exception $e) {
+            Log::info('Error occured during SchoolFeeCategoryService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function update(array $data, int $id)
     {
         DB::beginTransaction();
         try {
+            $schoolFeeCategory = SchoolFeeCategory::find($id);
             $schoolFeeCategory->update($data);
             DB::commit();
             return $schoolFeeCategory;
@@ -54,9 +66,10 @@ class SchoolFeeCategoryService
         }
     }
 
-    public function delete(SchoolFeeCategory $schoolFeeCategory)
+    public function delete(int $id)
     {
         try {
+            $schoolFeeCategory = SchoolFeeCategory::find($id);
             $schoolFeeCategory->delete();
         } catch (Exception $e) {
             DB::rollback();

@@ -10,16 +10,14 @@ use Illuminate\Support\Facades\Log;
 
 class PersonnelService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage, array $filter)
     {
         try {
-            $perPage = $request->per_page ?? 20;
-
             $query = Personnel::with(['user' => function ($query) {
               $query->with('userGroup');
             }]);
     
-            $userGroupId = $request->user_group_id ?? false;
+            $userGroupId = $filter['user_group_id'] ?? false;
     
             $query->when($userGroupId, function($q) use ($userGroupId) {
               return $q->whereHas('user', function($query) use ($userGroupId) {
@@ -29,29 +27,42 @@ class PersonnelService
               });
             });
     
-            $personnels = !$request->has('paginate') || $request->paginate === 'true'
+            $personnels = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
             return $personnels;
         } catch (Exception $e) {
-            Log::info('Error occured during PersonnelService index method call: ');
+            Log::info('Error occured during PersonnelService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function store(object $request)
+    public function get(int $id)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $personnel->load(['user' => function($query) {
+                $query->with('userGroup');
+            }]);
+            return $personnel;
+        } catch (Exception $e) {
+            Log::info('Error occured during PersonnelService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function store(array $data, array $user)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except('user');
-
             $personnel = Personnel::create($data);
     
             $personnel->user()->create([
-                'username' => $request->user['username'],
-                'user_group_id' => $request->user['user_group_id'],
-                'password' => Hash::make($request->user['password'])
+                'username' => $user['username'],
+                'user_group_id' => $user['user_group_id'],
+                'password' => Hash::make($user['password'])
             ]);
     
             $personnel->load(['user' => function($query) {
@@ -67,19 +78,18 @@ class PersonnelService
         }
     }
 
-    public function update(object $request, Personnel $personnel)
+    public function update(array $data, array $user, int $id)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except('user');
-
+            $personnel = Personnel::find($id);
             $personnel->update($data);
             
-            if ($request->has('user')) {
+            if ($user) {
                 $personnel->user()->update([
-                    'username' => $request->user['username'],
-                    'user_group_id' => $request->user['user_group_id'],
-                    'password' => Hash::make($request->user['password'])
+                    'username' => $user['username'],
+                    'user_group_id' => $user['user_group_id'],
+                    'password' => Hash::make($user['password'])
                 ]);
             }
             
@@ -96,9 +106,10 @@ class PersonnelService
         }
     }
 
-    public function delete(Personnel $personnel)
+    public function delete(int $id)
     {
         try {
+            $personnel = Personnel::find($id);
             $personnel->delete();
             $personnel->user()->delete();
         } catch (Exception $e) {

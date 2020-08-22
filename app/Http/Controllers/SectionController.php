@@ -18,7 +18,10 @@ class SectionController extends Controller
     public function index(Request $request)
     {
         $sectionService = new SectionService();
-        $sections = $sectionService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $sections = $sectionService->list($isPaginated, $perPage, $filters);
         return SectionResource::collection($sections);
     }
 
@@ -31,7 +34,9 @@ class SectionController extends Controller
     public function store(SectionStoreRequest $request)
     {
         $sectionService = new SectionService();
-        $section = $sectionService->store($request);
+        $data = $request->except('schedules');
+        $schedules = $request->schedules;
+        $section = $sectionService->store($data, $schedules);
         return (new SectionResource($section))
             ->response()
             ->setStatusCode(201);
@@ -43,9 +48,10 @@ class SectionController extends Controller
      * @param  \App\Section  $section
      * @return \Illuminate\Http\Response
      */
-    public function show(Section $section)
+    public function show(int $id)
     {
-        $section->load(['schoolYear','schoolCategory','level','course','semester','schedules']);
+        $sectionService = new SectionService();
+        $section = $sectionService->get($id);
         return new SectionResource($section);
     }
 
@@ -56,10 +62,12 @@ class SectionController extends Controller
      * @param  \App\Section  $section
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Section $section)
+    public function update(Request $request, int $id)
     {
         $sectionService = new SectionService();
-        $section = $sectionService->update($request, $section);
+        $data = $request->except('schedules');
+        $schedules = $request->schedules;
+        $section = $sectionService->update($data, $schedules, $id);
         return (new SectionResource($section))
         ->response()
         ->setStatusCode(200);
@@ -71,10 +79,10 @@ class SectionController extends Controller
      * @param  \App\Section  $section
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Section $section)
+    public function destroy(int $id)
     {
         $sectionService = new SectionService();
-        $sectionService->delete($section);
+        $sectionService->delete($id);
         return response()->json([], 204);
     }
 }

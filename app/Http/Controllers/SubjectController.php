@@ -24,7 +24,10 @@ class SubjectController extends Controller
     public function index(Request $request)
     {
         $subjectService = new SubjectService();
-        $subjects = $subjectService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $subjects = $subjectService->list($isPaginated, $perPage, $filters);
 
         return SubjectResource::collection(
             $subjects
@@ -54,9 +57,10 @@ class SubjectController extends Controller
      * @param  \App\Subject  $subject
      * @return \Illuminate\Http\Response
      */
-    public function show(Subject $subject)
+    public function show(int $id)
     {
-        $subject->load(['schoolCategory']);
+        $subjectService = new SubjectService();
+        $subject = $subjectService->get($id);
         return new SubjectResource($subject);
     }
 
@@ -67,10 +71,10 @@ class SubjectController extends Controller
      * @param  \App\Subject  $subject
      * @return \Illuminate\Http\Response
      */
-    public function update(SubjectUpdateRequest $request, Subject $subject)
+    public function update(SubjectUpdateRequest $request, int $id)
     {
         $subjectService = new SubjectService();
-        $subject = $subjectService->update($request->all(), $subject);
+        $subject = $subjectService->update($request->all(), $id);
 
         return (new SubjectResource($subject))
         ->response()
@@ -83,17 +87,20 @@ class SubjectController extends Controller
      * @param  \App\Subject  $subject
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Subject $subject)
+    public function destroy(int $id)
     {
         $subjectService = new SubjectService();
-        $subjectService->delete($subject);
+        $subjectService->delete($id);
         return response()->json([], 204);
     }
 
     public function getSubjectsOfLevel($levelId, Request $request)
     {
         $subjectService = new SubjectService();
-        $subjects = $subjectService->getSubjectsOfLevel($levelId, $request);    
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $subjects = $subjectService->getSubjectsOfLevel($levelId, $isPaginated, $perPage, $filters);    
 
         return SubjectResource::collection($subjects);
     }
@@ -101,14 +108,18 @@ class SubjectController extends Controller
     public function getSubjectsOfTranscript($transcriptId, Request $request)
     {
         $subjectService = new SubjectService();
-        $subjects = $subjectService->getSubjectsOfTranscript($transcriptId, $request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $subjects = $subjectService->getSubjectsOfTranscript($transcriptId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 
     public function getSubjectsOfEvaluation($evaluationId, Request $request)
     {
         $subjectService = new SubjectService();
-        $subjects = $subjectService->getSubjectsOfEvaluation($evaluationId, $request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $subjects = $subjectService->getSubjectsOfEvaluation($evaluationId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 }

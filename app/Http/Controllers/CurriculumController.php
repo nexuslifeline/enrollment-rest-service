@@ -19,7 +19,10 @@ class CurriculumController extends Controller
     public function index(Request $request)
     {
         $curriculumService = new CurriculumService();
-        $curriculums = $curriculumService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $curriculums = $curriculumService->list($isPaginated, $perPage, $filters);
         return CurriculumResource::collection($curriculums);
     }
 
@@ -32,7 +35,10 @@ class CurriculumController extends Controller
     public function store(CurriculumStoreRequest $request)
     {
         $curriculumService = new CurriculumService();
-        $curriculum = $curriculumService->store($request);
+        $data = $request->except('subjects', 'prerequisites');
+        $subjects = $request->subjects ?? [];
+        $prerequisites = $request->prerequisites ?? [];
+        $curriculum = $curriculumService->store($data, $subjects, $prerequisites);
         return (new CurriculumResource($curriculum))
             ->response()
             ->setStatusCode(201);
@@ -44,14 +50,10 @@ class CurriculumController extends Controller
      * @param  \App\Curriculum  $curriculum
      * @return \Illuminate\Http\Response
      */
-    public function show(Curriculum $curriculum)
+    public function show(int $id)
     {
-        // return $curriculum->id;
-        $curriculum->load(['schoolCategory', 'course', 'level', 'subjects' => function($query) use ($curriculum) {
-            return $query->with(['prerequisites' => function ($query) use ($curriculum) {
-                $query->where('curriculum_id', $curriculum->id);
-            }]);
-        }]);
+        $curriculumService = new CurriculumService();
+        $curriculum = $curriculumService->get($id);
         return new CurriculumResource($curriculum);
     }
 
@@ -62,10 +64,13 @@ class CurriculumController extends Controller
      * @param  \App\Curriculum  $curriculum
      * @return \Illuminate\Http\Response
      */
-    public function update(CurriculumUpdateRequest $request, Curriculum $curriculum)
+    public function update(CurriculumUpdateRequest $request, int $id)
     {
         $curriculumService = new CurriculumService();
-        $curriculum = $curriculumService->update($request, $curriculum);
+        $data = $request->except('subjects', 'prerequisites');
+        $subjects = $request->subjects ?? [];
+        $prerequisites = $request->prerequisites ?? [];
+        $curriculum = $curriculumService->update($data, $subjects, $prerequisites, $id);
         return (new CurriculumResource($curriculum))
         ->response()
         ->setStatusCode(200);
@@ -77,10 +82,10 @@ class CurriculumController extends Controller
      * @param  \App\Curriculum  $curriculum
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Curriculum $curriculum)
+    public function destroy(int $id)
     {
         $curriculumService = new CurriculumService();
-        $curriculumService->delete($curriculum);
+        $curriculumService->delete($id);
         return response()->json([], 204);
     }
 }

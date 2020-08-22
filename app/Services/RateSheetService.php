@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\RateSheetStoreRequest;
 use App\RateSheet;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -9,50 +10,61 @@ use Illuminate\Support\Facades\Log;
 
 class RateSheetService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage, array $filter)
     {
         try {
-            $perPage = $request->per_page ?? 20;
+            $perPage = $filter['per_page'] ?? 20;
             $query = RateSheet::with(['level', 'course', 'semester', 'fees']);
     
             // filters
-            $levelId = $request->level_id ?? false;
+            $levelId = $filter['level_id'] ?? false;
             $query->when($levelId, function($q) use ($levelId) {
                 return $q->where('level_id', $levelId);
             });
     
-            $courseId = $request->course_id ?? false;
+            $courseId = $filter['course_id'] ?? false;
             $query->when($courseId, function($q) use ($courseId) {
                 return $q->where('course_id', $courseId);
             });
     
-            $semesterId = $request->semester_id ?? false;
+            $semesterId = $filter['semester_id'] ?? false;
             $query->when($semesterId, function($q) use ($semesterId) {
                 return $q->where('semester_id', $semesterId);
             });
     
-            $rateSheets = !$request->has('paginate') || $request->paginate === 'true'
+            $rateSheets = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
 
             return $rateSheets;
 
         } catch (Exception $e) {
-            Log::info('Error occured during RateSheetService index method call: ');
+            Log::info('Error occured during RateSheetService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function store(object $request)
+    public function get(int $id)
+    {
+        try {
+            $rateSheet = RateSheet::find($id);
+            $rateSheet->load(['level', 'course', 'semester', 'fees']);
+            return $rateSheet;
+        } catch (Exception $e) {
+            Log::info('Error occured during RateSheetService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function store(array $data, array $fees)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except(['fees']);
             $rateSheet = RateSheet::create($data);
 
-            if ($request->has('fees')) {
-                $fees = $request->fees;
+            if ($fees) {
                 $items = [];
                 foreach ($fees as $fee) {
                     $items[$fee['school_fee_id']] = [
@@ -74,15 +86,14 @@ class RateSheetService
         }
     }
 
-    public function update(object $request, RateSheet $rateSheet)
+    public function update(array $data, array $fees, int $id)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except(['fees']);
+            $rateSheet = RateSheet::find($id);
             $rateSheet->update($data);
     
-            if ($request->has('fees')) {
-                $fees = $request->fees;
+            if ($fees) {
                 $items = [];
                 foreach ($fees as $fee) {
                     $items[$fee['school_fee_id']] = [
@@ -104,9 +115,10 @@ class RateSheetService
         }
     }
 
-    public function delete(RateSheet $rateSheet)
+    public function delete(int $id)
     {
         try {
+            $rateSheet = RateSheet::find($id);
             $rateSheet->delete();
         } catch (Exception $e) {
             DB::rollback();

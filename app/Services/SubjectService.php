@@ -12,25 +12,37 @@ use Illuminate\Support\Facades\Log;
 
 class SubjectService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $perPage = $request->per_page ?? 20;
             $query = Subject::with(['department', 'schoolCategory']);
 
             //filter by school category
-            $schoolCategoryId = $request->school_category_id ?? false;
+            $schoolCategoryId = $filters['school_category_id'] ?? false;
             $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
-            $subjects = !$request->has('paginate') || $request->paginate === 'true'
+            $subjects = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
 
             return $subjects;
         } catch (Exception $e) {
-            Log::info('Error occured during SubjectService index method call: ');
+            Log::info('Error occured during SubjectService list method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function get(int $id)
+    {
+        try {
+            $subject = Subject::find($id);
+            $subject->load(['schoolCategory']);
+            return $subject;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -52,10 +64,11 @@ class SubjectService
         }
     }
 
-    public function update(array $data, Subject $subject)
+    public function update(array $data, int $id)
     {
         DB::beginTransaction();
         try {
+            $subject = Subject::find($id);
             $subject->update($data);
             $subject->load(['schoolCategory']);
             DB::commit();
@@ -68,9 +81,10 @@ class SubjectService
         }
     }
 
-    public function delete(Subject $subject)
+    public function delete(int $id)
     {
         try {
+            $subject = Subject::find($id);
             $subject->delete();
         } catch (Exception $e) {
             DB::rollback();
@@ -80,44 +94,41 @@ class SubjectService
         } 
     }
 
-    public function getSubjectsOfLevel($levelId, object $data)
+    public function getSubjectsOfLevel($levelId, bool $isPaginated, int $perPage, array $filters)
     {
-        $perPage = $data->per_page ?? 20;
         $query = Level::find($levelId)->subjects();
 
         // filters
-        $courseId = $data->course_id ?? false;
+        $courseId = $filters['course_id'] ?? false;
         $query->when($courseId, function($q) use ($courseId) {
             return $q->where('course_id', $courseId);
         });
 
-        $semesterId = $data->semester_id ?? false;
+        $semesterId = $filters['semester_id'] ?? false;
         $query->when($semesterId, function($q) use ($semesterId) {
             return $q->where('semester_id', $semesterId);
         });
 
-        $subjects = !$data->has('paginate') || $data->paginate === 'true'
+        $subjects = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();
         
         return $subjects->unique('id');
     }
 
-    public function getSubjectsOfTranscript($transcriptId, object $data)
+    public function getSubjectsOfTranscript($transcriptId, bool $isPaginated, int $perPage)
     {
-        $perPage = $data->per_page ?? 20;
         $query = Transcript::find($transcriptId)->subjects();
 
-        $subjects = !$data->has('paginate') || $data->paginate === 'true'
+        $subjects = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();
 
         return $subjects;
     }
 
-    public function getSubjectsOfEvaluation($evaluationId, object $data)
+    public function getSubjectsOfEvaluation($evaluationId, bool $isPaginated, int $perPage)
     {
-        $perPage = $data->per_page ?? 20;
         $evaluation = Evaluation::find($evaluationId);
         $query = $evaluation->subjects()
         ->with(['prerequisites' => function($query) use ($evaluation) {
@@ -126,7 +137,7 @@ class SubjectService
             }]);
         }]);
 
-        $subjects = !$data->has('paginate') || $data->paginate === 'true'
+        $subjects = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();
         

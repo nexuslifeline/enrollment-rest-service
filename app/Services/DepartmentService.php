@@ -9,16 +9,27 @@ use Illuminate\Support\Facades\Log;
 
 class DepartmentService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage)
     {
         try {
-            $perPage = $request->per_page ?? 20;
-            $departments = !$request->has('paginate') || $request->paginate === 'true'
+            $departments = $isPaginated
                 ? Department::paginate($perPage)
                 : Department::all();
             return $departments;
         } catch (Exception $e) {
-            Log::info('Error occured during DepartmentService index method call: ');
+            Log::info('Error occured during DepartmentService list method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function get(int $id)
+    {
+        try {
+            $department = Department::find($id);
+            return $department;
+        } catch (Exception $e) {
+            Log::info('Error occured during DepartmentService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -39,10 +50,11 @@ class DepartmentService
         }
     }
 
-    public function update(array $data, Department $department)
+    public function update(array $data, int $id)
     {
         DB::beginTransaction();
         try {
+            $department = Department::find($id);
             $department->update($data); 
             DB::commit();
             return $department;
@@ -54,9 +66,10 @@ class DepartmentService
         }
     }
 
-    public function delete(Department $department)
+    public function delete(int $id)
     {
         try {
+            $department = Department::find($id);
             $department->delete();
         } catch (Exception $e) {
             DB::rollback();

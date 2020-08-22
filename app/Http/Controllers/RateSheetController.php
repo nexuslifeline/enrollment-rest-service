@@ -14,7 +14,10 @@ class RateSheetController extends Controller
     public function index(Request $request)
     {
         $rateSheetService = new RateSheetService();
-        $rateSheets = $rateSheetService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $rateSheets = $rateSheetService->list($isPaginated, $perPage, $filters);
         return RateSheetResource::collection(
             $rateSheets
         );
@@ -23,31 +26,36 @@ class RateSheetController extends Controller
     public function store(RateSheetStoreRequest $request)
     {
         $rateSheetService = new RateSheetService();
-        $rateSheet = $rateSheetService->store($request);
+        $data = $request->except('fees');
+        $fees = $request->fees ?? [];
+        $rateSheet = $rateSheetService->store($data, $fees);
         return (new RateSheetResource($rateSheet))
                 ->response()
                 ->setStatusCode(201);
     }
 
-    public function update(RateSheetUpdateRequest $request, RateSheet $rateSheet)
+    public function update(RateSheetUpdateRequest $request, int $id)
     {
         $rateSheetService = new RateSheetService();
-        $rateSheet = $rateSheetService->update($request, $rateSheet);
+        $data = $request->except('fees');
+        $fees = $request->fees ?? [];
+        $rateSheet = $rateSheetService->update($data, $fees, $id);
         return (new RateSheetResource($rateSheet))
         ->response()
         ->setStatusCode(200);
     }
 
-    public function show(RateSheet $rateSheet)
+    public function show(int $id)
     {
-        $rateSheet->load(['level', 'course', 'semester', 'fees']);
+        $rateSheetService = new RateSheetService();
+        $rateSheet = $rateSheetService->get($id);
         return new RateSheetResource($rateSheet);
     }
 
-    public function destroy(RateSheet $rateSheet)
+    public function destroy(int $id)
     {
         $rateSheetService = new RateSheetService();
-        $rateSheetService->delete($rateSheet);
+        $rateSheetService->delete($id);
         return response()->json([], 204);
     }
 }

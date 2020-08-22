@@ -9,59 +9,68 @@ use Illuminate\Support\Facades\Log;
 
 class SectionService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-          $perPage = $request->per_page ?? 20;
           $query = Section::with(['schoolYear','schoolCategory','level','course','semester']);
   
-          $schoolYearId = $request->school_year_id ?? false;        
+          $schoolYearId = $filters['school_year_id'] ?? false;        
           $query->when($schoolYearId, function($q) use ($schoolYearId) {
               return $q->where('school_year_id', $schoolYearId);
           });
   
-          $schoolCategoryId = $request->school_category_id ?? false;        
+          $schoolCategoryId = $filters['school_category_id'] ?? false;        
           $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
               return $q->where('level_id', $schoolCategoryId);
           });
   
-          $levelId = $request->level_id ?? false;        
+          $levelId = $filters['level_id'] ?? false;        
           $query->when($levelId, function($q) use ($levelId) {
               return $q->where('level_id', $levelId);
           });
   
-          $courseId = $request->course_id ?? false;        
+          $courseId = $filters['course_id'] ?? false;        
           $query->when($courseId, function($q) use ($courseId) {
               return $q->where('course_id', $courseId);
           });
   
-          $semesterId = $request->semester_id ?? false;        
+          $semesterId = $filters['semester_id'] ?? false;        
           $query->when($semesterId, function($q) use ($semesterId) {
               return $q->where('semester_id', $semesterId);
           });
   
-          $sections = !$request->has('paginate') || $request->paginate === 'true'
+          $sections = $isPaginated
               ? $query->paginate($perPage)
               : $query->get();
           
           return $sections;
         } catch (Exception $e) {
-            Log::info('Error occured during SectionService index method call: ');
+            Log::info('Error occured during SectionService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function store(object $request)
+    public function get(int $id)
+    {
+        try {
+            $section = Section::find($id);
+            $section->load(['schoolYear','schoolCategory','level','course','semester','schedules']);
+            return $section;
+        } catch (Exception $e) {
+            Log::info('Error occured during SectionService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function store(array $data, array $schedules)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except('schedules');
-      
             $section = Section::create($data);
     
-            if ($request->has('schedules')) {
-                $schedules = $request->schedules;
+            if ($schedules) {
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
@@ -81,16 +90,14 @@ class SectionService
         }
     }
 
-    public function update(object $request, Section $section)
+    public function update(array $data, array $schedules, int $id)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except('schedules');
-          
+            $section = Section::find($id);
             $section->update($data);
 
-            if ($request->has('schedules')) {
-                $schedules = $request->schedules;
+            if ($schedules) {
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
@@ -109,9 +116,10 @@ class SectionService
         }
     }
 
-    public function delete(Section $section)
+    public function delete(int $id)
     {
         try {
+            $section = Section::find($id);
             $section->delete();
         } catch (Exception $e) {
             DB::rollback();

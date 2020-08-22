@@ -11,29 +11,37 @@ use Illuminate\Support\Facades\Log;
 
 class CourseService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage)
     {
         try {
-            $perPage = $request->per_page ?? 20;
-            $courses = !$request->has('paginate') || $request->paginate === 'true'
+            $courses = $isPaginated
                 ? Course::paginate($perPage)
                 : Course::all();
             return $courses;
         } catch (Exception $e) {
-            Log::info('Error occured during CourseService index method call: ');
+            Log::info('Error occured during CourseService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function store(object $request)
+    public function get(int $id)
+    {
+        try {
+            $course = Course::find($id);
+            return $course;
+        } catch (Exception $e) {
+            Log::info('Error occured during CourseService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function store(array $data, array $levels)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except('levels');
-    
             $course = Course::create($data);
-            $levels = $request->levels;
             $items = [];
             foreach ($levels as $level) {
                 $items[$level['level_id']] = [
@@ -52,15 +60,12 @@ class CourseService
         }
     }
 
-    public function update(object $request, Course $course)
+    public function update(array $data, array $levels, int $id)
     {
         DB::beginTransaction();
         try {
-            $data = $request->except('levels');
-    
+            $course = Course::find($id);
             $course->update($data);
-    
-            $levels = $request->levels;
             $items = [];
             foreach ($levels as $level) {
                 $items[$level['level_id']] = [
@@ -79,9 +84,10 @@ class CourseService
         }
     }
 
-    public function delete(Course $course)
+    public function delete(int $id)
     {
         try {
+            $course = Course::find($id);
             $course->delete();
         } catch (Exception $e) {
             DB::rollback();
@@ -91,31 +97,29 @@ class CourseService
         } 
     }
 
-    public function getCoursesOfLevel($levelId, object $request)
+    public function getCoursesOfLevel(int $levelId, bool $paginate, int $perPage, array $filters)
     {
-        $perPage = $request->per_page ?? 20;
         $query = Level::find($levelId)->courses();
 
         // filters
-        $schoolCategoryId = $request->school_category_id ?? false;
+        $schoolCategoryId = $filters['school_category_id'] ?? false;
         $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
             return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
                 return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
             });
         });
 
-        $courses = !$request->has('paginate') || $request->paginate === 'true'
+        $courses = $paginate
             ? $query->paginate($perPage)
             : $query->get();
         return $courses;
     }
 
-    public function getCoursesOfSchoolCategory($schoolCategoryId, object $request)
+    public function getCoursesOfSchoolCategory($schoolCategoryId, bool $paginate, int $perPage)
     {
-        $perPage = $request->per_page ?? 20;
         $query = SchoolCategory::find($schoolCategoryId)->courses()->distinct('course_id');
 
-        $courses = !$request->has('paginate') || $request->paginate === 'true'
+        $courses = $paginate
             ? $query->paginate($perPage)
             : $query->get();
 

@@ -22,7 +22,10 @@ class PersonnelController extends Controller
     public function index(Request $request)
     {
         $personnelService = new PersonnelService();
-        $personnels = $personnelService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $personnels = $personnelService->list($isPaginated, $perPage, $filters);
         return PersonnelResource::collection($personnels);
     }
 
@@ -35,7 +38,9 @@ class PersonnelController extends Controller
     public function store(PersonnelStoreRequest $request)
     {
         $personnelService = new PersonnelService();
-        $personnel = $personnelService->store($request);
+        $data = $request->except('user');
+        $user = $request->user ?? [];
+        $personnel = $personnelService->store($data, $user);
         return (new PersonnelResource($personnel))
             ->response()
             ->setStatusCode(201);
@@ -47,11 +52,10 @@ class PersonnelController extends Controller
      * @param  \App\Personnel  $personnel
      * @return \Illuminate\Http\Response
      */
-    public function show(Personnel $personnel)
+    public function show(int $id)
     {
-        $personnel->load(['user' => function($query) {
-          $query->with('userGroup');
-        }]);
+        $personnelService = new PersonnelService();
+        $personnel = $personnelService->get($id);
         return new PersonnelResource($personnel);
     }
 
@@ -62,10 +66,12 @@ class PersonnelController extends Controller
      * @param  \App\Personnel  $personnel
      * @return \Illuminate\Http\Response
      */
-    public function update(PersonnelUpdateRequest $request, Personnel $personnel)
+    public function update(PersonnelUpdateRequest $request, int $id)
     {
         $personnelService = new PersonnelService();
-        $personnel = $personnelService->update($request, $personnel);
+        $data = $request->except('user');
+        $user = $request->user ?? [];
+        $personnel = $personnelService->update($data, $user, $id);
         return (new PersonnelResource($personnel))
         ->response()
         ->setStatusCode(200);
@@ -77,10 +83,10 @@ class PersonnelController extends Controller
      * @param  \App\Personnel  $personnel
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Personnel $personnel)
+    public function destroy(int $id)
     {
         $personnelService = new PersonnelService();
-        $personnelService->delete($personnel);
+        $personnelService->delete($id);
         return response()->json([], 204);
     }
 }

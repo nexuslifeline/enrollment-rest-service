@@ -9,16 +9,27 @@ use Illuminate\Support\Facades\Log;
 
 class UserGroupService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage)
     {
         try {
-            $perPage = $request->per_page ?? 20;
-            $userGroups = !$request->has('paginate') || $request->paginate === 'true'
+            $userGroups = $isPaginated
                 ? UserGroup::paginate($perPage)
                 : UserGroup::all();
             return $userGroups;
         } catch (Exception $e) {
-            Log::info('Error occured during UserGroupService index method call: ');
+            Log::info('Error occured during UserGroupService list method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function get(int $id)
+    {
+        try {
+            $userGroup = UserGroup::find($id);
+            return $userGroup;
+        } catch (Exception $e) {
+            Log::info('Error occured during UserGroupService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -39,10 +50,11 @@ class UserGroupService
         }
     }
 
-    public function update(array $data, UserGroup $userGroup)
+    public function update(array $data, int $id)
     {
         DB::beginTransaction();
         try {
+            $userGroup = UserGroup::find($id);
             $userGroup->update($data); 
             DB::commit();
             return $userGroup;
@@ -54,9 +66,10 @@ class UserGroupService
         }
     }
 
-    public function delete(UserGroup $userGroup)
+    public function delete(int $id)
     {
         try {
+            $userGroup = UserGroup::find($id);
             $userGroup->delete();
         } catch (Exception $e) {
             DB::rollback();

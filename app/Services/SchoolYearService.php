@@ -9,16 +9,27 @@ use Illuminate\Support\Facades\Log;
 
 class SchoolYearService
 {
-    public function index(object $request)
+    public function list(bool $isPaginated, int $perPage)
     {
         try {
-            $perPage = $request->per_page ?? 20;
-            $schoolYears = !$request->has('paginate') || $request->paginate === 'true'
+            $schoolYears = $isPaginated
                 ? SchoolYear::paginate($perPage)
                 : SchoolYear::all();
             return $schoolYears;
         } catch (Exception $e) {
-            Log::info('Error occured during SchoolYearService index method call: ');
+            Log::info('Error occured during SchoolYearService list method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function get(int $id)
+    {
+        try {
+            $schoolYear = SchoolYear::find($id);
+            return $schoolYear;
+        } catch (Exception $e) {
+            Log::info('Error occured during SchoolYearService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -46,10 +57,11 @@ class SchoolYearService
         }
     }
 
-    public function update(array $data, SchoolYear $schoolYear)
+    public function update(array $data, int $id)
     {
         DB::beginTransaction();
         try {
+            $schoolYear = SchoolYear::find($id);
             $schoolYear->update($data);
             if ($data['is_active']) {
                 $activeSchoolYear = SchoolYear::where('id', '!=', $schoolYear->id)
@@ -68,9 +80,10 @@ class SchoolYearService
         }
     }
 
-    public function delete(SchoolYear $schoolYear)
+    public function delete(int $id)
     {
         try {
+            $schoolYear = SchoolYear::find($id);
             $schoolYear->delete();
         } catch (Exception $e) {
             DB::rollback();

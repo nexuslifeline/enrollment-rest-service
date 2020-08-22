@@ -19,7 +19,9 @@ class SchoolFeeController extends Controller
     public function index(Request $request)
     {
         $schoolFeeService = new SchoolFeeService();
-        $schoolFees = $schoolFeeService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $schoolFees = $schoolFeeService->list($isPaginated, $perPage);
         return SchoolFeeResource::collection($schoolFees);
     }
 
@@ -44,11 +46,11 @@ class SchoolFeeController extends Controller
      * @param  \App\SchoolFee  $schoolFee
      * @return \Illuminate\Http\Response
      */
-    public function show(SchoolFee $schoolFee)
-    {
-        return new SchoolFeeResource(
-            $schoolFee->load(['schoolFeeCategory'])
-        );
+    public function show(int $id)
+    {   
+        $schoolFeeService = new SchoolFeeService();
+        $schoolFee = $schoolFeeService->get($id);
+        return new SchoolFeeResource($schoolFee);
     }
 
     /**
@@ -58,10 +60,10 @@ class SchoolFeeController extends Controller
      * @param  \App\SchoolFee  $schoolFee
      * @return \Illuminate\Http\Response
      */
-    public function update(SchoolFeeUpdateRequest $request, SchoolFee $schoolFee)
+    public function update(SchoolFeeUpdateRequest $request, int $id)
     {
         $schoolFeeService = new SchoolFeeService();
-        $schoolFee = $schoolFeeService->update($request->all(), $schoolFee);
+        $schoolFee = $schoolFeeService->update($request->all(), $id);
         return (new SchoolFeeResource($schoolFee))
                 ->response()
                 ->setStatusCode(200);
@@ -74,10 +76,10 @@ class SchoolFeeController extends Controller
      * @param  \App\SchoolFee  $schoolFee
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SchoolFee $schoolFee)
+    public function destroy(int $id)
     {
         $schoolFeeService = new SchoolFeeService();
-        $schoolFeeService->delete($schoolFee);
+        $schoolFeeService->delete($id);
         return response()->json([], 204);
     }
 }

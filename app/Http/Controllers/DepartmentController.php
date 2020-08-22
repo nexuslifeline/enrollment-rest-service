@@ -19,11 +19,11 @@ class DepartmentController extends Controller
     public function index(Request $request)
     {
         $departmentService = new DepartmentService();
-        $departments = $departmentService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $departments = $departmentService->list($isPaginated, $perPage);
 
-        return DepartmentResource::collection(
-            $departments
-        );
+        return DepartmentResource::collection($departments);
     }
 
     /**
@@ -48,8 +48,10 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Department $department)
+    public function show(int $id)
     {
+        $departmentService = new DepartmentService();
+        $department = $departmentService->get($id);
         return new DepartmentResource($department);
     }
 
@@ -60,10 +62,10 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Department $department)
+    public function update(Request $request, int $id)
     {
         $departmentService = new DepartmentService();
-        $department = $departmentService->update($request->all(), $department);
+        $department = $departmentService->update($request->all(), $id);
 
         return (new DepartmentResource($department))
             ->response()
@@ -76,10 +78,10 @@ class DepartmentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Department $department)
+    public function destroy(int $id)
     {
         $departmentService = new DepartmentService();
-        $departmentService->delete($department);
+        $departmentService->delete($id);
         return response()->json([], 204);
     }
 }

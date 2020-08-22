@@ -8,6 +8,7 @@ use App\SchoolFeeCategory;
 use Illuminate\Http\Request;
 use App\Http\Resources\SchoolFeeCategoryResource;
 use App\Services\SchoolFeeCategoryService;
+use App\Services\SchoolFeeService;
 
 class SchoolFeeCategoryController extends Controller
 {
@@ -19,7 +20,9 @@ class SchoolFeeCategoryController extends Controller
     public function index(Request $request)
     {
         $schoolFeeCategoryService = new SchoolFeeCategoryService();
-        $schoolFeeCategories = $schoolFeeCategoryService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $schoolFeeCategories = $schoolFeeCategoryService->list($isPaginated, $perPage);
         return SchoolFeeCategoryResource::collection($schoolFeeCategories);
     }
 
@@ -45,8 +48,10 @@ class SchoolFeeCategoryController extends Controller
      * @param  \App\SchoolFeeCategory  $schoolFeeCategory
      * @return \Illuminate\Http\Response
      */
-    public function show(SchoolFeeCategory $schoolFeeCategory)
+    public function show(int $id)
     {
+        $schoolFeeCategoryService = new SchoolFeeCategoryService();
+        $schoolFeeCategory = $schoolFeeCategoryService->get($id);
         return new SchoolFeeCategoryResource($schoolFeeCategory);
     }
 
@@ -57,10 +62,10 @@ class SchoolFeeCategoryController extends Controller
      * @param  \App\SchoolFeeCategory  $schoolFeeCategory
      * @return \Illuminate\Http\Response
      */
-    public function update(SchoolFeeUpdateRequest $request, SchoolFeeCategory $schoolFeeCategory)
+    public function update(SchoolFeeUpdateRequest $request, int $id)
     {
         $schoolFeeCategoryService = new SchoolFeeCategoryService();
-        $schoolFeeCategory = $schoolFeeCategoryService->update($request->all(), $schoolFeeCategory);
+        $schoolFeeCategory = $schoolFeeCategoryService->update($request->all(), $id);
 
         return (new SchoolFeeCategoryResource($schoolFeeCategory))
             ->response()
@@ -73,10 +78,10 @@ class SchoolFeeCategoryController extends Controller
      * @param  \App\SchoolFeeCategory  $schoolFeeCategory
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SchoolFeeCategory $schoolFeeCategory)
+    public function destroy(int $id)
     {
         $schoolFeeCategoryService = new SchoolFeeCategoryService();
-        $schoolFeeCategoryService->delete($schoolFeeCategory);
+        $schoolFeeCategoryService->delete($id);
         return response()->json([], 204);
     }
 }

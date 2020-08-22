@@ -7,6 +7,7 @@ use App\Http\Requests\SchoolYearUpdateRequest;
 use App\SchoolYear;
 use Illuminate\Http\Request;
 use App\Http\Resources\SchoolYearResource;
+use App\Services\SchoolFeeService;
 use App\Services\SchoolYearService;
 
 class SchoolYearController extends Controller
@@ -19,7 +20,9 @@ class SchoolYearController extends Controller
     public function index(Request $request)
     {
         $schoolYearService = new SchoolYearService();
-        $schoolYears = $schoolYearService->index($request);
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $schoolYears = $schoolYearService->list($isPaginated, $perPage);
         return SchoolYearResource::collection(
             $schoolYears
         );
@@ -47,8 +50,10 @@ class SchoolYearController extends Controller
      * @param  \App\SchoolYear  $schoolYear
      * @return \Illuminate\Http\Response
      */
-    public function show(SchoolYear $schoolYear)
+    public function show(int $id)
     {
+        $schoolYearService = new SchoolYearService();
+        $schoolYear = $schoolYearService->get($id);
         return new SchoolYearResource($schoolYear);
     }
 
@@ -59,10 +64,10 @@ class SchoolYearController extends Controller
      * @param  \App\SchoolYear  $schoolYear
      * @return \Illuminate\Http\Response
      */
-    public function update(SchoolYearUpdateRequest $request, SchoolYear $schoolYear)
+    public function update(SchoolYearUpdateRequest $request, int $id)
     {
         $schoolYearService = new SchoolYearService();
-        $schoolYear = $schoolYearService->update($request->all(), $schoolYear);
+        $schoolYear = $schoolYearService->update($request->all(), $id);
 
         return (new SchoolYearResource($schoolYear))
             ->response()
@@ -75,10 +80,10 @@ class SchoolYearController extends Controller
      * @param  \App\SchoolYear  $schoolYear
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SchoolYear $schoolYear)
+    public function destroy(int $id)
     {
         $schoolYearService = new SchoolYearService();
-        $schoolYearService->delete($schoolYear);
+        $schoolYearService->delete($id);
         return response()->json([], 204);
     }
 }
