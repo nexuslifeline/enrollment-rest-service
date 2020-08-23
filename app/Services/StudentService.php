@@ -2,10 +2,13 @@
 
 namespace App\Services;
 
+use App\Admission;
+use App\Application;
 use Image;
 use Exception;
 use App\Student;
 use App\SchoolYear;
+use App\Transcript;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -112,4 +115,148 @@ class StudentService
         }
     }
 
+    public function list(bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = Student::with(['address', 'family', 'education', 'photo', 'user']);
+
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function($query) use ($criteria) {
+                return $query->where(function($q) use ($criteria) {
+                    return $q->where('name', 'like', '%'.$criteria.'%')
+                    ->orWhere('first_name', 'like', '%'.$criteria.'%')
+                    ->orWhere('middle_name', 'like', '%'.$criteria.'%')
+                    ->orWhere('last_name', 'like', '%'.$criteria.'%');
+                });
+            });
+
+            $students = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->all();
+
+            return $students;
+        } catch (Exception $e) {
+          Log::info('Error occured during StudentService list method call: ');
+          Log::info($e->getMessage());
+          throw $e;
+        }
+    }
+
+    public function get(int $id)
+    {
+        try {
+            $student = Student::find($id);
+            $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
+            $student->append(['active_admission', 'active_application', 'transcript']);
+            return $student;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function store(array $data, array $studentInfo, array $related)
+    {
+        DB::beginTransaction();
+        try {
+            $student = Student::create($data);
+            foreach($related as $item) {
+                $info = $studentInfo[$item] ?? false;
+                if ($info) {
+                    $student->{$item}()->updateOrCreate(['student_id' => $student->id], $studentInfo[$item]);
+                }
+            }
+
+            $student->load($related);
+            DB::commit();
+            return $student;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function update(array $data, array $studentInfo, array $related, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $student = Student::find($id);
+            $student->update($data);
+
+            $activeApplication = $studentInfo['active_application'] ?? false;
+            if ($activeApplication) {
+                $application = Application::find($activeApplication['id']);
+                if ($application) {
+                    $application->update($activeApplication);
+                }
+            }
+
+            $activeAdmission = $studentInfo['active_admission'] ?? false;
+            if ($activeAdmission) {
+                $admission = Admission::find($activeAdmission['id']);
+                if ($admission) {
+                    $admission->update($activeAdmission);
+                }
+            }
+
+            $activeTranscript = $studentInfo['transcript'] ?? false;
+            if ($activeTranscript) {
+                $transcript = Transcript::find($activeTranscript['id']);
+                if ($transcript) {
+                    $transcript->update($activeTranscript);
+                    $subjects = $studentInfo['subjects'] ?? false;
+                    if ($subjects) {
+                        $transcript->subjects()->sync($subjects);
+                    }
+                }
+            }
+
+            foreach($related as $item) {
+                $info = $studentInfo[$item] ?? false;
+                if ($info) {
+                    $student->{$item}()->updateOrCreate(['student_id' => $student->id], $studentInfo[$item]);
+                    // $student->active_application->update
+                }
+            }
+            
+            $user = $studentInfo['user'] ?? false;
+            if ($user) {
+                $student->user()->updateOrCreate(
+                    [   
+                        'userable_id' => $student->id
+                    ],
+                    [ 
+                        'username' => $user['username'],
+                        'password' => Hash::make($user['password'])
+                    ]
+                );
+            }
+
+            $student->load(['address', 'family', 'education','photo', 'user', 'evaluation'])->fresh();
+            $student->append(['active_admission', 'active_application', 'transcript']);
+            DB::commit();
+            return $student;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function delete(int $id)
+    {
+        try {
+            $student = Student::find($id);
+            $student->delete();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        } 
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\BankAccount;
 use Illuminate\Http\Request;
 use App\Http\Resources\BankAccountResource;
+use App\Services\BankAccountService;
 
 class BankAccountController extends Controller
 {
@@ -15,10 +16,10 @@ class BankAccountController extends Controller
      */
     public function index(Request $request)
     {
+        $bankAccountService = new BankAccountService();
         $perPage = $request->per_page ?? 20;
-        $bankAccounts = !$request->has('paginate') || $request->paginate === 'true'
-            ? BankAccount::paginate($perPage)
-            : BankAccount::all();
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $bankAccounts = $bankAccountService->list($isPaginated, $perPage);
         return BankAccountResource::collection(
             $bankAccounts
         );

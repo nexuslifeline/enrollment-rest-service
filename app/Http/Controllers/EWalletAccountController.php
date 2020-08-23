@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\EWalletAccount;
 use Illuminate\Http\Request;
 use App\Http\Resources\EWalletAccountResource;
+use App\Services\EWalletAccountService;
 
 class EWalletAccountController extends Controller
 {
@@ -15,10 +16,10 @@ class EWalletAccountController extends Controller
      */
     public function index(Request $request)
     {
+        $eWalletAccountService = new EWalletAccountService();
         $perPage = $request->per_page ?? 20;
-        $eWalletAccounts = !$request->has('paginate') || $request->paginate === 'true'
-            ? EWalletAccount::paginate($perPage)
-            : EWalletAccount::all();
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $eWalletAccounts = $eWalletAccountService->list($isPaginated, $perPage);
         return EWalletAccountResource::collection(
             $eWalletAccounts
         );

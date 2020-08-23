@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Transcript;
 use Illuminate\Http\Request;
 use App\Http\Resources\TranscriptResource;
+use App\Services\TranscriptService;
 
 class TranscriptController extends Controller
 {
@@ -15,82 +16,11 @@ class TranscriptController extends Controller
      */
     public function index(Request $request)
     {
+        $transcriptService = new TranscriptService();
         $perPage = $request->per_page ?? 20;
-        $query = Transcript::with([
-            'section',
-            'schoolYear', 
-            'level', 
-            'course', 
-            'semester', 
-            'schoolCategory', 
-            'studentCategory',
-            'studentType', 
-            'application', 
-            'admission',
-            'student' => function($query) {
-                $query->with(['address', 'photo']);
-            }]);
-
-        // filters
-        // student
-        $studentId = $request->student_id ?? false;
-        $query->when($studentId, function($q) use ($studentId) {
-            return $q->whereHas('student', function($query) use ($studentId) {
-                return $query->where('student_id', $studentId);
-            });
-        });
-
-        // course
-        $courseId = $request->course_id ?? false;
-        $query->when($courseId, function($q) use ($courseId) {
-            return $q->whereHas('course', function($query) use ($courseId) {
-                return $query->where('course_id', $courseId);
-            });
-        });
-
-        // school category
-        $schoolCategoryId = $request->school_category_id ?? false;
-        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-            return $q->whereHas('schoolCategory', function($query) use ($schoolCategoryId) {
-                return $query->where('school_category_id', $schoolCategoryId);
-            });
-        });
-
-        // application status
-        $applicationStatusId = $request->application_status_id ?? false;
-        $query->when($applicationStatusId, function($q) use ($applicationStatusId) {
-            return $q->where(function($q) use ($applicationStatusId) {
-                return $q->whereHas('application', function($query) use ($applicationStatusId) {
-                    return $query->where('application_status_id', $applicationStatusId);
-                })->orWhereHas('admission', function($query) use ($applicationStatusId) {
-                    return $query->where('application_status_id', $applicationStatusId);
-                });
-            });
-        });
-
-        // transcript status
-        $transcriptStatusId = $request->transcript_status_id ?? false;
-        $query->when($transcriptStatusId, function($query) use ($transcriptStatusId) {
-            return $query->where('transcript_status_id', $transcriptStatusId);
-        });
-
-        // filter by student name
-        $criteria = $request->criteria ?? false;
-        $query->when($criteria, function($q) use ($criteria) {
-          	return $q->whereHas('student', function($query) use ($criteria) {
-								return $query->where(function($q) use ($criteria) {
-            				return $q->where('name', 'like', '%'.$criteria.'%')
-												->orWhere('first_name', 'like', '%'.$criteria.'%')
-												->orWhere('middle_name', 'like', '%'.$criteria.'%')
-												->orWhere('last_name', 'like', '%'.$criteria.'%');
-								});
-          	});
-        });
-
-        $transcripts = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $transcripts = $transcriptService->list($isPaginated, $perPage, $filters);
         // $registrar = $request->registrar ?? false;
         // $students->when($registrar, function($students) {
         //     return $students->append(['active_admission', 'active_application', 'transcript']);
@@ -151,84 +81,15 @@ class TranscriptController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Transcript $transcript)
+    public function update(Request $request, int $id)
     {
-        // return $request;
-        try {
-            $this->validate($request, [
-                'section_id' => 'sometimes|required'
-            ]);
-            $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
-            $data = $request->except($except);
-            $transcript->update($data);
+        $transcriptService = new TranscriptService();
+        $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
+        $data = $request->except($except);
+        $transcriptInfo = $request->only($except);
+        $transcript = $transcriptService->update($data, $transcriptInfo, $id);
+        return new TranscriptResource($transcript);
 
-            if ($request->has('application') && count($request->application) > 0) {
-                $application = $transcript->application();
-                if ($application) {
-                    $application->update($request->application);
-                }
-            }
-
-            if ($request->has('admission') && count($request->admission) > 0) {
-                $admission = $transcript->admission();
-                if ($admission) {
-                    $admission->update($request->admission);
-                }
-            }
-
-            if ($request->has('student_fee')) {
-                $student = $transcript->student()->first();
-                $studentFee = $student->studentFees()
-                    ->updateOrCreate(['transcript_id' => $transcript->id], $request->student_fee);
-
-                if ($request->has('fees')) {
-                    $fees = $request->fees;
-                    $items = [];
-                    foreach ($fees as $fee) {
-                        $items[$fee['school_fee_id']] = [
-                            'amount' => $fee['amount'],
-                            'notes' => $fee['notes']
-                        ];
-                    }
-                    $studentFee->studentFeeItems()->sync($items);
-                }
-            }
-                        
-            if ($request->has('billing')) {
-                $billing = $studentFee->billings()->create($request->billing);
-
-                if ($request->has('billing_item')) {
-                    $billing->billingItems()->create($request->billing_item);
-                }
-
-                $billing->update([
-                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
-                ]);
-            }
-
-            if ($request->has('subjects')) {
-                $transcript->subjects()->sync($request->subjects);
-            }
-
-            $transcript->load([
-                'schoolYear', 
-                'level', 
-                'course', 
-                'semester', 
-                'schoolCategory', 
-                'studentCategory',
-                'studentType', 
-                'application', 
-                'admission',
-                'student' => function($query) {
-                    $query->with(['address']);
-                }])->fresh();
-
-            return new TranscriptResource($transcript);
-        } catch (Throwable $e) {
-            Log::info($e->getMessage());
-            return response()->json([], 400); // Note! add error here
-        }
     }
 
     /**

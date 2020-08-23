@@ -6,6 +6,8 @@ use App\StudentFee;
 use App\Transcript;
 use Illuminate\Http\Request;
 use App\Http\Resources\StudentFeeResource;
+use App\Services\StudentFeeService;
+use App\Services\StudentService;
 
 class StudentFeeController extends Controller
 {
@@ -66,9 +68,8 @@ class StudentFeeController extends Controller
 
     public function getStudentFeeOfTranscript($transcriptId)
     {
-        $studentFee = Transcript::findOrFail($transcriptId)->studentFee()->with(['studentFeeItems', 'billings' => function($query) {
-          $query->first()->first();
-        }])->first();
+        $studentFeeService = new StudentFeeService();
+        $studentFee = $studentFeeService->getStudentFeeOfTranscript($transcriptId);
         return new StudentFeeResource($studentFee);
     }
 

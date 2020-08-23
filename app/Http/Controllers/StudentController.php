@@ -7,10 +7,12 @@ use App\Admission;
 use App\Application;
 use App\Transcript;
 use App\Evaluation;
+use App\Http\Requests\StudentStoreRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StudentUpdateRequest;
+use App\Services\StudentService;
 use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
@@ -22,22 +24,11 @@ class StudentController extends Controller
      */
     public function index(Request $request)
     {
+        $studentService = new StudentService();
         $perPage = $request->per_page ?? 20;
-        $query = Student::with(['address', 'family', 'education', 'photo', 'user']);
-
-        $criteria = $request->criteria ?? false;
-        $query->when($criteria, function($query) use ($criteria) {
-            return $query->where(function($q) use ($criteria) {
-                return $q->where('name', 'like', '%'.$criteria.'%')
-                    ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                    ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                    ->orWhere('last_name', 'like', '%'.$criteria.'%');
-                });
-        });
-
-        $students = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->all();
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $students = $studentService->list($isPaginated, $perPage, $filters);
 
         return StudentResource::collection(
             $students
@@ -53,27 +44,14 @@ class StudentController extends Controller
      */
     public function store(StudentUpdateRequest $request)
     {
-        try{
-            
-            $related = ['address', 'family', 'education', 'photo', 'user'];
-            $data = $request->except($related);
-            $student = Student::create($data);
-
-            foreach($related as $item) {
-                if ($request->has($item)) {
-                    $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
-                }
-            }
-
-            $student->load($related);
-            return (new StudentResource($student))
-                ->response()
-                ->setStatusCode(201);
-
-        } catch (Throwable $e) {
-            Log::info($e->getMessage());
-            return response()->json([], 400); // Note! add error here
-        }
+        $studentService = new StudentService();
+        $related = ['address', 'family', 'education', 'photo', 'user'];
+        $studentInfo = $request->only($related);
+        $data = $request->except($related);
+        $student = $studentService->store($data, $studentInfo, $related);
+        return (new StudentResource($student))
+        ->response()
+        ->setStatusCode(201);
     }
         
 
@@ -83,10 +61,10 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function show(Student $student)
+    public function show(int $id)
     {
-        $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
-        $student->append(['active_admission', 'active_application', 'transcript',]);
+        $studentService = new StudentService();
+        $student = $studentService->get($id);
         return new StudentResource($student);
     }
 
@@ -97,66 +75,15 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function update(StudentUpdateRequest $request, Student $student)
+    public function update(StudentUpdateRequest $request, int $id)
     {
-        try {
-            $related = ['address', 'family', 'education', 'evaluation'];
-            $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects', 'user', 'evaluation'];
-            $data = $request->except($except);
-            $student->update($data);
-
-            if ($request->has('active_application') && count($request->active_application) > 0) {
-                $application = Application::find($request->active_application['id']);
-                if ($application) {
-                    $application->update($request->active_application);
-                }
-            }
-
-            if ($request->has('active_admission') && count($request->active_admission) > 0) {
-                $admission = Admission::find($request->active_admission['id']);
-                if ($admission) {
-                    $admission->update($request->active_admission);
-                }
-            }
-
-            if ($request->has('transcript')) {
-                $transcript = Transcript::find($request->transcript['id']);
-                if ($transcript) {
-                    $transcript->update($request->transcript);
-                    if ($request->has('subjects') && $request->subjects) {
-                        $subjects = $request->subjects;
-                        $transcript->subjects()->sync($subjects);
-                    }
-                }
-            }
-
-            foreach($related as $item) {
-                if ($request->has($item)) {
-                    $query = $student->{$item}()->updateOrCreate(['student_id' => $student->id], $request->{$item});
-                    // $student->active_application->update
-                }
-            }
-            
-            if ($request->has('user')) {
-                $user = $student->user()->updateOrCreate(
-                    [   
-                        'userable_id' => $student->id
-                    ],
-                    [ 
-                        'username' => $request->user['username'],
-                        'password' => Hash::make($request->user['password'])
-                    ]
-                );
-            }
-
-            $student->load(['address', 'family', 'education','photo', 'user', 'evaluation'])->fresh();
-            $student->append(['active_admission', 'active_application', 'transcript']);
-
-            return new StudentResource($student);
-        } catch (Throwable $e) {
-            Log::info($e->getMessage());
-            return response()->json([], 400); // Note! add error here
-        }
+        $related = ['address', 'family', 'education', 'evaluation'];
+        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects', 'user', 'evaluation'];
+        $studentService = new StudentService();
+        $studentInfo = $request->only($except);
+        $data = $request->except($except);
+        $student = $studentService->update($data, $studentInfo, $related, $id);
+        return new StudentResource($student);
     }
 
     /**
@@ -165,10 +92,10 @@ class StudentController extends Controller
      * @param  \App\Student  $student
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Student $student)
+    public function destroy(int $id)
     {
-        $student->delete();
-        $student->user()->delete();
+        $studentService = new StudentService();
+        $studentService->delete($id);
         return response()->json([], 204);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\PeraPadalaAccount;
 use App\Http\Resources\PeraPadalaAccountResource;
+use App\Services\PeraPadalaAccountService;
 use Illuminate\Http\Request;
 
 class PeraPadalaAccountController extends Controller
@@ -15,10 +16,10 @@ class PeraPadalaAccountController extends Controller
      */
     public function index(Request $request)
     {
+        $peraPadalaAccountService = new PeraPadalaAccountService();
         $perPage = $request->per_page ?? 20;
-        $peraPadalaAccounts = !$request->has('paginate') || $request->paginate === 'true'
-            ? PeraPadalaAccount::paginate($perPage)
-            : PeraPadalaAccount::all();
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $peraPadalaAccounts = $peraPadalaAccountService->list($isPaginated, $perPage);
         return PeraPadalaAccountResource::collection(
             $peraPadalaAccounts
         );

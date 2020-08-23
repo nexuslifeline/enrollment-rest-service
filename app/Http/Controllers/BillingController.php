@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Billing;
 use Illuminate\Http\Request;
 use App\Http\Resources\BillingResource;
+use App\Services\BillingService;
 
 class BillingController extends Controller
 {
@@ -15,58 +16,11 @@ class BillingController extends Controller
      */
     public function index(Request $request)
     {
+        $billingService = new BillingService();
         $perPage = $request->per_page ?? 20;
-        $query = Billing::with(['schoolYear', 'semester', 'billingType', 'studentFee', 'payments']);
-
-        // filters
-
-        // student
-        $studentId = $request->student_id ?? false;
-        $query->when($studentId, function($q) use ($studentId) {
-            return $q->whereHas('student', function($query) use ($studentId) {
-                return $query->where('student_id', $studentId);
-            });
-        });
-
-        // school year
-        $schoolYearId = $request->school_year_id ?? false;
-        $query->when($schoolYearId, function($q) use ($schoolYearId) {
-            return $q->whereHas('schoolYear', function($query) use ($schoolYearId) {
-                return $query->where('school_year_id', $schoolYearId);
-            });
-        });
-
-        // semester
-        $semesterId = $request->semester_id ?? false;
-        $query->when($semesterId, function($q) use ($semesterId) {
-            return $q->whereHas('semester', function($query) use ($semesterId) {
-                return $query->where('semester_id', $semesterId);
-            });
-        });
-
-        // billing type
-        $billingTypeId = $request->billing_type_id ?? false;
-        $query->when($billingTypeId, function($q) use ($billingTypeId) {
-            return $q->whereHas('billingType', function($query) use ($billingTypeId) {
-                return $query->where('billing_type_id', $billingTypeId);
-            });
-        });
-
-        // // filter by student name
-        // $criteria = $request->criteria ?? false;
-        // $query->when($criteria, function($q) use ($criteria) {
-        //   return $q->whereHas('student', function($query) use ($criteria) {
-        //     return $query->where('name', 'like', '%'.$criteria.'%')
-        //               ->orWhere('first_name', 'like', '%'.$criteria.'%')
-        //               ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-        //               ->orWhere('last_name', 'like', '%'.$criteria.'%');
-        //   });
-        // });
-
-        $billings = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
-
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $billings = $billingService->list($isPaginated, $perPage, $filters);
         return BillingResource::collection(
             $billings
         );
@@ -89,9 +43,10 @@ class BillingController extends Controller
      * @param  \App\Billing  $billing
      * @return \Illuminate\Http\Response
      */
-    public function show(Billing $billing)
+    public function show(int $id)
     {
-        $billing->load(['billingItems', 'billingType', 'student']);
+        $billingService = new BillingService();
+        $billing = $billingService->get($id);
         return new BillingResource($billing);
     }
 
