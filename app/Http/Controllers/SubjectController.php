@@ -6,6 +6,7 @@ use App\Level;
 use App\Subject;
 use App\Transcript;
 use App\Evaluation;
+use App\SectionSchedule;
 use App\Http\Requests\SubjectStoreRequest;
 use App\Http\Requests\SubjectUpdateRequest;
 use Illuminate\Http\Request;
@@ -120,6 +121,16 @@ class SubjectController extends Controller
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $subjects = $subjectService->getSubjectsOfEvaluation($evaluationId, $isPaginated, $perPage);
+        return SubjectResource::collection($subjects);
+    }
+
+    public function getScheduledSubjectsOfSection($sectionId, Request $request)
+    {
+        $subjectService = new SubjectService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $subjects = $subjectService->getSectionScheduledSubjects($sectionId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 }

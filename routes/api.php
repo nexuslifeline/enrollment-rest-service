@@ -38,6 +38,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
         Route::get('/transcripts/{transcriptId}/subjects', 'SubjectController@getSubjectsOfTranscript');
+        Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
         // levels
         Route::resource('/levels', 'LevelController');
         Route::get('/school-categories/{schoolCategoryId}/levels', 'LevelController@getLevelsOfSchoolCategory');

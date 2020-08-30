@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Subject;
 use App\Level;
-use App\Transcript;
-use App\Evaluation;
 use Exception;
+use App\Subject;
+use App\Evaluation;
+use App\Transcript;
+use App\SectionSchedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -140,7 +141,26 @@ class SubjectService
         $subjects = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();
-        
+
+        return $subjects;
+    }
+
+
+    public function getSectionScheduledSubjects($sectionId, bool $isPaginated, int $perPage)
+    {
+        $subjectIds = SectionSchedule::select('subject_id')
+            ->where('section_id', $sectionId)
+            ->get()
+            ->pluck('subject_id');
+
+        $query = Subject::with(['schedules' => function($q) use ($sectionId) {
+            return $sectionId ? $q->where('section_id', $sectionId) : $q;
+        }])->whereIn('id', $subjectIds);
+
+        $subjects = $isPaginated
+            ? $query->paginate($perPage)
+            : $query->get();
+
         return $subjects;
     }
 }

@@ -23,8 +23,8 @@ class Subject extends Model
     public function levels()
     {
         return $this->belongsToMany(
-          'App\Level', 
-          'level_subjects', 
+          'App\Level',
+          'level_subjects',
           'subject_id',
           'level_id'
         );
@@ -58,5 +58,10 @@ class Subject extends Model
             'subject_id',
             'prerequisite_subject_id'
         )->withTimestamps();
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany('App\SectionSchedule');
     }
 }
