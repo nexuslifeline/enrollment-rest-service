@@ -55,7 +55,9 @@ class SectionService
     {
         try {
             $section = Section::find($id);
-            $section->load(['schoolYear','schoolCategory','level','course','semester','schedules']);
+            $section->load(['schoolYear','schoolCategory','level','course','semester','schedules' => function($query) {
+                $query->with(['subject', 'personnel']);
+            }]);
             return $section;
         } catch (Exception $e) {
             Log::info('Error occured during SectionService get method call: ');

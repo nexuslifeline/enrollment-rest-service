@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SectionStoreRequest;
+use App\Http\Requests\SectionUpdateRequest;
 use App\Section;
 use Illuminate\Http\Request;
 use App\Http\Resources\SectionResource;
@@ -62,7 +63,7 @@ class SectionController extends Controller
      * @param  \App\Section  $section
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $id)
+    public function update(SectionUpdateRequest $request, int $id)
     {
         $sectionService = new SectionService();
         $data = $request->except('schedules');
