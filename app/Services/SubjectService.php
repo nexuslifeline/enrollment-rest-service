@@ -155,7 +155,7 @@ class SubjectService
 
         $query = Subject::with(['schedules' => function($q) use ($sectionId) {
             return $sectionId ? $q->where('section_id', $sectionId) : $q;
-        }])->whereIn('id', $subjectIds);
+        }, 'schedules.personnel'])->whereIn('id', $subjectIds);
 
         $subjects = $isPaginated
             ? $query->paginate($perPage)
