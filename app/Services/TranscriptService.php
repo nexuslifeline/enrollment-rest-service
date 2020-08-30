@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Student;
 use App\Transcript;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -14,14 +15,14 @@ class TranscriptService
         try {
             $query = Transcript::with([
               'section',
-              'schoolYear', 
-              'level', 
-              'course', 
-              'semester', 
-              'schoolCategory', 
+              'schoolYear',
+              'level',
+              'course',
+              'semester',
+              'schoolCategory',
               'studentCategory',
-              'studentType', 
-              'application', 
+              'studentType',
+              'application',
               'admission',
               'student' => function($query) {
                   $query->with(['address', 'photo']);
@@ -98,7 +99,7 @@ class TranscriptService
         DB::beginTransaction();
         try {
             $transcript = Transcript::find($id);
-            
+
             $transcript->update($data);
 
             if ($transcriptInfo['application'] ?? false) {
@@ -111,7 +112,7 @@ class TranscriptService
             if ($transcriptInfo['admission'] ?? false) {
                 $admission = $transcript->admission();
                 if ($admission) {
-                    $admission->update($transcriptInfo['application']);
+                    $admission->update($transcriptInfo['admission']);
                 }
             }
 
@@ -132,7 +133,7 @@ class TranscriptService
                     $studentFee->studentFeeItems()->sync($items);
                 }
             }
-                        
+
             if ($transcriptInfo['billing'] ?? false) {
                 $billing = $studentFee->billings()->create($transcriptInfo['billing']);
 
@@ -150,14 +151,14 @@ class TranscriptService
             }
             DB::commit();
             $transcript->load([
-                'schoolYear', 
-                'level', 
-                'course', 
-                'semester', 
-                'schoolCategory', 
+                'schoolYear',
+                'level',
+                'course',
+                'semester',
+                'schoolCategory',
                 'studentCategory',
-                'studentType', 
-                'application', 
+                'studentType',
+                'application',
                 'admission',
                 'student' => function($query) {
                     $query->with(['address']);
@@ -166,6 +167,42 @@ class TranscriptService
           } catch (Exception $e) {
             DB::rollBack();
             Log::info('Error occured during TranscriptService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getTranscriptsOfStudent(int $studentId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $transcript = Student::find($studentId)->transcripts();
+            $query = $transcript->with([
+                'section',
+                'schoolYear',
+                'level',
+                'course',
+                'semester',
+                'schoolCategory',
+                'studentCategory',
+                'studentType',
+                'application',
+                'admission',
+                'student' => function($query) {
+                    $query->with(['address', 'photo']);
+                }]);
+
+            // transcript status
+            $transcriptStatusId = $filters['transcript_status_id'] ?? false;
+            $query->when($transcriptStatusId, function($query) use ($transcriptStatusId) {
+                return $query->where('transcript_status_id', $transcriptStatusId);
+            });
+
+            $transcripts = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            return $transcripts;
+        } catch (Exception $e) {
+            Log::info('Error occured during TranscriptService getTranscriptsOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
