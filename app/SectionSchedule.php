@@ -22,4 +22,9 @@ class SectionSchedule extends Model
     {
         return $this->belongsTo('App\Personnel');
     }
+
+    public function section()
+    {
+        return $this->belongsTo('App\Section');
+    }
 }

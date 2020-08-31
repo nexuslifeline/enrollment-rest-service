@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SectionStoreRequest;
+use App\Http\Requests\SectionUpdateRequest;
 use App\Section;
 use Illuminate\Http\Request;
 use App\Http\Resources\SectionResource;
@@ -62,7 +63,7 @@ class SectionController extends Controller
      * @param  \App\Section  $section
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $id)
+    public function update(SectionUpdateRequest $request, int $id)
     {
         $sectionService = new SectionService();
         $data = $request->except('schedules');
@@ -84,5 +85,16 @@ class SectionController extends Controller
         $sectionService = new SectionService();
         $sectionService->delete($id);
         return response()->json([], 204);
+    }
+
+    public function getSectionsOfSubject(Request $request, int $subjectId) {
+        $sectionService = new SectionService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $section = $sectionService->getSectionsOfSubject($isPaginated, $perPage, $filters, $subjectId);
+        return (new SectionResource($section))
+        ->response()
+        ->setStatusCode(200);
     }
 }

@@ -95,6 +95,39 @@ class SubjectController extends Controller
         return response()->json([], 204);
     }
 
+    public function getSectionsOfSubject(bool $isPaginated, int $perPage, array $filters, int $subjectId) {
+        try {
+
+            $query = Section::with(['schoolYear','schoolCategory','level','course','semester']);
+
+            
+            $schoolYearId = $filters['school_year_id'] ?? false;        
+            $query->when($schoolYearId, function($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
+           
+            $query->whereHas('schedules', function($q) use ($subjectId) {
+                return $q->where('subject_id', $subjectId);
+            });
+
+            $query->with(['schedules' => function($q) use ($subjectId) {
+                $q->where('subject_id', $subjectId);
+                return $q->with(['personnel']);                
+            }]); 
+
+            $sections = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+          
+          return $sections;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SectionService get sections of subject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function getSubjectsOfLevel($levelId, Request $request)
     {
         $subjectService = new SubjectService();
@@ -131,6 +164,15 @@ class SubjectController extends Controller
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $filters = $request->except('per_page', 'paginate');
         $subjects = $subjectService->getSectionScheduledSubjects($sectionId, $isPaginated, $perPage);
+        return SubjectResource::collection($subjects);
+    }
+
+    public function getSectionUnscheduledSubjects($evaluationId, Request $request)
+    {
+        $subjectService = new SubjectService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $subjects = $subjectService->getSectionUnscheduledSubjects($evaluationId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 }

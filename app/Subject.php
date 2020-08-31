@@ -64,4 +64,10 @@ class Subject extends Model
     {
         return $this->hasMany('App\SectionSchedule');
     }
+
+    public function getIsAllowedAttribute() {
+        //default true for now
+        //need to add logic for condition of grade and pre req of subject        
+        return true;
+    }
 }
