@@ -39,6 +39,10 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
         Route::get('/transcripts/{transcriptId}/subjects', 'SubjectController@getSubjectsOfTranscript');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
+        Route::get('/evaluations/{evaluationId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
+        Route::get('/subjects/{subjectId}/sections', 'SectionController@getSectionsOfSubject');
+        
+        
         // levels
         Route::resource('/levels', 'LevelController');
         Route::get('/school-categories/{schoolCategoryId}/levels', 'LevelController@getLevelsOfSchoolCategory');
@@ -106,6 +110,7 @@ Route::group(['prefix' => 'v1'], function()
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
         Route::get('/evaluations/{evaluationId}/subjects', 'SubjectController@getSubjectsOfEvaluation');
+        
         // evaluation file
         Route::get('/evaluations/{evaluationId}/files', 'EvaluationFileController@index');
         Route::post('/evaluations/{evaluationId}/files', 'EvaluationFileController@store');

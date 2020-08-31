@@ -18,13 +18,13 @@ class SectionSchedule extends Model
         'deleted_by'
     ];
 
-    public function subject()
-    {
-        return $this->belongsTo('App\Subject');
-    }
-
     public function personnel()
     {
         return $this->belongsTo('App\Personnel');
+    }
+
+    public function section()
+    {
+        return $this->belongsTo('App\Section');
     }
 }

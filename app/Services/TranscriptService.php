@@ -147,7 +147,14 @@ class TranscriptService
             }
 
             if ($transcriptInfo['subjects'] ?? false) {
-                $transcript->subjects()->sync($transcriptInfo['subjects']);
+                $items = [];
+                $subjects = $transcriptInfo['fees'];
+                foreach ($subjects as $subject) {
+                    $items[$subject['subject_id']] = [
+                        'section_id' => $subject['section_id'],
+                    ];
+                }
+                $transcript->subjects()->sync($items);
             }
             DB::commit();
             $transcript->load([
