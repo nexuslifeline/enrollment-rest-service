@@ -148,7 +148,7 @@ class TranscriptService
 
             if ($transcriptInfo['subjects'] ?? false) {
                 $items = [];
-                $subjects = $transcriptInfo['fees'];
+                $subjects = $transcriptInfo['subjects'];
                 foreach ($subjects as $subject) {
                     $items[$subject['subject_id']] = [
                         'section_id' => $subject['section_id'],
