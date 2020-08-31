@@ -36,7 +36,7 @@ class SectionController extends Controller
     {
         $sectionService = new SectionService();
         $data = $request->except('schedules');
-        $schedules = $request->schedules;
+        $schedules = $request->schedules ?? [];
         $section = $sectionService->store($data, $schedules);
         return (new SectionResource($section))
             ->response()
@@ -67,7 +67,7 @@ class SectionController extends Controller
     {
         $sectionService = new SectionService();
         $data = $request->except('schedules');
-        $schedules = $request->schedules;
+        $schedules = $request->schedules ?? [];
         $section = $sectionService->update($data, $schedules, $id);
         return (new SectionResource($section))
         ->response()
