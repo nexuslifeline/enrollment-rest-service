@@ -17,4 +17,14 @@ class SectionSchedule extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    public function personnel()
+    {
+        return $this->belongsTo('App\Personnel');
+    }
+
+    public function section()
+    {
+        return $this->belongsTo('App\Section');
+    }
 }

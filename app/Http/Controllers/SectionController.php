@@ -85,4 +85,15 @@ class SectionController extends Controller
         $sectionService->delete($id);
         return response()->json([], 204);
     }
+
+    public function getSectionsOfSubject(Request $request, int $subjectId) {
+        $sectionService = new SectionService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $section = $sectionService->getSectionsOfSubject($isPaginated, $perPage, $filters, $subjectId);
+        return (new SectionResource($section))
+        ->response()
+        ->setStatusCode(200);
+    }
 }

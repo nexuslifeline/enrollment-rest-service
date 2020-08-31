@@ -149,18 +149,38 @@ class SubjectService
     public function getSectionScheduledSubjects($sectionId, bool $isPaginated, int $perPage)
     {
         $subjectIds = SectionSchedule::select('subject_id')
+            
             ->where('section_id', $sectionId)
             ->get()
             ->pluck('subject_id');
 
         $query = Subject::with(['schedules' => function($q) use ($sectionId) {
-            return $sectionId ? $q->where('section_id', $sectionId) : $q;
+            return $sectionId ? $q->where('section_id', $sectionId)->with(['personnel', 'section']) : $q;
         }])->whereIn('id', $subjectIds);
 
         $subjects = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();
 
+        return $subjects;
+    }
+
+    public function getSectionUnscheduledSubjects($evaluationId, bool $isPaginated, int $perPage)
+    {
+        $evaluation = Evaluation::find($evaluationId);
+        $query = $evaluation->subjects()
+        ->with(['prerequisites' => function($query) use ($evaluation) {
+            return $query->with(['prerequisites' => function ($query) use ($evaluation) {
+                $query->where('curriculum_id', $evaluation->curriculum_id);
+            }]);
+        }]);
+
+        
+        $subjects = $isPaginated
+            ? $query->paginate($perPage)
+            : $query->get();
+        
+        $subjects->append('is_allowed');
         return $subjects;
     }
 }
