@@ -65,9 +65,9 @@ class Student extends Model
         return $this->hasMany('App\Transcript');
     }
 
-    public function evaluation()
+    public function evaluations()
     {
-        return $this->hasOne('App\Evaluation');
+        return $this->hasMany('App\Evaluation');
     }
 
     public function studentFees()
@@ -109,5 +109,10 @@ class Student extends Model
         });
 
         return $transcript->first();
+    }
+
+    public function getNameAttribute()
+    {
+        return "{$this->first_name} {$this->middle_name} {$this->last_name}";
     }
 }

@@ -82,4 +82,9 @@ class Transcript extends Model
     {
         return $this->belongsTo('App\Section');
     }
+    
+    public function getNameAttribute()
+    {
+        return "{$this->student->first_name} {$this->student->middle_name} {$this->student->last_name}";
+    }
 }

@@ -102,4 +102,14 @@ class TranscriptController extends Controller
     {
         //
     }
+
+    public function getTranscriptsOfStudent($studentId, Request $request)
+    {
+        $transcriptService = new TranscriptService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $evaluations = $transcriptService->getTranscriptsOfStudent($studentId, $isPaginated, $perPage, $filters);
+        return TranscriptResource::collection($evaluations);
+    }
 }
