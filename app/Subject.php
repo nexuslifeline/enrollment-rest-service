@@ -67,7 +67,14 @@ class Subject extends Model
 
     public function getIsAllowedAttribute() {
         //default true for now
-        //need to add logic for condition of grade and pre req of subject        
-        return true;
+        //need to add logic for condition of grade and pre req of subject
+        //temporary fix for isTaken on evaluation
+        if ($this->pivot) {
+            if ($this->pivot->is_taken) {
+                return false;
+            } else {
+                return true;
+            }
+        }
     }
 }

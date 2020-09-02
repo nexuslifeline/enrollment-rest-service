@@ -25,7 +25,7 @@ class Transcript extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany('App\Subject', 'transcript_subjects', 'transcript_id', 'subject_id')->withTimestamps();
+        return $this->belongsToMany('App\Subject', 'transcript_subjects', 'transcript_id', 'subject_id')->withPivot('section_id')->withTimestamps();
     }
 
     public function application()
