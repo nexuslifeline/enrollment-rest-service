@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Evaluation;
+use App\Student;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,8 +16,8 @@ class EvaluationService
         try {
             $query = Evaluation::with([
               'lastSchoolLevel',
-              'level', 
-              'course', 
+              'level',
+              'course',
               'studentCategory',
               'curriculum',
               'studentCurriculum',
@@ -48,7 +49,7 @@ class EvaluationService
                     return $query->where('course_id', $courseId);
                 });
             });
-            
+
             // level
             $levelId = $filters['level_id'] ?? false;
             $query->when($levelId, function($q) use ($levelId) {
@@ -75,7 +76,7 @@ class EvaluationService
                     });
                 });
             });
-        
+
             $evaluations = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();
@@ -91,7 +92,16 @@ class EvaluationService
     {
         try {
             $evaluation = Evaluation::find($id);
-            $evaluation->load('subjects');
+            $evaluation->load([
+                'subjects' => function($query) {
+                    $query->with('prerequisites');
+                },
+                'studentCategory',
+                'course',
+                'level',
+                'student' => function($query) {
+                    $query->with(['address', 'photo']);
+            }]);
             return $evaluation;
         } catch (Exception $e) {
             Log::info('Error occured during EvaluationService get method call: ');
@@ -123,8 +133,8 @@ class EvaluationService
 
             $evaluation->load([
                 'lastSchoolLevel',
-                'level', 
-                'course', 
+                'level',
+                'course',
                 'studentCategory',
                 'student' => function($query) {
                     $query->with(['address', 'photo']);
@@ -136,6 +146,37 @@ class EvaluationService
             Log::info('Error occured during EvaluationService update method call: ');
             Log::info($e->getMessage());
             throw $e;
+        }
+    }
+
+    public function getEvaluationsOfStudent(int $studentId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = Student::find($studentId)->evaluations()->withCount('files');
+            // evaluation status
+            $evaluationStatusId = $filters['evaluation_status_id'] ?? false;
+            $query->when($evaluationStatusId, function($query) use ($evaluationStatusId) {
+                return $query->where('evaluation_status_id', $evaluationStatusId);
+            });
+            $evaluations = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            $evaluations->load([
+                'lastSchoolLevel',
+                'level',
+                'course',
+                'studentCategory',
+                'curriculum',
+                'studentCurriculum',
+                'student' => function($query) {
+                    $query->with(['address', 'photo']);
+                }
+            ]);
+            return $evaluations;
+        } catch (Exception $e) {
+          Log::info('Error occured during EvaluationService getEvaluationOfStudent method call: ');
+          Log::info($e->getMessage());
+          throw $e;
         }
     }
 }

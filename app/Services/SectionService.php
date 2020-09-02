@@ -13,36 +13,36 @@ class SectionService
     {
         try {
           $query = Section::with(['schoolYear','schoolCategory','level','course','semester']);
-  
-          $schoolYearId = $filters['school_year_id'] ?? false;        
+
+          $schoolYearId = $filters['school_year_id'] ?? false;
           $query->when($schoolYearId, function($q) use ($schoolYearId) {
               return $q->where('school_year_id', $schoolYearId);
           });
-  
-          $schoolCategoryId = $filters['school_category_id'] ?? false;        
+
+          $schoolCategoryId = $filters['school_category_id'] ?? false;
           $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
               return $q->where('level_id', $schoolCategoryId);
           });
-  
-          $levelId = $filters['level_id'] ?? false;        
+
+          $levelId = $filters['level_id'] ?? false;
           $query->when($levelId, function($q) use ($levelId) {
               return $q->where('level_id', $levelId);
           });
-  
-          $courseId = $filters['course_id'] ?? false;        
+
+          $courseId = $filters['course_id'] ?? false;
           $query->when($courseId, function($q) use ($courseId) {
               return $q->where('course_id', $courseId);
           });
-  
-          $semesterId = $filters['semester_id'] ?? false;        
+
+          $semesterId = $filters['semester_id'] ?? false;
           $query->when($semesterId, function($q) use ($semesterId) {
               return $q->where('semester_id', $semesterId);
           });
-  
+
           $sections = $isPaginated
               ? $query->paginate($perPage)
               : $query->get();
-          
+
           return $sections;
         } catch (Exception $e) {
             Log::info('Error occured during SectionService list method call: ');
@@ -71,15 +71,15 @@ class SectionService
         DB::beginTransaction();
         try {
             $section = Section::create($data);
-    
+
             if ($schedules) {
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
-                }            
+                }
                 // $section->schedules()->sync($schedules);
             }
-            
+
             //   $section->load(['department', 'schoolCategory']);
             $section->load(['schoolYear','schoolCategory','level','course','semester']);
             DB::commit();
@@ -103,7 +103,7 @@ class SectionService
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
-                }            
+                }
                 // $section->schedules()->sync($schedules);
             }
 
