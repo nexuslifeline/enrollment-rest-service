@@ -10,12 +10,13 @@ use App\StudentPhoto;
 use App\Evaluation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
-    protected $appends = [];
+    protected $appends = ['name','age'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -24,6 +25,14 @@ class Student extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    public function getNameAttribute(){
+        return ucfirst($this->first_name). ($this->middle_name ? ' ' .ucfirst($this->first_name). ' ' : ' '). ucfirst($this->last_name);
+    }
+
+    public function getAgeAttribute(){
+        return Carbon::parse($this->attributes['birth_date'])->age;
+    }
 
     public function user()
     {
