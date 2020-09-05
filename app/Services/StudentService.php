@@ -221,14 +221,14 @@ class StudentService
                     // $student->active_application->update
                 }
             }
-            
+
             $user = $studentInfo['user'] ?? false;
             if ($user) {
                 $student->user()->updateOrCreate(
-                    [   
+                    [
                         'userable_id' => $student->id
                     ],
-                    [ 
+                    [
                         'username' => $user['username'],
                         'password' => Hash::make($user['password'])
                     ]

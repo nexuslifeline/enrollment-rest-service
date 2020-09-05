@@ -26,14 +26,6 @@ class Student extends Model
         'deleted_by'
     ];
 
-    public function getNameAttribute(){
-        return ucfirst($this->first_name). ($this->middle_name ? ' ' .ucfirst($this->first_name). ' ' : ' '). ucfirst($this->last_name);
-    }
-
-    public function getAgeAttribute(){
-        return Carbon::parse($this->attributes['birth_date'])->age;
-    }
-
     public function user()
     {
         return $this->morphOne('App\User', 'userable');
@@ -118,5 +110,15 @@ class Student extends Model
         });
 
         return $transcript->first();
+    }
+
+    public function getNameAttribute()
+    {
+        return ucfirst($this->first_name) . ($this->middle_name ? ' ' . ucfirst($this->first_name) . ' ' : ' ') . ucfirst($this->last_name);
+    }
+
+    public function getAgeAttribute()
+    {
+        return Carbon::parse($this->attributes['birth_date'])->age;
     }
 }

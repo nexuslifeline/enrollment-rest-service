@@ -22,7 +22,7 @@ class Evaluation extends Model
     {
         return $this->hasMany('App\EvaluationFile');
     }
-    
+
     public function student()
     {
         return $this->belongsTo('App\Student');
@@ -32,7 +32,7 @@ class Evaluation extends Model
     {
         return $this->belongsTo('App\StudentCategory');
     }
-    
+
     public function lastSchoollevel()
     {
         return $this->belongsTo('App\Level', 'last_school_level_id');
@@ -73,4 +73,5 @@ class Evaluation extends Model
           'is_taken'
         ])->withTimestamps();
     }
+    
 }
