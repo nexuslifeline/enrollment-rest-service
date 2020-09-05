@@ -175,4 +175,24 @@ class SubjectController extends Controller
         $subjects = $subjectService->getSectionUnscheduledSubjects($evaluationId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
+
+    public function getSectionScheduledSubjectsWithStatus($sectionId, Request $request)
+    {
+        $subjectService = new SubjectService();
+
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+
+        $user = $request->user()->load('userable');
+        $studentId = $user ? $user->userable->id : 0;
+
+        $subjects = $subjectService->getSectionScheduledSubjectsWithStatus(
+            $sectionId,
+            $studentId,
+            $isPaginated,
+            $perPage
+        );
+        return SubjectResource::collection($subjects);
+    }
 }
