@@ -204,6 +204,18 @@ class TranscriptService
                 return $query->where('transcript_status_id', $transcriptStatusId);
             });
 
+            // application status
+            $applicationStatusId = $filters['application_status_id'] ?? false;
+            $query->when($applicationStatusId, function($q) use ($applicationStatusId) {
+                return $q->where(function($q) use ($applicationStatusId) {
+                    return $q->whereHas('application', function($query) use ($applicationStatusId) {
+                        return $query->where('application_status_id', $applicationStatusId);
+                    })->orWhereHas('admission', function($query) use ($applicationStatusId) {
+                        return $query->where('application_status_id', $applicationStatusId);
+                    });
+                });
+            });
+
             $transcripts = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();

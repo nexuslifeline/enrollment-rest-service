@@ -104,7 +104,9 @@ Route::group(['prefix' => 'v1'], function()
         // sections
         Route::resource('/sections', 'SectionController');
         // student fee
+        Route::resource('/student-fees', 'StudentFeeController');
         Route::get('/transcripts/{transcriptId}/student-fees', 'StudentFeeController@getStudentFeeOfTranscript');
+        Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         // curriculum
         Route::resource('curriculums', 'CurriculumController');
         // school fee categories
@@ -112,7 +114,7 @@ Route::group(['prefix' => 'v1'], function()
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
         Route::get('/evaluations/{evaluationId}/subjects', 'SubjectController@getSubjectsOfEvaluation');
-        
+
         // evaluation file
         Route::get('/evaluations/{evaluationId}/files', 'EvaluationFileController@index');
         Route::post('/evaluations/{evaluationId}/files', 'EvaluationFileController@store');

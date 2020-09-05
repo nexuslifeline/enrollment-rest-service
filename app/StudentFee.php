@@ -25,4 +25,29 @@ class StudentFee extends Model
   {
       return $this->hasMany('App\Billing');
   }
+
+  public function student()
+  {
+    return $this->belongsTo('App\Student');
+  }
+
+  public function level()
+  {
+    return $this->belongsTo('App\Level');
+  }
+
+  public function course()
+  {
+    return $this->belongsTo('App\Course');
+  }
+
+  public function semester()
+  {
+    return $this->belongsTo('App\Semester');
+  }
+
+  public function schoolYear()
+  {
+    return $this->belongsTo('App\SchoolYear');
+  }
 }
