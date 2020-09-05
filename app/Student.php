@@ -114,7 +114,7 @@ class Student extends Model
 
     public function getNameAttribute()
     {
-        return ucfirst($this->first_name) . ($this->middle_name ? ' ' . ucfirst($this->first_name) . ' ' : ' ') . ucfirst($this->last_name);
+        return ucfirst($this->first_name) . ($this->middle_name ? ' ' . ucfirst($this->middle_name) . ' ' : ' ') . ucfirst($this->last_name);
     }
 
     public function getAgeAttribute()
