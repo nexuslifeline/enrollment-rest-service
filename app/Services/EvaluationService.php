@@ -107,19 +107,19 @@ class EvaluationService
             $evaluation = Evaluation::find($id);
             $evaluation->update($data);
 
-            if ($subjects) {
-                $items = [];
-                foreach ($subjects as $subject) {
-                    $items[$subject['subject_id']] = [
-                        'level_id' => $subject['level_id'],
-                        'semester_id' => $subject['semester_id'],
-                        'is_taken' => $subject['is_taken'],
-                        'grade' => $subject['grade'],
-                        'notes' => $subject['notes']
-                    ];
-                }
-                $evaluation->subjects()->sync($items);
+            // if ($subjects) {
+            $items = [];
+            foreach ($subjects as $subject) {
+                $items[$subject['subject_id']] = [
+                    'level_id' => $subject['level_id'],
+                    'semester_id' => $subject['semester_id'],
+                    'is_taken' => $subject['is_taken'],
+                    'grade' => $subject['grade'],
+                    'notes' => $subject['notes']
+                ];
             }
+            $evaluation->subjects()->sync($items);
+            // }
 
             $evaluation->load([
                 'lastSchoolLevel',

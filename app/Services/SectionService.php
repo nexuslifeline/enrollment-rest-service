@@ -71,15 +71,15 @@ class SectionService
         DB::beginTransaction();
         try {
             $section = Section::create($data);
-    
-            if ($schedules) {
-                $section->schedules()->delete();
-                foreach ($schedules as $schedule) {
-                    $section->schedules()->create($schedule);
-                }            
-                // $section->schedules()->sync($schedules);
+
+            // if ($schedules) {
+            $section->schedules()->delete();
+            foreach ($schedules as $schedule) {
+                $section->schedules()->create($schedule);
             }
-            
+                // $section->schedules()->sync($schedules);
+            // }
+
             //   $section->load(['department', 'schoolCategory']);
             $section->load(['schoolYear','schoolCategory','level','course','semester']);
             DB::commit();
@@ -99,13 +99,13 @@ class SectionService
             $section = Section::find($id);
             $section->update($data);
 
-            if ($schedules) {
-                $section->schedules()->delete();
-                foreach ($schedules as $schedule) {
-                    $section->schedules()->create($schedule);
-                }
-                // $section->schedules()->sync($schedules);
+            // if ($schedules) {
+            $section->schedules()->delete();
+            foreach ($schedules as $schedule) {
+                $section->schedules()->create($schedule);
             }
+                // $section->schedules()->sync($schedules);
+            // }
 
             $section->load(['schoolYear','schoolCategory','level','course','semester']);
             DB::commit();

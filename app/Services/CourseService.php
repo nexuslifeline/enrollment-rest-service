@@ -48,7 +48,7 @@ class CourseService
                     'school_category_id' => $level['school_category_id']
                 ];
             }
-    
+
             $course->levels()->sync($items);
             DB::commit();
             return $course;
@@ -72,7 +72,7 @@ class CourseService
                     'school_category_id' => $level['school_category_id']
                 ];
             }
-    
+
             $course->levels()->sync($items);
             DB::commit();
             return $course;
@@ -94,7 +94,7 @@ class CourseService
             Log::info('Error occured during CourseService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 
     public function getCoursesOfLevel(int $levelId, bool $paginate, int $perPage, array $filters)

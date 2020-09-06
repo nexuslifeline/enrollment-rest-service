@@ -15,23 +15,23 @@ class RateSheetService
         try {
             $perPage = $filter['per_page'] ?? 20;
             $query = RateSheet::with(['level', 'course', 'semester', 'fees']);
-    
+
             // filters
             $levelId = $filter['level_id'] ?? false;
             $query->when($levelId, function($q) use ($levelId) {
                 return $q->where('level_id', $levelId);
             });
-    
+
             $courseId = $filter['course_id'] ?? false;
             $query->when($courseId, function($q) use ($courseId) {
                 return $q->where('course_id', $courseId);
             });
-    
+
             $semesterId = $filter['semester_id'] ?? false;
             $query->when($semesterId, function($q) use ($semesterId) {
                 return $q->where('semester_id', $semesterId);
             });
-    
+
             $rateSheets = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
@@ -64,16 +64,16 @@ class RateSheetService
         try {
             $rateSheet = RateSheet::create($data);
 
-            if ($fees) {
-                $items = [];
-                foreach ($fees as $fee) {
-                    $items[$fee['school_fee_id']] = [
-                        'amount' => $fee['amount'],
-                        'notes' => $fee['notes']
-                    ];
-                }
-                $rateSheet->fees()->sync($items);
+            // if ($fees) {
+            $items = [];
+            foreach ($fees as $fee) {
+                $items[$fee['school_fee_id']] = [
+                    'amount' => $fee['amount'],
+                    'notes' => $fee['notes']
+                ];
             }
+            $rateSheet->fees()->sync($items);
+            // }
 
             $rateSheet->load(['level', 'course', 'semester', 'fees']);
             DB::commit();
@@ -92,18 +92,18 @@ class RateSheetService
         try {
             $rateSheet = RateSheet::find($id);
             $rateSheet->update($data);
-    
-            if ($fees) {
-                $items = [];
-                foreach ($fees as $fee) {
-                    $items[$fee['school_fee_id']] = [
-                        'amount' => $fee['amount'],
-                        'notes' => $fee['notes']
-                    ];
-                }
-                $rateSheet->fees()->sync($items);
+
+            // if ($fees) {
+            $items = [];
+            foreach ($fees as $fee) {
+                $items[$fee['school_fee_id']] = [
+                    'amount' => $fee['amount'],
+                    'notes' => $fee['notes']
+                ];
             }
-    
+            $rateSheet->fees()->sync($items);
+            // }
+
             $rateSheet->load(['level', 'course', 'semester', 'fees']);
             DB::commit();
             return $rateSheet;
@@ -125,6 +125,6 @@ class RateSheetService
             Log::info('Error occured during RateSheetService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

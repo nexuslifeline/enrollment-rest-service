@@ -121,7 +121,7 @@ class TranscriptService
                 $studentFee = $student->studentFees()
                     ->updateOrCreate(['transcript_id' => $transcript->id], $transcriptInfo['student_fee']);
 
-                if ($transcriptInfo['fees'] ?? false) {
+                if (array_key_exists('fees', $transcriptInfo)) {
                     $fees = $transcriptInfo['fees'];
                     $items = [];
                     foreach ($fees as $fee) {
@@ -146,7 +146,7 @@ class TranscriptService
                 ]);
             }
 
-            if ($transcriptInfo['subjects'] ?? false) {
+            if (array_key_exists('subjects', $transcriptInfo)) {
                 $items = [];
                 $subjects = $transcriptInfo['subjects'];
                 foreach ($subjects as $subject) {
