@@ -2,7 +2,7 @@
     "name": "stc/enrollment-rest-api",
     "type": "project",
     "description": "API for the enrollment system of STC Tandag.",
-    "version": "0.1.9",
+    "version": "0.1.10",
     "keywords": [
         "framework",
         "laravel"
