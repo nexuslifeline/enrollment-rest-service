@@ -110,7 +110,7 @@ Route::group(['prefix' => 'v1'], function()
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
         Route::get('/evaluations/{evaluationId}/subjects', 'SubjectController@getSubjectsOfEvaluation');
-        
+
         // evaluation file
         Route::get('/evaluations/{evaluationId}/files', 'EvaluationFileController@index');
         Route::post('/evaluations/{evaluationId}/files', 'EvaluationFileController@store');

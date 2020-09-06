@@ -93,7 +93,7 @@ class SubjectService
             Log::info('Error occured during SubjectService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 
     public function getSubjectsOfLevel(int $levelId, bool $isPaginated, int $perPage, array $filters)
@@ -165,34 +165,60 @@ class SubjectService
         return $subjects;
     }
 
-    public function getSectionUnscheduledSubjects(int $evaluationId, bool $isPaginated, int $perPage)
+    public function getSectionUnscheduledSubjects(int $evaluationId, int $studentId, int $curriculumId, bool $isPaginated, int $perPage)
     {
-        $evaluation = Evaluation::find($evaluationId);
-        $query = $evaluation->subjects()
-        ->with(['prerequisites' => function($query) use ($evaluation) {
-            return $query->with(['prerequisites' => function ($query) use ($evaluation) {
-                $query->where('curriculum_id', $evaluation->curriculum_id);
-            }]);
-        }]);
+        try {
 
+            if (!$studentId) {
+                throw new Exception('Student id not found!');
+            }
 
-        $subjects = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+            if (!$evaluationId) {
+                throw new Exception('Evaluation id not found!');
+            }
 
-        $subjects->append('is_allowed');
-        return $subjects;
+            if (!$curriculumId) {
+                throw new Exception('Curriculum id not found!');
+            }
+
+            $evaluation = Evaluation::find($evaluationId);
+
+            $query = $evaluation->subjects();
+
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+
+            foreach ($subjects as $subject) {
+                $subject->is_allowed = $this->isAllowedToTake(
+                    $studentId,
+                    $subject->id,
+                    $curriculumId
+                );
+            }
+
+            $subjects->append(['is_allowed']);
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSectionUnscheduledSubjects method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
-    public function getSectionScheduledSubjectsWithStatus(int $sectionId, int $studentId, bool $isPaginated, int $perPage)
+    public function getSectionScheduledSubjectsWithStatus(int $sectionId, int $studentId, int $curriculumId, bool $isPaginated, int $perPage)
     {
         try {
             if (!$studentId) {
-                throw new Exception('Section id not found!');
+                throw new Exception('Student id not found!');
             }
 
             if (!$sectionId) {
                 throw new Exception('Section id not found!');
+            }
+
+            if (!$curriculumId) {
+                throw new Exception('Curriculum id not found!');
             }
 
             $subjectIds = SectionSchedule::select('subject_id')
@@ -209,9 +235,11 @@ class SubjectService
                 : $query->get();
 
             foreach ($subjects as $subject) {
+
                 $subject->is_allowed = $this->isAllowedToTake(
                     $studentId,
-                    $subject->id
+                    $subject->id,
+                    $curriculumId
                 );
             }
 
@@ -224,7 +252,7 @@ class SubjectService
         }
     }
 
-    private function isAllowedToTake(int $studentId, int $subjectId)
+    private function isAllowedToTake(int $studentId, int $subjectId, $curriculumId)
     {
 
         // - allowed if
@@ -232,7 +260,7 @@ class SubjectService
         // - and all pre requisite were taken with passed grade
         if (
             !$this->isTaken($studentId, $subjectId) &&
-            $this->arePrereqPassed($studentId, $subjectId)
+            $this->arePrereqPassed($studentId, $subjectId, $curriculumId)
         ) {
             return true;
         }
@@ -240,7 +268,7 @@ class SubjectService
         if (
             $this->isTaken($studentId, $subjectId) &&
             !$this->isPassed($studentId, $subjectId) &&
-            $this->arePrereqPassed($studentId, $subjectId)
+            $this->arePrereqPassed($studentId, $subjectId, $curriculumId)
         ) {
             return true;
         }
@@ -275,10 +303,11 @@ class SubjectService
             ->count() > 0;
     }
 
-    private function arePrereqPassed(int $studentId, int $subjectId)
+    private function arePrereqPassed(int $studentId, int $subjectId, int $curriculumId)
     {
-       $subjects = Subject::with(['prerequisites'])
-        ->find($subjectId);
+       $subjects = Subject::with(['prerequisites' => function($query) use ($curriculumId) {
+            return $query->where('curriculum_id', $curriculumId);
+        }])->find($subjectId);
 
         $prerequisites = $subjects->prerequisites;
 
@@ -290,7 +319,7 @@ class SubjectService
         foreach ($prerequisites as $prerequisite) {
             $passed = $passed && $this->isPassed(
                 $studentId,
-                $prerequisite->prerequisite_subject_id
+                $prerequisite->id
             );
             if (!$passed) break;
         }

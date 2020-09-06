@@ -103,7 +103,7 @@ class SectionService
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
-                }            
+                }
                 // $section->schedules()->sync($schedules);
             }
 
