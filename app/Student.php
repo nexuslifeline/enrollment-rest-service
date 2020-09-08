@@ -16,7 +16,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
-    protected $appends = ['name','age'];
+    protected $appends = ['name','age','current_address', 'permanent_address'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -120,5 +120,31 @@ class Student extends Model
     public function getAgeAttribute()
     {
         return Carbon::parse($this->attributes['birth_date'])->age;
+    }
+
+    public function getCurrentAddressAttribute() {
+        if ($this->address) {
+            $houseNoStreet = ucfirst($this->address->current_house_no_street);
+            $barangay = ucfirst($this->address->current_barangay);
+            $city = ucfirst($this->address->current_city_town);
+            $province = ucfirst($this->address->current_province);
+            $country = ucfirst($this->address->currentCountry->name);
+            $collection = collect([$houseNoStreet, $barangay, $city, $province, $country])->implode(', ');
+            return $collection;
+        }
+        return null;
+    }
+
+    public function getPermanentAddressAttribute() {
+        if ($this->address) {
+            $houseNoStreet = ucfirst($this->address->permanent_house_no_street);
+            $barangay = ucfirst($this->address->permanent_barangay);
+            $city = ucfirst($this->address->permanent_city_town);
+            $province = ucfirst($this->address->permanent_province);
+            $country = ucfirst($this->address->permanentCountry->name);
+            $collection = collect([$houseNoStreet, $barangay, $city, $province, $country])->implode(', ');
+            return $collection;
+        }
+        return null;
     }
 }

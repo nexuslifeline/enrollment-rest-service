@@ -33,7 +33,7 @@ class PaymentFileService
             }
 
             $extension = $file->extension();
-            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp'];
+            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp', 'jfif', 'tiff', 'tif'];
 
             //if there's a better condition to check if the file is an image or not
             //and the resize value
