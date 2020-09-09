@@ -52,7 +52,11 @@ class StudentFeeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $studentFeeService = new StudentFeeService();
+        $data = $request->except('student_fee_items');
+        $studentFeeItems = $request->student_fee_items ?? [];
+        $studentFee = $studentFeeService->update($id, $data, $studentFeeItems);
+        return new StudentFeeResource($studentFee);
     }
 
     /**
@@ -71,6 +75,16 @@ class StudentFeeController extends Controller
         $studentFeeService = new StudentFeeService();
         $studentFee = $studentFeeService->getStudentFeeOfTranscript($transcriptId);
         return new StudentFeeResource($studentFee);
+    }
+
+    public function getStudentFeesOfStudent($studentId, Request $request)
+    {
+        $studentFeeService = new StudentFeeService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $studentFees = $studentFeeService->getStudentFeesOfStudent($studentId, $isPaginated, $perPage, $filters);
+        return StudentFeeResource::collection($studentFees);
     }
 
 }

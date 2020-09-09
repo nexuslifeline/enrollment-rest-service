@@ -61,8 +61,8 @@ class Evaluation extends Model
     public function subjects()
     {
         return $this->belongsToMany(
-            'App\Subject', 
-            'evaluation_subjects', 
+            'App\Subject',
+            'evaluation_subjects',
             'evaluation_id',
             'subject_id'
         )->withPivot([

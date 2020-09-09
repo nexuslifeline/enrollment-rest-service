@@ -57,7 +57,7 @@ class StudentService
                   'transcript_status_id' => $transcriptStatusId
                 ]);
 
-                $student->evaluation()->create([
+                $student->evaluations()->create([
                   'student_id' => $student->id,
                   'student_category_id' => $studentCategoryId,
                   'evaluation_status_id' => $evaluationStatusId
@@ -76,7 +76,7 @@ class StudentService
                     'transcript_status_id' => $transcriptStatusId
                   ]);
 
-                  $student->evaluation()->create([
+                  $student->evaluations()->create([
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
                     'evaluation_status_id' => $evaluationStatusId
@@ -92,7 +92,7 @@ class StudentService
                     'student_category_id' => $studentCategoryId,
                     'transcript_status_id' => $transcriptStatusId
                   ]);
-                  $student->evaluation()->create([
+                  $student->evaluations()->create([
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
                     'evaluation_status_id' => $evaluationStatusId

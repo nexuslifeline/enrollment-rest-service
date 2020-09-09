@@ -31,6 +31,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/logout', 'AuthController@logout');
         // students
         Route::resource('/students', 'StudentController');
+        Route::get('/students/{studentId}/evaluations', 'EvaluationController@getEvaluationsOfStudent');
+        Route::get('/students/{studentId}/transcripts', 'TranscriptController@getTranscriptsOfStudent');
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');
         Route::delete('/students/{studentId}/photos', 'StudentPhotoController@destroy');
         // subjects
@@ -102,7 +104,9 @@ Route::group(['prefix' => 'v1'], function()
         // sections
         Route::resource('/sections', 'SectionController');
         // student fee
+        Route::resource('/student-fees', 'StudentFeeController');
         Route::get('/transcripts/{transcriptId}/student-fees', 'StudentFeeController@getStudentFeeOfTranscript');
+        Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         // curriculum
         Route::resource('curriculums', 'CurriculumController');
         // school fee categories

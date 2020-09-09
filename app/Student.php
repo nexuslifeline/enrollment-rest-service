@@ -66,9 +66,9 @@ class Student extends Model
         return $this->hasMany('App\Transcript');
     }
 
-    public function evaluation()
+    public function evaluations()
     {
-        return $this->hasOne('App\Evaluation');
+        return $this->hasMany('App\Evaluation');
     }
 
     public function studentFees()

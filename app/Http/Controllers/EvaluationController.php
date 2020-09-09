@@ -79,4 +79,14 @@ class EvaluationController extends Controller
     {
         //
     }
+
+    public function getEvaluationsOfStudent($studentId, Request $request)
+    {
+        $evaluationService = new EvaluationService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $evaluations = $evaluationService->getEvaluationsOfStudent($studentId, $isPaginated, $perPage, $filters);
+        return EvaluationResource::collection($evaluations);
+    }
 }
