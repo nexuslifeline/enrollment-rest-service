@@ -72,13 +72,13 @@ class SectionService
         try {
             $section = Section::create($data);
 
-            if ($schedules) {
+            //if ($schedules) {
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
                 }
                 // $section->schedules()->sync($schedules);
-            }
+            //}
 
             //   $section->load(['department', 'schoolCategory']);
             $section->load(['schoolYear','schoolCategory','level','course','semester']);
@@ -99,13 +99,13 @@ class SectionService
             $section = Section::find($id);
             $section->update($data);
 
-            if ($schedules) {
+            //if ($schedules) {
                 $section->schedules()->delete();
                 foreach ($schedules as $schedule) {
                     $section->schedules()->create($schedule);
                 }
                 // $section->schedules()->sync($schedules);
-            }
+            //}
                 // $section->schedules()->sync($schedules);
             // }
 
