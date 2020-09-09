@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Course;
+use App\Section;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -63,6 +63,11 @@ class Subject extends Model
     public function schedules()
     {
         return $this->hasMany('App\SectionSchedule');
+    }
+
+    public function getSectionAttribute()
+    {
+        return Section::find($this->pivot->section_id);
     }
 
     public function getIsAllowedAttribute() {
