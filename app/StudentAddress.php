@@ -23,4 +23,15 @@ class StudentAddress extends Model
     {
         return $this->belongsTo('App\Student');
     }
+
+    public function currentCountry()
+    {
+        return $this->belongsTo('App\Country', 'current_country_id', 'id');
+    }
+
+    public function permanentCountry()
+    {
+        return $this->belongsTo('App\Country', 'permanent_country_id', 'id');
+    }
+
 }

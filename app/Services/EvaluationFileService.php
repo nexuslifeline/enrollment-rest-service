@@ -20,23 +20,23 @@ class EvaluationFileService
             if (!$file) {
                 throw new \Exception('File not found!');
             }
-            
+
             $extension = $file->extension();
-            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp'];
-            
+            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp', 'jfif', 'tiff', 'tif'];
+
             //if there's a better condition to check if the file is an image or not
             //and the resize value
             if (in_array($extension, $imageExtensions )) {
-                
+
                 $width = Image::make($file)->width();
                 $image = Image::make($file);
-                
+
                 //if image width is less than 1024 dont resize
                 //not sure if this is necessary ?
                 $image->resize(null, 600, function ($constraint) {
                     $constraint->aspectRatio();
                 });
-                
+
                 $path = 'files/evaluation/' . $file->hashName();
                 Storage::put($path, $image->stream());
             }
@@ -85,7 +85,7 @@ class EvaluationFileService
 
         $query = EvaluationFile::where('id', $fileId);
         $evaluationFile = $query->first();
-        
+
         if ($evaluationFile) {
             return  response()->file(
                 storage_path('app/' . $evaluationFile->path)
@@ -102,9 +102,9 @@ class EvaluationFileService
 
         $query = EvaluationFile::where('id', $fileId);
         $evaluationFile = $query->first();
-        
+
         $evaluationFile->update($data);
-        
+
         return  $evaluationFile;
     }
 }
