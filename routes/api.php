@@ -80,6 +80,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/user-groups', 'UserGroupController');
         // user
         Route::resource('/personnels', 'PersonnelController');
+        Route::post('/personnels/{personnelId}/photos', 'PersonnelPhotoController@store');
+        Route::delete('/personnels/{personnelId}/photos', 'PersonnelPhotoController@destroy');
         // payments
         Route::resource('/payments', 'PaymentController');
         Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');

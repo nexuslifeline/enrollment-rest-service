@@ -13,12 +13,11 @@ class PersonnelService
     public function list(bool $isPaginated, int $perPage, array $filter)
     {
         try {
-            $query = Personnel::with(['user' => function ($query) {
+            $query = Personnel::with(['photo','user' => function ($query) {
               $query->with('userGroup');
             }]);
-    
             $userGroupId = $filter['user_group_id'] ?? false;
-    
+
             $query->when($userGroupId, function($q) use ($userGroupId) {
               return $q->whereHas('user', function($query) use ($userGroupId) {
                 return $query->whereHas('userGroup', function($q) use ($userGroupId) {
@@ -26,7 +25,7 @@ class PersonnelService
                 });
               });
             });
-    
+
             $personnels = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
@@ -42,7 +41,7 @@ class PersonnelService
     {
         try {
             $personnel = Personnel::find($id);
-            $personnel->load(['user' => function($query) {
+            $personnel->load(['photo','user' => function($query) {
                 $query->with('userGroup');
             }]);
             return $personnel;
@@ -58,14 +57,14 @@ class PersonnelService
         DB::beginTransaction();
         try {
             $personnel = Personnel::create($data);
-    
+
             $personnel->user()->create([
                 'username' => $user['username'],
                 'user_group_id' => $user['user_group_id'],
                 'password' => Hash::make($user['password'])
             ]);
-    
-            $personnel->load(['user' => function($query) {
+
+            $personnel->load(['photo','user' => function($query) {
                 $query->with('userGroup');
             }]);
             DB::commit();
@@ -84,7 +83,7 @@ class PersonnelService
         try {
             $personnel = Personnel::find($id);
             $personnel->update($data);
-            
+
             if ($user) {
                 $personnel->user()->update([
                     'username' => $user['username'],
@@ -92,8 +91,8 @@ class PersonnelService
                     'password' => Hash::make($user['password'])
                 ]);
             }
-            
-            $personnel->load(['user' => function($query) {
+
+            $personnel->load(['photo','user' => function($query) {
                 $query->with('userGroup');
             }]);
             DB::commit();
@@ -117,6 +116,6 @@ class PersonnelService
             Log::info('Error occured during PersonnelService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }
