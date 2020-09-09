@@ -126,6 +126,7 @@ class SubjectService
             ? $query->paginate($perPage)
             : $query->get();
 
+        $subjects->append('section');
         return $subjects;
     }
 
