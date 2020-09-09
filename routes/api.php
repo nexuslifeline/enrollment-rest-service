@@ -128,6 +128,8 @@ Route::group(['prefix' => 'v1'], function()
         // reports
         Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
         Route::get('requirement-list', 'ReportController@requirementList');
+        // permissions
+        Route::resource('permission-groups', 'PermissionGroupController');
     });
     Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
 });
