@@ -65,7 +65,7 @@ class UserGroupController extends Controller
     {
         $userGroupService = new UserGroupService();
         $userGroup = $userGroupService->update($request->all(), $id);
-       
+
         return (new UserGroupResource($userGroup))
         ->response()
         ->setStatusCode(200);

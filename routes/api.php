@@ -55,6 +55,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
         // school categories
         Route::resource('/school-categories', 'SchoolCategoryController');
+        Route::get('/user-groups/{userGroupId}/school-categories', 'SchoolCategoryController@getSchoolCategoriesOfUserGroup');
+        Route::post('/user-groups/{userGroupId}/school-categories', 'SchoolCategoryController@storeSchoolCategoriesOfUserGroup');
         // school years
         Route::resource('/school-years', 'SchoolYearController');
         // semesters
@@ -78,6 +80,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/transcripts', 'TranscriptController');
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
+        Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');
+        Route::post('/user-groups/{userGroupId}/permissions', 'PermissionController@storePermissionsOfUserGroup');
         // user
         Route::resource('/personnels', 'PersonnelController');
         // payments
@@ -128,7 +132,7 @@ Route::group(['prefix' => 'v1'], function()
         // reports
         Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
         Route::get('requirement-list', 'ReportController@requirementList');
-        // permissions
+        // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
     });
     Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');

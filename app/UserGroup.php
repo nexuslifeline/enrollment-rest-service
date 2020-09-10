@@ -18,4 +18,24 @@ class UserGroup extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    public function permissions()
+    {
+        return $this->belongsToMany(
+            'App\Permission',
+            'user_group_permissions',
+            'user_group_id',
+            'permission_id'
+        )->withTimestamps();
+    }
+
+    public function schoolCategories()
+    {
+        return $this->belongsToMany(
+            'App\SchoolCategory',
+            'user_group_categories',
+            'user_group_id',
+            'school_category_id'
+        )->withTimestamps();
+    }
 }
