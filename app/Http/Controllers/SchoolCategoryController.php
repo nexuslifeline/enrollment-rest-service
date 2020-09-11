@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\SchoolCategoryResource;
 use App\SchoolCategory;
+use App\Services\SchoolCategoryService;
 use Illuminate\Http\Request;
 
 class SchoolCategoryController extends Controller
@@ -15,11 +16,10 @@ class SchoolCategoryController extends Controller
      */
     public function index(Request $request)
     {
+        $schoolCategoryService = new SchoolCategoryService();
         $perPage = $request->per_page ?? 20;
-        $schoolCategories = !$request->has('paginate') || $request->paginate === 'true'
-            ? SchoolCategory::paginate($perPage)
-            : SchoolCategory::all();
-
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $schoolCategories = $schoolCategoryService->list($isPaginated, $perPage);
         return SchoolCategoryResource::collection(
             $schoolCategories
         );
@@ -90,5 +90,22 @@ class SchoolCategoryController extends Controller
     {
         $schoolCategory->delete();
         return response()->json([], 204);
+    }
+
+    public function getSchoolCategoriesOfUserGroup($userGroupId, Request $request)
+    {
+        $schoolCategoryService = new SchoolCategoryService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $schoolCategories = $schoolCategoryService->getSchoolCategoriesOfUserGroup($userGroupId, $isPaginated, $perPage);
+        return SchoolCategoryResource::collection($schoolCategories);
+    }
+
+    public function storeSchoolCategoriesOfUserGroup($userGroupId, Request $request)
+    {
+        $schoolCategoryService = new SchoolCategoryService();
+        $data = $request->school_categories;
+        $schoolCategories = $schoolCategoryService->storeSchoolCategoriesOfUserGroup($userGroupId, $data);
+        return SchoolCategoryResource::collection($schoolCategories);
     }
 }
