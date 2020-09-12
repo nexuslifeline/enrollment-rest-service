@@ -15,7 +15,7 @@ use Carbon\Carbon;
 class Student extends Model
 {
     use SoftDeletes;
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'name']; //added name on guarded to prevent updating, coz we already have name attrib
     protected $appends = ['name','age','current_address', 'permanent_address'];
     protected $hidden = [
         'created_at',
