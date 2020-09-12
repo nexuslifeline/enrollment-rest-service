@@ -25,6 +25,15 @@ class SubjectService
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function($query) use ($criteria) {
+                return $query->where(function($q) use ($criteria) {
+                    return $q->where('name', 'like', '%'.$criteria.'%')
+                    ->orWhere('description', 'like', '%'.$criteria.'%')
+                    ->orWhere('code', 'like', '%'.$criteria.'%');
+                });
+            });
+
             $subjects = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();

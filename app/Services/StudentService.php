@@ -147,7 +147,7 @@ class StudentService
         try {
             $student = Student::find($id);
             $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
-            $student->append(['active_admission', 'active_application', 'transcript']);
+            $student->append('active_application', 'active_admission', 'transcript');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');

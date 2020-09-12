@@ -31,21 +31,21 @@ class PaymentReceiptFileService
             if (!$file) {
                 throw new \Exception('File not found!');
             }
-            
+
             $extension = $file->extension();
-            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp'];
-            
+            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp', 'jfif', 'tiff', 'tif'];
+
             //if there's a better condition to check if the file is an image or not
             //and the resize value
             if (in_array($extension, $imageExtensions )) {
-                
+
                 // $width = Image::make($file)->width();
                 $image = Image::make($file);
 
                 $image->resize(null, 600, function ($constraint) {
                     $constraint->aspectRatio();
                 });
-                
+
                 $path = 'files/payment-receipt/' . $file->hashName();
                 Storage::put($path, $image->stream());
             }
