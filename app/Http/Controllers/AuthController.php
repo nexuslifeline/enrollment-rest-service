@@ -27,6 +27,7 @@ class AuthController extends Controller
         ->where('userable_type', 'App\Student')
         ->first();
 
+      // Note! to be refactored, should now use the Laravel Http Client instead of Guzzle
       if ($user) {
         $http = new \GuzzleHttp\Client;
         $response = $http->post(url('/') . '/oauth/token', [
@@ -54,6 +55,7 @@ class AuthController extends Controller
         ->where('userable_type', 'App\Personnel')
         ->first();
 
+      // Note! to be refactored, should now use the Laravel Http Client instead of Guzzle
       if ($user) {
         $http = new \GuzzleHttp\Client;
         $response = $http->post(url('/') . '/oauth/token', [
@@ -75,7 +77,7 @@ class AuthController extends Controller
     public function getAuthUser()
     {
       $user = Auth::user();
-      $user->load(['userable', 'userable.photo', 'userGroup']);
+      $user->load(['userable', 'userable.photo']);
 
       if ($user->userable_type === 'App\\Student') {
         $user->userable->append([
@@ -83,6 +85,12 @@ class AuthController extends Controller
           'active_application',
           'transcript'
         ]);
+      } else {
+        $user->load(['userGroup' => function($q) {
+          return $q->select(['id', 'name'])->with(['permissions' => function($q) {
+            return $q->select(['permissions.id', 'permission_group_id']);
+          }]);
+        }]);
       }
 
       return new UserResource($user);
