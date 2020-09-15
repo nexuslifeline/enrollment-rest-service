@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\BankAccount;
 use Illuminate\Http\Request;
-use App\Http\Resources\BankAccountResource;
 use App\Services\BankAccountService;
+use App\Http\Resources\BankAccountResource;
+use App\Http\Requests\BankAccountStoreRequest;
+use App\Http\Requests\BankAccountUpdateRequest;
 
 class BankAccountController extends Controller
 {
@@ -26,24 +28,18 @@ class BankAccountController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BankAccountStoreRequest $request)
     {
-        //
+        $bankAccountService = new BankAccountService();
+        $bankAccount = $bankAccountService->store($request->all());
+        return (new BankAccountResource($bankAccount))
+                ->response()
+                ->setStatusCode(201);
     }
 
     /**
@@ -52,20 +48,11 @@ class BankAccountController extends Controller
      * @param  \App\BankAccount  $bankAccount
      * @return \Illuminate\Http\Response
      */
-    public function show(BankAccount $bankAccount)
+    public function show(int $id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\BankAccount  $bankAccount
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(BankAccount $bankAccount)
-    {
-        //
+        $bankAccountService = new BankAccountService();
+        $bankAccount = $bankAccountService->get($id);
+        return new BankAccountResource($bankAccount);
     }
 
     /**
@@ -75,9 +62,14 @@ class BankAccountController extends Controller
      * @param  \App\BankAccount  $bankAccount
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BankAccount $bankAccount)
+    public function update(BankAccountUpdateRequest $request, int $id)
     {
-        //
+        $bankAccountService = new BankAccountService();
+        $bankAccount = $bankAccountService->update($request->all(), $id);
+
+        return (new BankAccountResource($bankAccount))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -86,8 +78,10 @@ class BankAccountController extends Controller
      * @param  \App\BankAccount  $bankAccount
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BankAccount $bankAccount)
+    public function destroy(int $id)
     {
-        //
+        $bankAccountService = new BankAccountService();
+        $bankAccountService->delete($id);
+        return response()->json([], 204);
     }
 }

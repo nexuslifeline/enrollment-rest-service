@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\PeraPadalaAccount;
-use App\Http\Resources\PeraPadalaAccountResource;
-use App\Services\PeraPadalaAccountService;
 use Illuminate\Http\Request;
+use App\Services\PeraPadalaAccountService;
+use App\Http\Resources\PeraPadalaAccountResource;
+use App\Http\Requests\PeraPadalaAccountStoreRequest;
+use App\Http\Requests\PeraPadalaAccountUpdateRequest;
 
 class PeraPadalaAccountController extends Controller
 {
@@ -26,24 +28,18 @@ class PeraPadalaAccountController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PeraPadalaAccountStoreRequest $request)
     {
-        //
+        $peraPadalaAccountService = new PeraPadalaAccountService();
+        $peraPadalaAccount = $peraPadalaAccountService->store($request->all());
+        return (new PeraPadalaAccountResource($peraPadalaAccount))
+                ->response()
+                ->setStatusCode(201);
     }
 
     /**
@@ -52,21 +48,13 @@ class PeraPadalaAccountController extends Controller
      * @param  \App\PeraPadalaAccount  $peraPadalaAccount
      * @return \Illuminate\Http\Response
      */
-    public function show(PeraPadalaAccount $peraPadalaAccount)
+    public function show(int $id)
     {
-        //
+        $peraPadalaAccountService = new PeraPadalaAccountService();
+        $peraPadalaAccount = $peraPadalaAccountService->get($id);
+        return new PeraPadalaAccountResource($peraPadalaAccount);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\PeraPadalaAccount  $peraPadalaAccount
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(PeraPadalaAccount $peraPadalaAccount)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -75,9 +63,14 @@ class PeraPadalaAccountController extends Controller
      * @param  \App\PeraPadalaAccount  $peraPadalaAccount
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, PeraPadalaAccount $peraPadalaAccount)
+    public function update(PeraPadalaAccountUpdateRequest $request, int $id)
     {
-        //
+        $peraPadalaAccountService = new PeraPadalaAccountService();
+        $peraPadalaAccount = $peraPadalaAccountService->update($request->all(), $id);
+
+        return (new PeraPadalaAccountResource($peraPadalaAccount))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -86,8 +79,10 @@ class PeraPadalaAccountController extends Controller
      * @param  \App\PeraPadalaAccount  $peraPadalaAccount
      * @return \Illuminate\Http\Response
      */
-    public function destroy(PeraPadalaAccount $peraPadalaAccount)
+    public function destroy(int $id)
     {
-        //
+        $peraPadalaAccountService = new PeraPadalaAccountService();
+        $peraPadalaAccountService->delete($id);
+        return response()->json([], 204);
     }
 }

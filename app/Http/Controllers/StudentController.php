@@ -53,7 +53,6 @@ class StudentController extends Controller
         ->response()
         ->setStatusCode(201);
     }
-        
 
     /**
      * Display the specified resource.
