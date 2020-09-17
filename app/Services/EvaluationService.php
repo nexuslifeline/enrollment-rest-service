@@ -77,6 +77,13 @@ class EvaluationService
                 });
             });
 
+            // order by
+            $orderBy = $filters['order_by'] ?? false;
+            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+                $sort = $filters['sort'] ?? 'ASC';
+                return $q->orderBy($orderBy, $sort);
+            });
+
             $evaluations = $isPaginated
             ? $query->paginate($perPage)
             : $query->get();

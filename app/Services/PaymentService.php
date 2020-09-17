@@ -42,6 +42,13 @@ class PaymentService
               });
             });
 
+            // order by
+            $orderBy = $filters['order_by'] ?? false;
+            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+                $sort = $filters['sort'] ?? 'ASC';
+                return $q->orderBy($orderBy, $sort);
+            });
+
             $payments = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
