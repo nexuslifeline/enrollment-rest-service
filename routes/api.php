@@ -32,14 +32,14 @@ Route::group(['prefix' => 'v1'], function()
         // students
         Route::resource('/students', 'StudentController');
         Route::get('/students/{studentId}/evaluations', 'EvaluationController@getEvaluationsOfStudent');
-        Route::get('/students/{studentId}/transcripts', 'TranscriptController@getTranscriptsOfStudent');
+        Route::get('/students/{studentId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfStudent');
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');
         Route::delete('/students/{studentId}/photos', 'StudentPhotoController@destroy');
         // subjects
         Route::resource('/subjects', 'SubjectController');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
-        Route::get('/transcripts/{transcriptId}/subjects', 'SubjectController@getSubjectsOfTranscript');
+        Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
         Route::get('/evaluations/{evaluationId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
         Route::get('/subjects/{subjectId}/sections', 'SectionController@getSectionsOfSubject');
@@ -76,8 +76,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::put('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@update');
         Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
-        // transcript
-        Route::resource('/transcripts', 'TranscriptController');
+        // academic records
+        Route::resource('/academic-records', 'AcademicRecordController');
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
         Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');
@@ -111,7 +111,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/sections', 'SectionController');
         // student fee
         Route::resource('/student-fees', 'StudentFeeController');
-        Route::get('/transcripts/{transcriptId}/student-fees', 'StudentFeeController@getStudentFeeOfTranscript');
+        Route::get('/academic-records/{academicRecordId}/student-fees', 'StudentFeeController@getStudentFeeOfAcademicRecord');
         Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         // curriculum
         Route::resource('curriculums', 'CurriculumController');
@@ -132,12 +132,12 @@ Route::group(['prefix' => 'v1'], function()
         // pera padala accounts
         Route::resource('pera-padala-accounts', 'PeraPadalaAccountController');
         // reports
-        Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
+        Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
         Route::get('requirement-list', 'ReportController@requirementList');
         // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
     });
-    Route::get('assessment-form/{transcriptId}', 'ReportController@assessmentForm');
+    Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {

@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Transcript extends Model
+class AcademicRecord extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
@@ -25,7 +25,7 @@ class Transcript extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany('App\Subject', 'transcript_subjects', 'transcript_id', 'subject_id')->withPivot('section_id')->withTimestamps();
+        return $this->belongsToMany('App\Subject', 'academic_record_subjects', 'academic_record_id', 'subject_id')->withPivot('section_id')->withTimestamps();
     }
 
     public function application()

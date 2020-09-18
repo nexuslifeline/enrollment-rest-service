@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\StudentFee;
-use App\Transcript;
+use App\AcademicRecord;
 use Illuminate\Http\Request;
 use App\Http\Resources\StudentFeeResource;
 use App\Services\StudentFeeService;
@@ -70,10 +70,10 @@ class StudentFeeController extends Controller
         //
     }
 
-    public function getStudentFeeOfTranscript($transcriptId)
+    public function getStudentFeeOfAcademicRecord($academicRecordId)
     {
         $studentFeeService = new StudentFeeService();
-        $studentFee = $studentFeeService->getStudentFeeOfTranscript($transcriptId);
+        $studentFee = $studentFeeService->getStudentFeeOfAcademicRecord($academicRecordId);
         return new StudentFeeResource($studentFee);
     }
 

@@ -107,23 +107,23 @@
         <table width="100%">
             <tr>
                 <td width="12%">Student No. : </td>
-                <td width="28%">{{ $transcript->student->student_no ? $transcript->student->student_no : 'Awaiting Confirmation' }}</td>
+                <td width="28%">{{ $academicRecord->student->student_no ? $academicRecord->student->student_no : 'Awaiting Confirmation' }}</td>
                 <td width="15%">Level : </td>
-                <td width="45%">{{ $transcript->level->name }}</td>
+                <td width="45%">{{ $academicRecord->level->name }}</td>
             </tr>
             <tr>
                 <td>Name : </td>
-                <td>{{ $transcript->student->last_name .', '. $transcript->student->first_name .' '. $transcript->student->middle_name }}</td>
-                @if($transcript->course_id)
+                <td>{{ $academicRecord->student->last_name .', '. $academicRecord->student->first_name .' '. $academicRecord->student->middle_name }}</td>
+                @if($academicRecord->course_id)
                 <td>Course : </td>
-                <td>{{ $transcript->course->description }}</td>
+                <td>{{ $academicRecord->course->description }}</td>
                 @endif
             </tr>
             <tr>
                 <td>Address : </td>
-                <td>{{ $transcript->student->address->current_complete_address }}</td>
+                <td>{{ $academicRecord->student->address->current_complete_address }}</td>
                 <td>School Year : </td>
-                <td>{{ $transcript->semester_id ? $transcript->semester->name.' /' : '' }} {{ $transcript->schoolYear->name }}</td>
+                <td>{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
             </tr>
         </table>
         <hr>

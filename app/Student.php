@@ -61,9 +61,9 @@ class Student extends Model
         return $this->hasOne('App\Admission');
     }
 
-    public function transcripts()
+    public function academicRecords()
     {
-        return $this->hasMany('App\Transcript');
+        return $this->hasMany('App\AcademicRecord');
     }
 
     public function evaluation()
@@ -101,20 +101,20 @@ class Student extends Model
             ->first();
     }
 
-    public function getTranscriptAttribute()
+    public function getAcademicRecordAttribute()
     {
-        $transcript = $this->transcripts();
+        $academicRecord = $this->academicRecords();
 
         $application = $this->active_application ?? false;
         $admission = $this->active_admission ?? false;
-        $transcript->when($application, function($query) use ($application){
+        $academicRecord->when($application, function($query) use ($application){
           return $query->where('application_id', $application['id']);
         });
-        $transcript->when($admission, function($query) use ($admission){
+        $academicRecord->when($admission, function($query) use ($admission){
           return $query->where('admission_id', $admission['id']);
         });
 
-        return $transcript->first();
+        return $academicRecord->first();
     }
 
     public function getNameAttribute()

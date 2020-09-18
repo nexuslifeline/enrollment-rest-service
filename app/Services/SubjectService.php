@@ -6,7 +6,7 @@ use App\Level;
 use Exception;
 use App\Subject;
 use App\Evaluation;
-use App\Transcript;
+use App\AcademicRecord;
 use App\SectionSchedule;
 use App\EvaluationSubject;
 use Illuminate\Support\Facades\DB;
@@ -127,9 +127,9 @@ class SubjectService
         return $subjects->unique('id');
     }
 
-    public function getSubjectsOfTranscript(int $transcriptId, bool $isPaginated, int $perPage)
+    public function getSubjectsOfAcademicRecord(int $academicRecordId, bool $isPaginated, int $perPage)
     {
-        $query = Transcript::find($transcriptId)->subjects();
+        $query = AcademicRecord::find($academicRecordId)->subjects();
 
         $subjects = $isPaginated
             ? $query->paginate($perPage)

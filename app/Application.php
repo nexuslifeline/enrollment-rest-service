@@ -24,9 +24,9 @@ class Application extends Model
         return $this->belongsTo('App\Student');
     }
 
-    public function transcript()
+    public function academicRecord()
     {
-        return $this->hasOne('App\Transcript');
+        return $this->hasOne('App\AcademicRecord');
     }
 
     public function applicationStep()

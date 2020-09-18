@@ -83,7 +83,7 @@ class AuthController extends Controller
         $user->userable->append([
           'active_admission',
           'active_application',
-          'transcript'
+          'academicRecord'
         ]);
       } else {
         $user->load(['userGroup' => function($q) {

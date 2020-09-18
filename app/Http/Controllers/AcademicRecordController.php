@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Transcript;
+use App\AcademicRecord;
 use Illuminate\Http\Request;
-use App\Http\Resources\TranscriptResource;
-use App\Services\TranscriptService;
+use App\Http\Resources\AcademicRecordResource;
+use App\Services\AcademicRecordService;
 
-class TranscriptController extends Controller
+class AcademicRecordController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,18 +16,18 @@ class TranscriptController extends Controller
      */
     public function index(Request $request)
     {
-        $transcriptService = new TranscriptService();
+        $academicRecordService = new AcademicRecordService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $filters = $request->except('per_page', 'paginate');
-        $transcripts = $transcriptService->list($isPaginated, $perPage, $filters);
+        $academicRecords = $academicRecordService->list($isPaginated, $perPage, $filters);
         // $registrar = $request->registrar ?? false;
         // $students->when($registrar, function($students) {
-        //     return $students->append(['active_admission', 'active_application', 'transcript']);
+        //     return $students->append(['active_admission', 'active_application', 'academicRecord']);
         // });
 
-        return TranscriptResource::collection(
-            $transcripts
+        return AcademicRecordResource::collection(
+            $academicRecords
         );
     }
 
@@ -83,12 +83,12 @@ class TranscriptController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $transcriptService = new TranscriptService();
+        $academicRecordService = new AcademicRecordService();
         $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
         $data = $request->except($except);
-        $transcriptInfo = $request->only($except);
-        $transcript = $transcriptService->update($data, $transcriptInfo, $id);
-        return new TranscriptResource($transcript);
+        $academicRecordInfo = $request->only($except);
+        $academicRecord = $academicRecordService->update($data, $academicRecordInfo, $id);
+        return new AcademicRecordResource($academicRecord);
 
     }
 
@@ -103,13 +103,13 @@ class TranscriptController extends Controller
         //
     }
 
-    public function getTranscriptsOfStudent($studentId, Request $request)
+    public function getAcademicRecordsOfStudent($studentId, Request $request)
     {
-        $transcriptService = new TranscriptService();
+        $academicRecordService = new AcademicRecordService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $filters = $request->except('per_page', 'paginate');
-        $evaluations = $transcriptService->getTranscriptsOfStudent($studentId, $isPaginated, $perPage, $filters);
-        return TranscriptResource::collection($evaluations);
+        $evaluations = $academicRecordService->getAcademicRecordsOfStudent($studentId, $isPaginated, $perPage, $filters);
+        return AcademicRecordResource::collection($evaluations);
     }
 }

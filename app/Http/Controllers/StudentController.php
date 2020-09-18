@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Student;
 use App\Admission;
 use App\Application;
-use App\Transcript;
+use App\AcademicRecord;
 use App\Evaluation;
 use App\Http\Requests\StudentStoreRequest;
 use Illuminate\Http\Request;
@@ -77,7 +77,7 @@ class StudentController extends Controller
     public function update(StudentUpdateRequest $request, int $id)
     {
         $related = ['address', 'family', 'education', 'evaluation'];
-        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'transcript', 'subjects', 'user', 'evaluation'];
+        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'academic_record', 'subjects', 'user', 'evaluation'];
         $studentService = new StudentService();
         $studentInfo = $request->only($except);
         $data = $request->except($except);

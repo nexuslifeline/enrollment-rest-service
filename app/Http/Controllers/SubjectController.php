@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Level;
 use App\Subject;
-use App\Transcript;
+use App\AcademicRecord;
 use App\Evaluation;
 use App\SectionSchedule;
 use App\Http\Requests\SubjectStoreRequest;
@@ -106,12 +106,12 @@ class SubjectController extends Controller
         return SubjectResource::collection($subjects);
     }
 
-    public function getSubjectsOfTranscript($transcriptId, Request $request)
+    public function getSubjectsOfAcademicRecord($academicRecordId, Request $request)
     {
         $subjectService = new SubjectService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
-        $subjects = $subjectService->getSubjectsOfTranscript($transcriptId, $isPaginated, $perPage);
+        $subjects = $subjectService->getSubjectsOfAcademicRecord($academicRecordId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 

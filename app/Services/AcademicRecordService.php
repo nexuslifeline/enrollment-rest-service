@@ -3,17 +3,17 @@
 namespace App\Services;
 
 use App\Student;
-use App\Transcript;
+use App\AcademicRecord;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class TranscriptService
+class AcademicRecordService
 {
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Transcript::with([
+            $query = AcademicRecord::with([
               'section',
               'schoolYear',
               'level',
@@ -65,10 +65,10 @@ class TranscriptService
                 });
             });
 
-            // transcript status
-            $transcriptStatusId = $filters['transcript_status_id'] ?? false;
-            $query->when($transcriptStatusId, function($query) use ($transcriptStatusId) {
-                return $query->where('transcript_status_id', $transcriptStatusId);
+            // academicRecord status
+            $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
+            $query->when($academicRecordStatusId, function($query) use ($academicRecordStatusId) {
+                return $query->where('academic_record_status_id', $academicRecordStatusId);
             });
 
             // filter by student name
@@ -83,46 +83,46 @@ class TranscriptService
                     });
                 });
             });
-            $transcripts = $isPaginated
+            $academicRecords = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
-            return $transcripts;
+            return $academicRecords;
         } catch (Exception $e) {
-            Log::info('Error occured during TranscriptService list method call: ');
+            Log::info('Error occured during AcademicRecordService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function update(array $data, array $transcriptInfo, int $id)
+    public function update(array $data, array $academicRecordInfo, int $id)
     {
         DB::beginTransaction();
         try {
-            $transcript = Transcript::find($id);
+            $academicRecord = AcademicRecord::find($id);
 
-            $transcript->update($data);
+            $academicRecord->update($data);
 
-            if ($transcriptInfo['application'] ?? false) {
-                $application = $transcript->application();
+            if ($academicRecordInfo['application'] ?? false) {
+                $application = $academicRecord->application();
                 if ($application) {
-                    $application->update($transcriptInfo['application']);
+                    $application->update($academicRecordInfo['application']);
                 }
             }
 
-            if ($transcriptInfo['admission'] ?? false) {
-                $admission = $transcript->admission();
+            if ($academicRecordInfo['admission'] ?? false) {
+                $admission = $academicRecord->admission();
                 if ($admission) {
-                    $admission->update($transcriptInfo['admission']);
+                    $admission->update($academicRecordInfo['admission']);
                 }
             }
 
-            if ($transcriptInfo['student_fee'] ?? false) {
-                $student = $transcript->student()->first();
+            if ($academicRecordInfo['student_fee'] ?? false) {
+                $student = $academicRecord->student()->first();
                 $studentFee = $student->studentFees()
-                    ->updateOrCreate(['transcript_id' => $transcript->id], $transcriptInfo['student_fee']);
+                    ->updateOrCreate(['academic_record_id' => $academicRecord->id], $academicRecordInfo['student_fee']);
 
-                if (array_key_exists('fees', $transcriptInfo)) {
-                    $fees = $transcriptInfo['fees'];
+                if (array_key_exists('fees', $academicRecordInfo)) {
+                    $fees = $academicRecordInfo['fees'];
                     $items = [];
                     foreach ($fees as $fee) {
                         $items[$fee['school_fee_id']] = [
@@ -134,11 +134,11 @@ class TranscriptService
                 }
             }
 
-            if ($transcriptInfo['billing'] ?? false) {
-                $billing = $studentFee->billings()->create($transcriptInfo['billing']);
+            if ($academicRecordInfo['billing'] ?? false) {
+                $billing = $studentFee->billings()->create($academicRecordInfo['billing']);
 
-                if ($transcriptInfo['billing_item'] ?? false) {
-                    $billing->billingItems()->create($transcriptInfo['billing_item']);
+                if ($academicRecordInfo['billing_item'] ?? false) {
+                    $billing->billingItems()->create($academicRecordInfo['billing_item']);
                 }
 
                 $billing->update([
@@ -146,18 +146,18 @@ class TranscriptService
                 ]);
             }
 
-            if (array_key_exists('subjects', $transcriptInfo)) {
+            if (array_key_exists('subjects', $academicRecordInfo)) {
                 $items = [];
-                $subjects = $transcriptInfo['subjects'];
+                $subjects = $academicRecordInfo['subjects'];
                 foreach ($subjects as $subject) {
                     $items[$subject['subject_id']] = [
                         'section_id' => $subject['section_id'],
                     ];
                 }
-                $transcript->subjects()->sync($items);
+                $academicRecord->subjects()->sync($items);
             }
             DB::commit();
-            $transcript->load([
+            $academicRecord->load([
                 'schoolYear',
                 'level',
                 'course',
@@ -170,20 +170,20 @@ class TranscriptService
                 'student' => function($query) {
                     $query->with(['address']);
                 }])->fresh();
-            return $transcript;
+            return $academicRecord;
           } catch (Exception $e) {
             DB::rollBack();
-            Log::info('Error occured during TranscriptService update method call: ');
+            Log::info('Error occured during AcademicRecordService update method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
     }
 
-    public function getTranscriptsOfStudent(int $studentId, bool $isPaginated, int $perPage, array $filters)
+    public function getAcademicRecordsOfStudent(int $studentId, bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $transcript = Student::find($studentId)->transcripts();
-            $query = $transcript->with([
+            $academicRecord = Student::find($studentId)->academicRecords();
+            $query = $academicRecord->with([
                 'section',
                 'schoolYear',
                 'level',
@@ -198,10 +198,10 @@ class TranscriptService
                     $query->with(['address', 'photo']);
                 }]);
 
-            // transcript status
-            $transcriptStatusId = $filters['transcript_status_id'] ?? false;
-            $query->when($transcriptStatusId, function($query) use ($transcriptStatusId) {
-                return $query->where('transcript_status_id', $transcriptStatusId);
+            // academicRecord status
+            $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
+            $query->when($academicRecordStatusId, function($query) use ($academicRecordStatusId) {
+                return $query->where('academic_record_status_id', $academicRecordStatusId);
             });
 
             // application status
@@ -216,12 +216,12 @@ class TranscriptService
                 });
             });
 
-            $transcripts = $isPaginated
+            $academicRecords = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
-            return $transcripts;
+            return $academicRecords;
         } catch (Exception $e) {
-            Log::info('Error occured during TranscriptService getTranscriptsOfStudent method call: ');
+            Log::info('Error occured during AcademicRecordService getAcademicRecordsOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

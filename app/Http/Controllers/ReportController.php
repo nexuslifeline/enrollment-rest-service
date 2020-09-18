@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Transcript;
+use App\AcademicRecord;
 use Mpdf\Mpdf;
 
 class ReportController extends Controller
 {
-    public function assessmentForm($transcriptId)
+    public function assessmentForm($academicRecordId)
     {
-        $transcript = Transcript::find($transcriptId);
-        $data['subjects'] = $transcript->subjects()->get();
-        $data['student_fee'] = $transcript->studentFee()->first();
+        $academicRecord = AcademicRecord::find($academicRecordId);
+        $data['subjects'] = $academicRecord->subjects()->get();
+        $data['student_fee'] = $academicRecord->studentFee()->first();
         $data['fees'] = $data['student_fee']->studentFeeItems()->with('schoolFeeCategory')->get();
         // $data['categories'] = $data['student_fee']->studentFeeItems()->with('schoolFeeCategory')->get();
         // return $data['categories'];
-        $data['transcript'] = $transcript->load([
+        $data['academicRecord'] = $academicRecord->load([
             'section',
             'schoolYear', 
             'level', 

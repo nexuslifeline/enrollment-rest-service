@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Student;
 use App\StudentFee;
-use App\Transcript;
+use App\AcademicRecord;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -26,20 +26,20 @@ class StudentFeeService
             }
             $studentFee->studentFeeItems()->sync($items);
         } catch (Exception $e) {
-            Log::info('Error occured during update getStudentFeeOfTranscript method call: ');
+            Log::info('Error occured during update getStudentFeeOfAcademicRecord method call: ');
             Log::info($e->getMessage());
         }
     }
 
-    public function getStudentFeeOfTranscript(int $transcriptId)
+    public function getStudentFeeOfAcademicRecord(int $academicRecordId)
     {
         try {
-            $studentFee = Transcript::findOrFail($transcriptId)->studentFee()->with(['studentFeeItems', 'billings' => function($query) {
+            $studentFee = AcademicRecord::findOrFail($academicRecordId)->studentFee()->with(['studentFeeItems', 'billings' => function($query) {
               $query->first()->first();
             }])->first();
             return $studentFee;
         } catch (Exception $e) {
-            Log::info('Error occured during StudentFeeService getStudentFeeOfTranscript method call: ');
+            Log::info('Error occured during StudentFeeService getStudentFeeOfAcademicRecord method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

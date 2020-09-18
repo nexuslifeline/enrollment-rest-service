@@ -74,12 +74,12 @@ class StudentUpdateRequest extends FormRequest
             'family.mother_email' => 'sometimes|nullable|email',
             'family.parent_guardian_name' => 'sometimes|required|string|max:255',
             'family.parent_guardian_contact_no' => 'sometimes|required|string|max:255',
-            // transcript
-            'transcript.level_id' => 'sometimes|required',
+            // academicRecord
+            'academicRecord.level_id' => 'sometimes|required',
             // remove required 07-27-2020
-            // 'transcript.section_id' => 'sometimes|required',
-            'transcript.course_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
-            'transcript.semester_id' => 'sometimes|required_if:transcript.school_category_id,4,5,6',
+            // 'academicRecord.section_id' => 'sometimes|required',
+            'academicRecord.course_id' => 'sometimes|required_if:academicRecord.school_category_id,4,5,6',
+            'academicRecord.semester_id' => 'sometimes|required_if:academicRecord.school_category_id,4,5,6',
             'subjects' => 'sometimes|array|min:1',
             // user account
             'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$this->id.',userable_id',
@@ -122,10 +122,10 @@ class StudentUpdateRequest extends FormRequest
             'family.mother_email' => 'email',
             'family.parent_guardian_name' => 'parent/guardian name',
             'family.parent_guardian_contact_no' => 'parent/guardian contact no.',
-            'transcript.level_id' => 'level',
-            'transcript.section_id' => 'section',
-            'transcript.course_id' => 'course',
-            'transcript.semester_id' => 'semester',
+            'academicRecord.level_id' => 'level',
+            'academicRecord.section_id' => 'section',
+            'academicRecord.course_id' => 'course',
+            'academicRecord.semester_id' => 'semester',
             'user.username' => 'username',
             'user.password' => 'password',
             'evaluation.level_id' => 'level',

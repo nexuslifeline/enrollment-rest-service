@@ -110,16 +110,16 @@ class PaymentService
             $paymentStatusId = $data['payment_status_id'] ?? false;
             if ($paymentStatusId === 2) {
                 $student = $payment->student()->first();
-                $transcript = $student->transcripts()->get()->last();
+                $academicRecord = $student->academicRecords()->get()->last();
                 //check if student is new or old
-                if ($transcript['student_category_id'] === 1) {
-                    $students = Student::with(['transcripts'])
-                    ->whereHas('transcripts', function ($query) {
+                if ($academicRecord['student_category_id'] === 1) {
+                    $students = Student::with(['academicRecords'])
+                    ->whereHas('academicRecords', function ($query) {
                         return $query->where('student_category_id',1)
-                        ->where('transcript_status_id', 3);
+                        ->where('academic_record_status_id', 3);
                     })
                     ->get();
-                  
+
                     $student->update([
                         'student_no' => '11'. str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
                     ]);
