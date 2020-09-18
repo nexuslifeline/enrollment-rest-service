@@ -80,6 +80,6 @@ class SchoolFeeService
             Log::info('Error occured during SchoolFeeService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

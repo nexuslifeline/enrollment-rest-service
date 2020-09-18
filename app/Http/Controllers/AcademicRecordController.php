@@ -60,7 +60,9 @@ class AcademicRecordController extends Controller
      */
     public function show($id)
     {
-        //
+        $academicRecordService = new AcademicRecordService();
+        $academicRecord = $academicRecordService->get($id);
+        return new AcademicRecordResource($academicRecord);
     }
 
     /**

@@ -7,6 +7,8 @@ use App\AcademicRecord;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Auth;
+use Carbon\Carbon;
 
 class AcademicRecordService
 {
@@ -83,12 +85,49 @@ class AcademicRecordService
                     });
                 });
             });
+
+            // order by
+            $orderBy = $filters['order_by'] ?? false;
+            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+                $sort = $filters['sort'] ?? 'ASC';
+                return $q->orderBy($orderBy, $sort);
+            });
+
             $academicRecords = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
             return $academicRecords;
         } catch (Exception $e) {
             Log::info('Error occured during AcademicRecordService list method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function get(int $id)
+    {
+        try {
+            $academicRecord = AcademicRecord::with([
+                'section',
+                'schoolYear',
+                'level',
+                'course',
+                'semester',
+                'schoolCategory',
+                'studentCategory',
+                'studentType',
+                'application',
+                'admission',
+                'studentFee' => function($query) {
+                    $query->with(['studentFeeItems']);
+                },
+                'subjects',
+                'student' => function($query) {
+                    $query->with(['address', 'photo']);
+                }])->find($id);
+            return $academicRecord;
+        } catch (Exception $e) {
+            Log::info('Error occured during AcademicRecordService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -105,6 +144,16 @@ class AcademicRecordService
             if ($academicRecordInfo['application'] ?? false) {
                 $application = $academicRecord->application();
                 if ($application) {
+                    if ($academicRecord->academic_record_status_id === 2) {
+                        $academicRecordInfo['application']['approved_by'] = Auth::user()->id;
+                        $academicRecordInfo['application']['approved_date'] = Carbon::now();
+                    }
+                    if ($academicRecordInfo['application']['application_status_id'] ?? false) {
+                        if ($academicRecordInfo['application']['application_status_id'] === 3) {
+                            $academicRecordInfo['application']['disapproved_by'] = Auth::user()->id;
+                            $academicRecordInfo['application']['disapproved_date'] = Carbon::now();
+                        }
+                    }
                     $application->update($academicRecordInfo['application']);
                 }
             }
@@ -112,12 +161,26 @@ class AcademicRecordService
             if ($academicRecordInfo['admission'] ?? false) {
                 $admission = $academicRecord->admission();
                 if ($admission) {
+                    if ($academicRecord->academic_record_status_id === 2) {
+                        $academicRecordInfo['admission']['approved_by'] = Auth::user()->id;
+                        $academicRecordInfo['admission']['approved_date'] = Carbon::now();
+                    }
+                    if ($academicRecordInfo['admission']['application_status_id'] ?? false) {
+                        if ($academicRecordInfo['admission']['application_status_id'] === 3) {
+                            $academicRecordInfo['admission']['disapproved_by'] = Auth::user()->id;
+                            $academicRecordInfo['admission']['disapproved_date'] = Carbon::now();
+                        }
+                    }
                     $admission->update($academicRecordInfo['admission']);
                 }
             }
 
             if ($academicRecordInfo['student_fee'] ?? false) {
                 $student = $academicRecord->student()->first();
+                if ($academicRecordInfo['student_fee']['student_fee_status_id'] === 2) {
+                    $academicRecordInfo['student_fee']['approved_by'] = Auth::user()->id;
+                    $academicRecordInfo['student_fee']['approved_date'] = Carbon::now();
+                }
                 $studentFee = $student->studentFees()
                     ->updateOrCreate(['academic_record_id' => $academicRecord->id], $academicRecordInfo['student_fee']);
 
