@@ -70,6 +70,15 @@ class Subject extends Model
         return Section::find($this->pivot->section_id);
     }
 
+    public function getSectionScheduleAttribute() {
+        $sectionSchedule =  Section::with(['schedules' => function ($query) {
+            return $query->with('personnel', 'section')->where('section_id', $this->pivot->section_id)
+                ->where('subject_id', $this->id);
+        }])->find($this->pivot->section_id);
+
+        return $sectionSchedule->schedules ?? null;
+    }
+
     public function getIsAllowedAttribute() {
         return $this->attributes['is_allowed'];
     }

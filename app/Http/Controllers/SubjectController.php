@@ -115,6 +115,15 @@ class SubjectController extends Controller
         return SubjectResource::collection($subjects);
     }
 
+    public function getSubjectsOfAcademicRecordWithSchedules($academicRecordId, Request $request)
+    {
+        $subjectService = new SubjectService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $subjects = $subjectService->getSubjectsOfAcademicRecordWithSchedules($academicRecordId, $isPaginated, $perPage);
+        return SubjectResource::collection($subjects);
+    }
+
     public function getSubjectsOfEvaluation($evaluationId, Request $request)
     {
         $subjectService = new SubjectService();

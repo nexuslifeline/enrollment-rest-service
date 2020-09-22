@@ -40,6 +40,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
         Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord');
+        Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
         Route::get('/evaluations/{evaluationId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
         Route::get('/subjects/{subjectId}/sections', 'SectionController@getSectionsOfSubject');

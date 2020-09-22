@@ -139,6 +139,18 @@ class SubjectService
         return $subjects;
     }
 
+    public function getSubjectsOfAcademicRecordWithSchedules(int $academicRecordId, bool $isPaginated, int $perPage)
+    {
+        $query = AcademicRecord::find($academicRecordId)->subjects();
+
+        $subjects = $isPaginated
+            ? $query->paginate($perPage)
+            : $query->get();
+
+        $subjects->append('section_schedule');
+        return $subjects;
+    }
+
     public function getSubjectsOfEvaluation(int $evaluationId, bool $isPaginated, int $perPage)
     {
         $evaluation = Evaluation::find($evaluationId);
