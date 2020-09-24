@@ -99,30 +99,44 @@ class CourseService
 
     public function getCoursesOfLevel(int $levelId, bool $paginate, int $perPage, array $filters)
     {
-        $query = Level::find($levelId)->courses();
+        try {
+            $query = Level::find($levelId)->courses();
 
-        // filters
-        $schoolCategoryId = $filters['school_category_id'] ?? false;
-        $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
-            return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
-                return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
+            // filters
+            $schoolCategoryId = $filters['school_category_id'] ?? false;
+            $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
+                return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
+                    return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
+                });
             });
-        });
 
-        $courses = $paginate
-            ? $query->paginate($perPage)
-            : $query->get();
-        return $courses;
+            $courses = $paginate
+                ? $query->paginate($perPage)
+                : $query->get();
+            return $courses;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during CourseService getCoursesOfLevel method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function getCoursesOfSchoolCategory($schoolCategoryId, bool $paginate, int $perPage)
     {
-        $query = SchoolCategory::find($schoolCategoryId)->courses()->distinct('course_id');
+        try {
+            $query = SchoolCategory::find($schoolCategoryId)->courses()->distinct('course_id');
 
-        $courses = $paginate
-            ? $query->paginate($perPage)
-            : $query->get();
+            $courses = $paginate
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        return $courses;
+            return $courses;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during CourseService getCoursesOfSchoolCategory method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 }

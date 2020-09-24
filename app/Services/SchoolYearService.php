@@ -46,7 +46,7 @@ class SchoolYearService
                 $activeSchoolYear->update([
                     'is_active' => 0
                 ]);
-            }   
+            }
             DB::commit();
             return $schoolYear;
         } catch (Exception $e) {
@@ -69,7 +69,7 @@ class SchoolYearService
                 $activeSchoolYear->update([
                     'is_active' => 0
                 ]);
-            }   
+            }
             DB::commit();
             return $schoolYear;
         } catch (Exception $e) {
@@ -90,6 +90,6 @@ class SchoolYearService
             Log::info('Error occured during SchoolYearService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

@@ -257,6 +257,6 @@ class StudentService
             Log::info('Error occured during StudentService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

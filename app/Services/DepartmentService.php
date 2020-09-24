@@ -39,7 +39,7 @@ class DepartmentService
     {
         DB::beginTransaction();
         try {
-            $department = Department::create($data);  
+            $department = Department::create($data);
             DB::commit();
             return $department;
         } catch (Exception $e) {
@@ -55,7 +55,7 @@ class DepartmentService
         DB::beginTransaction();
         try {
             $department = Department::find($id);
-            $department->update($data); 
+            $department->update($data);
             DB::commit();
             return $department;
         } catch (Exception $e) {
@@ -76,6 +76,6 @@ class DepartmentService
             Log::info('Error occured during DepartmentService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

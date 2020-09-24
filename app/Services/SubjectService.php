@@ -107,84 +107,114 @@ class SubjectService
 
     public function getSubjectsOfLevel(int $levelId, bool $isPaginated, int $perPage, array $filters)
     {
-        $query = Level::find($levelId)->subjects();
+        try{
+            $query = Level::find($levelId)->subjects();
 
-        // filters
-        $courseId = $filters['course_id'] ?? false;
-        $query->when($courseId, function($q) use ($courseId) {
-            return $q->where('course_id', $courseId);
-        });
+            // filters
+            $courseId = $filters['course_id'] ?? false;
+            $query->when($courseId, function($q) use ($courseId) {
+                return $q->where('course_id', $courseId);
+            });
 
-        $semesterId = $filters['semester_id'] ?? false;
-        $query->when($semesterId, function($q) use ($semesterId) {
-            return $q->where('semester_id', $semesterId);
-        });
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function($q) use ($semesterId) {
+                return $q->where('semester_id', $semesterId);
+            });
 
-        $subjects = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        return $subjects->unique('id');
+            return $subjects->unique('id');
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjectsOfLevel method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function getSubjectsOfAcademicRecord(int $academicRecordId, bool $isPaginated, int $perPage)
     {
-        $query = AcademicRecord::find($academicRecordId)->subjects();
+        try {
+            $query = AcademicRecord::find($academicRecordId)->subjects();
 
-        $subjects = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        $subjects->append('section');
-        return $subjects;
+            $subjects->append('section');
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjectsOfAcademicRecord method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function getSubjectsOfAcademicRecordWithSchedules(int $academicRecordId, bool $isPaginated, int $perPage)
     {
-        $query = AcademicRecord::find($academicRecordId)->subjects();
+        try {
+            $query = AcademicRecord::find($academicRecordId)->subjects();
 
-        $subjects = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        $subjects->append('section_schedule');
-        return $subjects;
+            $subjects->append('section_schedule');
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjectsOfAcademicRecordWithSchedules method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function getSubjectsOfEvaluation(int $evaluationId, bool $isPaginated, int $perPage)
     {
-        $evaluation = Evaluation::find($evaluationId);
-        $query = $evaluation->subjects()
-        ->with(['prerequisites' => function($query) use ($evaluation) {
-            return $query->with(['prerequisites' => function ($query) use ($evaluation) {
-                $query->where('curriculum_id', $evaluation->curriculum_id);
+        try {
+            $evaluation = Evaluation::find($evaluationId);
+            $query = $evaluation->subjects()
+            ->with(['prerequisites' => function($query) use ($evaluation) {
+                return $query->with(['prerequisites' => function ($query) use ($evaluation) {
+                    $query->where('curriculum_id', $evaluation->curriculum_id);
+                }]);
             }]);
-        }]);
 
-        $subjects = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        return $subjects;
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjectsOfEvaluation method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
 
     public function getSectionScheduledSubjects(int $sectionId, bool $isPaginated, int $perPage)
     {
-        $subjectIds = SectionSchedule::select('subject_id')
-            ->where('section_id', $sectionId)
-            ->get()
-            ->pluck('subject_id');
+        try {
+            $subjectIds = SectionSchedule::select('subject_id')
+                ->where('section_id', $sectionId)
+                ->get()
+                ->pluck('subject_id');
 
-        $query = Subject::with(['schedules' => function($q) use ($sectionId) {
-            return $sectionId ? $q->where('section_id', $sectionId)->with(['personnel', 'section']) : $q;
-        }])->whereIn('id', $subjectIds);
+            $query = Subject::with(['schedules' => function($q) use ($sectionId) {
+                return $sectionId ? $q->where('section_id', $sectionId)->with(['personnel', 'section']) : $q;
+            }])->whereIn('id', $subjectIds);
 
-        $subjects = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        return $subjects;
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSectionScheduledSubjects method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function getSectionUnscheduledSubjects(int $evaluationId, int $studentId, int $curriculumId, bool $isPaginated, int $perPage)

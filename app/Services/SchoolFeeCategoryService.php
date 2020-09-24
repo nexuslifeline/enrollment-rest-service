@@ -76,6 +76,6 @@ class SchoolFeeCategoryService
             Log::info('Error occured during SchoolFeeCategoryService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

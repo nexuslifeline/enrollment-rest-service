@@ -13,9 +13,7 @@ class BillingService
     {
         try {
             $query = Billing::with(['schoolYear', 'semester', 'billingType', 'studentFee', 'payments']);
-    
             // filters
-    
             // student
             $studentId = $filter['student_id'] ?? false;
             $query->when($studentId, function($q) use ($studentId) {
@@ -23,7 +21,6 @@ class BillingService
                     return $query->where('student_id', $studentId);
                 });
             });
-    
             // school year
             $schoolYearId = $filter['school_year_id'] ?? false;
             $query->when($schoolYearId, function($q) use ($schoolYearId) {
@@ -31,7 +28,6 @@ class BillingService
                     return $query->where('school_year_id', $schoolYearId);
                 });
             });
-    
             // semester
             $semesterId = $filter['semester_id'] ?? false;
             $query->when($semesterId, function($q) use ($semesterId) {
@@ -39,7 +35,6 @@ class BillingService
                     return $query->where('semester_id', $semesterId);
                 });
             });
-    
             // billing type
             $billingTypeId = $filter['billing_type_id'] ?? false;
             $query->when($billingTypeId, function($q) use ($billingTypeId) {
@@ -47,7 +42,6 @@ class BillingService
                     return $query->where('billing_type_id', $billingTypeId);
                 });
             });
-    
             // // filter by student name
             // $criteria = $request->criteria ?? false;
             // $query->when($criteria, function($q) use ($criteria) {
@@ -58,7 +52,6 @@ class BillingService
             //               ->orWhere('last_name', 'like', '%'.$criteria.'%');
             //   });
             // });
-    
             $billings = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();

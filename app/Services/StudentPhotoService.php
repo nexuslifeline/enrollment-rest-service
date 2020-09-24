@@ -38,26 +38,32 @@ class StudentPhotoService
             );
 
             return $studentPhoto;
-        } catch (Throwable $e) {
-            ValidationException::withMessages([
-                'photo' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentPhotoService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 
     public function delete($studentId)
     {
-        if (!$studentId) {
-            throw new \Exception('Student id not found!');
-        }
+        try {
+            if (!$studentId) {
+                throw new \Exception('Student id not found!');
+            }
 
-        $query = StudentPhoto::where('student_id', $studentId);
-        $photo = $query->first();
-        if ($photo) {
-            Storage::delete($photo->path);
-            $query->delete();
-            return true;
+            $query = StudentPhoto::where('student_id', $studentId);
+            $photo = $query->first();
+            if ($photo) {
+                Storage::delete($photo->path);
+                $query->delete();
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentPhotoService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-        return false;
     }
 }

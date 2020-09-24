@@ -39,7 +39,7 @@ class UserGroupService
     {
         DB::beginTransaction();
         try {
-            $userGroup = UserGroup::create($data);  
+            $userGroup = UserGroup::create($data); 
             DB::commit();
             return $userGroup;
         } catch (Exception $e) {
@@ -55,7 +55,7 @@ class UserGroupService
         DB::beginTransaction();
         try {
             $userGroup = UserGroup::find($id);
-            $userGroup->update($data); 
+            $userGroup->update($data);
             DB::commit();
             return $userGroup;
         } catch (Exception $e) {
@@ -76,6 +76,6 @@ class UserGroupService
             Log::info('Error occured during UserGroupService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

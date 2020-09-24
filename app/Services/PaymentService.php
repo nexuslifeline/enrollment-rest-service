@@ -145,6 +145,6 @@ class PaymentService
             Log::info('Error occured during PaymentService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
-        } 
+        }
     }
 }

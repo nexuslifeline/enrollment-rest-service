@@ -12,13 +12,20 @@ class PaymentReceiptFileService
 {
     public function index(object $request, $paymentId)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = Payment::where('id', $paymentId)->first()->paymentReceiptFiles();
-        $files = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
+        try {
+            $perPage = $request->per_page ?? 20;
+            $query = Payment::where('id', $paymentId)->first()->paymentReceiptFiles();
+            $files = !$request->has('paginate') || $request->paginate === 'true'
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        return $files;
+            return $files;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentReceiptFileService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+
     }
 
     public function store($paymentId, $studentId, $file)
@@ -64,57 +71,75 @@ class PaymentReceiptFileService
             );
 
             return $paymentReceiptFile;
-        } catch (Throwable $e) {
-            ValidationException::withMessages([
-                'file' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentReceiptFileService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 
     public function delete($fileId)
     {
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
-        }
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        $query = PaymentReceiptFile::where('id', $fileId);
-        $file = $query->first();
-        if ($file) {
-            Storage::delete($file->path);
-            $query->delete();
-            return true;
+            $query = PaymentReceiptFile::where('id', $fileId);
+            $file = $query->first();
+            if ($file) {
+                Storage::delete($file->path);
+                $query->delete();
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentReceiptFileService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-        return false;
     }
 
     public function preview($fileId) {
+        try {
 
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
-        }
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        $query = PaymentReceiptFile::where('id', $fileId);
-        $paymentReceiptFile = $query->first();
-        
-        if ($paymentReceiptFile) {
-            return  response()->file(
-                storage_path('app/' . $paymentReceiptFile->path)
-            );
+            $query = PaymentReceiptFile::where('id', $fileId);
+            $paymentReceiptFile = $query->first();
+
+            if ($paymentReceiptFile) {
+                return  response()->file(
+                    storage_path('app/' . $paymentReceiptFile->path)
+                );
+            }
+            return null;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentReceiptFileService preview method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-        return null;
     }
 
     public function update($data, $fileId) {
 
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
-        }
+        try {
 
-        $query = PaymentReceiptFile::where('id', $fileId);
-        $paymentReceiptFile = $query->first();
-        
-        $paymentReceiptFile->update($data);
-        
-        return  $paymentReceiptFile;
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
+
+            $query = PaymentReceiptFile::where('id', $fileId);
+            $paymentReceiptFile = $query->first();
+            $paymentReceiptFile->update($data);
+
+            return  $paymentReceiptFile;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentReceiptFileService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 }

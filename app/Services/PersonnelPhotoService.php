@@ -38,26 +38,32 @@ class PersonnelPhotoService
             );
 
             return $personnelPhoto;
-        } catch (Throwable $e) {
-            ValidationException::withMessages([
-                'photo' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentPhotoService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 
     public function delete($personnelId)
     {
-        if (!$personnelId) {
-            throw new \Exception('Personnel id not found!');
-        }
+        try {
+            if (!$personnelId) {
+                throw new \Exception('Personnel id not found!');
+            }
 
-        $query = PersonnelPhoto::where('personnel_id', $studentId);
-        $photo = $query->first();
-        if ($photo) {
-            Storage::delete($photo->path);
-            $query->delete();
-            return true;
+            $query = PersonnelPhoto::where('personnel_id', $studentId);
+            $photo = $query->first();
+            if ($photo) {
+                Storage::delete($photo->path);
+                $query->delete();
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentReceiptFileService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-        return false;
     }
 }

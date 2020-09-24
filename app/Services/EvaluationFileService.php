@@ -54,57 +54,73 @@ class EvaluationFileService
             );
 
             return $evaluationFile;
-        } catch (Throwable $e) {
-            ValidationException::withMessages([
-                'file' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            Log::info('Error occured during EvaluationFileService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 
     public function delete($fileId)
     {
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
-        }
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        $query = EvaluationFile::where('id', $fileId);
-        $file = $query->first();
-        if ($file) {
-            Storage::delete($file->path);
-            $query->delete();
-            return true;
+            $query = EvaluationFile::where('id', $fileId);
+            $file = $query->first();
+            if ($file) {
+                Storage::delete($file->path);
+                $query->delete();
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            Log::info('Error occured during EvaluationFileService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-        return false;
     }
 
     public function preview($fileId) {
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
+            $query = EvaluationFile::where('id', $fileId);
+            $evaluationFile = $query->first();
+
+            if ($evaluationFile) {
+                return  response()->file(
+                    storage_path('app/' . $evaluationFile->path)
+                );
+            }
+            return null;
+        } catch (Exception $e) {
+            Log::info('Error occured during EvaluationFileService preview method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-
-        $query = EvaluationFile::where('id', $fileId);
-        $evaluationFile = $query->first();
-
-        if ($evaluationFile) {
-            return  response()->file(
-                storage_path('app/' . $evaluationFile->path)
-            );
-        }
-        return null;
     }
 
     public function update($data, $fileId) {
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
+            $query = EvaluationFile::where('id', $fileId);
+            $evaluationFile = $query->first();
+
+            $evaluationFile->update($data);
+
+            return  $evaluationFile;
+        } catch (Exception $e) {
+            Log::info('Error occured during EvaluationFileService preview method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-
-        $query = EvaluationFile::where('id', $fileId);
-        $evaluationFile = $query->first();
-
-        $evaluationFile->update($data);
-
-        return  $evaluationFile;
     }
 }

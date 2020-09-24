@@ -12,13 +12,19 @@ class PaymentFileService
 {
     public function index(object $request, $paymentId)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = Payment::where('id', $paymentId)->first()->files();
-        $files = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
+        try {
+            $perPage = $request->per_page ?? 20;
+            $query = Payment::where('id', $paymentId)->first()->files();
+            $files = !$request->has('paginate') || $request->paginate === 'true'
+                ? $query->paginate($perPage)
+                : $query->get();
 
-        return $files;
+            return $files;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentFileService index method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function store($paymentId, $file)
@@ -63,57 +69,73 @@ class PaymentFileService
             );
 
             return $paymentFile;
-        } catch (Throwable $e) {
-            ValidationException::withMessages([
-                'file' => $e->getMessage()
-            ]);
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentFileService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 
     public function delete($fileId)
     {
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
-        }
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        $query = PaymentFile::where('id', $fileId);
-        $file = $query->first();
-        if ($file) {
-            Storage::delete($file->path);
-            $query->delete();
-            return true;
+            $query = PaymentFile::where('id', $fileId);
+            $file = $query->first();
+            if ($file) {
+                Storage::delete($file->path);
+                $query->delete();
+                return true;
+            }
+            return false;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentFileService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-        return false;
     }
 
     public function preview($fileId) {
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
+            $query = PaymentFile::where('id', $fileId);
+            $paymentFile = $query->first();
+
+            if ($paymentFile) {
+                return  response()->file(
+                    storage_path('app/' . $paymentFile->path)
+                );
+            }
+            return null;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentFileService preview method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-
-        $query = PaymentFile::where('id', $fileId);
-        $paymentFile = $query->first();
-
-        if ($paymentFile) {
-            return  response()->file(
-                storage_path('app/' . $paymentFile->path)
-            );
-        }
-        return null;
     }
 
     public function update($data, $fileId) {
+        try {
+            if (!$fileId) {
+                throw new \Exception('File id not found!');
+            }
 
-        if (!$fileId) {
-            throw new \Exception('File id not found!');
+            $query = PaymentFile::where('id', $fileId);
+            $paymentFile = $query->first();
+
+            $paymentFile->update($data);
+
+            return  $paymentFile;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentFileService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
-
-        $query = PaymentFile::where('id', $fileId);
-        $paymentFile = $query->first();
-
-        $paymentFile->update($data);
-
-        return  $paymentFile;
     }
 }
