@@ -89,7 +89,7 @@ class AuthController extends Controller
         $user->load(['userGroup' => function($q) {
           return $q->select(['id', 'name'])->with(['permissions' => function($q) {
             return $q->select(['permissions.id', 'permission_group_id']);
-          }]);
+          }, 'schoolCategories']);
         }]);
       }
 

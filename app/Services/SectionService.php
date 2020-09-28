@@ -21,7 +21,7 @@ class SectionService
 
           $schoolCategoryId = $filters['school_category_id'] ?? false;
           $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-              return $q->where('level_id', $schoolCategoryId);
+              return $q->where('school_category_id', $schoolCategoryId);
           });
 
           $levelId = $filters['level_id'] ?? false;
@@ -38,6 +38,35 @@ class SectionService
           $query->when($semesterId, function($q) use ($semesterId) {
               return $q->where('semester_id', $semesterId);
           });
+
+          $schoolYearId = $filters['school_year_id'] ?? false;
+          $query->when($schoolYearId, function($q) use ($schoolYearId) {
+              return $q->where('school_year_id', $schoolYearId);
+          });
+
+          //criteria
+          $criteria = $filters['criteria'] ?? false;
+          $query->when($criteria, function($q) use ($criteria) {
+            return $q->where(function($q) use ($criteria) {
+                return $q->where('name', 'like', '%'.$criteria.'%')
+                    ->orWhere('description', 'like', '%'.$criteria.'%')
+                    ->orWhereHas('schoolYear', function($query) use ($criteria) {
+                        return $query->where('name', 'like', '%'.$criteria.'%');
+                    })
+                    ->orWhereHas('schoolCategory', function($query) use ($criteria) {
+                        return $query->where('name', 'like', '%'.$criteria.'%');
+                    })
+                    ->orWhereHas('level', function($query) use ($criteria) {
+                        return $query->where('name', 'like', '%'.$criteria.'%');
+                    })
+                    ->orWhereHas('course', function($query) use ($criteria) {
+                        return $query->where('name', 'like', '%'.$criteria.'%');
+                    })
+                    ->orWhereHas('semester', function($query) use ($criteria) {
+                        return $query->where('name', 'like', '%'.$criteria.'%');
+                    });
+                });
+            });
 
           $sections = $isPaginated
               ? $query->paginate($perPage)
