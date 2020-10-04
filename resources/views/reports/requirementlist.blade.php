@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>Requirement List</title>
-        
+
         <style type="text/css">
             @page { sheet-size: A4; }
             body{
@@ -50,13 +50,13 @@
         <table class="table__header">
             <tr>
                 <td class="td__logo">
-                    <img src="{{url('storage/stc_logo.png')}}" style="height: 90px; width: 90px;">
+                    <img src="{{url('storage/organization-logo/'.$organization->organizationLogo->hash_name)}}" style="height: 90px; width: 90px;">
                 </td>
                 <td class="td__info">
-                    <div class="header__name">SAINT THERESA COLLEGE OF TANDAG, INC.</div>
-                    <div class="header__details">Tandag City, Surigao del Sur</div>
-                    <div class="header__details">Telefax No. 086-2113046, 2114499</div>
-                    <div class="header__details">Email: stctandag@yahoo.com</div>
+                    <div class="header__name">{{$organization->name}}</div>
+                    <div class="header__details">{{$organization->address}}</div>
+                    <div class="header__details">{{$organization->telephone_no}}</div>
+                    <div class="header__details">{{$organization->email_address}}</div>
                 </td>
                 <td></td>
             </tr>

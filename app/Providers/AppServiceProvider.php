@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Observers\StudentFeeObserver;
+use App\StudentFee;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
@@ -40,5 +42,6 @@ class AppServiceProvider extends ServiceProvider
                 );
             });
         }
+        StudentFee::observe(StudentFeeObserver::class);
     }
 }
