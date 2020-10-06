@@ -142,6 +142,9 @@ Route::group(['prefix' => 'v1'], function()
         Route::put('organization-settings/{organizationSettingId}', 'OrganizationSettingController@update');
         Route::post('/organization-settings/{organizationSettingId}/logos', 'OrganizationLogoController@store');
         Route::delete('/organization-settings/{organizationSettingId}/logos', 'OrganizationLogoController@destroy');
+
+        Route::resource('terms', 'TermController');
+        Route::post('terms/update-multiple', 'TermController@updateCreateMultiple');
     });
     Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     Route::get('requirement-list', 'ReportController@requirementList');

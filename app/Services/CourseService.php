@@ -86,9 +86,11 @@ class CourseService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $course = Course::find($id);
             $course->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during CourseService delete method call: ');

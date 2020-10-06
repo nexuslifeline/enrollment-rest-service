@@ -86,4 +86,14 @@ class SchoolYearController extends Controller
         $schoolYearService->delete($id);
         return response()->json([], 204);
     }
+
+    public function getSchoolYearWithTerms($id, Request $request) {
+        $schoolYearService = new SchoolYearService();
+        $filters = $request->except('per_page', 'paginate');
+        $schoolYear = $schoolYearService->getSchoolYearWithTerms($id, $filters);
+
+        return (new SchoolYearResource($schoolYear))
+            ->response()
+            ->setStatusCode(200);
+    }
 }

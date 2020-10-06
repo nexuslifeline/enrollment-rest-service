@@ -68,9 +68,11 @@ class EWalletAccountService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $eWalletAccount = EWalletAccount::find($id);
             $eWalletAccount->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during EWalletAccountService delete method call: ');

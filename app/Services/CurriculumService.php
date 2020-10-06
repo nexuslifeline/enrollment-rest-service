@@ -188,9 +188,11 @@ class CurriculumService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $curriculum = Curriculum::find($id);
             $curriculum->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during CurriculumService delete method call: ');

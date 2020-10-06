@@ -18,4 +18,8 @@ class SchoolYear extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    public function terms(){
+        return $this->hasMany('App\Term');
+    }
 }

@@ -68,9 +68,11 @@ class BankAccountService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $bankAccount = BankAccount::find($id);
             $bankAccount->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during BankAccountService delete method call: ');

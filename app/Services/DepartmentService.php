@@ -68,9 +68,11 @@ class DepartmentService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $department = Department::find($id);
             $department->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during DepartmentService delete method call: ');
