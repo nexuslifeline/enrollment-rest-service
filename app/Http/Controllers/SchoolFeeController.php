@@ -47,7 +47,7 @@ class SchoolFeeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(int $id)
-    {   
+    {
         $schoolFeeService = new SchoolFeeService();
         $schoolFee = $schoolFeeService->get($id);
         return new SchoolFeeResource($schoolFee);

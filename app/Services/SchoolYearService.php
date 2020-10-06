@@ -92,4 +92,35 @@ class SchoolYearService
             throw $e;
         }
     }
+
+    public function getSchoolYearWithTerms(int $schoolYearId, array $filters){
+        try {
+
+            if (!$schoolYearId) {
+                throw new \Exception('School year id not found!');
+            }
+
+            $schoolYear = SchoolYear::find($schoolYearId)->with('terms')->get();
+
+            // //filter by school category
+            // $schoolCategoryId = $filters['school_category_id'] ?? false;
+            // $schoolYear->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            //     return $q->terms->where('school_category_id', $schoolCategoryId);
+            // });
+
+            // //filter by semester
+            // $semesterId = $filters['semester_id'] ?? false;
+            // $schoolYear->when($semesterId, function($q) use ($semesterId) {
+            //     return $q->terms->where('semester_id', $semesterId);
+            // });
+
+            return $query;
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SchoolYearService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }

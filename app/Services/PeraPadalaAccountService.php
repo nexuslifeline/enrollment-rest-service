@@ -68,9 +68,11 @@ class PeraPadalaAccountService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $peraPadalaAccount = PeraPadalaAccount::find($id);
             $peraPadalaAccount->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PeraPadalaAccountService delete method call: ');

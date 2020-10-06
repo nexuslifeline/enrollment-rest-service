@@ -137,9 +137,11 @@ class PaymentService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $payment = Payment::find($id);
             $payment->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PaymentService delete method call: ');
