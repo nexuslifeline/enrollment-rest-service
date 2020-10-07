@@ -20,9 +20,10 @@ class SchoolYearController extends Controller
     public function index(Request $request)
     {
         $schoolYearService = new SchoolYearService();
+        $filters = $request->except('paginate','per_page');
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
-        $schoolYears = $schoolYearService->list($isPaginated, $perPage);
+        $schoolYears = $schoolYearService->list($isPaginated, $perPage, $filters);
         return SchoolYearResource::collection(
             $schoolYears
         );
@@ -85,15 +86,5 @@ class SchoolYearController extends Controller
         $schoolYearService = new SchoolYearService();
         $schoolYearService->delete($id);
         return response()->json([], 204);
-    }
-
-    public function getSchoolYearWithTerms($id, Request $request) {
-        $schoolYearService = new SchoolYearService();
-        $filters = $request->except('per_page', 'paginate');
-        $schoolYear = $schoolYearService->getSchoolYearWithTerms($id, $filters);
-
-        return (new SchoolYearResource($schoolYear))
-            ->response()
-            ->setStatusCode(200);
     }
 }
