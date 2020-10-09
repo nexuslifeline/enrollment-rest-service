@@ -37,6 +37,14 @@ class BillingController extends Controller
         //
     }
 
+    public function storeBatchSoa(Request $request)
+    {
+        $billingService = new BillingService();
+        $data = $request->all();
+        $schoolFee = $billingService->storeBatchSoa($data);
+        return BillingResource::collection($schoolFee);
+    }
+
     /**
      * Display the specified resource.
      *

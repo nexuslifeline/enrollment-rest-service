@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\SchoolFee;
+use App\Term;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

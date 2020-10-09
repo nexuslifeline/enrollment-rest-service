@@ -126,13 +126,14 @@ class StudentService
                     return $q->where('name', 'like', '%'.$criteria.'%')
                     ->orWhere('first_name', 'like', '%'.$criteria.'%')
                     ->orWhere('middle_name', 'like', '%'.$criteria.'%')
+                    ->orWhere('student_no', 'like', '%'.$criteria.'%')
                     ->orWhere('last_name', 'like', '%'.$criteria.'%');
                 });
             });
 
             $students = $isPaginated
                 ? $query->paginate($perPage)
-                : $query->all();
+                : $query->get();
 
             return $students;
         } catch (Exception $e) {

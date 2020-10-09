@@ -7,29 +7,36 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Term extends Model
 {
-   //
-   use SoftDeletes;
-   protected $guarded = [];
-   protected $hidden = [
-       'created_at',
-       'deleted_at',
-       'updated_at',
-       'created_by',
-       'updated_by',
-       'deleted_by'
-   ];
+    //
+    use SoftDeletes;
+    protected $guarded = [];
+    protected $hidden = [
+        'created_at',
+        'deleted_at',
+        'updated_at',
+        'created_by',
+        'updated_by',
+        'deleted_by'
+    ];
 
-   public function schoolYear(){
-    return $this->belongsTo('App\SchoolYear');
-   }
+    public function schoolYear()
+    {
+        return $this->belongsTo('App\SchoolYear');
+    }
 
-   public function schoolCategory(){
-    return $this->belongsTo('App\SchoolCategory');
-   }
+    public function schoolCategory()
+    {
+        return $this->belongsTo('App\SchoolCategory');
+    }
 
-   public function semester(){
-    return $this->belongsTo('App\Semester');
-   }
+    public function semester()
+    {
+        return $this->belongsTo('App\Semester');
+    }
 
-
+    public function studentFees()
+    {
+        return $this->belongsToMany('App\StudentFee', 'student_fee_terms', 'term_id', 'student_fee_id')
+        ->withPivot(['amount', 'is_billed']);
+    }
 }

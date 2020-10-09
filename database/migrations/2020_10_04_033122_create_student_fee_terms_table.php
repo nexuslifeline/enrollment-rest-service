@@ -20,6 +20,7 @@ class CreateStudentFeeTermsTable extends Migration
             $table->foreign('term_id')->references('id')->on('terms');
             $table->unsignedBigInteger('term_id')->nullable();
             $table->decimal('amount', 13, 2)->default(0)->nullable();
+            $table->tinyInteger('is_billed')->default(0)->nullable();
             $table->timestamps();
         });
     }

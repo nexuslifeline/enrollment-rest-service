@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\SchoolYear;
 use App\Term;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +15,19 @@ class TermService
         try {
             $query = Term::with(['schoolYear', 'schoolCategory', 'semester']);
 
-            //filter by school category
+            //filter by school year
             $schoolYearId = $filters['school_year_id'] ?? false;
             $query->when($schoolYearId, function($q) use ($schoolYearId) {
                 return $q->where('school_year_id', $schoolYearId);
+            });
+
+            //filter by active school year
+            $activeSchoolYear = $filters['active_school_year'] ?? false;
+            $query->when($activeSchoolYear, function ($q) {
+                $activeSy = SchoolYear::where('is_active', 1)->first() ?? false;
+                $q->when($activeSy, function ($q) use ($activeSy) {
+                    return $q->where('school_year_id', $activeSy->id);
+                });
             });
 
             //filter by school category
@@ -77,11 +87,11 @@ class TermService
     {
         DB::beginTransaction();
         try {
-            $term = SchoolFee::find($id);
+            $term = Term::find($id);
             $term->update($data);
             $term->load(['schoolYear', 'schoolCategory', 'semester']);
             DB::commit();
-            return $schoolFee;
+            return $term;
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during SchoolFeeService update method call: ');
