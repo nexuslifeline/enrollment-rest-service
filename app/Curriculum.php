@@ -19,7 +19,7 @@ class Curriculum extends Model
         'deleted_by'
     ];
 
-    public function schoolCategory() 
+    public function schoolCategory()
     {
         return $this->belongsTo('App\SchoolCategory');
     }
@@ -37,8 +37,8 @@ class Curriculum extends Model
     public function subjects()
     {
         return $this->belongsToMany(
-            'App\Subject', 
-            'level_subjects', 
+            'App\Subject',
+            'level_subjects',
             'curriculum_id',
             'subject_id'
         )->withPivot(['level_id','semester_id'])->withTimestamps();

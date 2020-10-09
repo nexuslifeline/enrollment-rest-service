@@ -147,6 +147,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('terms/update-multiple', 'TermController@updateCreateMultiple');
     });
     Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
+    Route::get('requirement-list', 'ReportController@requirementList');
+    Route::get('statement-of-account/{studentFeeId}', 'ReportController@statementOfAccount');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {

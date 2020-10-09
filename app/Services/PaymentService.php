@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Payment;
 use App\Student;
+use App\StudentFee;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -123,6 +124,11 @@ class PaymentService
                     $student->update([
                         'student_no' => '11'. str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
                     ]);
+                }
+                $billing = $payment->billing;
+                if ($billing->billing_type_id === 1) {
+                    $studentFee = StudentFee::find($billing->student_fee_id);
+                    $studentFee->recomputeTerms($payment->amount);
                 }
             }
             DB::commit();

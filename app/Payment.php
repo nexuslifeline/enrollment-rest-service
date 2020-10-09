@@ -38,4 +38,9 @@ class Payment extends Model
     {
         return $this->belongsTo('App\Student');
     }
+
+    public function billing()
+    {
+        return $this->belongsTo('App\Billing');
+    }
 }

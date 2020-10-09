@@ -2,7 +2,7 @@
 <html>
     <head>
         <title>Assessment Form</title>
-        
+
         <style type="text/css">
             @page { sheet-size: A4; }
             body{
@@ -92,13 +92,13 @@
         <table class="table__header">
             <tr>
                 <td class="td__logo">
-                    <img src="{{url('storage/stc_logo.png')}}" style="height: 90px; width: 90px;">
+                    <img src="{{url('storage/organization-logo/'.$organization->organizationLogo->hash_name)}}" style="height: 90px; width: 90px;">
                 </td>
                 <td class="td__info">
-                    <div class="header__name">SAINT THERESA COLLEGE OF TANDAG, INC.</div>
-                    <div class="header__details">Tandag City, Surigao del Sur</div>
-                    <div class="header__details">Telefax No. 086-2113046, 2114499</div>
-                    <div class="header__details">Email: stctandag@yahoo.com</div>
+                    <div class="header__name">{{$organization->name}}</div>
+                    <div class="header__details">{{$organization->address}}</div>
+                    <div class="header__details">{{$organization->telephone_no}}</div>
+                    <div class="header__details">{{$organization->email_address}}</div>
                 </td>
                 <td></td>
             </tr>
@@ -128,7 +128,7 @@
         </table>
         <hr>
         <br>
-        @if($student_fee->is_computed_by_units)
+        @if($academicRecord->studentFee->is_computed_by_units)
         <div class="table__name-subjects">Subjects</div>
         <table class="table__subjects">
             <thead>
@@ -142,7 +142,7 @@
                     <td width="100px" class="float-right">Total Amount</td>
                 </tr>
             </thead>
-            @foreach ($subjects as $subject)
+            @foreach ($academicRecord->subjects as $subject)
             <tr>
                 <td>{{ $subject->name }}</td>
                 <td>{{ $subject->description }}</td>
@@ -157,7 +157,7 @@
         <table width="100%">
             <tr>
                 <td width="500px" class="float-right total" >TOTAL TUITION FEE</td>
-                <td width="100px" class="float-right total">{{ number_format(array_sum(array_column(iterator_to_array($subjects), 'total_amount')), 2) }}</td>
+                <td width="100px" class="float-right total">{{ number_format(array_sum(array_column(iterator_to_array($academicRecord->subjects), 'total_amount')), 2) }}</td>
             </tr>
         </table>
         @endif
@@ -166,9 +166,9 @@
         @endphp
         {{-- <div class="table__name-fees">Fees</div>
         <hr> --}}
-        @if($student_fee->is_computed_by_units)
+        @if($academicRecord->studentFee->is_computed_by_units)
         @php
-        $fees = array_filter(iterator_to_array($fees), function($a) {
+        $fees = array_filter(iterator_to_array($academicRecord->studentFee->studentFeeItems), function($a) {
             return $a->id !== 2;
         });
         @endphp
@@ -205,7 +205,7 @@
         <table width="100%">
             <tr>
                 <td width="500px" class="float-right total">TOTAL</td>
-                <td width="100px" class="float-right total">{{ number_format($student_fee->total_amount, 2) }}</td>
+                <td width="100px" class="float-right total">{{ number_format($academicRecord->studentFee->total_amount, 2) }}</td>
             </tr>
         </table>
         <br>
