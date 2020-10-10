@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Billing;
+use App\Http\Requests\BillingStoreRequest;
 use Illuminate\Http\Request;
 use App\Http\Resources\BillingResource;
 use App\Services\BillingService;
@@ -32,12 +33,18 @@ class BillingController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(BillingStoreRequest $request)
     {
-        //
+        $billingService = new BillingService();
+        $data = $request->all();
+        $billing = $billingService->store($data);
+
+        return (new BillingResource($billing))
+            ->response()
+            ->setStatusCode(201);
     }
 
-    public function storeBatchSoa(Request $request)
+    public function storeBatchSoa(BillingStoreRequest $request)
     {
         $billingService = new BillingService();
         $data = $request->all();

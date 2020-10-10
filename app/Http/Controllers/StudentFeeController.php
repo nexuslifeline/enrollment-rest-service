@@ -86,5 +86,4 @@ class StudentFeeController extends Controller
         $studentFees = $studentFeeService->getStudentFeesOfStudent($studentId, $isPaginated, $perPage, $filters);
         return StudentFeeResource::collection($studentFees);
     }
-
 }

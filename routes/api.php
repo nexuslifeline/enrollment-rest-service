@@ -144,10 +144,12 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/organization-settings/{organizationSettingId}/logos', 'OrganizationLogoController@store');
         Route::delete('/organization-settings/{organizationSettingId}/logos', 'OrganizationLogoController@destroy');
 
+        //terms
         Route::resource('terms', 'TermController');
+        Route::get('students/{studentId}/terms', 'TermController@getStudentFeeTermsOfStudent');
         Route::post('terms/update-multiple', 'TermController@updateCreateMultiple');
     });
-    Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
+    // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     Route::get('requirement-list', 'ReportController@requirementList');
     Route::get('statement-of-account/{studentFeeId}', 'ReportController@statementOfAccount');
 });

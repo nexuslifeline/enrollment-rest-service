@@ -39,4 +39,9 @@ class Term extends Model
         return $this->belongsToMany('App\StudentFee', 'student_fee_terms', 'term_id', 'student_fee_id')
         ->withPivot(['amount', 'is_billed']);
     }
+
+    public function getPreviousBalanceAttribute()
+    {
+        return StudentFee::find($this->pivot->student_fee_id)->getPreviousBalance();
+    }
 }

@@ -96,4 +96,13 @@ class TermController extends Controller
             ->response()
             ->setStatusCode(200);
     }
+
+    public function getStudentFeeTermsOfStudent($studentId, Request $request)
+    {
+        $termService = new TermService();
+        $filters = $request->except('per_page', 'paginate');
+        // return $filters;
+        $terms = $termService->getStudentFeeTermsOfStudent($studentId, $filters);
+        return TermResource::collection($terms);
+    }
 }

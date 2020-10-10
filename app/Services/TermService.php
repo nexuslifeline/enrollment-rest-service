@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\SchoolYear;
+use App\Student;
 use App\Term;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class TermService
 
             return $terms;
         } catch (Exception $e) {
-            Log::info('Error occured during SchoolFeeService list method call: ');
+            Log::info('Error occured during TermService list method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -61,7 +62,7 @@ class TermService
             $term->load(['schoolYear', 'schoolCategory', 'semester']);
             return $term;
         } catch (Exception $e) {
-            Log::info('Error occured during SchoolFeeCategoryService get method call: ');
+            Log::info('Error occured during TermService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -77,7 +78,7 @@ class TermService
             return $term;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during SchoolFeeService store method call: ');
+            Log::info('Error occured during TermService store method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -94,7 +95,7 @@ class TermService
             return $term;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during SchoolFeeService update method call: ');
+            Log::info('Error occured during TermService update method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -109,7 +110,7 @@ class TermService
             DB::commit();
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during SchoolFeeService delete method call: ');
+            Log::info('Error occured during TermService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -145,7 +146,38 @@ class TermService
 
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during SchoolFeeService update method call: ');
+            Log::info('Error occured during TermService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getStudentFeeTermsOfStudent(int $studentId, array $filters)
+    {
+        try {
+            $query = Student::findOrFail($studentId)
+                ->studentFees();
+
+            // school year
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
+            // semester
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function($q) use ($semesterId) {
+                return $q->where('semester_id', $semesterId);
+            });
+
+            $studentFee = $query->first();
+            $terms = [];
+            if ($studentFee) {
+                $terms = $studentFee->terms()->get();
+                $terms->append('previous_balance');
+            }
+            return $terms;
+        } catch (Exception $e) {
+            Log::info('Error occured during TermService getStudentFeeTermsOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

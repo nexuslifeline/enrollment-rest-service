@@ -16,7 +16,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id', 'name']; //added name on guarded to prevent updating, coz we already have name attrib
-    protected $appends = ['name','age','current_address', 'permanent_address'];
+    protected $appends = ['name','age','current_address', 'permanent_address', 'latest_academic_record'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -115,6 +115,11 @@ class Student extends Model
         });
 
         return $academicRecord->first();
+    }
+
+    public function getLatestAcademicRecordAttribute()
+    {
+        return $this->academicRecords()->where('academic_record_status_id', 3)->latest()->first();
     }
 
     public function getNameAttribute()

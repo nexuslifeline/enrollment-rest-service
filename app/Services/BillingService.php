@@ -121,11 +121,13 @@ class BillingService
                     'total_amount' => $studentFee->pivot->amount,
                     'student_id' => $studentFee->student_id,
                     'due_date' => $data['due_date'],
+                    'term_id' => $data['term_id'],
                     'billing_type_id' => 2,
                     'billing_status_id' => 2,
                     'school_year_id' => $studentFee->school_year_id,
                     'semester_id' => $studentFee->semester_id,
-                    'student_fee_id' => $studentFee->id
+                    'student_fee_id' => $studentFee->id,
+                    'previous_balance' => $studentFee->getPreviousBalance()
                 ]);
 
                 $billing->update([
@@ -142,6 +144,30 @@ class BillingService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during SchoolFeeService storeBatchSoa method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function store(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $billing = Billing::create($data);
+            $billing->update([
+                'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+            ]);
+            // if billing is soa update student_fee_term is_billed to 1
+            if ($billing->billing_type_id === 2) {
+                $billing->studentFee()->first()->terms()->wherePivot('term_id', $billing->term_id)
+                    ->update(['is_billed' => 1]);
+            }
+
+            DB::commit();
+            return $billing;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during BillingService store method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

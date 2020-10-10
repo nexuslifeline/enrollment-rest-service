@@ -80,7 +80,7 @@ class PaymentService
     {
         DB::beginTransaction();
         try {
-            $payment = Payment::create($data);  
+            $payment = Payment::create($data);
             // if ($request->hasFile('files')) {
             //   $files = $request->file('files');
             //   foreach ($files as $file) {

@@ -32,12 +32,11 @@ class ReportController extends Controller
                 return $q->with(['studentFeeItems']);
             }
         ]);
-
         $mpdf = new Mpdf();
         $content = view('reports.assessmentform')->with($data);
         $mpdf->WriteHTML($content);
-        // return $mpdf->Output('', 'S');
-        return $mpdf->Output();
+        return $mpdf->Output('', 'S');
+        // return $mpdf->Output();
     }
 
     public function requirementList()
@@ -46,7 +45,7 @@ class ReportController extends Controller
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $content = view('reports.requirementlist')->with($data);
         $mpdf->WriteHTML($content);
-        return $mpdf->Output();
+        // return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
 
@@ -69,7 +68,7 @@ class ReportController extends Controller
             ]);
         $content = view('reports.soa')->with($data);
         $mpdf->WriteHTML($content);
-        return $mpdf->Output();
+        // return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
 }

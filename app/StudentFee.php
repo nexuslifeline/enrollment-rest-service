@@ -58,7 +58,8 @@ class StudentFee extends Model
 
   public function terms()
   {
-    return $this->belongsToMany('App\Term', 'student_fee_terms', 'student_fee_id', 'term_id');
+    return $this->belongsToMany('App\Term', 'student_fee_terms', 'student_fee_id', 'term_id')
+    ->withPivot(['amount', 'is_billed']);;
   }
 
   public function recomputeTerms($payment = 0)
@@ -79,5 +80,20 @@ class StudentFee extends Model
 
         $this->terms()->sync($studentFeeTerms);
     }
+  }
+
+  public function getPreviousBalance()
+  {
+    $totalBilling = Billing::where('student_id', $this->student_id)
+        ->where('billing_type_id', 2)
+        ->get()
+        ->sum('total_amount');
+    $totalPayment = Payment::where('student_id', $this->student_id)
+        ->whereHas('billing', function ($query) {
+            return $query->where('billing_type_id', 2);
+        })
+        ->get()
+        ->sum('amount');
+    return $totalBilling - $totalPayment;
   }
 }
