@@ -31,6 +31,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('/logout', 'AuthController@logout');
         // students
         Route::resource('/students', 'StudentController');
+        Route::get('/students/{studentId}/billings', 'StudentController@getBillingsOfStudent');
         Route::get('/students/{studentId}/evaluations', 'EvaluationController@getEvaluationsOfStudent');
         Route::get('/students/{studentId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfStudent');
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');

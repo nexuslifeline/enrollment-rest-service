@@ -14,7 +14,9 @@ class PaymentService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Payment::with(['paymentMode', 'student' => function($query) {
+            //added billing related model
+            //10 10 2020
+            $query = Payment::with(['paymentMode', 'billing', 'student' => function($query) {
                 $query->with(['address', 'photo']);
             }])
             ->where('payment_status_id', '!=', 1);
@@ -81,17 +83,6 @@ class PaymentService
         DB::beginTransaction();
         try {
             $payment = Payment::create($data);
-            // if ($request->hasFile('files')) {
-            //   $files = $request->file('files');
-            //   foreach ($files as $file) {
-            //       $path = $file->store('files');
-            //       $paymentFile = PaymentFile::create([
-            //           'payment_id' => $payment->id,
-            //           'path' => $path,
-            //           'name' => $file->getClientOriginalName(),
-            //           'hash_name' => $file->hashName()
-            //       ]);
-            //   }
             DB::commit();
             return $payment;
         } catch (Exception $e) {
