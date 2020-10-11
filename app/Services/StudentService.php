@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\Admission;
-use App\Application;
 use Image;
 use Exception;
+use App\Billing;
 use App\Student;
+use App\Admission;
 use App\SchoolYear;
+use App\Application;
 use App\AcademicRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -255,6 +256,33 @@ class StudentService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during StudentService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getBillingsOfStudent($id) {
+        try {
+            //soa billing type id
+            $billingTypeId = 2;
+            $soaBillings = Billing::where('billing_type_id', $billingTypeId)
+                        ->where('student_id', $id)->latest()->get();
+            $soaBillings->append('total_paid');
+
+            //other billing type id
+            $billingTypeId = 3;
+            $otherBillings = Billing::where('billing_type_id', $billingTypeId)
+                    ->where('student_id', $id)->get();
+            $otherBillings->append('total_paid');
+
+
+            $billings = $soaBillings->merge($otherBillings);
+
+            return $billings;
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService getBillingsOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

@@ -53,4 +53,8 @@ class Billing extends Model
         return $this->hasMany('App\Payment');
     }
 
+    public function getTotalPaidAttribute() {
+        return $this->payments->sum('amount');
+    }
+
 }

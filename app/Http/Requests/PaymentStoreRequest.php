@@ -24,22 +24,30 @@ class PaymentStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount' => 'required|numeric',
-            'payment_mode_id' => 'required'
+            'student_id' => 'sometimes|required',
+            'billing_id' => 'sometimes|required',
+            'reference_no' => 'sometimes|required',
+            'payment_mode_id' => 'sometimes|required',
+            'date_paid' => 'sometimes|required|date',
+            'amount' => 'sometimes|required|numeric|gt:0',
+            'notes' => 'sometimes|required_if:payment_mode_id,==,3'
         ];
     }
 
     public function attributes()
     {
         return [
-            'payment_mode_id' => 'payment mode'
+            'payment_mode_id' => 'payment mode',
+            'date_paid' => 'date paid is required',
+            'student_id' => 'student'
         ];
     }
 
     public function messages()
     {
         return [
-            'notes.required_if' => 'Notes is required when payment mode is OTHERS.'
+            'notes.required_if' => 'Notes is required when payment mode is OTHERS.',
+            'billing_id' => 'Please select a biling.'
         ];
     }
 }

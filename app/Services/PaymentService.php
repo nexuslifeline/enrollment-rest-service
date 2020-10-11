@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Payment;
 use App\Student;
+use App\StudentFee;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,9 @@ class PaymentService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Payment::with(['paymentMode', 'student' => function($query) {
+            //added billing related model
+            //10 10 2020
+            $query = Payment::with(['paymentMode', 'billing', 'student' => function($query) {
                 $query->with(['address', 'photo']);
             }])
             ->where('payment_status_id', '!=', 1);
@@ -79,18 +82,7 @@ class PaymentService
     {
         DB::beginTransaction();
         try {
-            $payment = Payment::create($data);  
-            // if ($request->hasFile('files')) {
-            //   $files = $request->file('files');
-            //   foreach ($files as $file) {
-            //       $path = $file->store('files');
-            //       $paymentFile = PaymentFile::create([
-            //           'payment_id' => $payment->id,
-            //           'path' => $path,
-            //           'name' => $file->getClientOriginalName(),
-            //           'hash_name' => $file->hashName()
-            //       ]);
-            //   }
+            $payment = Payment::create($data);
             DB::commit();
             return $payment;
         } catch (Exception $e) {
@@ -124,6 +116,11 @@ class PaymentService
                         'student_no' => '11'. str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
                     ]);
                 }
+                $billing = $payment->billing;
+                if ($billing->billing_type_id === 1) {
+                    $studentFee = StudentFee::find($billing->student_fee_id);
+                    $studentFee->recomputeTerms($payment->amount);
+                }
             }
             DB::commit();
             return $payment;
@@ -137,9 +134,11 @@ class PaymentService
 
     public function delete(int $id)
     {
+        DB::beginTransaction();
         try {
             $payment = Payment::find($id);
             $payment->delete();
+            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PaymentService delete method call: ');

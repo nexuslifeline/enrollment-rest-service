@@ -38,4 +38,10 @@ class PaymentUpdateRequest extends FormRequest
             'payment_mode_id' => 'payment mode'
         ];
     }
+    public function messages()
+    {
+        return [
+            'notes.required_if' => 'Notes is required when payment mode is OTHERS.',
+        ];
+    }
 }

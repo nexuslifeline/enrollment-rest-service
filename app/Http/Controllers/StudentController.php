@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Student;
 use App\Admission;
+use App\Evaluation;
 use App\Application;
 use App\AcademicRecord;
-use App\Evaluation;
-use App\Http\Requests\StudentStoreRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use App\Http\Resources\StudentResource;
-use App\Http\Requests\StudentUpdateRequest;
 use App\Services\StudentService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\BillingResource;
+use App\Http\Resources\StudentResource;
+use App\Http\Requests\StudentStoreRequest;
+use App\Http\Requests\StudentUpdateRequest;
 
 class StudentController extends Controller
 {
@@ -96,5 +97,15 @@ class StudentController extends Controller
         $studentService = new StudentService();
         $studentService->delete($id);
         return response()->json([], 204);
+    }
+
+    public function getBillingsOfStudent(int $id)
+    {
+        $studentService = new StudentService();
+        $billings = $studentService->getBillingsOfStudent($id);
+
+        return BillingResource::collection(
+            $billings
+        );
     }
 }
