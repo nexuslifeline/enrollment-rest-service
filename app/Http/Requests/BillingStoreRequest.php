@@ -25,6 +25,7 @@ class BillingStoreRequest extends FormRequest
     {
         return [
             'term_id' => 'sometimes|required',
+            'student_id' => 'sometimes|required',
             'due_date' => 'required|date'
         ];
     }
@@ -32,7 +33,8 @@ class BillingStoreRequest extends FormRequest
     public function attributes()
     {
         return [
-            'term_id' => 'term'
+            'term_id' => 'term',
+            'student_id' => 'student'
         ];
     }
 }

@@ -17,4 +17,14 @@ class BillingItem extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    public function schoolFee()
+    {
+        return $this->belongsTo('App\SchoolFee');
+    }
+
+    public function term()
+    {
+        return $this->belongsTo('App\Term');
+    }
 }

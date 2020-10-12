@@ -14,7 +14,8 @@ class BillingTypesTableSeeder extends Seeder
         DB::table('billing_types')->insert(
             [
                 ['name' => 'Initial Fee', 'description' => ''],
-                ['name' => 'Billing', 'description' => ''],
+                ['name' => 'SOA', 'description' => ''],
+                ['name' => 'BILLING', 'description' => ''],
             ]
         );
     }

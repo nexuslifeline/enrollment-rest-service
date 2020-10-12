@@ -149,7 +149,7 @@ class BillingService
         }
     }
 
-    public function store(array $data)
+    public function store(array $data, array $billingItems)
     {
         DB::beginTransaction();
         try {
@@ -157,6 +157,12 @@ class BillingService
             $billing->update([
                 'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
+
+            foreach ($billingItems as $item)
+            {
+                $billing->billingItems()->create($item);
+            }
+
             // if billing is soa update student_fee_term is_billed to 1
             if ($billing->billing_type_id === 2) {
                 $billing->studentFee()->first()->terms()->wherePivot('term_id', $billing->term_id)

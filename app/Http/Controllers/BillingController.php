@@ -36,8 +36,9 @@ class BillingController extends Controller
     public function store(BillingStoreRequest $request)
     {
         $billingService = new BillingService();
-        $data = $request->all();
-        $billing = $billingService->store($data);
+        $data = $request->except('billing_items');
+        $billingItems = $request->billing_items ?? [];
+        $billing = $billingService->store($data, $billingItems);
 
         return (new BillingResource($billing))
             ->response()
