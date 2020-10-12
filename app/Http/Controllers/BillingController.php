@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Billing;
-use App\Http\Requests\BillingStoreRequest;
 use Illuminate\Http\Request;
-use App\Http\Resources\BillingResource;
 use App\Services\BillingService;
+use App\Http\Resources\BillingResource;
+use App\Http\Requests\BillingStoreRequest;
+use App\Http\Resources\BillingItemResource;
 
 class BillingController extends Controller
 {
@@ -97,5 +98,11 @@ class BillingController extends Controller
     public function destroy(Billing $billing)
     {
         //
+    }
+
+    public function getBillingItemsOfBilling(int $id) {
+        $billingService = new BillingService();
+        $schoolFee = $billingService->getBillingItemsOfBilling($id);
+        return BillingItemResource::collection($schoolFee);
     }
 }

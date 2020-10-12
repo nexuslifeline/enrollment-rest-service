@@ -267,7 +267,11 @@ class StudentService
             //soa billing type id
             $billingTypeId = 2;
             $soaBillings = Billing::where('billing_type_id', $billingTypeId)
-                        ->where('student_id', $id)->latest()->get();
+                        ->where('student_id', $id)
+                        ->latest()
+                        ->take(1)
+                        ->get();
+
             $soaBillings->append('total_paid');
 
             //other billing type id

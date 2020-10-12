@@ -23,8 +23,14 @@ class PaymentService
             //filter
             //payment status
             $paymentStatusId = $filters['payment_status_id'] ?? false;
-                $query->when($paymentStatusId, function($q) use ($paymentStatusId) {
+            $query->when($paymentStatusId, function($q) use ($paymentStatusId) {
                     return $q->where('payment_status_id', $paymentStatusId);
+            });
+
+            $dateFrom = $filters['date_from'] ?? false;
+            $dateTo = $filters['date_to'] ?? false;
+            $query->when($dateFrom, function($q) use ($dateFrom, $dateTo) {
+                return $q->whereBetween('date_paid', [$dateFrom, $dateTo]);
             });
 
             //criteria
