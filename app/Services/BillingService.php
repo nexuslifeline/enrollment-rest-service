@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\AcademicRecord;
 use App\Billing;
 use App\Term;
 use Exception;
@@ -139,6 +140,59 @@ class BillingService
             $studentFees->update([
                 'is_billed' => 1
             ]);
+            DB::commit();
+            return $billings;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SchoolFeeService storeBatchSoa method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function storeBatchOtherBilling(array $data, array $billingItems)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecords = AcademicRecord::where('school_category_id', $data['school_category_id'])
+                ->where('school_year_id', $data['school_year_id']);
+
+            $levelId = $data['level_id'] ?? false;
+            $academicRecords->when($levelId, function ($query) use ($levelId) {
+                $query->where('level_id', $levelId);
+            });
+
+            $courseId = $data['course_id'] ?? false;
+            $academicRecords->when($courseId, function ($query) use ($courseId) {
+                $query->where('course_id', $courseId);
+            });
+
+            $semesterId = $data['semester_id'] ?? false;
+            $academicRecords->when($semesterId, function ($query) use ($semesterId) {
+                $query->where('semester_id', $semesterId);
+            });
+
+            $billings = [];
+            foreach ($academicRecords->get() as $academicRecord) {
+                $billing = Billing::create([
+                    'due_date' => $data['due_date'],
+                    'total_amount' => $data['total_amount'],
+                    'student_id' => $academicRecord->student_id,
+                    'billing_type_id' => $data['billing_type_id'],
+                    'billing_status_id' => $data['billing_status_id'],
+                    'school_year_id' => $data['school_year_id'],
+                    'semester_id' => $data['semester_id']
+                ]);
+                $billing->update([
+                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                ]);
+
+                foreach ($billingItems as $item)
+                {
+                    $billing->billingItems()->create($item);
+                }
+                $billings[] = $billing;
+            }
             DB::commit();
             return $billings;
         } catch (Exception $e) {

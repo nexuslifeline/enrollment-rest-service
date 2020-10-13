@@ -49,8 +49,17 @@ class BillingController extends Controller
     {
         $billingService = new BillingService();
         $data = $request->all();
-        $schoolFee = $billingService->storeBatchSoa($data);
-        return BillingResource::collection($schoolFee);
+        $billings = $billingService->storeBatchSoa($data);
+        return BillingResource::collection($billings);
+    }
+
+    public function storeBatchOtherBilling(BillingStoreRequest $request)
+    {
+        $billingService = new BillingService();
+        $data = $request->except('billing_items');
+        $billingItems = $request->billing_items ?? [];
+        $billings = $billingService->storeBatchOtherBilling($data, $billingItems);
+        return BillingResource::collection($billings);
     }
 
     /**
