@@ -283,7 +283,7 @@ class StudentService
 
             $billings = $soaBillings->merge($otherBillings);
 
-            return $billings;
+            return $billings->sortBy('due_date');
 
         } catch (Exception $e) {
             DB::rollback();
