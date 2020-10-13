@@ -107,6 +107,7 @@ Route::group(['prefix' => 'v1'], function()
         Route::resource('/billings', 'BillingController');
         Route::post('/billings/batch-soa', 'BillingController@storeBatchSoa');
         Route::post('/billings/batch-other-billing', 'BillingController@storeBatchOtherBilling');
+        Route::get('/billings/{billingId}/billing-items', 'BillingController@getBillingItemsOfBilling');
         // eWallets
         Route::resource('/e-wallet-accounts', 'EWalletAccountController');
         // bankAccounts

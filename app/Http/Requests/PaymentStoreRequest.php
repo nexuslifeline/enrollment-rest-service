@@ -26,6 +26,7 @@ class PaymentStoreRequest extends FormRequest
         return [
             'student_id' => 'sometimes|required',
             'billing_id' => 'sometimes|required',
+            'transaction_no' => 'sometimes|required',
             'reference_no' => 'sometimes|required',
             'payment_mode_id' => 'sometimes|required',
             'date_paid' => 'sometimes|required|date',

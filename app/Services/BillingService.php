@@ -91,7 +91,11 @@ class BillingService
     {
         try {
             $billing = Billing::find($id);
-            $billing->load(['billingItems', 'billingType', 'student']);
+            $billing->load(['billingType', 'student', 'billingItems' => function($query) {
+                    return $query->with(['term', 'schoolFee']);
+                }
+            ]);
+
             return $billing;
         } catch (Exception $e) {
             Log::info('Error occured during BillingService get method call: ');
@@ -228,6 +232,23 @@ class BillingService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during BillingService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getBillingItemsofBilling(int $id) {
+        try {
+            $billing = Billing::find($id);
+
+            $billingItems = $billing->billingItems()
+            ->with(['term' =>function($query){
+                    return $query->with(['schoolYear', 'semester']);
+            }, 'schoolFee'])->get();
+
+            return $billingItems;
+        } catch (Exception $e) {
+            Log::info('Error occured during BillingService get method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
