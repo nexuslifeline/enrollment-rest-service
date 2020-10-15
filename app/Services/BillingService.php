@@ -91,10 +91,7 @@ class BillingService
     {
         try {
             $billing = Billing::find($id);
-            $billing->load(['billingType', 'student', 'billingItems' => function($query) {
-                    return $query->with(['term', 'schoolFee']);
-                }
-            ]);
+            $billing->load(['billingType', 'student', 'billingItems']);
 
             return $billing;
         } catch (Exception $e) {

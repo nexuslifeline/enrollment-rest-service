@@ -90,6 +90,9 @@ class PaymentService
         try {
             $payment = Payment::create($data);
             DB::commit();
+            $payment->load(['billing' => function($q) {
+                $q->append('total_paid');
+            }]);
             return $payment;
         } catch (Exception $e) {
             DB::rollback();
