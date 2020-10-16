@@ -34,9 +34,15 @@ class StudentFeeService
     public function getStudentFeeOfAcademicRecord(int $academicRecordId)
     {
         try {
-            $studentFee = AcademicRecord::findOrFail($academicRecordId)->studentFee()->with(['studentFeeItems', 'billings' => function($query) {
-              $query->first()->first();
-            }])->first();
+            $studentFee = AcademicRecord::findOrFail($academicRecordId)
+                ->studentFee()
+                ->with([
+                    'studentFeeItems' => function($query) {
+                        $query->with(['schoolFeeCategory']);
+                    },
+                    'billings' => function($query) {
+                        $query->first()->first();
+                    }])->first();
             return $studentFee;
         } catch (Exception $e) {
             Log::info('Error occured during StudentFeeService getStudentFeeOfAcademicRecord method call: ');
@@ -50,7 +56,9 @@ class StudentFeeService
         try {
             $query = Student::findOrFail($studentId)->studentFees()
             ->with([
-                'studentFeeItems',
+                'studentFeeItems' => function ($query) {
+                    return $query->with(['schoolFeeCategory']);
+                },
                 'level',
                 'course',
                 'semester',

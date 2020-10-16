@@ -14,7 +14,9 @@ class RateSheetService
     {
         try {
             $perPage = $filter['per_page'] ?? 20;
-            $query = RateSheet::with(['level', 'course', 'semester', 'fees']);
+            $query = RateSheet::with(['level', 'course', 'semester', 'fees'=> function ($query) {
+                return $query->with(['schoolFeeCategory']);
+            }]);
 
             // filters
             $levelId = $filter['level_id'] ?? false;
@@ -49,7 +51,9 @@ class RateSheetService
     {
         try {
             $rateSheet = RateSheet::find($id);
-            $rateSheet->load(['level', 'course', 'semester', 'fees']);
+            $rateSheet->load(['level', 'course', 'semester', 'fees' => function ($query) {
+                return $query->with(['schoolFeeCategory']);
+            }]);
             return $rateSheet;
         } catch (Exception $e) {
             Log::info('Error occured during RateSheetService get method call: ');
@@ -68,6 +72,7 @@ class RateSheetService
             $items = [];
             foreach ($fees as $fee) {
                 $items[$fee['school_fee_id']] = [
+                    'is_initial_fee' => $fee['is_initial_fee'],
                     'amount' => $fee['amount'],
                     'notes' => $fee['notes']
                 ];
@@ -97,6 +102,7 @@ class RateSheetService
             $items = [];
             foreach ($fees as $fee) {
                 $items[$fee['school_fee_id']] = [
+                    'is_initial_fee' => $fee['is_initial_fee'],
                     'amount' => $fee['amount'],
                     'notes' => $fee['notes']
                 ];

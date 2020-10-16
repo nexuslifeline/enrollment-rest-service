@@ -190,7 +190,8 @@ class AcademicRecordService
                     foreach ($fees as $fee) {
                         $items[$fee['school_fee_id']] = [
                             'amount' => $fee['amount'],
-                            'notes' => $fee['notes']
+                            'notes' => $fee['notes'],
+                            'is_initial_fee' => $fee['is_initial_fee']
                         ];
                     }
                     $studentFee->studentFeeItems()->sync($items);

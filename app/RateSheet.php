@@ -28,7 +28,7 @@ class RateSheet extends Model
             'rate_sheet_fees',
             'rate_sheet_id',
             'school_fee_id'
-        )->withPivot(['amount','notes']);
+        )->withPivot(['amount','notes','is_initial_fee']);
     }
 
     public function level()
