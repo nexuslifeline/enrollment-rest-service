@@ -18,7 +18,7 @@ class StudentFee extends Model
         'student_fee_items',
         'student_fee_id',
         'school_fee_id'
-      )->withPivot(['amount','notes']);
+      )->withPivot(['amount','notes','is_initial_fee']);
   }
 
   public function billings()
