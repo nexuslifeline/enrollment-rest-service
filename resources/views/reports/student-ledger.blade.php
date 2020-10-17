@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Collection Report</title>
+    <title>STUDENT LEDGER</title>
     <style type="text/css" media="print">
 
         @page {
@@ -77,6 +77,11 @@
             font-weight: bold;
         }
 
+        .student {
+            margin: 10px 0;
+            font-size: 9pt;
+        }
+
     </style>
 </head>
 <body>
@@ -85,41 +90,34 @@
         <div class="header__details">{{$organization->address}}</div>
         <div class="header__details">{{$organization->telephone_no}}</div>
         <div class="header__details">{{$organization->email_address}}</div>
-        <div class="report__title">COLLECTION REPORT</div>
-        <div class="report__sub-title">Period: {{ $date_from }} - {{ $date_to }} </div>
+        <div class="report__title">STUDENT LEDGER</div>
+        <div class="report__sub-title">AS OF DATE: {{ $as_of_date }}</div>
+    </div>
+    <div class="student">
+        <div>Student No : <br><strong>{{ $student->student_no }}</strong></div>
+        <div>Name       : <br><strong>{{ $student->name }}</strong></div>
     </div>
     <div class="table-container">
         <table class="table-details">
             <tr>
-                <th style="width: 20%; ">STUDENT</th>
-                <th style="width: 12%;  text-align: left;">TRANSACTION NO</th>
-                <th style="width: 12%; ">REFERENCE NO</th>
-                <th style="width: 12%; ">PAYMENT MODE</th>
-                <th style="width: 11%; ">BILLING NO</th>
-                <th style="width: 10%; ">DATE PAID</th>
-                <!-- <th style="width: 12%;">Posted By</th> -->
-                <th style="width: 10%; text-align: right;">AMOUNT</th>
+                <th style="width: 10%; text-align: left;">DATE</th>
+                <th style="width: 20%; text-align: left;">DETAILS</th>
+                <th style="width: 15%; text-align: left;">REFERENCE NO</th>
+                <th style="width: 18%; text-align: right;">DEBIT</th>
+                <th style="width: 18%; text-align: right;">CREDIT</th>
+                <th style="width: 18%; text-align: right;">BALANCE</th>
             </tr>
-            @foreach ($payments as $payment)
+            @foreach ($ledgers as $ledger)
             <tr>
-                <td>
-                    <div style="margin-bottom: 10px;">{{ $payment->student->student_no }}</div>
-                    <div >{{ $payment->student->name }}</div>
-                </td>
-                <td>{{ $payment->transaction_no }}</td>
-                <td>{{ $payment->reference_no }}</td>
-                <td>{{ $payment->paymentMode->name }}</td>
-                <td>{{ $payment->billing->billing_no }}</td>
-                <td>{{ date_format(date_create($payment->date_paid),'m/d/Y')  }}</td>
-                <!-- <td></td> -->
-                <td style="text-align: right;">{{ number_format($payment->amount, 2) }}</td>
+                <td>{{ date_format(date_create($ledger->txn_date),'m/d/Y')  }}</td>
+                <td>{{ $ledger->txn_type }}</td>
+                <td>{{ $ledger->reference }}</td>
+                <td style="text-align: right;">{{ number_format($ledger->debit, 2) }}</td>
+                <td style="text-align: right;">{{ number_format($ledger->credit, 2) }}</td>
+                <td style="text-align: right;">{{ number_format($ledger->balance, 2) }}</td>
             </tr>
             @endforeach
         </table>
-    </div>
-    <div class="report-footer">
-        <span>TOTAL AMOUNT : </span>
-        {{ number_format(array_sum(array_column(iterator_to_array($payments), 'amount')), 2) }}
     </div>
 </body>
 </html>
