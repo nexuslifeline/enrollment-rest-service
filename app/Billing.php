@@ -57,4 +57,9 @@ class Billing extends Model
         return $this->payments->sum('amount');
     }
 
+    public function term()
+    {
+        return $this->belongsTo('App\Term');
+    }
+
 }

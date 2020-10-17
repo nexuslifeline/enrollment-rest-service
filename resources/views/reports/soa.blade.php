@@ -6,7 +6,7 @@
         <style type="text/css">
             @page { sheet-size: A4; }
             body{
-                font-family: Calibri;
+                font-family: 'Calibri';
                 font-size: 9pt;
             }
             @page {
@@ -40,11 +40,28 @@
             }
             .table__student-info {
                 width: 100%;
-                border-bottom: 1px solid black
+                border-bottom: 1px solid black;
+                font-size: 8.5pt;
             }
-            .table__fees {
+            .table__previous-billing-info {
                 width: 100%;
-                padding-top: 15px;
+                /* border-bottom: 1px solid black; */
+                border-collapse: collapse;
+                font-size: 8.5pt;
+            }
+            .table__previous-billing-info td {
+              padding-top: 3px;
+              padding-bottom: 3px;
+            }
+            .table__billing-info {
+                width: 100%;
+                /* border-bottom: 1px solid black; */
+                border-collapse: collapse;
+                font-size: 8.5pt;
+            }
+            .table__billing-info td {
+              padding-top: 5px;
+              padding-bottom: 5px;
             }
             hr {
                 margin: 2px 0;
@@ -66,42 +83,72 @@
                 <td></td>
             </tr>
         </table>
-        <div class="title">Statement of Account</div>
+        <div class="title">STATEMENT OF ACCOUNT</div>
         <table class="table__student-info">
           <tr>
-            <td style="width: 150px">{{$studentFee->student->student_no}}</td>
-            <td style="width: 300px">{{$studentFee->student->last_name.', '.$studentFee->student->first_name.' '.$studentFee->student->middle_name}}</td>
-            <td style="width: 100px">{{$studentFee->academicRecord->section->name}}</td>
-            <td style="width: 150px">{{$studentFee->academicRecord->semester->name}} {{$studentFee->academicRecord->schoolYear->name}}</td>
+            <td style="width: 75px">Student No. :</td>
+            <td>{{$student->student_no}}</td>
+            <td colspan="2"></td>
+            <td>{{$academicRecord->course ? "Course :" : ""}}</td>
+            <td>{{$academicRecord->course ? $academicRecord->course->name : ""}}</td>
+            <td>Term :</td>
+            <td>{{$billing->term->name}}</td>
+          </tr>
+          <tr>
+            <td>Student :</td>
+            <td style="width: 150px;">{{$student->last_name.', '.$student->first_name.' '.$student->middle_name}}</td>
+            <td colspan="2"></td>
+            <td>{{$academicRecord->semester ? "Semester :" : ""}}</td>
+            <td>{{$academicRecord->semester ? $academicRecord->semester->name : ""}}</td>
+            <td style="width: 100px;">Generate Date :</td>
+            <td>{{date('F j, Y', strtotime($billing->created_at))}}</td>
+          </tr>
+          <tr>
+            <td>Level :</td>
+            <td>{{$academicRecord->level->name}}</td>
+            <td style="width: 50px;">Section :</td>
+            <td>{{$academicRecord->section->name}}</td>
+            <td style="width: 75px;">School Year :</td>
+            <td>{{$academicRecord->schoolYear->name}}</td>
+            <td>Due Date :</td>
+            <td>{{date('F j, Y', strtotime($billing->created_at))}}</td>
           </tr>
         </table>
-        <table class="table__fees">
+        @if ($previousBilling)
+        <br>
+        <div style="font-size: 10pt; font-weight: bold;">PREVIOUS BILLING</div>
+        <table class="table__previous-billing-info">
           <tr>
-            <td style="width: 50%; text-align: center;">
-              <h4>School Fees</h4>
-            </td>
-            <td style="width: 50%; text-align: center;">
-              <h4>Miscellaneous Fees</h4>
-            </td>
+            <td style="width: 50%; padding-left: 15px;">{{$previousBilling->billing_no}} - {{$previousBilling->term->name}}</td>
+            <td style="width: 50%; text-align: right;">{{number_format($previousBilling->total_amount + $previousBilling->previous_balance,2)}}</td>
+          </tr>
+          @if (count($previousBilling->payments))
+          <tr>
+            <td style="padding-left: 15px;">Payments</td>
+          </tr>
+          @foreach ($previousBilling->payments as $payment)
+          <tr>
+            <td style="padding-left: 30px;">{{$payment->transaction_no}} - {{date('F j, Y', strtotime($payment->date_paid))}}</td>
+            <td style="text-align: right;">({{number_format($payment->amount,2)}})</td>
+          </tr>
+          @endforeach
+          @endif
+          <tr>
+            <td style="border-top: 1px solid black; font-size: 9pt; font-weight: bold;">REMAINING BALANCE</td>
+            <td style="text-align: right; border-top: 1px solid black; font-size: 9pt; font-weight: bold;">{{number_format($billing->previous_balance,2)}}</td>
+          </tr>
+        </table>
+        @endif
+        <br>
+        <div style="font-size: 10pt; font-weight: bold;">CURRENT BILLING</div>
+        <table class="table__billing-info">
+          <tr>
+            <td style="width: 50%; padding-left: 15px;">{{$billing->billing_no}} - {{$billing->term->name}}</td>
+            <td style="width: 50%; text-align: right;">{{number_format($billing->total_amount,2)}}</td>
           </tr>
           <tr>
-            <td>
-              <table style="width: 100%">
-                <tr>
-                  <td colspan="3"><b>Fees:</b></td>
-                </tr>
-                <tr>
-                  <td style="padding-left: 15px; width: 65%;">Registration</td>
-                  <td style="width: 5%;">P</td>
-                  <td style="width: 30%; text-align: right">340.00</td>
-                </tr>
-                <tr>
-                  <td style="padding-left: 15px; width: 65%;">Tuitio</td>
-                  <td style="width: 5%;">P</td>
-                  <td style="width: 30%; text-align: right">340.00</td>
-                </tr>
-              </table>
-            </td>
+            <td style="border-top: 1px solid black; font-size: 10pt; font-weight: bold;">TOTAL AMOUNT DUE</td>
+            <td style="text-align: right; border-top: 1px solid black; font-size: 10pt; font-weight: bold;">{{number_format($billing->previous_balance + $billing->total_amount,2)}}</td>
           </tr>
         </table>
       </div>

@@ -6,6 +6,7 @@ use Mpdf\Mpdf;
 use App\Payment;
 use App\StudentFee;
 use App\AcademicRecord;
+use App\Billing;
 use App\OrganizationSetting;
 use Illuminate\Http\Request;
 use App\Services\PaymentService;
@@ -55,23 +56,29 @@ class ReportController extends Controller
         return $mpdf->Output('', 'S');
     }
 
-    public function statementOfAccount($studentFeeId)
+    public function statementOfAccount($billingId)
     {
         $mpdf = new Mpdf();
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
-        $data['studentFee'] = StudentFee::find($studentFeeId)
-            ->load([
-                'student',
-                'academicRecord' => function ($q) {
-                    return $q->with([
-                        'level',
-                        'course',
-                        'semester',
-                        'schoolYear',
-                        'section'
-                    ]);
-                }
-            ]);
+        $data['billing'] = Billing::find($billingId)
+            ->load('term');
+        $data['student'] = $data['billing']->student()->first();
+        $data['academicRecord'] = $data['billing']->studentFee()->first()->academicRecord()
+            ->with([
+                'level',
+                'course',
+                'semester',
+                'schoolYear',
+                'section'
+            ])->first();
+        $data['previousBilling'] = Billing::with(['payments', 'term'])
+            ->where('id', '!=', $billingId)
+            ->where('student_fee_id', $data['billing']->student_fee_id)
+            ->where('billing_type_id', 2)
+            ->where('created_at', '<', $data['billing']->created_at)
+            ->latest()
+            ->first();
+        // return $data;
         $content = view('reports.soa')->with($data);
         $mpdf->WriteHTML($content);
         // return $mpdf->Output();

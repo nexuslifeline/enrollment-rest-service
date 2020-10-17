@@ -139,7 +139,7 @@ Route::group(['prefix' => 'v1'], function()
         // reports
         Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
         Route::get('requirement-list', 'ReportController@requirementList');
-        Route::get('collection-report', 'ReportController@collectionReport');
+        Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
         // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
 
@@ -154,9 +154,8 @@ Route::group(['prefix' => 'v1'], function()
         Route::post('terms/update-multiple', 'TermController@updateCreateMultiple');
     });
     // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
-    Route::get('requirement-list', 'ReportController@requirementList');
-    Route::get('statement-of-account/{studentFeeId}', 'ReportController@statementOfAccount');
-
+    // Route::get('requirement-list', 'ReportController@requirementList');
+    // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
