@@ -37,7 +37,12 @@ class Term extends Model
     public function studentFees()
     {
         return $this->belongsToMany('App\StudentFee', 'student_fee_terms', 'term_id', 'student_fee_id')
-        ->withPivot(['amount', 'is_billed']);
+            ->withPivot(['amount', 'is_billed']);
+    }
+
+    public function billing()
+    {
+        return $this->hasOne('App\Billing');
     }
 
     public function getPreviousBalanceAttribute()
