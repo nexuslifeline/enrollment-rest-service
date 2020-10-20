@@ -76,6 +76,7 @@ class PaymentFileService
         }
     }
 
+
     public function delete($fileId)
     {
         try {
@@ -137,5 +138,42 @@ class PaymentFileService
             Log::info($e->getMessage());
             throw $e;
         }
+    }
+
+    public function storeMultiple($paymentId, $files) {
+
+        $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp', 'jfif', 'tiff', 'tif'];
+
+        foreach($files as $file) {
+            
+            $extension = $file->extension();
+            if (in_array($extension, $imageExtensions )) {
+
+                // $width = Image::make($file)->width();
+                $image = Image::make($file);
+
+                $image->resize(null, 600, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+
+                $path = 'files/payment/' . $file->hashName();
+                Storage::put($path, $image->stream());
+            }
+            else {
+                $path = $file->store('files/payment');
+            }
+
+            $paymentFile = PaymentFile::create(
+                [
+                    'payment_id' => $paymentId,
+                    'path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                    'hash_name' => $file->hashName()
+                ]
+            );
+        }
+
+        $query = Payment::where('id', $paymentId)->first()->files();
+        return $query->get();
     }
 }

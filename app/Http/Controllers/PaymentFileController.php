@@ -110,4 +110,14 @@ class PaymentFileController extends Controller
             return response()->json([], 400);
         }
     }
+
+    public function storeMultiple($paymentId, Request $request) {
+
+        $paymentFileService = new PaymentFileService();
+        $files = $request->file ?? [];
+        $paymentFiles = $paymentFileService->storeMultiple($paymentId, $files);
+        return PaymentFileResource::collection(
+            $paymentFiles
+        );
+    }
 }
