@@ -16,14 +16,13 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::group(['prefix' => 'v1'], function()
-{
+Route::group(['prefix' => 'v1'], function () {
     // public endpoints here
     Route::post('/login', 'AuthController@login'); // for student
     Route::post('/personnel/login', 'AuthController@loginPersonnel'); // for personnels
     Route::post('/register', 'AuthController@register');
 
-    Route::group(['middleware' => ['auth:api']], function() {
+    Route::group(['middleware' => ['auth:api']], function () {
         // secured endpoints here
 
         // others
@@ -165,5 +164,3 @@ Route::group(['prefix' => 'v1'], function()
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-
-

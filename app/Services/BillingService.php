@@ -14,10 +14,12 @@ class BillingService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Billing::with(['schoolYear', 'semester', 'billingType', 'studentFee', 'payments',
-            'student' => function ($query) {
-                return $query->with(['address', 'photo']);
-            }]);
+            $query = Billing::with([
+                'schoolYear', 'semester', 'billingType', 'studentFee', 'payments',
+                'student' => function ($query) {
+                    return $query->with(['address', 'photo']);
+                }
+            ]);
             // filters
             // student
             $studentId = $filters['student_id'] ?? false;
@@ -61,17 +63,17 @@ class BillingService
             });
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
-            $query->when($criteria, function($q) use ($criteria) {
-              return $q->whereHas('student', function($query) use ($criteria) {
-                return $query->where('name', 'like', '%'.$criteria.'%')
-                    ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                    ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                    ->orWhere('last_name', 'like', '%'.$criteria.'%');
-              });
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->whereHas('student', function ($query) use ($criteria) {
+                    return $query->where('name', 'like', '%' . $criteria . '%')
+                        ->orWhere('first_name', 'like', '%' . $criteria . '%')
+                        ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+                        ->orWhere('last_name', 'like', '%' . $criteria . '%');
+                });
             });
 
             $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
                 $sort = $filters['sort'] ?? 'ASC';
                 return $q->orderBy($orderBy, $sort);
             });
@@ -101,7 +103,7 @@ class BillingService
         }
     }
 
-    public function storeBatchSoa(array $data)
+    public function storeBatchSoa(array $data, array $billingItems)
     {
         DB::beginTransaction();
         try {
@@ -118,9 +120,14 @@ class BillingService
             });
 
             $billings = [];
+
+            $totalBillingItems = array_reduce($billingItems, function ($carry, $item) {
+                return $carry + $item['amount'];
+            });
+
             foreach ($studentFees->get() as $studentFee) {
                 $billing = Billing::create([
-                    'total_amount' => $studentFee->pivot->amount,
+                    'total_amount' => $studentFee->pivot->amount + $totalBillingItems,
                     'student_id' => $studentFee->student_id,
                     'due_date' => $data['due_date'],
                     'term_id' => $data['term_id'],
@@ -133,7 +140,16 @@ class BillingService
                 ]);
 
                 $billing->update([
-                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                ]);
+
+                foreach ($billingItems as $item) {
+                    $billing->billingItems()->create($item);
+                }
+
+                $billing->billingItems()->create([
+                    'term_id' => $billing->term_id,
+                    'amount' => $studentFee->pivot->amount
                 ]);
 
                 $billings[] = $billing;
@@ -185,11 +201,10 @@ class BillingService
                     'semester_id' => $data['semester_id']
                 ]);
                 $billing->update([
-                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                 ]);
 
-                foreach ($billingItems as $item)
-                {
+                foreach ($billingItems as $item) {
                     $billing->billingItems()->create($item);
                 }
                 $billings[] = $billing;
@@ -210,11 +225,10 @@ class BillingService
         try {
             $billing = Billing::create($data);
             $billing->update([
-                'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
 
-            foreach ($billingItems as $item)
-            {
+            foreach ($billingItems as $item) {
                 $billing->billingItems()->create($item);
             }
 
@@ -234,14 +248,15 @@ class BillingService
         }
     }
 
-    public function getBillingItemsofBilling(int $id) {
+    public function getBillingItemsofBilling(int $id)
+    {
         try {
             $billing = Billing::find($id);
 
             $billingItems = $billing->billingItems()
-            ->with(['term' =>function($query){
+                ->with(['term' => function ($query) {
                     return $query->with(['schoolYear', 'semester']);
-            }, 'schoolFee'])->get();
+                }, 'schoolFee'])->get();
 
             return $billingItems;
         } catch (Exception $e) {

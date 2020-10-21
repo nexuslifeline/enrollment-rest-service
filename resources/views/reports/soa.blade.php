@@ -114,41 +114,74 @@
             <td>{{date('F j, Y', strtotime($billing->created_at))}}</td>
           </tr>
         </table>
-        @if ($previousBilling)
         <br>
-        <div style="font-size: 10pt; font-weight: bold;">PREVIOUS BILLING</div>
-        <table class="table__previous-billing-info">
+        <table style="width: 100%;">
           <tr>
-            <td style="width: 50%; padding-left: 15px;">{{$previousBilling->billing_no}} - {{$previousBilling->term->name}}</td>
-            <td style="width: 50%; text-align: right;">{{number_format($previousBilling->total_amount + $previousBilling->previous_balance,2)}}</td>
-          </tr>
-          @if (count($previousBilling->payments))
-          <tr>
-            <td style="padding-left: 15px;">Payments</td>
-          </tr>
-          @foreach ($previousBilling->payments as $payment)
-          <tr>
-            <td style="padding-left: 30px;">{{$payment->transaction_no}} - {{date('F j, Y', strtotime($payment->date_paid))}}</td>
-            <td style="text-align: right;">({{number_format($payment->amount,2)}})</td>
-          </tr>
-          @endforeach
-          @endif
-          <tr>
-            <td style="border-top: 1px solid black; font-size: 9pt; font-weight: bold;">REMAINING BALANCE</td>
-            <td style="text-align: right; border-top: 1px solid black; font-size: 9pt; font-weight: bold;">{{number_format($billing->previous_balance,2)}}</td>
+            <td style="width: 60%; text-align: center;">
+              <table style="width: 100%; border-collapse: collapse; margin: 0 15px; border-right: 1px solid black;">
+                <tr>
+                  <td colspan="4"><h3>PAYMENT HISTORY</h3></td>
+                </tr>
+                <tr>
+                  <td style="border-bottom: 1px solid black"></td>
+                  <td style="border-bottom: 1px solid black">AMOUNT PAID</td>
+                  <td style="border-bottom: 1px solid black">DATE PAID</td>
+                  <td style="border-bottom: 1px solid black">O.R. NUMBER</td>
+                </tr>
+                @foreach ($terms as $term)
+                <tr>
+                  <td style="text-align: left;">{{$term->name}}</td>
+                  <td>{{number_format($term->billing && $term->billing->payments->first() ? $term->billing->payments->first()->amount : 0, 2)}}</td>
+                  <td>{{$term->billing && $term->billing->payments->first() ? date('F j, Y', strtotime($term->billing->payments->first()->date_paid)) : ''}}</td>
+                  <td>{{$term->billing && $term->billing->payments->first() ? $term->billing->payments->first()->reference_no : ''}}</td>
+                </tr>
+                @endforeach
+              </table>
+            </td>
+            <td style="width: 40%; vertical-align: top;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td>Previous Billing : </td>
+                  <td style="text-align: right;">{{number_format($previousBilling ? $previousBilling->total_amount : 0,2)}}</td>
+                </tr>
+                <tr>
+                  <td>Less Payment : </td>
+                  <td style="text-align: right; border-bottom: 1px solid black">({{number_format($previousBilling && $previousBilling->payments && $previousBilling->payments->first() ? $previousBilling->payments->first()->amount : 0, 2)}})</td>
+                </tr>
+                <tr>
+                  <td>Balance : </td>
+                  <td style="text-align: right;">{{number_format($billing->previous_balance, 2)}}</td>
+                </tr>
+                <tr>
+                  <td style="border-bottom: 1px solid black">Current Billing : </td>
+                  <td style="text-align: right; border-bottom: 1px solid black">{{number_format($billing->total_amount, 2)}}</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 10pt; font-weight: bold">TOTAL AMOUNT DUE : </td>
+                  <td style="text-align: right; font-size: 10pt; font-weight: bold">{{number_format($billing->total_amount + $billing->previous_balance, 2)}}</td>
+                </tr>
+              </table>
+            </td>
           </tr>
         </table>
-        @endif
         <br>
-        <div style="font-size: 10pt; font-weight: bold;">CURRENT BILLING</div>
-        <table class="table__billing-info">
+        <table style="width: 100%; border-collapse:collapse">
           <tr>
-            <td style="width: 50%; padding-left: 15px;">{{$billing->billing_no}} - {{$billing->term->name}}</td>
-            <td style="width: 50%; text-align: right;">{{number_format($billing->total_amount,2)}}</td>
+            <td colspan="2" style="text-align: center; font-size: 10pt;"><h4>BILLING DETAILS</h4></td>
           </tr>
           <tr>
-            <td style="border-top: 1px solid black; font-size: 10pt; font-weight: bold;">TOTAL AMOUNT DUE</td>
-            <td style="text-align: right; border-top: 1px solid black; font-size: 10pt; font-weight: bold;">{{number_format($billing->previous_balance + $billing->total_amount,2)}}</td>
+            <td style="width: 70%; border-bottom: 1px solid black">ITEM</td>
+            <td style="text-align: right; border-bottom: 1px solid black">AMOUNT</td>
+          </tr>
+          @foreach ($billing->billingItems as $item)
+          <tr>
+            <td>{{$item->term ? $item->term->name : $item->schoolFee->name}}</td>
+            <td style="text-align: right;">{{number_format($item->amount,2)}}</td>
+          </tr>
+          @endforeach
+          <tr>
+            <td style="border-top: 1px solid black; font-size: 9pt; font-weight: bold;">TOTAL BILLING</td>
+            <td style="text-align: right; border-top: 1px solid black; font-size: 9pt; font-weight: bold;">{{number_format($billing->total_amount,2)}}</td>
           </tr>
         </table>
       </div>
