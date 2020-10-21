@@ -95,9 +95,15 @@ class BillingController extends Controller
      * @param  \App\Billing  $billing
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Billing $billing)
+    public function update(Request $request, int $id)
     {
-        //
+        $billingService = new BillingService();
+        $data = $request->except('billing_items');
+        $billingItems = $request->billing_items ?? [];
+        $billing = $billingService->update($id, $data, $billingItems);
+        return (new BillingResource($billing))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -106,9 +112,11 @@ class BillingController extends Controller
      * @param  \App\Billing  $billing
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Billing $billing)
+    public function destroy(int $id)
     {
-        //
+        $billingService = new BillingService();
+        $billingService->delete($id);
+        return response()->json([], 204);
     }
 
     public function getBillingItemsOfBilling(int $id)

@@ -98,6 +98,7 @@ class StudentFee extends Model
       ->whereHas('billing', function ($query) {
         return $query->where('billing_type_id', 2);
       })
+      ->where('payment_status_id', 2)
       ->get()
       ->sum('amount');
     return ($totalBilling + $initialPreviousBalance) - $totalPayment;

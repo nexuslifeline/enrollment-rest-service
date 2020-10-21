@@ -130,11 +130,18 @@
                 </tr>
                 @foreach ($terms as $term)
                 <tr>
-                  <td style="text-align: left;">{{$term->name}}</td>
-                  <td>{{number_format($term->billing && $term->billing->payments->first() ? $term->billing->payments->first()->amount : 0, 2)}}</td>
-                  <td>{{$term->billing && $term->billing->payments->first() ? date('F j, Y', strtotime($term->billing->payments->first()->date_paid)) : ''}}</td>
-                  <td>{{$term->billing && $term->billing->payments->first() ? $term->billing->payments->first()->reference_no : ''}}</td>
+                  <td colspan="4" style="text-align: left;">{{$term->name}}</td>
                 </tr>
+                @if ($term->billing)
+                @foreach ($term->billing->payments as $payment)
+                <tr>
+                  <td></td>
+                  <td>{{number_format($payment->amount,2)}}</td>
+                  <td>{{date('F j, Y', strtotime($payment->date_paid))}}</td>
+                  <td>{{$payment->reference_no}}</td>
+                </tr>
+                @endforeach
+                @endif
                 @endforeach
               </table>
             </td>
@@ -146,7 +153,7 @@
                 </tr>
                 <tr>
                   <td>Less Payment : </td>
-                  <td style="text-align: right; border-bottom: 1px solid black">({{number_format($previousBilling && $previousBilling->payments && $previousBilling->payments->first() ? $previousBilling->payments->first()->amount : 0, 2)}})</td>
+                  <td style="text-align: right; border-bottom: 1px solid black">({{number_format($previousBilling && $previousBilling->payments ? $previousBilling->payments->sum('amount') : 0, 2)}})</td>
                 </tr>
                 <tr>
                   <td>Balance : </td>
@@ -167,7 +174,7 @@
         <br>
         <table style="width: 100%; border-collapse:collapse">
           <tr>
-            <td colspan="2" style="text-align: center; font-size: 10pt;"><h4>BILLING DETAILS</h4></td>
+            <td colspan="2" style="text-align: center; font-size: 10pt;"><h4>CURRENT BILLING DETAILS</h4></td>
           </tr>
           <tr>
             <td style="width: 70%; border-bottom: 1px solid black">ITEM</td>

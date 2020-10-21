@@ -93,8 +93,9 @@ class BillingService
     {
         try {
             $billing = Billing::find($id);
-            $billing->load(['billingType', 'student', 'billingItems']);
-
+            $billing->load(['billingType', 'student', 'billingItems' => function ($query) {
+                return $query->with(['schoolFee', 'term']);
+            }]);
             return $billing;
         } catch (Exception $e) {
             Log::info('Error occured during BillingService get method call: ');
@@ -243,6 +244,49 @@ class BillingService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during BillingService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function update(int $id, array $data, array $billingItems)
+    {
+        DB::beginTransaction();
+        try {
+
+            $billing = Billing::find($id);
+
+            $billing->update($data);
+
+            $billing->billingItems()->delete();
+            foreach ($billingItems as $item) {
+                $billing->billingItems()->create($item);
+            }
+            DB::commit();
+            return $billing;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during BillingService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function delete(int $id)
+    {
+        try {
+            DB::beginTransaction();
+            $billing = Billing::find($id);
+            // if billing is soa update student_fee_term is_billed to 0 so you can create it again
+            if ($billing->billing_type_id === 2) {
+                $billing->studentFee()->first()->terms()->wherePivot('term_id', $billing->term_id)
+                    ->update(['is_billed' => 0]);
+            }
+            $billing->delete();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during BillingService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
