@@ -180,7 +180,8 @@ class ReportController extends Controller
                 'created_at as txn_date'
             ]
         )->where('student_id', $studentId)
-            ->whereDate('created_at', '<', $asOfDate);
+            ->where('payment_status_id', '=', 2) //added filter payment status = approved
+                ->whereDate('created_at', '<', $asOfDate);
 
         $payments->when($schoolYearId, function ($q) use ($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);

@@ -76,7 +76,6 @@ class PaymentFileService
         }
     }
 
-
     public function delete($fileId)
     {
         try {
@@ -145,7 +144,6 @@ class PaymentFileService
         $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp', 'jfif', 'tiff', 'tif'];
 
         foreach($files as $file) {
-            
             $extension = $file->extension();
             if (in_array($extension, $imageExtensions )) {
 
