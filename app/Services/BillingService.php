@@ -93,9 +93,8 @@ class BillingService
     {
         try {
             $billing = Billing::find($id);
-            $billing->load(['billingType', 'student', 'billingItems' => function ($query) {
-                return $query->with(['schoolFee', 'term']);
-            }]);
+            $billing->load(['billingType', 'student', 'billingItems']);
+            $billing->append(['total_paid']);
             return $billing;
         } catch (Exception $e) {
             Log::info('Error occured during BillingService get method call: ');

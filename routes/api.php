@@ -92,8 +92,10 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');
         Route::get('/payments/{paymentId}/files/{fileId}/preview', 'PaymentFileController@preview');
         Route::post('/payments/{paymentId}/files', 'PaymentFileController@store');
+        Route::post('/payments/{paymentId}/multiple-files', 'PaymentFileController@storeMultiple');
         Route::put('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@update');
         Route::delete('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@destroy');
+
         // payment receipt files
         Route::get('/payments/{paymentId}/payment-receipt-files', 'PaymentReceiptFileController@index');
         Route::post('/payments/{paymentId}/payment-receipt-files', 'PaymentReceiptFileController@store');

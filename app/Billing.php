@@ -54,7 +54,7 @@ class Billing extends Model
     }
 
     public function getTotalPaidAttribute() {
-        return $this->payments->sum('amount');
+        return $this->payments->where('payment_status_id', 2)->sum('amount');
     }
 
     public function term()
