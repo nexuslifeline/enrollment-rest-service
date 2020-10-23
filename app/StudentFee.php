@@ -13,17 +13,17 @@ class StudentFee extends Model
 
   public function studentFeeItems()
   {
-      return $this->belongsToMany(
-        'App\SchoolFee',
-        'student_fee_items',
-        'student_fee_id',
-        'school_fee_id'
-      )->withPivot(['amount','notes','is_initial_fee']);
+    return $this->belongsToMany(
+      'App\SchoolFee',
+      'student_fee_items',
+      'student_fee_id',
+      'school_fee_id'
+    )->withPivot(['amount', 'notes', 'is_initial_fee']);
   }
 
   public function billings()
   {
-      return $this->hasMany('App\Billing');
+    return $this->hasMany('App\Billing');
   }
 
   public function student()
@@ -59,41 +59,48 @@ class StudentFee extends Model
   public function terms()
   {
     return $this->belongsToMany('App\Term', 'student_fee_terms', 'student_fee_id', 'term_id')
-    ->withPivot(['amount', 'is_billed']);;
+      ->withPivot(['amount', 'is_billed']);;
   }
 
   public function recomputeTerms($payment = 0)
   {
     $terms = Term::where('school_year_id', $this->school_year_id)
-        ->where('school_category_id', $this->academicRecord->school_category_id)
-        ->where('semester_id', $this->semester_id)
-        ->get();
+      ->where('school_category_id', $this->academicRecord->school_category_id)
+      ->where('semester_id', $this->semester_id)
+      ->get();
 
     if (count($terms) > 0) {
-        $studentFeeTerms = [];
-        $amount = ($this->total_amount - $payment) / count($terms);
-        foreach ($terms as $term) {
-            $studentFeeTerms[$term->id] = [
-                'amount' => $amount
-            ];
-        }
+      $studentFeeTerms = [];
+      $amount = ($this->total_amount - $payment) / count($terms);
+      foreach ($terms as $term) {
+        $studentFeeTerms[$term->id] = [
+          'amount' => $amount
+        ];
+      }
 
-        $this->terms()->sync($studentFeeTerms);
+      $this->terms()->sync($studentFeeTerms);
     }
   }
 
   public function getPreviousBalance()
   {
+    $initialFee = $this->billings()
+      ->where('billing_type_id', 1)
+      ->first();
+
+    $initialPreviousBalance = $initialFee['previous_balance'] ?? 0;
+
     $totalBilling = Billing::where('student_id', $this->student_id)
-        ->where('billing_type_id', 2)
-        ->get()
-        ->sum('total_amount');
+      ->where('billing_type_id', 2)
+      ->get()
+      ->sum('total_amount');
     $totalPayment = Payment::where('student_id', $this->student_id)
-        ->whereHas('billing', function ($query) {
-            return $query->where('billing_type_id', 2);
-        })
-        ->get()
-        ->sum('amount');
-    return $totalBilling - $totalPayment;
+      ->whereHas('billing', function ($query) {
+        return $query->where('billing_type_id', 2);
+      })
+      ->where('payment_status_id', 2)
+      ->get()
+      ->sum('amount');
+    return ($totalBilling + $initialPreviousBalance) - $totalPayment;
   }
 }

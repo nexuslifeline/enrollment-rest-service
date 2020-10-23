@@ -16,14 +16,13 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::group(['prefix' => 'v1'], function()
-{
+Route::group(['prefix' => 'v1'], function () {
     // public endpoints here
     Route::post('/login', 'AuthController@login'); // for student
     Route::post('/personnel/login', 'AuthController@loginPersonnel'); // for personnels
     Route::post('/register', 'AuthController@register');
 
-    Route::group(['middleware' => ['auth:api']], function() {
+    Route::group(['middleware' => ['auth:api']], function () {
         // secured endpoints here
 
         // others
@@ -93,8 +92,10 @@ Route::group(['prefix' => 'v1'], function()
         Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');
         Route::get('/payments/{paymentId}/files/{fileId}/preview', 'PaymentFileController@preview');
         Route::post('/payments/{paymentId}/files', 'PaymentFileController@store');
+        Route::post('/payments/{paymentId}/multiple-files', 'PaymentFileController@storeMultiple');
         Route::put('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@update');
         Route::delete('/payments/{paymentId}/files/{fileId}', 'PaymentFileController@destroy');
+
         // payment receipt files
         Route::get('/payments/{paymentId}/payment-receipt-files', 'PaymentReceiptFileController@index');
         Route::post('/payments/{paymentId}/payment-receipt-files', 'PaymentReceiptFileController@store');
@@ -163,5 +164,3 @@ Route::group(['prefix' => 'v1'], function()
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-
-

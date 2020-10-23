@@ -34,7 +34,7 @@ class ReportController extends Controller
             'studentType',
             'application',
             'admission',
-            'student' => function($query) {
+            'student' => function ($query) {
                 $query->with(['address']);
             },
             'subjects',
@@ -64,7 +64,10 @@ class ReportController extends Controller
         $mpdf = new Mpdf();
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $data['billing'] = Billing::find($billingId)
-            ->load('term');
+            ->load(['term', 'billingItems' => function ($query) {
+                return $query->with(['term', 'schoolFee'])
+                    ->orderBy('term_id', 'DESC');
+            }]);
         $data['student'] = $data['billing']->student()->first();
         $data['academicRecord'] = $data['billing']->studentFee()->first()->academicRecord()
             ->with([
@@ -74,7 +77,13 @@ class ReportController extends Controller
                 'schoolYear',
                 'section'
             ])->first();
-        $data['previousBilling'] = Billing::with(['payments', 'term'])
+
+        $data['terms'] = $data['billing']->studentFee()->first()->terms()->with(['billing' => function ($query) use ($data) {
+            return $query->with(['payments'])
+                ->where('student_fee_id', $data['billing']->student_fee_id);
+        }])->get();
+        // return $data['terms'];
+        $data['previousBilling'] = Billing::with('payments')
             ->where('id', '!=', $billingId)
             ->where('student_fee_id', $data['billing']->student_fee_id)
             ->where('billing_type_id', 2)
@@ -98,27 +107,27 @@ class ReportController extends Controller
         $dateFrom = $request->date_from ?? false;
         $dateTo = $request->date_to ?? false;
 
-        $query->when($dateFrom, function($q) use ($dateFrom, $dateTo) {
+        $query->when($dateFrom, function ($q) use ($dateFrom, $dateTo) {
             return $q->whereBetween('date_paid', [$dateFrom, $dateTo]);
         });
 
-         //criteria
-         $criteria = $request->criteria ?? false;
-         $query->when($criteria, function($q) use ($criteria) {
-           return $q->where(function($q) use ($criteria) {
-               return $q->where('date_paid', 'like', '%'.$criteria.'%')
-               ->orWhere('amount', 'like', '%'.$criteria.'%')
-               ->orWhere('reference_no', 'like', '%'.$criteria.'%')
-               ->orWhereHas('student', function($query) use ($criteria) {
-                   return $query->where(function($q) use ($criteria) {
-                       return $q->where('name', 'like', '%'.$criteria.'%')
-                       ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                       ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                       ->orWhere('last_name', 'like', '%'.$criteria.'%');
-                   });
-               });
-           });
-         });
+        //criteria
+        $criteria = $request->criteria ?? false;
+        $query->when($criteria, function ($q) use ($criteria) {
+            return $q->where(function ($q) use ($criteria) {
+                return $q->where('date_paid', 'like', '%' . $criteria . '%')
+                    ->orWhere('amount', 'like', '%' . $criteria . '%')
+                    ->orWhere('reference_no', 'like', '%' . $criteria . '%')
+                    ->orWhereHas('student', function ($query) use ($criteria) {
+                        return $query->where(function ($q) use ($criteria) {
+                            return $q->where('name', 'like', '%' . $criteria . '%')
+                                ->orWhere('first_name', 'like', '%' . $criteria . '%')
+                                ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+                                ->orWhere('last_name', 'like', '%' . $criteria . '%');
+                        });
+                    });
+            });
+        });
 
         $data['date_from'] = date('m/d/Y', strtotime($dateFrom));
         $data['date_to'] = date('m/d/Y', strtotime($dateTo));
@@ -132,7 +141,8 @@ class ReportController extends Controller
         return $mpdf->Output('', 'S');
     }
 
-    public function studentLedger($studentId, Request $request) {
+    public function studentLedger($studentId, Request $request)
+    {
 
         $mpdf = new Mpdf();
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
@@ -151,12 +161,13 @@ class ReportController extends Controller
                 DB::raw('0 as debit'),
                 DB::raw('(total_amount) as credit'),
                 'billings.created_at as txn_date'
-            ])
+            ]
+        )
             ->join('billing_types', 'billings.billing_type_id', '=', 'billing_types.id')
             ->where('student_id', $studentId)
             ->whereDate('billings.created_at', '<', $asOfDate);
 
-        $billings->when($schoolYearId, function($q) use ($schoolYearId) {
+        $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
         });
 
@@ -167,17 +178,19 @@ class ReportController extends Controller
                 'amount as debit',
                 DB::raw('0 as credit'),
                 'created_at as txn_date'
-            ])->where('student_id', $studentId)
+            ]
+        )->where('student_id', $studentId)
+            ->where('payment_status_id', '=', 2) //added filter payment status = approved
                 ->whereDate('created_at', '<', $asOfDate);
 
-        $payments->when($schoolYearId, function($q) use ($schoolYearId) {
+        $payments->when($schoolYearId, function ($q) use ($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
         });
 
         $billingPayments = $billings->with('billingItems')->union($payments)->orderBy('txn_date');
 
-        $result = DB::table(function ($query) use($billingPayments) {
-            $query->select('*' , DB::raw('(@bal := @bal + (credit - debit)) as balance'))
+        $result = DB::table(function ($query) use ($billingPayments) {
+            $query->select('*', DB::raw('(@bal := @bal + (credit - debit)) as balance'))
                 ->from($billingPayments);
         })->get();
 
