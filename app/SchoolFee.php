@@ -22,4 +22,14 @@ class SchoolFee extends Model
     {
         return $this->belongsTo('App\SchoolFeeCategory');
     }
+
+    public function studentFeeItems()
+    {
+        return $this->belongsToMany(
+            'App\SchoolFee',
+            'student_fee_items',
+            'school_fee_id',
+            'student_fee_id'
+        )->withPivot(['amount', 'notes', 'is_initial_fee']);
+    }
 }

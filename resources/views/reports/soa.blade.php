@@ -245,7 +245,7 @@
       <td style="text-align: right; font-size: 11pt; font-weight: bold; border: none;">
         TOTAL BILLING :
       </td>
-      <td style="text-align: right; font-size: 11pt; font-weight: bold; border: none; background-color: lightgray">
+      <td style="text-align: right; font-size: 11pt; font-weight: bold; border: none;">
         {{number_format($billing->total_amount, 2)}}
       </td>
     </tr>

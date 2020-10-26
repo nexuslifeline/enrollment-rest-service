@@ -46,11 +46,34 @@
                 padding: 3px;
             }
             .table__fees {
-                width: 100%;
+                width: 60%;
                 font-size: 9pt;
+                margin: auto;
                 /* margin-bottom: 10px; */
                 /* border: 0.5px solid gray; */
                 border-collapse: collapse;
+            }
+            .table__terms {
+                width: 60%;
+                font-size: 9pt;
+                margin: auto;
+                border: 1px solid gray;
+                border-collapse: collapse;
+            }
+            .table__terms td {
+                padding: 3px;
+                border: 1px solid gray;
+            }
+            .table__categories {
+                width: 60%;
+                font-size: 9pt;
+                margin: auto;
+                /* margin-bottom: 10px; */
+                /* border: 0.5px solid gray; */
+                border-collapse: collapse;
+            }
+            .table__categories td {
+                padding: 3px;
             }
             .table__fees tr td {
                 /* border: 0.5px solid gray; */
@@ -104,12 +127,12 @@
             </tr>
         </table>
         <div class="title">Assessment Form</div>
-        <table width="100%">
+        <table style="width: 100%">
             <tr>
-                <td width="12%">Student No. : </td>
-                <td width="28%">{{ $academicRecord->student->student_no ? $academicRecord->student->student_no : 'Awaiting Confirmation' }}</td>
-                <td width="15%">Level : </td>
-                <td width="45%">{{ $academicRecord->level->name }}</td>
+                <td style="width: 12%">Student No. : </td>
+                <td style="width: 28%">{{ $academicRecord->student->student_no ? $academicRecord->student->student_no : 'Awaiting Confirmation' }}</td>
+                <td style="width: 15%">Level : </td>
+                <td style="width: 45%">{{ $academicRecord->level->name }}</td>
             </tr>
             <tr>
                 <td>Name : </td>
@@ -128,18 +151,18 @@
         </table>
         <hr>
         <br>
-        @if($academicRecord->studentFee->is_computed_by_units)
+        {{-- @if($academicRecord->studentFee->is_computed_by_units)
         <div class="table__name-subjects">Subjects</div>
         <table class="table__subjects">
             <thead>
                 <tr>
-                    <td width="100px">Code</td>
-                    <td width="250px">Description</td>
-                    <td width="70px" class="float-center">Lec Units</td>
-                    <td width="100px" class="float-right">Amt Per Lec Unit</td>
-                    <td width="70px" class="float-center">Lab Units</td>
-                    <td width="100px" class="float-right">Amt Per Lab Unit</td>
-                    <td width="100px" class="float-right">Total Amount</td>
+                    <td style="width: 100px">Code</td>
+                    <td style="width: 250px">Description</td>
+                    <td style="width: 70px" class="float-center">Lec Units</td>
+                    <td style="width: 100px" class="float-right">Amt Per Lec Unit</td>
+                    <td style="width: 70px" class="float-center">Lab Units</td>
+                    <td style="width: 100px" class="float-right">Amt Per Lab Unit</td>
+                    <td style="width: 100px" class="float-right">Total Amount</td>
                 </tr>
             </thead>
             @foreach ($academicRecord->subjects as $subject)
@@ -154,59 +177,94 @@
             </tr>
             @endforeach
         </table>
-        <table width="100%">
+        <table style="width: 100%">
             <tr>
-                <td width="500px" class="float-right total" >TOTAL TUITION FEE</td>
-                <td width="100px" class="float-right total">{{ number_format(array_sum(array_column(iterator_to_array($academicRecord->subjects), 'total_amount')), 2) }}</td>
+                <td style="width: 500px" class="float-right total" >TOTAL TUITION FEE</td>
+                <td style="width: 100px" class="float-right total">{{ number_format($academicRecord->subjects->sum('total_amount'), 2) }}</td>
             </tr>
         </table>
-        @endif
+        @endif --}}
         @php
-        $array = []
+        $fees = $academicRecord->studentFee->studentFeeItems;
         @endphp
-        {{-- <div class="table__name-fees">Fees</div>
-        <hr> --}}
-        @if($academicRecord->studentFee->is_computed_by_units)
-        @php
-        $fees = array_filter(iterator_to_array($academicRecord->studentFee->studentFeeItems), function($a) {
-            return $a->id !== 2;
-        });
-        @endphp
-        @endif
-        @foreach($fees as $category)
-        @if(!(in_array($category->school_fee_category_id, $array)))
-        @if($category->school_fee_category_id)
-        <div class="table__name-fees">{{$category->schoolFeeCategory->name}}</div>
-        @endif
+        <br>
         <table class="table__fees">
-            {{-- <thead>
-                <tr>
-                    <td width="200px">Fee</td>
-                    <td width="300px">Notes</td>
-                    <td width="100px" class="float-right">Amount</td>
-                </tr>
-            </thead> --}}
-            @foreach ($fees as $fee)
-            @if($fee->school_fee_category_id === $category->school_fee_category_id)
             <tr>
-                <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
-                {{-- <td>{{ $fee->pivot->notes }}</td> --}}
-                <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
+                <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">DETAILS</td>
+            </tr>
+        @foreach($fees as $fee)
+            @if($fee->school_fee_category_id !== null)
+            <tr>
+                <td colspan="2" class="table__name-fees">{{$schoolFeeCategories->find($fee->school_fee_category_id)->name}}</td>
             </tr>
             @endif
-            @endforeach
-        </table>
-        @php
-        array_push($array, $category->school_fee_category_id)
-        @endphp
-        @endif
-        @endforeach
-        <hr>
-        <table width="100%">
             <tr>
-                <td width="500px" class="float-right total">TOTAL</td>
-                <td width="100px" class="float-right total">{{ number_format($academicRecord->studentFee->total_amount, 2) }}</td>
+                <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
+                <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
             </tr>
+        @endforeach
+            <tr>
+                <td style="border-top: 1px solid gray" class="float-right total">TOTAL</td>
+                <td style="border-top: 1px solid gray" class="float-right total">{{ number_format($academicRecord->studentFee->total_amount, 2) }}</td>
+            </tr>
+        </table>
+        <br>
+        <table class="table__categories">
+            <tr>
+                <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">SUMMARY</td>
+            </tr>
+            @foreach ($schoolFeeCategories as $schoolFeeCategory)
+            <tr>
+                <td>{{$schoolFeeCategory->name}}</td>
+                <td class="float-right">{{number_format($fees->where('school_fee_category_id', $schoolFeeCategory->id)->sum('pivot.amount'), 2)}}</td>
+            </tr>
+            @endforeach
+            @foreach ($fees->whereNull('school_fee_category_id') as $fee)
+            <tr>
+                <td>{{$fee->name}}</td>
+                <td class="float-right">{{number_format($fee->pivot->amount, 2)}}</td>
+            </tr>
+            @endforeach
+            <tr>
+                <td style="border-top: 1px solid gray" class="float-right total">SUB TOTAL :</td>
+                <td style="border-top: 1px solid gray" class="float-right total">{{number_format($academicRecord->studentFee->total_amount, 2)}}</td>
+            </tr>
+            <tr>
+                <td class="float-right total">LESS PAYMENT :</td>
+                <td class="float-right total">
+                @php
+                $payment = $academicRecord->studentFee->billings
+                        ->where('billing_type_id', 1)->first()->payments()->sum('amount');
+                @endphp
+                {{
+                    (number_format($payment,2))
+                }}
+                </td>
+            </tr>
+            <tr>
+                <td class="float-right total">TOTAL BALANCE :</td>
+                <td style="border-top: 1px solid gray" class="float-right total">
+                {{
+                    number_format($academicRecord->studentFee->total_amount - $payment ,2)
+                }}
+                </td>
+            </tr>
+        </table>
+        <br>
+        <table class="table__terms">
+            <tr>
+                <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">PAYMENT SCHEDULE</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">TERMS</td>
+                <td style="text-align: right; font-weight: bold;">AMOUNT</td>
+            </tr>
+            @foreach ($academicRecord->studentFee->terms as $term)
+            <tr>
+                <td>{{$term->name}}</td>
+                <td style="text-align: right">{{$term->pivot->amount}}</td>
+            </tr>
+            @endforeach
         </table>
         <br>
     </body>
