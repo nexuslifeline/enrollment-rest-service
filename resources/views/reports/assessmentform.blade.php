@@ -262,7 +262,7 @@
             @foreach ($academicRecord->studentFee->terms as $term)
             <tr>
                 <td>{{$term->name}}</td>
-                <td style="text-align: right">{{$term->pivot->amount}}</td>
+                <td style="text-align: right">{{number_format($term->pivot->amount, 2)}}</td>
             </tr>
             @endforeach
         </table>

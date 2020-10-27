@@ -173,8 +173,7 @@
           <tr>
             <td colspan="4" style="text-align: left; font-weight: bold;">{{$term->name}}</td>
           </tr>
-          @if ($term->billing)
-          @if(count($term->billing->payments) > 0)
+          @if($term->billing && count($term->billing->payments) > 0)
           @foreach ($term->billing->payments as $payment)
           <tr>
             <td></td>
@@ -188,7 +187,6 @@
             <td colspan="4" style="text-align: center">No Payment</td>
           </tr>
           @endif
-          @endif
           @endforeach
         </table>
       </td>
@@ -201,7 +199,7 @@
           </tr>
           <tr>
             <td>Previous Billing : </td>
-            <td style="text-align: right;">{{number_format($previousBilling ? $previousBilling->total_amount : 0,2)}}</td>
+            <td style="text-align: right;">{{number_format($previousBilling ? $previousBilling->total_amount + $previousBilling->previous_balance : $billing->previous_balance, 2)}}</td>
           </tr>
           <tr>
             <td>Less Payment : </td>
