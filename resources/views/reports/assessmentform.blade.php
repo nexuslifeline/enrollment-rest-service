@@ -192,17 +192,23 @@
             <tr>
                 <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">DETAILS</td>
             </tr>
-        @foreach($fees as $fee)
-            @if($fee->school_fee_category_id !== null)
+            @foreach ($schoolFeeCategories as $schoolFeeCategory)
             <tr>
-                <td colspan="2" class="table__name-fees">{{$schoolFeeCategories->find($fee->school_fee_category_id)->name}}</td>
+                <td colspan="2" class="table__name-fees">{{$schoolFeeCategory->name}}</td>
             </tr>
-            @endif
+            @foreach ($fees->where('school_fee_category_id', $schoolFeeCategory->id) as $fee)
             <tr>
                 <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
                 <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
             </tr>
-        @endforeach
+            @endforeach
+            @endforeach
+            @foreach($fees->whereNull('school_fee_category_id') as $fee)
+            <tr>
+                <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
+                <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
+            </tr>
+            @endforeach
             <tr>
                 <td style="border-top: 1px solid gray" class="float-right total">TOTAL</td>
                 <td style="border-top: 1px solid gray" class="float-right total">{{ number_format($academicRecord->studentFee->total_amount, 2) }}</td>
