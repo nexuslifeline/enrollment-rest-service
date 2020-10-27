@@ -203,4 +203,31 @@ class ReportController extends Controller
         // return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
+
+    public function registrationForm($academicRecordId)
+    {
+        $academicRecord = AcademicRecord::find($academicRecordId);
+        $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
+        $data['academicRecord'] = $academicRecord->load([
+            'section',
+            'schoolYear',
+            'level',
+            'course',
+            'semester',
+            'schoolCategory',
+            'studentCategory',
+            'studentType',
+            'application',
+            'admission',
+            'student' => function ($query) {
+                $query->with(['address']);
+            },
+            'subjects',
+        ]);
+        $mpdf = new Mpdf();
+        $content = view('reports.registrationForm')->with($data);
+        $mpdf->WriteHTML($content);
+        return $mpdf->Output('', 'S');
+        // return $mpdf->Output();
+    }
 }
