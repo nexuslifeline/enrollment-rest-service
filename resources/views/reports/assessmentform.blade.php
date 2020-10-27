@@ -46,7 +46,7 @@
                 padding: 3px;
             }
             .table__fees {
-                width: 60%;
+                width: 80%;
                 font-size: 9pt;
                 margin: auto;
                 /* margin-bottom: 10px; */
@@ -54,7 +54,7 @@
                 border-collapse: collapse;
             }
             .table__terms {
-                width: 60%;
+                width: 80%;
                 font-size: 9pt;
                 margin: auto;
                 border: 1px solid gray;
@@ -65,7 +65,7 @@
                 border: 1px solid gray;
             }
             .table__categories {
-                width: 60%;
+                width: 80%;
                 font-size: 9pt;
                 margin: auto;
                 /* margin-bottom: 10px; */
