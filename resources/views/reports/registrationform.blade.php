@@ -103,7 +103,7 @@
                 <td></td>
             </tr>
         </table>
-        <div class="title">Assessment Form</div>
+        <div class="title">Certificate of Registration</div>
         <table width="100%">
             <tr>
                 <td width="12%">Student No. : </td>
