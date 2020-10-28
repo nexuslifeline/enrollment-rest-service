@@ -69,15 +69,15 @@ class StudentFee extends Model
       ->where('semester_id', $this->semester_id)
       ->get();
 
-    $initialBilling = $this->billings()
-      ->where('billing_type_id', 1)
-      ->first();
+    // $initialBilling = $this->billings()
+    //   ->where('billing_type_id', 1)
+    //   ->first();
 
-    $previousBalance = $initialBilling['previous_balance'] ?? 0;
+    // $previousBalance = $initialBilling['previous_balance'] ?? 0;
 
     if (count($terms) > 0) {
       $studentFeeTerms = [];
-      $amount = (($this->total_amount + $previousBalance) - $payment) / count($terms);
+      $amount = ($this->total_amount - $payment) / count($terms);
       foreach ($terms as $term) {
         $studentFeeTerms[$term->id] = [
           'amount' => $amount
@@ -97,9 +97,9 @@ class StudentFee extends Model
 
     $initialPreviousBalance = $initialBilling['previous_balance'] ?? 0;
 
-    if ($initialBilling->payments->sum('amount') > $initialBilling['total_amount']) {
-      $initialPreviousBalance = ($initialBilling['total_amount'] + $initialBilling['previous_balance']) - $initialBilling->payments->sum('amount');
-    }
+    // if ($initialBilling->payments->sum('amount') > $initialBilling['total_amount']) {
+    //   $initialPreviousBalance = ($initialBilling['total_amount'] + $initialBilling['previous_balance']) - $initialBilling->payments->sum('amount');
+    // }
 
     $totalBilling = Billing::where('student_id', $this->student_id)
       ->where('billing_type_id', 2)

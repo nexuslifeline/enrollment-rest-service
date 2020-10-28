@@ -188,90 +188,91 @@
         $fees = $academicRecord->studentFee->studentFeeItems;
         @endphp
         <br>
-        <table class="table__fees">
+        <table style="width: 100%;">
             <tr>
-                <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">DETAILS</td>
-            </tr>
-            @foreach ($schoolFeeCategories as $schoolFeeCategory)
-            <tr>
-                <td colspan="2" class="table__name-fees">{{$schoolFeeCategory->name}}</td>
-            </tr>
-            @foreach ($fees->where('school_fee_category_id', $schoolFeeCategory->id) as $fee)
-            <tr>
-                <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
-                <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
-            </tr>
-            @endforeach
-            @endforeach
-            @foreach($fees->whereNull('school_fee_category_id') as $fee)
-            <tr>
-                <td style="{{$fee->school_fee_category_id ? 'padding-left: 15px' : ''}}">{{ $fee->name }}</td>
-                <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
-            </tr>
-            @endforeach
-            <tr>
-                <td style="border-top: 1px solid gray" class="float-right total">TOTAL</td>
-                <td style="border-top: 1px solid gray" class="float-right total">{{ number_format($academicRecord->studentFee->total_amount, 2) }}</td>
+                <td style="width: 50%">
+                    <table class="table__categories">
+                        <tr>
+                            <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt;">SUMMARY</td>
+                        </tr>
+                        @foreach ($schoolFeeCategories as $schoolFeeCategory)
+                        <tr>
+                            <td>{{$schoolFeeCategory->name}}</td>
+                            <td class="float-right">{{number_format($fees->where('school_fee_category_id', $schoolFeeCategory->id)->sum('pivot.amount'), 2)}}</td>
+                        </tr>
+                        @endforeach
+                        <tr>
+                            <td>Untitled Fees</td>
+                            <td class="float-right">{{number_format($fees->whereNull('school_fee_category_id')->sum('pivot.amount'), 2)}}</td>
+                        </tr>
+                        <tr>
+                            <td style="border-top: 1px solid gray; font-weight: bold;" colspan="2">SUB TOTAL :</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-left: 30px;">Total Fees</td>
+                            <td style="font-weight: bold;" class="float-right">{{number_format($academicRecord->studentFee->total_amount, 2)}}</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;" colspan="2">LESS :</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-left: 30px;">Total Payment</td>
+                            <td class="float-right" style="font-weight: bold;">
+                            @php
+                            $payment = $academicRecord->studentFee->billings
+                                    ->where('billing_type_id', 1)->first()->payments()->sum('amount');
+                            @endphp
+                            ({{
+                                (number_format($payment,2))
+                            }})
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="total">TOTAL BALANCE :</td>
+                            <td style="border-top: 1px solid gray" class="float-right total">
+                            {{
+                                number_format($academicRecord->studentFee->total_amount - $payment ,2)
+                            }}
+                            </td>
+                        </tr>
+                    </table>
+                    <br>
+                    <table class="table__terms">
+                        <tr>
+                            <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt;">PAYMENT SCHEDULE</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">TERMS</td>
+                            <td style="text-align: right; font-weight: bold;">AMOUNT</td>
+                        </tr>
+                        @foreach ($academicRecord->studentFee->terms as $term)
+                        <tr>
+                            <td>{{$term->name}}</td>
+                            <td style="text-align: right">{{number_format($term->pivot->amount, 2)}}</td>
+                        </tr>
+                        @endforeach
+                    </table>
+                </td>
+                <td style="width: 50%; vertical-align: top">
+                    <table class="table__fees">
+                        <tr>
+                            <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt;">MISCELLANEOUS FEES</td>
+                        </tr>
+                        @foreach($fees->where('school_fee_category_id', 1) as $fee)
+                        <tr>
+                            <td>{{ $fee->name }}</td>
+                            <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
+                        </tr>
+                        @endforeach
+                        <tr>
+                            <td style="border-top: 1px solid gray; width: 70%;" class="float-right total">TOTAL</td>
+                            <td style="border-top: 1px solid gray; width: 30%;" class="float-right total">{{ number_format($fees->where('school_fee_category_id', 1)->sum('pivot.amount'), 2) }}</td>
+                        </tr>
+                    </table>
+                </td>
             </tr>
         </table>
         <br>
-        <table class="table__categories">
-            <tr>
-                <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">SUMMARY</td>
-            </tr>
-            @foreach ($schoolFeeCategories as $schoolFeeCategory)
-            <tr>
-                <td>{{$schoolFeeCategory->name}}</td>
-                <td class="float-right">{{number_format($fees->where('school_fee_category_id', $schoolFeeCategory->id)->sum('pivot.amount'), 2)}}</td>
-            </tr>
-            @endforeach
-            @foreach ($fees->whereNull('school_fee_category_id') as $fee)
-            <tr>
-                <td>{{$fee->name}}</td>
-                <td class="float-right">{{number_format($fee->pivot->amount, 2)}}</td>
-            </tr>
-            @endforeach
-            <tr>
-                <td style="border-top: 1px solid gray" class="float-right total">SUB TOTAL :</td>
-                <td style="border-top: 1px solid gray" class="float-right total">{{number_format($academicRecord->studentFee->total_amount, 2)}}</td>
-            </tr>
-            <tr>
-                <td class="float-right total">LESS PAYMENT :</td>
-                <td class="float-right total">
-                @php
-                $payment = $academicRecord->studentFee->billings
-                        ->where('billing_type_id', 1)->first()->payments()->sum('amount');
-                @endphp
-                {{
-                    (number_format($payment,2))
-                }}
-                </td>
-            </tr>
-            <tr>
-                <td class="float-right total">TOTAL BALANCE :</td>
-                <td style="border-top: 1px solid gray" class="float-right total">
-                {{
-                    number_format($academicRecord->studentFee->total_amount - $payment ,2)
-                }}
-                </td>
-            </tr>
-        </table>
-        <br>
-        <table class="table__terms">
-            <tr>
-                <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid gray;">PAYMENT SCHEDULE</td>
-            </tr>
-            <tr>
-                <td style="font-weight: bold;">TERMS</td>
-                <td style="text-align: right; font-weight: bold;">AMOUNT</td>
-            </tr>
-            @foreach ($academicRecord->studentFee->terms as $term)
-            <tr>
-                <td>{{$term->name}}</td>
-                <td style="text-align: right">{{number_format($term->pivot->amount, 2)}}</td>
-            </tr>
-            @endforeach
-        </table>
         <br>
     </body>
 </html>
