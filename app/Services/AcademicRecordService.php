@@ -16,52 +16,53 @@ class AcademicRecordService
     {
         try {
             $query = AcademicRecord::with([
-              'section',
-              'schoolYear',
-              'level',
-              'course',
-              'semester',
-              'schoolCategory',
-              'studentCategory',
-              'studentType',
-              'application',
-              'admission',
-              'student' => function($query) {
-                  $query->with(['address', 'photo']);
-              }]);
+                'section',
+                'schoolYear',
+                'level',
+                'course',
+                'semester',
+                'schoolCategory',
+                'studentCategory',
+                'studentType',
+                'application',
+                'admission',
+                'student' => function ($query) {
+                    $query->with(['address', 'photo']);
+                }
+            ]);
 
             // filters
             // student
             $studentId = $filters['student_id'] ?? false;
-            $query->when($studentId, function($q) use ($studentId) {
-                return $q->whereHas('student', function($query) use ($studentId) {
+            $query->when($studentId, function ($q) use ($studentId) {
+                return $q->whereHas('student', function ($query) use ($studentId) {
                     return $query->where('student_id', $studentId);
                 });
             });
 
             // course
             $courseId = $filters['course_id'] ?? false;
-            $query->when($courseId, function($q) use ($courseId) {
-                return $q->whereHas('course', function($query) use ($courseId) {
+            $query->when($courseId, function ($q) use ($courseId) {
+                return $q->whereHas('course', function ($query) use ($courseId) {
                     return $query->where('course_id', $courseId);
                 });
             });
 
             // school category
             $schoolCategoryId = $filters['school_category_id'] ?? false;
-            $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-                return $q->whereHas('schoolCategory', function($query) use ($schoolCategoryId) {
+            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
+                return $q->whereHas('schoolCategory', function ($query) use ($schoolCategoryId) {
                     return $query->where('school_category_id', $schoolCategoryId);
                 });
             });
 
             // application status
             $applicationStatusId = $filters['application_status_id'] ?? false;
-            $query->when($applicationStatusId, function($q) use ($applicationStatusId) {
-                return $q->where(function($q) use ($applicationStatusId) {
-                    return $q->whereHas('application', function($query) use ($applicationStatusId) {
+            $query->when($applicationStatusId, function ($q) use ($applicationStatusId) {
+                return $q->where(function ($q) use ($applicationStatusId) {
+                    return $q->whereHas('application', function ($query) use ($applicationStatusId) {
                         return $query->where('application_status_id', $applicationStatusId);
-                    })->orWhereHas('admission', function($query) use ($applicationStatusId) {
+                    })->orWhereHas('admission', function ($query) use ($applicationStatusId) {
                         return $query->where('application_status_id', $applicationStatusId);
                     });
                 });
@@ -69,26 +70,26 @@ class AcademicRecordService
 
             // academicRecord status
             $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
-            $query->when($academicRecordStatusId, function($query) use ($academicRecordStatusId) {
+            $query->when($academicRecordStatusId, function ($query) use ($academicRecordStatusId) {
                 return $query->where('academic_record_status_id', $academicRecordStatusId);
             });
 
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
-            $query->when($criteria, function($q) use ($criteria) {
-                return $q->whereHas('student', function($query) use ($criteria) {
-                    return $query->where(function($q) use ($criteria) {
-                        return $q->where('name', 'like', '%'.$criteria.'%')
-                            ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                            ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                            ->orWhere('last_name', 'like', '%'.$criteria.'%');
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->whereHas('student', function ($query) use ($criteria) {
+                    return $query->where(function ($q) use ($criteria) {
+                        return $q->where('name', 'like', '%' . $criteria . '%')
+                            ->orWhere('first_name', 'like', '%' . $criteria . '%')
+                            ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+                            ->orWhere('last_name', 'like', '%' . $criteria . '%');
                     });
                 });
             });
 
             // order by
             $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
                 $sort = $filters['sort'] ?? 'ASC';
                 return $q->orderBy($orderBy, $sort);
             });
@@ -118,13 +119,14 @@ class AcademicRecordService
                 'studentType',
                 'application',
                 'admission',
-                'studentFee' => function($query) {
+                'studentFee' => function ($query) {
                     $query->with(['studentFeeItems']);
                 },
                 'subjects',
-                'student' => function($query) {
+                'student' => function ($query) {
                     $query->with(['address', 'photo']);
-                }])->find($id);
+                }
+            ])->find($id);
             return $academicRecord;
         } catch (Exception $e) {
             Log::info('Error occured during AcademicRecordService get method call: ');
@@ -205,8 +207,12 @@ class AcademicRecordService
                     $billing->billingItems()->create($academicRecordInfo['billing_item']);
                 }
 
+                if ($billing->previous_balance > 0 && $billing->billing_type_id === 1) {
+                    $studentFee->recomputeTerms();
+                }
+
                 $billing->update([
-                    'billing_no' => 'BILL-'. date('Y') .'-'. str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                 ]);
             }
 
@@ -231,11 +237,12 @@ class AcademicRecordService
                 'studentType',
                 'application',
                 'admission',
-                'student' => function($query) {
+                'student' => function ($query) {
                     $query->with(['address']);
-                }])->fresh();
+                }
+            ])->fresh();
             return $academicRecord;
-          } catch (Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::info('Error occured during AcademicRecordService update method call: ');
             Log::info($e->getMessage());
@@ -258,23 +265,24 @@ class AcademicRecordService
                 'studentType',
                 'application',
                 'admission',
-                'student' => function($query) {
+                'student' => function ($query) {
                     $query->with(['address', 'photo']);
-                }]);
+                }
+            ]);
 
             // academicRecord status
             $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
-            $query->when($academicRecordStatusId, function($query) use ($academicRecordStatusId) {
+            $query->when($academicRecordStatusId, function ($query) use ($academicRecordStatusId) {
                 return $query->where('academic_record_status_id', $academicRecordStatusId);
             });
 
             // application status
             $applicationStatusId = $filters['application_status_id'] ?? false;
-            $query->when($applicationStatusId, function($q) use ($applicationStatusId) {
-                return $q->where(function($q) use ($applicationStatusId) {
-                    return $q->whereHas('application', function($query) use ($applicationStatusId) {
+            $query->when($applicationStatusId, function ($q) use ($applicationStatusId) {
+                return $q->where(function ($q) use ($applicationStatusId) {
+                    return $q->whereHas('application', function ($query) use ($applicationStatusId) {
                         return $query->where('application_status_id', $applicationStatusId);
-                    })->orWhereHas('admission', function($query) use ($applicationStatusId) {
+                    })->orWhereHas('admission', function ($query) use ($applicationStatusId) {
                         return $query->where('application_status_id', $applicationStatusId);
                     });
                 });

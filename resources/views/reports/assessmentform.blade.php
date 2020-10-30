@@ -196,10 +196,12 @@
                             <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt;">SUMMARY</td>
                         </tr>
                         @foreach ($schoolFeeCategories as $schoolFeeCategory)
+                        @if (count($fees->where('school_fee_category_id', $schoolFeeCategory->id)))
                         <tr>
                             <td>{{$schoolFeeCategory->name}}</td>
                             <td class="float-right">{{number_format($fees->where('school_fee_category_id', $schoolFeeCategory->id)->sum('pivot.amount'), 2)}}</td>
                         </tr>
+                        @endif
                         @endforeach
                         <tr>
                             <td>Untitled Fees</td>
@@ -211,6 +213,10 @@
                         <tr>
                             <td style="padding-left: 30px;">Total Fees</td>
                             <td style="font-weight: bold;" class="float-right">{{number_format($academicRecord->studentFee->total_amount, 2)}}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-left: 30px;">Previous Balance</td>
+                            <td style="font-weight: bold;" class="float-right">{{number_format($academicRecord->studentFee->billings->where('billing_type_id', 1)->first()->previous_balance, 2)}}</td>
                         </tr>
                         <tr>
                             <td style="font-weight: bold;" colspan="2">LESS :</td>
@@ -231,7 +237,7 @@
                             <td class="total">TOTAL BALANCE :</td>
                             <td style="border-top: 1px solid gray" class="float-right total">
                             {{
-                                number_format($academicRecord->studentFee->total_amount - $payment ,2)
+                                number_format(($academicRecord->studentFee->total_amount + $academicRecord->studentFee->billings->where('billing_type_id', 1)->first()->previous_balance) - $payment ,2)
                             }}
                             </td>
                         </tr>
