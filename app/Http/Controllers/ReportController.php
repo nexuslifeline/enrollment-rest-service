@@ -15,33 +15,26 @@ use App\Services\PaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\PaymentResource;
-
+use App\SchoolFeeCategory;
 
 class ReportController extends Controller
 {
     public function assessmentForm($academicRecordId)
     {
-        $academicRecord = AcademicRecord::find($academicRecordId);
+        $data['academicRecord'] = AcademicRecord::find($academicRecordId);
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
-        $data['academicRecord'] = $academicRecord->load([
-            'section',
-            'schoolYear',
-            'level',
-            'course',
-            'semester',
-            'schoolCategory',
-            'studentCategory',
-            'studentType',
-            'application',
-            'admission',
-            'student' => function ($query) {
-                $query->with(['address']);
-            },
-            'subjects',
-            'studentFee' => function ($q) {
-                return $q->with(['studentFeeItems']);
-            }
-        ]);
+        // $data['academicRecord'] = $academicRecord;
+        // return $data['academicRecord']->studentFee;
+        // return SchoolFeeCategory::with(['schoolFees' => function ($q) use ($data) {
+        //     return $q->with(['studentFeeItems' => function ($query) use ($data) {
+        //         return $query->where('student_fee_id', $data['academicRecord']->studentFee->id);
+        //     }]);
+        // }])->get();
+        $data['schoolFeeCategories'] = SchoolFeeCategory::whereHas('schoolFees', function ($q) use ($data) {
+            return $q->whereHas('studentFeeItems', function ($query) use ($data) {
+                return $query->where('student_fee_id', $data['academicRecord']->studentFee->id);
+            });
+        })->get();
         $mpdf = new Mpdf();
         $content = view('reports.assessmentform')->with($data);
         $mpdf->WriteHTML($content);
@@ -181,7 +174,7 @@ class ReportController extends Controller
             ]
         )->where('student_id', $studentId)
             ->where('payment_status_id', '=', 2) //added filter payment status = approved
-                ->whereDate('created_at', '<', $asOfDate);
+            ->whereDate('created_at', '<', $asOfDate);
 
         $payments->when($schoolYearId, function ($q) use ($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);

@@ -18,9 +18,9 @@ class SchoolFeeCategory extends Model
         'deleted_by'
     ];
 
-    public function schooFeeCategory()
+    public function schoolFees()
     {
-        return $this->belongsTo('App\SchoolFeeCategory');
+        return $this->hasMany('App\SchoolFee');
         //return $this->hasOne('App\SchoolFeeCategory');
     }
 }
