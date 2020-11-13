@@ -18,11 +18,11 @@
             }
             .table__header tr .td__logo {
                 width: 20%;
-                text-align: right
+                text-align: right;
             }
             .table__header tr .td__info {
                 text-align: center;
-                width: 60%
+                width: 60%;
             }
             .header__name {
                 font-size: 13pt;
@@ -56,17 +56,17 @@
             .table__terms {
                 width: 80%;
                 font-size: 9pt;
-                margin: auto;
                 border: 1px solid gray;
                 border-collapse: collapse;
             }
             .table__terms td {
                 padding: 3px;
                 border: 1px solid gray;
+                text-transform: capitalize;
             }
             .table__categories {
                 width: 80%;
-                font-size: 9pt;
+                font-size: 9pt;s
                 margin: auto;
                 /* margin-bottom: 10px; */
                 /* border: 0.5px solid gray; */
@@ -74,12 +74,14 @@
             }
             .table__categories td {
                 padding: 3px;
+                text-transform: capitalize;
             }
             .table__fees tr td {
                 /* border: 0.5px solid gray; */
             }
             .table__fees td {
                 padding: 3px;
+                text-transform: capitalize;
             }
             .float-right {
                 text-align: right
@@ -109,6 +111,11 @@
             hr {
                 margin: 2px 0;
             }
+
+            .student__info td {
+                text-transform: capitalize; 
+            }
+
         </style>
     </head>
     <body>
@@ -118,36 +125,69 @@
                     <img src="{{url('storage/organization-logo/'.$organization->organizationLogo->hash_name)}}" style="height: 90px; width: 90px;">
                 </td>
                 <td class="td__info">
-                    <div class="header__name">{{$organization->name}}</div>
-                    <div class="header__details">{{$organization->address}}</div>
-                    <div class="header__details">{{$organization->telephone_no}}</div>
-                    <div class="header__details">{{$organization->email_address}}</div>
+                    <div class="header__name">{{ $organization->name }}</div>
+                    <div class="header__details">{{ $organization->address }}</div>
+                    <div class="header__details">{{ $organization->telephone_no }}</div>
+                    <div class="header__details">{{ $organization->email_address }}</div>
                 </td>
                 <td></td>
             </tr>
         </table>
-        <div class="title">Assessment Form</div>
-        <table style="width: 100%">
-            <tr>
-                <td style="width: 12%">Student No. : </td>
+        <div class="title">ASSESMENT FORM</div>
+        <table class="student__info" style="width: 100%">
+            <!-- <tr>
+                <td style="width: 17%; font-weight: bold;">Student No. : </td>
                 <td style="width: 28%">{{ $academicRecord->student->student_no ? $academicRecord->student->student_no : 'Awaiting Confirmation' }}</td>
-                <td style="width: 15%">Level : </td>
-                <td style="width: 45%">{{ $academicRecord->level->name }}</td>
+                <td style="width: 15%; font-weight: bold;" >Level : </td>
+                <td style="width: 40%; text-transform: none;">{{ $academicRecord->level->name }}</td>
             </tr>
             <tr>
-                <td>Name : </td>
+                <td style="font-weight: bold;">Name : </td>
                 <td>{{ $academicRecord->student->last_name .', '. $academicRecord->student->first_name .' '. $academicRecord->student->middle_name }}</td>
                 @if($academicRecord->course_id)
-                <td>Course : </td>
-                <td>{{ $academicRecord->course->description }}</td>
+                <td style="font-weight: bold;">Course : </td>
+                <td style="text-transform: none;">{{ $academicRecord->course->description }}</td>
                 @endif
             </tr>
             <tr>
-                <td>Address : </td>
+                <td style="font-weight: bold;">Address : </td>
                 <td>{{ $academicRecord->student->address->current_complete_address }}</td>
-                <td>School Year : </td>
-                <td>{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
+                <td style="font-weight: bold;">School Year : </td>
+                <td style="text-transform: none;">{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
+            </tr> -->
+
+            <tr>
+                <td style="width: 50%; font-weight: bold;">Student No. : </td>
+                <td style="width: 50%; font-weight: bold;" >Level : </td>
             </tr>
+            <tr>
+                <td style="width: 28%">{{ $academicRecord->student->student_no ? $academicRecord->student->student_no : 'Awaiting Confirmation' }}</td>
+                <td style="width: 40%; text-transform: none;">{{ $academicRecord->level->name }}</td>
+            </tr>
+            <tr>
+                <td style="font-weight: bold;">Name : </td>
+                @if($academicRecord->course_id)
+                <td style="font-weight: bold;">Course : </td>
+                @endif
+            </tr>
+
+            <tr>
+                <td>{{ $academicRecord->student->last_name .', '. $academicRecord->student->first_name .' '. $academicRecord->student->middle_name }}</td>
+                @if($academicRecord->course_id)
+                <td style="text-transform: none;">{{ $academicRecord->course->description }}</td>
+                @endif
+            </tr>
+
+            <tr>
+                <td style="font-weight: bold;">Address : </td>
+                <td style="font-weight: bold;">School Year : </td>
+            </tr>
+
+            <tr>
+                <td>{{ $academicRecord->student->address->current_complete_address }}</td>
+                <td style="text-transform: none;">{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
+            </tr>
+
         </table>
         <hr>
         <br>
@@ -204,7 +244,7 @@
                         @endif
                         @endforeach
                         <tr>
-                            <td>Untitled Fees</td>
+                            <td>Uncategorized Fees</td>
                             <td class="float-right">{{number_format($fees->whereNull('school_fee_category_id')->sum('pivot.amount'), 2)}}</td>
                         </tr>
                         <tr>
