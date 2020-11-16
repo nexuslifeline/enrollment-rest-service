@@ -8,7 +8,8 @@ use App\Subject;
 use App\Evaluation;
 use App\AcademicRecord;
 use App\SectionSchedule;
-use App\EvaluationSubject;
+use App\TranscriptRecord;
+use App\TranscriptRecordSubject;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -169,14 +170,14 @@ class SubjectService
         }
     }
 
-    public function getSubjectsOfEvaluation(int $evaluationId, bool $isPaginated, int $perPage)
+    public function getSubjectsOfTranscriptRecord(int $transcriptRecordId, bool $isPaginated, int $perPage)
     {
         try {
-            $evaluation = Evaluation::find($evaluationId);
-            $query = $evaluation->subjects()
-            ->with(['prerequisites' => function($query) use ($evaluation) {
-                return $query->with(['prerequisites' => function ($query) use ($evaluation) {
-                    $query->where('curriculum_id', $evaluation->curriculum_id);
+            $transriptRecord = TranscriptRecord::find($transcriptRecordId);
+            $query = $transriptRecord->subjects()
+            ->with(['prerequisites' => function($query) use ($transriptRecord) {
+                return $query->with(['prerequisites' => function ($query) use ($transriptRecord) {
+                    $query->where('curriculum_id', $transriptRecord->curriculum_id);
                 }]);
             }]);
 
@@ -186,7 +187,7 @@ class SubjectService
 
             return $subjects;
         } catch (Exception $e) {
-            Log::info('Error occured during SubjectService getSubjectsOfEvaluation method call: ');
+            Log::info('Error occured during SubjectService getSubjectsOfTranscriptRecord method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -217,7 +218,7 @@ class SubjectService
         }
     }
 
-    public function getSectionUnscheduledSubjects(int $evaluationId, int $studentId, int $curriculumId, bool $isPaginated, int $perPage)
+    public function getSectionUnscheduledSubjects(int $transcriptRecordId, int $studentId, int $curriculumId, bool $isPaginated, int $perPage)
     {
         try {
 
@@ -225,17 +226,17 @@ class SubjectService
                 throw new Exception('Student id not found!');
             }
 
-            if (!$evaluationId) {
-                throw new Exception('Evaluation id not found!');
+            if (!$transcriptRecordId) {
+                throw new Exception('Transcript Record id not found!');
             }
 
             if (!$curriculumId) {
                 throw new Exception('Curriculum id not found!');
             }
 
-            $evaluation = Evaluation::find($evaluationId);
+            $transcriptRecord = TranscriptRecord::find($transcriptRecordId);
 
-            $query = $evaluation->subjects();
+            $query = $transcriptRecord->subjects();
 
             $subjects = $isPaginated
                 ? $query->paginate($perPage)
@@ -330,11 +331,11 @@ class SubjectService
 
     private function isTaken(int $studentId, int $subjectId)
     {
-        $evaluationIds = Evaluation::where('student_id', $studentId)
+        $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
             ->get()
             ->pluck('id');
 
-        return EvaluationSubject::whereIn('evaluation_id', $evaluationIds)
+        return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
             ->where('subject_id', $subjectId)
             ->where('is_taken', 1)
             ->get()
@@ -344,11 +345,11 @@ class SubjectService
     // return true if grade is passed, if not taken yet this will return false
     private function isPassed(int $studentId, int $subjectId)
     {
-        $evaluationIds = Evaluation::where('student_id', $studentId)
+        $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
             ->get()
             ->pluck('id');
 
-        return EvaluationSubject::whereIn('evaluation_id', $evaluationIds)
+        return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
             ->where('subject_id', $subjectId)
             ->where('grade', '>', 74)
             ->get()

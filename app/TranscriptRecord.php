@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Evaluation extends Model
+class TranscriptRecord extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
@@ -18,24 +18,14 @@ class Evaluation extends Model
         'deleted_by'
     ];
 
-    public function files()
-    {
-        return $this->hasMany('App\EvaluationFile');
-    }
-
     public function student()
     {
         return $this->belongsTo('App\Student');
     }
 
-    public function studentCategory()
+    public function schoolCategory()
     {
-        return $this->belongsTo('App\StudentCategory');
-    }
-
-    public function lastSchoollevel()
-    {
-        return $this->belongsTo('App\Level', 'last_school_level_id');
+        return $this->belongsTo('App\SchoolCategory');
     }
 
     public function level()
@@ -58,19 +48,19 @@ class Evaluation extends Model
         return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
     }
 
-    // public function subjects()
-    // {
-    //     return $this->belongsToMany(
-    //         'App\Subject',
-    //         'evaluation_subjects',
-    //         'evaluation_id',
-    //         'subject_id'
-    //     )->withPivot([
-    //       'level_id',
-    //       'semester_id',
-    //       'grade',
-    //       'notes',
-    //       'is_taken'
-    //     ])->withTimestamps();
-    // }
+    public function subjects()
+    {
+        return $this->belongsToMany(
+            'App\Subject',
+            'transcript_record_subjects',
+            'transcript_record_id',
+            'subject_id'
+        )->withPivot([
+          'level_id',
+          'semester_id',
+          'grade',
+          'notes',
+          'is_taken'
+        ])->withTimestamps();
+    }
 }

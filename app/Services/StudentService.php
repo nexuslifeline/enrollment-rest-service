@@ -24,6 +24,7 @@ class StudentService
         try {
             $academicRecordStatusId = 1;
             $evaluationStatusId = 1;
+            $transcriptRecordStatusId = 1; //1 = draft
             $isEnrolled = $data['is_enrolled'];
 
             $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
@@ -101,6 +102,13 @@ class StudentService
                 }
             }
 
+
+            //create transcript record
+            $student->transcriptRecords()->create([
+                'student_id' => $student->id,
+                'transcript_record_status_id' => $transcriptRecordStatusId
+              ]);
+
             $user = $student->user()->create([
                 'username' => $data['username'],
                 'password' => Hash::make($data['password'])
@@ -149,7 +157,7 @@ class StudentService
         try {
             $student = Student::find($id);
             $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
-            $student->append('active_application', 'active_admission', 'academic_record');
+            $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -204,6 +212,14 @@ class StudentService
                 }
             }
 
+            $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+            if ($activeTranscriptRecord) {
+                $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+                if ($transcriptRecord) {
+                    $transcriptRecord->update($activeTranscriptRecord);
+                }
+            }
+
             $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
             if ($activeAcademicRecord) {
                 $academicRecord = AcademicRecord::find($activeAcademicRecord['id']);
@@ -238,7 +254,7 @@ class StudentService
             }
 
             $student->load(['address', 'family', 'education','photo', 'user', 'evaluation'])->fresh();
-            $student->append(['active_admission', 'active_application', 'academic_record']);
+            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record']);
             DB::commit();
             return $student;
         } catch (Exception $e) {
