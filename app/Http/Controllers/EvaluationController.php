@@ -63,9 +63,10 @@ class EvaluationController extends Controller
     public function update(EvaluationUpdateRequest $request, int $id)
     {
         $evaluationService = new EvaluationService();
-        $data = $request->except('subjects');
+        $data = $request->except('subjects', 'transcript_record');
+        $transcriptData = $request->transcript_record ?? [];
         $subjects = $request->subjects ?? [];
-        $evaluation = $evaluationService->update($data, $subjects, $id);
+        $evaluation = $evaluationService->update($data, $subjects, $transcriptData, $id);
         return new EvaluationResource($evaluation);
     }
 

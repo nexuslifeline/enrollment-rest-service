@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TramscriptRecordSubject extends Model
+class TranscriptRecordSubject extends Model
 {
     protected $guarded = ['id'];
     protected $hidden = [

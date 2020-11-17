@@ -58,6 +58,11 @@ class Evaluation extends Model
         return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
     }
 
+    public function transcriptRecord()
+    {
+        return $this->belongsTo('App\TranscriptRecord');
+    }
+
     // public function subjects()
     // {
     //     return $this->belongsToMany(

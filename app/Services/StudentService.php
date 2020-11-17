@@ -10,6 +10,7 @@ use App\Admission;
 use App\SchoolYear;
 use App\Application;
 use App\AcademicRecord;
+use App\TranscriptRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +42,13 @@ class StudentService
                 'email' => $data['username']
             ]);
 
+              //create transcript record
+            $transcriptRecord = $student->transcriptRecords()->create([
+                'student_id' => $student->id,
+                'transcript_record_status_id' => $transcriptRecordStatusId
+            ]);
+
+
             // student category
             // 1 - new
             // 2 - old
@@ -62,7 +70,8 @@ class StudentService
                 $student->evaluations()->create([
                   'student_id' => $student->id,
                   'student_category_id' => $studentCategoryId,
-                  'evaluation_status_id' => $evaluationStatusId
+                  'evaluation_status_id' => $evaluationStatusId,
+                  'transcript_record_id' => $transcriptRecord->id
                 ]);
 
               } else {
@@ -94,20 +103,18 @@ class StudentService
                     'student_category_id' => $studentCategoryId,
                     'academic_record_status_id' => $academicRecordStatusId
                   ]);
+
                   $student->evaluations()->create([
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
-                    'evaluation_status_id' => $evaluationStatusId
+                    'evaluation_status_id' => $evaluationStatusId,
+                    'transcript_record_id' => $transcriptRecord->id
+
                   ]);
                 }
             }
 
 
-            //create transcript record
-            $student->transcriptRecords()->create([
-                'student_id' => $student->id,
-                'transcript_record_status_id' => $transcriptRecordStatusId
-              ]);
 
             $user = $student->user()->create([
                 'username' => $data['username'],
