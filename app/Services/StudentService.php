@@ -10,6 +10,7 @@ use App\Admission;
 use App\SchoolYear;
 use App\Application;
 use App\AcademicRecord;
+use App\TranscriptRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +25,7 @@ class StudentService
         try {
             $academicRecordStatusId = 1;
             $evaluationStatusId = 1;
+            $transcriptRecordStatusId = 1; //1 = draft
             $isEnrolled = $data['is_enrolled'];
 
             $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
@@ -39,6 +41,13 @@ class StudentService
                 'mobile_no' => $data['mobile_no'],
                 'email' => $data['username']
             ]);
+
+              //create transcript record
+            $transcriptRecord = $student->transcriptRecords()->create([
+                'student_id' => $student->id,
+                'transcript_record_status_id' => $transcriptRecordStatusId
+            ]);
+
 
             // student category
             // 1 - new
@@ -61,7 +70,8 @@ class StudentService
                 $student->evaluations()->create([
                   'student_id' => $student->id,
                   'student_category_id' => $studentCategoryId,
-                  'evaluation_status_id' => $evaluationStatusId
+                  'evaluation_status_id' => $evaluationStatusId,
+                  'transcript_record_id' => $transcriptRecord->id
                 ]);
 
               } else {
@@ -93,13 +103,18 @@ class StudentService
                     'student_category_id' => $studentCategoryId,
                     'academic_record_status_id' => $academicRecordStatusId
                   ]);
+
                   $student->evaluations()->create([
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
-                    'evaluation_status_id' => $evaluationStatusId
+                    'evaluation_status_id' => $evaluationStatusId,
+                    'transcript_record_id' => $transcriptRecord->id
+
                   ]);
                 }
             }
+
+
 
             $user = $student->user()->create([
                 'username' => $data['username'],
@@ -149,7 +164,7 @@ class StudentService
         try {
             $student = Student::find($id);
             $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
-            $student->append('active_application', 'active_admission', 'academic_record');
+            $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -204,6 +219,14 @@ class StudentService
                 }
             }
 
+            $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+            if ($activeTranscriptRecord) {
+                $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+                if ($transcriptRecord) {
+                    $transcriptRecord->update($activeTranscriptRecord);
+                }
+            }
+
             $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
             if ($activeAcademicRecord) {
                 $academicRecord = AcademicRecord::find($activeAcademicRecord['id']);
@@ -238,7 +261,7 @@ class StudentService
             }
 
             $student->load(['address', 'family', 'education','photo', 'user', 'evaluation'])->fresh();
-            $student->append(['active_admission', 'active_application', 'academic_record']);
+            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record']);
             DB::commit();
             return $student;
         } catch (Exception $e) {

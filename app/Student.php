@@ -66,6 +66,10 @@ class Student extends Model
         return $this->hasMany('App\AcademicRecord');
     }
 
+    public function transcriptRecords() {
+        return $this->hasMany('App\TranscriptRecord');
+    }
+
     public function evaluation()
     {
         return $this->hasOne('App\Evaluation');
@@ -120,6 +124,12 @@ class Student extends Model
     public function getLatestAcademicRecordAttribute()
     {
         return $this->academicRecords()->where('academic_record_status_id', 3)->latest()->first();
+    }
+
+    public function getActiveTranscriptRecordAttribute()
+    {
+        $draftStatus = 1; // draft transcript status
+        return $this->transcriptRecords()->where('transcript_record_status_id', $draftStatus)->latest()->first();
     }
 
     public function getNameAttribute()

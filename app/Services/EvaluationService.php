@@ -21,8 +21,10 @@ class EvaluationService
               'studentCategory',
               'curriculum',
               'studentCurriculum',
+              'transcriptRecord',
               'student' => function($query) {
                   $query->with(['address', 'photo']);
+
               }])
               ->withCount('files')
               ->where('evaluation_status_id', '!=', 1);
@@ -32,7 +34,7 @@ class EvaluationService
             $studentId = $filters['student_id'] ?? false;
             $query->when($studentId, function($q) use ($studentId) {
                 return $q->whereHas('student', function($query) use ($studentId) {
-                    return $query->where('student_id', $studentId);
+                     $query->where('student_id', $studentId);
                 });
             });
 
@@ -117,26 +119,30 @@ class EvaluationService
         }
     }
 
-    public function update(array $data, array $subjects, int $id)
+    public function update(array $data, array $subjects, array $transcriptData, int $id)
     {
         DB::beginTransaction();
         try {
             $evaluation = Evaluation::find($id);
             $evaluation->update($data);
 
-            // if ($subjects) {
-            $items = [];
-            foreach ($subjects as $subject) {
-                $items[$subject['subject_id']] = [
-                    'level_id' => $subject['level_id'],
-                    'semester_id' => $subject['semester_id'],
-                    'is_taken' => $subject['is_taken'],
-                    'grade' => $subject['grade'],
-                    'notes' => $subject['notes']
-                ];
+            if (count($transcriptData) > 0) {
+                $transcriptRecord = $evaluation->transcriptRecord;
+                $transcriptRecord->update($transcriptData);
+                if ($subjects) {
+                    $items = [];
+                    foreach ($subjects as $subject) {
+                        $items[$subject['subject_id']] = [
+                            'level_id' => $subject['level_id'],
+                            'semester_id' => $subject['semester_id'],
+                            'is_taken' => $subject['is_taken'],
+                            'grade' => $subject['grade'],
+                            'notes' => $subject['notes']
+                        ];
+                    }
+                    $transcriptRecord->subjects()->sync($items);
+                }
             }
-            $evaluation->subjects()->sync($items);
-            // }
 
             $evaluation->load([
                 'lastSchoolLevel',

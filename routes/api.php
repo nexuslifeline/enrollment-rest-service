@@ -42,7 +42,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord');
         Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
-        Route::get('/evaluations/{evaluationId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
         Route::get('/subjects/{subjectId}/sections', 'SectionController@getSectionsOfSubject');
         Route::get('/sections/{sectionId}/my-scheduled-subjects', 'SubjectController@getSectionScheduledSubjectsWithStatus');
 
@@ -125,7 +124,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
-        Route::get('/evaluations/{evaluationId}/subjects', 'SubjectController@getSubjectsOfEvaluation');
 
         // evaluation file
         Route::get('/evaluations/{evaluationId}/files', 'EvaluationFileController@index');
@@ -156,6 +154,10 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('terms', 'TermController');
         Route::get('students/{studentId}/terms', 'TermController@getStudentFeeTermsOfStudent');
         Route::post('terms/update-multiple', 'TermController@updateCreateMultiple');
+
+        //transcript-records
+        Route::get('/transcript-records/{transcriptRecordId}/subjects', 'SubjectController@getSubjectsOfTranscriptRecord');
+        Route::get('/transcript-records/{transcriptRecordId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
     });
     // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');

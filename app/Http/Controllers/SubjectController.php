@@ -124,12 +124,12 @@ class SubjectController extends Controller
         return SubjectResource::collection($subjects);
     }
 
-    public function getSubjectsOfEvaluation($evaluationId, Request $request)
+    public function getSubjectsOfTranscriptRecord($transcriptRecordId, Request $request)
     {
         $subjectService = new SubjectService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
-        $subjects = $subjectService->getSubjectsOfEvaluation($evaluationId, $isPaginated, $perPage);
+        $subjects = $subjectService->getSubjectsOfTranscriptRecord($transcriptRecordId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 
