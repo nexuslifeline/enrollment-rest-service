@@ -7,6 +7,8 @@ use App\Admission;
 use App\Evaluation;
 use App\Application;
 use App\AcademicRecord;
+use App\Http\Requests\ManualRegisterRequest;
+use App\Http\Requests\StudentRegisterRequest;
 use Illuminate\Http\Request;
 use App\Services\StudentService;
 use Illuminate\Support\Facades\Log;
@@ -46,13 +48,13 @@ class StudentController extends Controller
     public function store(StudentUpdateRequest $request)
     {
         $studentService = new StudentService();
-        $related = ['address', 'family', 'education', 'photo', 'user'];
+        $related = ['address', 'family', 'education', 'photo', 'user', 'academicRecord'];
         $studentInfo = $request->only($related);
         $data = $request->except($related);
         $student = $studentService->store($data, $studentInfo, $related);
         return (new StudentResource($student))
-        ->response()
-        ->setStatusCode(201);
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -107,5 +109,15 @@ class StudentController extends Controller
         return BillingResource::collection(
             $billings
         );
+    }
+
+    public function manualRegister(ManualRegisterRequest $request)
+    {
+        $studentService = new StudentService();
+        $student = $studentService->manualRegister($request->all());
+        return $student;
+        return (new StudentResource($student))
+            ->response()
+            ->setStatusCode(201);
     }
 }

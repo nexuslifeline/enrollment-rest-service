@@ -30,6 +30,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/logout', 'AuthController@logout');
         // students
         Route::resource('/students', 'StudentController');
+        Route::post('/students/manual-registration', 'StudentController@manualRegister');
         Route::get('/students/{studentId}/billings', 'StudentController@getBillingsOfStudent');
         Route::get('/students/{studentId}/evaluations', 'EvaluationController@getEvaluationsOfStudent');
         Route::get('/students/{studentId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfStudent');
@@ -156,10 +157,11 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('terms/update-multiple', 'TermController@updateCreateMultiple');
 
         //transcript-records
+        Route::resource('/transcript-records', 'TranscriptRecordController');
         Route::get('/transcript-records/{transcriptRecordId}/subjects', 'SubjectController@getSubjectsOfTranscriptRecord');
         Route::get('/transcript-records/{transcriptRecordId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
     });
-    // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
+    Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
 });

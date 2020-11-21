@@ -19,59 +19,58 @@ use App\Http\Requests\StudentRegisterRequest;
 
 class AuthController extends Controller
 {
-    public function login(StudentLoginRequest $request)
-    {
-      $data = $request->validated();
+  public function login(StudentLoginRequest $request)
+  {
+    $data = $request->validated();
 
-      $user = User::where('username', $data['username'])
-        ->where('userable_type', 'App\Student')
-        ->first();
+    $user = User::where('username', $data['username'])
+      ->where('userable_type', 'App\Student')
+      ->first();
 
-      // Note! to be refactored, should now use the Laravel Http Client instead of Guzzle
-      if ($user) {
-        $http = new \GuzzleHttp\Client;
-        $response = $http->post(url('/') . '/oauth/token', [
-          'form_params' => [
-            'grant_type' => 'password',
-            'client_id' => Config::get('client.id'),
-            'client_secret' => Config::get('client.secret'),
-            'username' => $data['username'],
-            'password' => $data['password'],
-            'scope' => '',
-          ],
-        ]);
-        return json_encode(json_decode((string) $response->getBody(), true));
-      } else {
-        return response()->json(['error' => 'Unauthenticated.'], 401);
-      }
+    // Note! to be refactored, should now use the Laravel Http Client instead of Guzzle
+    if ($user) {
+      $http = new \GuzzleHttp\Client;
+      $response = $http->post(url('/') . '/oauth/token', [
+        'form_params' => [
+          'grant_type' => 'password',
+          'client_id' => Config::get('client.id'),
+          'client_secret' => Config::get('client.secret'),
+          'username' => $data['username'],
+          'password' => $data['password'],
+          'scope' => '',
+        ],
+      ]);
+      return json_encode(json_decode((string) $response->getBody(), true));
+    } else {
+      return response()->json(['error' => 'Unauthenticated.'], 401);
     }
+  }
 
 
-    public function loginPersonnel(PersonnelLoginRequest $request)
-    {
-      $data = $request->validated();
+  public function loginPersonnel(PersonnelLoginRequest $request)
+  {
+    $data = $request->validated();
 
-      $user = User::where('username', $data['username'])
-        ->where('userable_type', 'App\Personnel')
-        ->first();
+    $user = User::where('username', $data['username'])
+      ->where('userable_type', 'App\Personnel')
+      ->first();
 
-      // Note! to be refactored, should now use the Laravel Http Client instead of Guzzle
-      if ($user) {
-        $http = new \GuzzleHttp\Client;
-        $response = $http->post(url('/') . '/oauth/token', [
-          'form_params' => [
-            'grant_type' => 'password',
-            'client_id' => Config::get('client.id'),
-            'client_secret' => Config::get('client.secret'),
-            'username' => $data['username'],
-            'password' => $data['password'],
-            'scope' => '',
-          ],
-        ]);
-        return json_encode(json_decode((string) $response->getBody(), true));
-      } else {
-        return response()->json(['error' => 'Unauthenticated.'], 401);
-      }
+    // Note! to be refactored, should now use the Laravel Http Client instead of Guzzle
+    if ($user) {
+      $http = new \GuzzleHttp\Client;
+      $response = $http->post(url('/') . '/oauth/token', [
+        'form_params' => [
+          'grant_type' => 'password',
+          'client_id' => Config::get('client.id'),
+          'client_secret' => Config::get('client.secret'),
+          'username' => $data['username'],
+          'password' => $data['password'],
+          'scope' => '',
+        ],
+      ]);
+      return json_encode(json_decode((string) $response->getBody(), true));
+    } else {
+      return response()->json(['error' => 'Unauthenticated.'], 401);
     }
 
     public function getAuthUser()
@@ -97,22 +96,25 @@ class AuthController extends Controller
       return new UserResource($user);
     }
 
-    public function register(StudentRegisterRequest $request)
-    {
-      $studentService = new StudentService();
-      $user = $studentService->register($request->all());
+    return new UserResource($user);
+  }
 
-      return (new UserResource($user))
-        ->response()
-        ->setStatusCode(201);
-    }
+  public function register(StudentRegisterRequest $request)
+  {
+    $studentService = new StudentService();
+    $user = $studentService->register($request->all());
 
-    public function logout()
-    {
-        auth()->user()->tokens->each(function ($token, $key) {
-            $token->delete();
-        });
+    return (new UserResource($user))
+      ->response()
+      ->setStatusCode(201);
+  }
 
-        return response()->json('Logged out successfully', 200);
-    }
+  public function logout()
+  {
+    auth()->user()->tokens->each(function ($token, $key) {
+      $token->delete();
+    });
+
+    return response()->json('Logged out successfully', 200);
+  }
 }

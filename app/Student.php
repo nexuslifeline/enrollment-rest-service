@@ -16,7 +16,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id', 'name']; //added name on guarded to prevent updating, coz we already have name attrib
-    protected $appends = ['name','age','current_address', 'permanent_address', 'latest_academic_record'];
+    protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'latest_manual_academic_record'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -111,11 +111,11 @@ class Student extends Model
 
         $application = $this->active_application ?? false;
         $admission = $this->active_admission ?? false;
-        $academicRecord->when($application, function($query) use ($application){
-          return $query->where('application_id', $application['id']);
+        $academicRecord->when($application, function ($query) use ($application) {
+            return $query->where('application_id', $application['id']);
         });
-        $academicRecord->when($admission, function($query) use ($admission){
-          return $query->where('admission_id', $admission['id']);
+        $academicRecord->when($admission, function ($query) use ($admission) {
+            return $query->where('admission_id', $admission['id']);
         });
 
         return $academicRecord->first();
@@ -126,6 +126,11 @@ class Student extends Model
         return $this->academicRecords()->where('academic_record_status_id', 3)->latest()->first();
     }
 
+    public function getLatestManualAcademicRecordAttribute()
+    {
+        return $this->academicRecords()->where('is_manual', 1)->latest()->first();
+    }
+    
     public function getActiveTranscriptRecordAttribute()
     {
         $draftStatus = 1; // draft transcript status
@@ -142,7 +147,8 @@ class Student extends Model
         return Carbon::parse($this->attributes['birth_date'])->age;
     }
 
-    public function getCurrentAddressAttribute() {
+    public function getCurrentAddressAttribute()
+    {
         if ($this->address) {
             $houseNoStreet = ucfirst($this->address->current_house_no_street);
             $barangay = ucfirst($this->address->current_barangay);
@@ -155,7 +161,8 @@ class Student extends Model
         return null;
     }
 
-    public function getPermanentAddressAttribute() {
+    public function getPermanentAddressAttribute()
+    {
         if ($this->address) {
             $houseNoStreet = ucfirst($this->address->permanent_house_no_street);
             $barangay = ucfirst($this->address->permanent_barangay);
