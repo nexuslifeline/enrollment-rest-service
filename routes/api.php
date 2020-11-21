@@ -161,7 +161,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/transcript-records/{transcriptRecordId}/subjects', 'SubjectController@getSubjectsOfTranscriptRecord');
         Route::get('/transcript-records/{transcriptRecordId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
     });
-    Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
+    // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
 });
