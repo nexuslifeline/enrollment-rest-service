@@ -159,6 +159,9 @@ Route::group(['prefix' => 'v1'], function () {
         //transcript-records
         Route::get('/transcript-records/{transcriptRecordId}/subjects', 'SubjectController@getSubjectsOfTranscriptRecord');
         Route::get('/transcript-records/{transcriptRecordId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
+
+        //document types
+        Route::resource('/document-types', 'DocumentTypeController');
     });
     // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');
