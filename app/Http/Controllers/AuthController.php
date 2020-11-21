@@ -72,32 +72,31 @@ class AuthController extends Controller
     } else {
       return response()->json(['error' => 'Unauthenticated.'], 401);
     }
+  }
 
-    public function getAuthUser()
-    {
-      $user = Auth::user();
-      $user->load(['userable', 'userable.photo']);
+  public function getAuthUser()
+  {
+    $user = Auth::user();
+    $user->load(['userable', 'userable.photo']);
 
-      if ($user->userable_type === 'App\\Student') {
-        $user->userable->append([
-          'active_admission',
-          'active_application',
-          'academic_record',
-          'active_transcript_record'
-        ]);
-      } else {
-        $user->load(['userGroup' => function($q) {
-          return $q->select(['id', 'name'])->with(['permissions' => function($q) {
-            return $q->select(['permissions.id', 'permission_group_id']);
-          }, 'schoolCategories']);
-        }]);
-      }
-
-      return new UserResource($user);
+    if ($user->userable_type === 'App\\Student') {
+      $user->userable->append([
+        'active_admission',
+        'active_application',
+        'academic_record',
+        'active_transcript_record'
+      ]);
+    } else {
+      $user->load(['userGroup' => function ($q) {
+        return $q->select(['id', 'name'])->with(['permissions' => function ($q) {
+          return $q->select(['permissions.id', 'permission_group_id']);
+        }, 'schoolCategories']);
+      }]);
     }
 
     return new UserResource($user);
   }
+
 
   public function register(StudentRegisterRequest $request)
   {
