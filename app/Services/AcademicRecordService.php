@@ -74,6 +74,24 @@ class AcademicRecordService
                 return $query->where('academic_record_status_id', $academicRecordStatusId);
             });
 
+            //is manual
+            $isManual = $filters['is_manual'] ?? false;
+            $query->when($isManual, function ($query) use ($isManual) {
+                return $query->where('is_manual', $isManual);
+            });
+
+            //manual steps
+            $manualStepId = $filters['manual_step_id'] ?? false;
+            $query->when($manualStepId, function ($query) use ($manualStepId) {
+                return $query->where('manual_step_id', $manualStepId);
+            });
+
+            //not equals to manual steps
+            $notManualStepId = $filters['not_manual_step_id'] ?? false;
+            $query->when($notManualStepId, function ($query) use ($notManualStepId) {
+                return $query->where('manual_step_id', '!=', $notManualStepId);
+            });
+
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($q) use ($criteria) {

@@ -39,60 +39,60 @@ class EvaluationService
 
             //school category
             $schoolCategoryId = $filters['school_category_id'] ?? false;
-            $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
             // course
             $courseId = $filters['course_id'] ?? false;
-            $query->when($courseId, function($q) use ($courseId) {
-                return $q->whereHas('course', function($query) use ($courseId) {
+            $query->when($courseId, function ($q) use ($courseId) {
+                return $q->whereHas('course', function ($query) use ($courseId) {
                     return $query->where('course_id', $courseId);
                 });
             });
 
             // level
             $levelId = $filters['level_id'] ?? false;
-            $query->when($levelId, function($q) use ($levelId) {
-                return $q->whereHas('level', function($query) use ($levelId) {
+            $query->when($levelId, function ($q) use ($levelId) {
+                return $q->whereHas('level', function ($query) use ($levelId) {
                     return $query->where('level_id', $levelId);
                 });
             });
 
             // evaluation status
             $evaluationStatusId = $filters['evaluation_status_id'] ?? false;
-            $query->when($evaluationStatusId, function($query) use ($evaluationStatusId) {
+            $query->when($evaluationStatusId, function ($query) use ($evaluationStatusId) {
                 return $query->where('evaluation_status_id', $evaluationStatusId);
             });
 
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
-            $query->when($criteria, function($q) use ($criteria) {
-                return $q->whereHas('student', function($query) use ($criteria) {
-                    return $query->where(function($q) use ($criteria) {
-                        return $q->where('name', 'like', '%'.$criteria.'%')
-                            ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                            ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                            ->orWhere('last_name', 'like', '%'.$criteria.'%');
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->whereHas('student', function ($query) use ($criteria) {
+                    return $query->where(function ($q) use ($criteria) {
+                        return $q->where('name', 'like', '%' . $criteria . '%')
+                            ->orWhere('first_name', 'like', '%' . $criteria . '%')
+                            ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+                            ->orWhere('last_name', 'like', '%' . $criteria . '%');
                     });
                 });
             });
 
             // order by
             $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
                 $sort = $filters['sort'] ?? 'ASC';
                 return $q->orderBy($orderBy, $sort);
             });
 
             $evaluations = $isPaginated
-            ? $query->paginate($perPage)
-            : $query->get();
+                ? $query->paginate($perPage)
+                : $query->get();
             return $evaluations;
         } catch (Exception $e) {
-          Log::info('Error occured during EvaluationService list method call: ');
-          Log::info($e->getMessage());
-          throw $e;
+            Log::info('Error occured during EvaluationService list method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 
@@ -101,15 +101,16 @@ class EvaluationService
         try {
             $evaluation = Evaluation::find($id);
             $evaluation->load([
-                'subjects' => function($query) {
+                'subjects' => function ($query) {
                     $query->with('prerequisites');
                 },
                 'studentCategory',
                 'course',
                 'level',
-                'student' => function($query) {
+                'student' => function ($query) {
                     $query->with(['address', 'photo']);
-            }]);
+                }
+            ]);
             return $evaluation;
         } catch (Exception $e) {
             Log::info('Error occured during EvaluationService get method call: ');
@@ -148,9 +149,10 @@ class EvaluationService
                 'level',
                 'course',
                 'studentCategory',
-                'student' => function($query) {
+                'student' => function ($query) {
                     $query->with(['address', 'photo']);
-            }])->fresh();
+                }
+            ])->fresh();
             DB::commit();
             return $evaluation;
         } catch (Exception $e) {
@@ -167,7 +169,7 @@ class EvaluationService
             $query = Student::find($studentId)->evaluations()->withCount('files');
             // evaluation status
             $evaluationStatusId = $filters['evaluation_status_id'] ?? false;
-            $query->when($evaluationStatusId, function($query) use ($evaluationStatusId) {
+            $query->when($evaluationStatusId, function ($query) use ($evaluationStatusId) {
                 return $query->where('evaluation_status_id', $evaluationStatusId);
             });
             $evaluations = $isPaginated
@@ -180,15 +182,15 @@ class EvaluationService
                 'studentCategory',
                 'curriculum',
                 'studentCurriculum',
-                'student' => function($query) {
+                'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
             ]);
             return $evaluations;
         } catch (Exception $e) {
-          Log::info('Error occured during EvaluationService getEvaluationOfStudent method call: ');
-          Log::info($e->getMessage());
-          throw $e;
+            Log::info('Error occured during EvaluationService getEvaluationOfStudent method call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 }
