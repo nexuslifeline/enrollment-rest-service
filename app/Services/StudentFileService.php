@@ -3,18 +3,18 @@
 namespace App\Services;
 
 use Image;
-use App\EvaluationFile;
+use App\StudentFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-class EvaluationFileService
+class StudentFileService
 {
 
-    public function store($evaluationId, $file)
+    public function store($studentId, $file)
     {
         try {
-            if (!$evaluationId) {
-                throw new \Exception('Evaluation id not found!');
+            if (!$studentId) {
+                throw new \Exception('Student id not found!');
             }
 
             if (!$file) {
@@ -37,25 +37,25 @@ class EvaluationFileService
                     $constraint->aspectRatio();
                 });
 
-                $path = 'files/evaluation/' . $file->hashName();
+                $path = 'files/student/' . $file->hashName();
                 Storage::put($path, $image->stream());
             }
             else {
-                $path = $file->store('files/evaluation');
+                $path = $file->store('files/student');
             }
 
-            $evaluationFile = EvaluationFile::Create(
+            $studentFile = StudentFile::Create(
                 [
-                    'evaluation_id' => $evaluationId,
+                    'student_id' => $studentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
                     'hash_name' => $file->hashName()
                 ]
             );
 
-            return $evaluationFile;
+            return $studentFile;
         } catch (Exception $e) {
-            Log::info('Error occured during EvaluationFileService store method call: ');
+            Log::info('Error occured during StudentFileService store method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -68,7 +68,7 @@ class EvaluationFileService
                 throw new \Exception('File id not found!');
             }
 
-            $query = EvaluationFile::where('id', $fileId);
+            $query = StudentFile::where('id', $fileId);
             $file = $query->first();
             if ($file) {
                 Storage::delete($file->path);
@@ -77,7 +77,7 @@ class EvaluationFileService
             }
             return false;
         } catch (Exception $e) {
-            Log::info('Error occured during EvaluationFileService delete method call: ');
+            Log::info('Error occured during StudentFileService delete method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -89,17 +89,17 @@ class EvaluationFileService
                 throw new \Exception('File id not found!');
             }
 
-            $query = EvaluationFile::where('id', $fileId);
-            $evaluationFile = $query->first();
+            $query = StudentFile::where('id', $fileId);
+            $studentFile = $query->first();
 
-            if ($evaluationFile) {
+            if ($studentFile) {
                 return  response()->file(
-                    storage_path('app/' . $evaluationFile->path)
+                    storage_path('app/' . $studentFile->path)
                 );
             }
             return null;
         } catch (Exception $e) {
-            Log::info('Error occured during EvaluationFileService preview method call: ');
+            Log::info('Error occured during StudentFileService preview method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -111,14 +111,14 @@ class EvaluationFileService
                 throw new \Exception('File id not found!');
             }
 
-            $query = EvaluationFile::where('id', $fileId);
-            $evaluationFile = $query->first();
+            $query = StudentFile::where('id', $fileId);
+            $studentFile = $query->first();
 
-            $evaluationFile->update($data);
+            $studentFile->update($data);
 
-            return  $evaluationFile;
+            return  $studentFile;
         } catch (Exception $e) {
-            Log::info('Error occured during EvaluationFileService preview method call: ');
+            Log::info('Error occured during StudentFileService preview method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

@@ -35,6 +35,14 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/students/{studentId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfStudent');
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');
         Route::delete('/students/{studentId}/photos', 'StudentPhotoController@destroy');
+
+        // student file
+        Route::get('/students/{studentId}/files', 'StudentFileController@index');
+        Route::post('/students/{studentId}/files', 'StudentFileController@store');
+        Route::put('/students/{studentId}/files/{fileId}', 'StudentFileController@update');
+        Route::get('/students/{studentId}/files/{fileId}/preview', 'StudentFileController@preview');
+        Route::delete('/students/{studentId}/files/{fileId}', 'StudentFileController@destroy');
+
         // subjects
         Route::resource('/subjects', 'SubjectController');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
@@ -124,13 +132,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
-
-        // evaluation file
-        Route::get('/evaluations/{evaluationId}/files', 'EvaluationFileController@index');
-        Route::post('/evaluations/{evaluationId}/files', 'EvaluationFileController@store');
-        Route::put('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@update');
-        Route::get('/evaluations/{evaluationId}/files/{fileId}/preview', 'EvaluationFileController@preview');
-        Route::delete('/evaluations/{evaluationId}/files/{fileId}', 'EvaluationFileController@destroy');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
         // pera padala accounts

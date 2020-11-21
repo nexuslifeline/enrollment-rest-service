@@ -26,6 +26,11 @@ class Student extends Model
         'deleted_by'
     ];
 
+    public function files()
+    {
+        return $this->hasMany('App\StudentFile');
+    }
+
     public function user()
     {
         return $this->morphOne('App\User', 'userable');

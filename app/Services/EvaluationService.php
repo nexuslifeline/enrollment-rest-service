@@ -26,7 +26,6 @@ class EvaluationService
                   $query->with(['address', 'photo']);
 
               }])
-              ->withCount('files')
               ->where('evaluation_status_id', '!=', 1);
 
             // filters

@@ -18,11 +18,6 @@ class Evaluation extends Model
         'deleted_by'
     ];
 
-    public function files()
-    {
-        return $this->hasMany('App\EvaluationFile');
-    }
-
     public function student()
     {
         return $this->belongsTo('App\Student');

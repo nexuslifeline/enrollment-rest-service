@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Semester;
+use Illuminate\Http\Request;
+use App\Services\SemesterService;
 use App\Http\Resources\SemesterResource;
 
 class SemesterController extends Controller
@@ -15,10 +16,11 @@ class SemesterController extends Controller
      */
     public function index(Request $request)
     {
+        $semesterService = new SemesterService();
+        $filters = $request->except('paginate','per_page');
         $perPage = $request->per_page ?? 20;
-        $semesters = !$request->has('paginate') || $request->paginate === 'true'
-            ? Semester::paginate($perPage)
-            : Semester::all();
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $semesters = $semesterService->list($isPaginated, $perPage, $filters);
         return SemesterResource::collection(
             $semesters
         );
