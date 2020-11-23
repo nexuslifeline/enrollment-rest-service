@@ -59,26 +59,6 @@ class StudentService
 
             if ($isEnrolled) {
                 $student->applications()->create([
-                  'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                  'application_step_id' => 1,
-                  'application_status_id' => 2
-                ])->academicRecord()->create([
-                  'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                  'student_id' => $student->id,
-                  'student_category_id' => $studentCategoryId,
-                  'academic_record_status_id' => $academicRecordStatusId
-                ]);
-
-                $student->evaluations()->create([
-                  'student_id' => $student->id,
-                  'student_category_id' => $studentCategoryId,
-                  'evaluation_status_id' => $evaluationStatusId,
-                  'transcript_record_id' => $transcriptRecord->id
-                ]);
-
-              } else {
-                if ($studentCategoryId === 2) {
-                  $student->applications()->create([
                     'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                     'application_step_id' => 1,
                     'application_status_id' => 2
@@ -111,7 +91,8 @@ class StudentService
                     $student->evaluations()->create([
                         'student_id' => $student->id,
                         'student_category_id' => $studentCategoryId,
-                        'evaluation_status_id' => $evaluationStatusId
+                        'evaluation_status_id' => $evaluationStatusId,
+                        'transcript_record_id' => $transcriptRecord->id
                     ]);
                 } else {
                     if ($studentCategoryId === 2) {
@@ -132,37 +113,53 @@ class StudentService
                             'evaluation_status_id' => $evaluationStatusId
                         ]);
                     } else {
-                        $student->admission()->create([
-                            'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                            'admission_step_id' => 1,
-                            'application_status_id' => 2
-                        ])->academicRecord()->create([
-                            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                            'student_id' => $student->id,
-                            'student_category_id' => $studentCategoryId,
-                            'academic_record_status_id' => $academicRecordStatusId
-                        ]);
+                        if ($studentCategoryId === 2) {
+                            $student->applications()->create([
+                                'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+                                'application_step_id' => 1,
+                                'application_status_id' => 2
+                            ])->academicRecord()->create([
+                                'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+                                'student_id' => $student->id,
+                                'student_category_id' => $studentCategoryId,
+                                'academic_record_status_id' => $academicRecordStatusId
+                            ]);
 
-                        $student->evaluations()->create([
-                            'student_id' => $student->id,
-                            'student_category_id' => $studentCategoryId,
-                            'evaluation_status_id' => $evaluationStatusId,
-                            'transcript_record_id' => $transcriptRecord->id
+                            $student->evaluations()->create([
+                                'student_id' => $student->id,
+                                'student_category_id' => $studentCategoryId,
+                                'evaluation_status_id' => $evaluationStatusId
+                            ]);
+                        } else {
+                            $student->admission()->create([
+                                'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+                                'admission_step_id' => 1,
+                                'application_status_id' => 2
+                            ])->academicRecord()->create([
+                                'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+                                'student_id' => $student->id,
+                                'student_category_id' => $studentCategoryId,
+                                'academic_record_status_id' => $academicRecordStatusId
+                            ]);
 
-                        ]);
+                            $student->evaluations()->create([
+                                'student_id' => $student->id,
+                                'student_category_id' => $studentCategoryId,
+                                'evaluation_status_id' => $evaluationStatusId,
+                                'transcript_record_id' => $transcriptRecord->id
+
+                            ]);
+                        }
                     }
                 }
-
-
-
-                $user = $student->user()->create([
-                    'username' => $data['username'],
-                    'password' => Hash::make($data['password'])
-                ]);
-
-                DB::commit();
-                return $user;
             }
+            $user = $student->user()->create([
+                'username' => $data['username'],
+                'password' => Hash::make($data['password'])
+            ]);
+
+            DB::commit();
+            return $user;
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during StudentService register method call: ');
@@ -185,7 +182,15 @@ class StudentService
             $studentFee = $data['student_fee'] ?? false;
             $application = $data['application'] ?? false;
 
-            $student = Student::updateOrCreate(['id' => $studentId], $data);
+            $student = Student::updateOrCreate(['id' => $studentId], [
+                'birth_date' => $data['birth_date'],
+                'civil_status_id' => $data['civil_status_id'],
+                'email' => $data['email'],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'middle_name' => $data['middle_name'],
+                'mobile_no' => $data['mobile_no']
+            ]);
 
             if ($academicRecord) {
                 $activeAcademicRecord = $student->academicRecords()->updateOrCreate(['id' => $academicRecord['id']], $academicRecord);
