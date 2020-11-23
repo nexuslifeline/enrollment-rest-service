@@ -15,25 +15,25 @@ class EvaluationService
     {
         try {
             $query = Evaluation::with([
-              'lastSchoolLevel',
-              'level',
-              'course',
-              'studentCategory',
-              'curriculum',
-              'studentCurriculum',
-              'transcriptRecord',
-              'student' => function($query) {
-                  $query->with(['address', 'photo']);
-
-              }])
-              ->where('evaluation_status_id', '!=', 1);
+                'lastSchoolLevel',
+                'level',
+                'course',
+                'studentCategory',
+                'curriculum',
+                'studentCurriculum',
+                'transcriptRecord',
+                'student' => function ($query) {
+                    $query->with(['address', 'photo']);
+                }
+            ])
+                ->where('evaluation_status_id', '!=', 1);
 
             // filters
             // student
             $studentId = $filters['student_id'] ?? false;
-            $query->when($studentId, function($q) use ($studentId) {
-                return $q->whereHas('student', function($query) use ($studentId) {
-                     $query->where('student_id', $studentId);
+            $query->when($studentId, function ($q) use ($studentId) {
+                return $q->whereHas('student', function ($query) use ($studentId) {
+                    $query->where('student_id', $studentId);
                 });
             });
 
@@ -101,12 +101,13 @@ class EvaluationService
         try {
             $evaluation = Evaluation::find($id);
             $evaluation->load([
-                'subjects' => function ($query) {
-                    $query->with('prerequisites');
-                },
+                // 'subjects' => function ($query) {
+                //     $query->with('prerequisites');
+                // },
                 'studentCategory',
                 'course',
                 'level',
+                'transcriptRecord',
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
@@ -166,7 +167,7 @@ class EvaluationService
     public function getEvaluationsOfStudent(int $studentId, bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Student::find($studentId)->evaluations()->withCount('files');
+            $query = Student::find($studentId)->evaluations();
             // evaluation status
             $evaluationStatusId = $filters['evaluation_status_id'] ?? false;
             $query->when($evaluationStatusId, function ($query) use ($evaluationStatusId) {
