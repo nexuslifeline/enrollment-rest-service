@@ -13,9 +13,17 @@ class TranscriptRecordController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $transcriptRecordService = new transcriptRecordService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $transcriptRecords = $transcriptRecordService->list($isPaginated, $perPage, $filters);
+
+        return TranscriptRecordResource::collection(
+            $transcriptRecords
+        );
     }
 
     /**
