@@ -17,6 +17,7 @@ class TranscriptRecordService
         'level',
         'course',
         'curriculum',
+        'studentCurriculum',
         'student' => function ($query) {
           $query->with(['address', 'photo']);
         }
@@ -58,6 +59,38 @@ class TranscriptRecordService
       return $transcriptRecords;
     } catch (Exception $e) {
       Log::info('Error occured during TranscriptRecordService list method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function update(array $data, array $subjects, int $id)
+  {
+    DB::beginTransaction();
+    try {
+      $transcriptRecord = TranscriptRecord::find($id);
+      // return $transcriptRecord;
+      $transcriptRecord->update($data);
+
+      if ($subjects) {
+        $items = [];
+        foreach ($subjects as $subject) {
+          $items[$subject['subject_id']] = [
+            'level_id' => $subject['level_id'],
+            'semester_id' => $subject['semester_id'],
+            'is_taken' => $subject['is_taken'],
+            'grade' => $subject['grade'],
+            'notes' => $subject['notes']
+          ];
+        }
+        // return $items;
+        $transcriptRecord->subjects()->sync($items);
+      }
+      DB::commit();
+      return $transcriptRecord;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during TranscriptRecordService update method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

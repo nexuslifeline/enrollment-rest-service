@@ -80,7 +80,11 @@ class TranscriptRecordController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $transcriptRecordService = new TranscriptRecordService();
+        $data = $request->except('subjects');
+        $subjects = $request->subjects ?? [];
+        $transcriptRecord = $transcriptRecordService->update($data, $subjects, $id);
+        return new TranscriptRecordResource($transcriptRecord);
     }
 
     /**
