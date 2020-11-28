@@ -76,7 +76,7 @@ class ReportController extends Controller
                 ->where('student_fee_id', $data['billing']->student_fee_id);
         }])->get();
         // return $data['terms'];
-        $data['previousBilling'] = Billing::with('payments')
+        $data['previousBilling'] = Billing::with('payments', 'term')
             ->where('id', '!=', $billingId)
             ->where('student_fee_id', $data['billing']->student_fee_id)
             ->where('billing_type_id', 2)
@@ -86,7 +86,6 @@ class ReportController extends Controller
         // return $data;
         $content = view('reports.soa')->with($data);
         $mpdf->WriteHTML($content);
-        // return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
 

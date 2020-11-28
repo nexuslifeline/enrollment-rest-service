@@ -253,7 +253,7 @@
   <br>
   <table style="width: 100%;">
     <tr>
-      <td>
+      <td style="vertical-align: top;">
         <table class="table__payment-history" style="width: 100%; border-collapse: collapse; margin: 0 15px; border-right: 1px solid gray;">
           <tr>
             <td colspan="4" style="text-align: center;">
@@ -261,18 +261,15 @@
             </td>
           </tr>
           <tr>
-            <!-- <td style="border-bottom: 1px solid gray; width: 10%;"></td> -->
-            <td style="border-bottom: 1px solid gray; width: 30%; font-weight: bold;">DATE PAID</td>
-            <td style="border-bottom: 1px solid gray; width: 30%; font-weight: bold; text-transform: none;">O.R. Number</td>
+            <td style="border-bottom: 1px solid gray; width: 20%;"></td>
+            <td style="border-bottom: 1px solid gray; width: 25%; font-weight: bold;">DATE PAID</td>
+            <td style="border-bottom: 1px solid gray; width: 25%; font-weight: bold; text-transform: none;">O.R. Number</td>
             <td style="border-bottom: 1px solid gray; width: 30%; font-weight: bold; text-align: right;">AMOUNT PAID</td>
           </tr>
-          @foreach ($terms as $term)
+          @if($previousBilling && $previousBilling->payments)
+          @foreach ($previousBilling->payments as $key=>$payment)
           <tr>
-            <td colspan="4" style="text-align: left; font-weight: bold;">{{$term->name}}</td>
-          </tr>
-          @if($term->billing && count($term->billing->payments) > 0)
-          @foreach ($term->billing->payments as $payment)
-          <tr>
+            <td style="text-align: left; font-weight: bold;">{{$key === 0 ? $previousBilling->term->name : ''}}</td>
             <td>{{date('M j, Y', strtotime($payment->date_paid))}}</td>
             <td>{{$payment->reference_no}}</td>
             <td style="text-align: right;">{{number_format($payment->amount,2)}}</td>
@@ -283,7 +280,6 @@
             <td colspan="4" style="text-align: center">No Payment</td>
           </tr>
           @endif
-          @endforeach
         </table>
       </td>
       <td style="width: 40%; vertical-align: top;">
