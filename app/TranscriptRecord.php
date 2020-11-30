@@ -48,6 +48,10 @@ class TranscriptRecord extends Model
         return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
     }
 
+    public function evaluations() {
+        return $this->hasMany('App\Evaluation');
+    }
+
     public function subjects()
     {
         return $this->belongsToMany(
