@@ -15,11 +15,8 @@ class StudentFileController extends Controller
 {
     public function index(Request $request, $studentId)
     {
-        $perPage = $request->per_page ?? 20;
-        $query = Student::where('id', $studentId)->first()->files();
-        $files = !$request->has('paginate') || $request->paginate === 'true'
-            ? $query->paginate($perPage)
-            : $query->get();
+        $studentFileService = new StudentFileService();
+        $files = $studentFileService->index($request, $studentId);
         return StudentFileResource::collection(
             $files
         );

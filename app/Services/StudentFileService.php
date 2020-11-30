@@ -10,6 +10,25 @@ use Illuminate\Validation\ValidationException;
 class StudentFileService
 {
 
+    public function index(object $request, $studentId)
+    {
+        try {
+            $perPage = $request->per_page ?? 20;
+            $query = StudentFile::where('student_id', $studentId)
+                    ->with('documentType');
+
+            $files = !$request->has('paginate') || $request->paginate === 'true'
+                ? $query->paginate($perPage)
+                : $query->get();
+
+            return $files;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentFileService index method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function store($studentId, $file)
     {
         try {
