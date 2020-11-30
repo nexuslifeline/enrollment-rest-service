@@ -71,7 +71,8 @@ class Student extends Model
         return $this->hasMany('App\AcademicRecord');
     }
 
-    public function transcriptRecords() {
+    public function transcriptRecords()
+    {
         return $this->hasMany('App\TranscriptRecord');
     }
 
@@ -135,11 +136,16 @@ class Student extends Model
     {
         return $this->academicRecords()->where('is_manual', 1)->latest()->first();
     }
-    
+
     public function getActiveTranscriptRecordAttribute()
     {
         $draftStatus = 1; // draft transcript status
-        return $this->transcriptRecords()->where('transcript_record_status_id', $draftStatus)->latest()->first();
+        $pendingStatus = 3; // pending transcript status
+        return $this->transcriptRecords()
+            ->where('transcript_record_status_id', $draftStatus)
+            ->orWhere('transcript_record_status_id', $pendingStatus)
+            ->latest()
+            ->first();
     }
 
     public function getNameAttribute()

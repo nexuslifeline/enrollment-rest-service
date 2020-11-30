@@ -35,6 +35,7 @@ class ManualRegisterRequest extends FormRequest
             'academic_record.section_id' => 'sometimes|required',
             'academic_record.course_id' => 'required_if:academic_record.school_category_id,4,5,6',
             'academic_record.semester_id' => 'required_if:academic_record.school_category_id,4,5,6',
+            'academic_record_subjects' => 'sometimes|array|min:1',
         ];
     }
 
@@ -55,6 +56,7 @@ class ManualRegisterRequest extends FormRequest
             'academic_record.course_id' => 'course',
             'academic_record.semester_id' => 'semester',
             'academic_record.section_id' => 'section',
+            'academic_record_subjects' => 'subjects'
         ];
     }
 }
