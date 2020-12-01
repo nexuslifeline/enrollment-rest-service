@@ -76,9 +76,11 @@ class Student extends Model
         return $this->hasMany('App\TranscriptRecord');
     }
 
-    public function evaluation()
+    public function getEvaluationAttribute()
     {
-        return $this->hasOne('App\Evaluation');
+        $completedStatus = 5;
+        //return $this->hasOne('App\Evaluation');
+        return  $this->evaluations()->where('evaluation_status_id', '!=', $completedStatus)->latest()->first();
     }
 
     public function evaluations()

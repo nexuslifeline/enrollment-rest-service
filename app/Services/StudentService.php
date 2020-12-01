@@ -7,14 +7,15 @@ use Exception;
 use App\Billing;
 use App\Student;
 use App\Admission;
+use Carbon\Carbon;
+use App\Evaluation;
 use App\SchoolYear;
 use App\Application;
 use App\AcademicRecord;
 use App\TranscriptRecord;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -277,8 +278,8 @@ class StudentService
             }
 
             DB::commit();
-            $student->load(['user', 'evaluation']);
-            $student->append('active_transcript_record');
+            $student->load(['user']);
+            $student->append('active_transcript_record', 'evaluation');
             return $student;
         } catch (Exception $e) {
             DB::rollback();
@@ -320,8 +321,8 @@ class StudentService
     {
         try {
             $student = Student::find($id);
-            $student->load(['address', 'family', 'education', 'photo', 'evaluation']);
-            $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record');
+            $student->load(['address', 'family', 'education', 'photo']);
+            $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record', 'evaluation');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -396,6 +397,14 @@ class StudentService
                 }
             }
 
+            $activeEvaluation = $studentInfo['evaluation'] ?? false;
+            if ($activeEvaluation) {
+                $evaluation = Evaluation::find($activeEvaluation['id']);
+                if ($evaluation) {
+                    $evaluation->update($activeEvaluation);
+                }
+            }
+
             foreach ($related as $item) {
                 $info = $studentInfo[$item] ?? false;
                 if ($info) {
@@ -417,8 +426,8 @@ class StudentService
                 );
             }
 
-            $student->load(['address', 'family', 'education', 'photo', 'user', 'evaluation'])->fresh();
-            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record']);
+            $student->load(['address', 'family', 'education', 'photo', 'user', ])->fresh();
+            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
             DB::commit();
             return $student;
         } catch (Exception $e) {
@@ -468,6 +477,147 @@ class StudentService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during StudentService getBillingsOfStudent method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function enroll(array $data, array $studentInfo, array $related, int $id) {
+
+        DB::beginTransaction();
+
+        try {
+
+            $academicRecordStatusId = 1; //pending
+            $evaluationStatusId = 1; // pending
+            $transcriptRecordStatusId = 1; //1 = draft
+            $studentCategoryId = 2; //old
+            $isManual = 1;
+
+            $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+            if (!$activeSchoolYear) {
+                throw new Exception('No active school year found!');
+            }
+
+            $student = Student::find($id);
+            // return $student;
+
+            $activeApplication = $studentInfo['active_application'] ?? false;
+            if ($activeApplication &&  is_null($activeApplication['id'])) {
+
+                //do if no active application
+                    $student->applications()->create([
+                        'school_year_id' =>  $activeSchoolYear['id'],
+                        'application_step_id' =>  $activeApplication['application_step_id'],
+                        'application_status_id' =>  $activeApplication['application_status_id'],
+                        'is_manual' =>  $isManual
+                    ])->academicRecord()->create([
+                        'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+                        'student_id' => $student->id,
+                        'student_category_id' => $studentCategoryId,
+                        'academic_record_status_id' => $academicRecordStatusId
+                    ]);
+
+                $activeEvaluation = $studentInfo['evaluation'] ?? false;
+                if ($activeEvaluation) {
+                    $schoolCategoryId = $activeEvaluation['school_category_id'];
+                    $levelId =  $activeEvaluation['level_id'];
+                    $courseId = $activeEvaluation['course_id'];
+
+                    $transcriptRecord = TranscriptRecord::where('student_id', $student->id)
+                                        ->where('school_category_id', $schoolCategoryId)
+                                        ->where('level_id', in_array($schoolCategoryId, [4,5,6,7]) ? null : $levelId)
+                                        ->where('course_id', $courseId)->first();
+
+                    if($transcriptRecord && in_array($schoolCategoryId, [4,5,6,7])) {
+                        //transcript exist therefor use existing transcript and create evaluation
+                        // $activeEvaluation->transcript_record_id = $transcriptRecord['id'];
+                        // $activeEvaluation->student_curriculum_id = $transcriptRecord['student_curriculum_id'];
+                        // $activeEvaluation->curriculum_id = $transcriptRecord['curriculum_id'];
+                        $transcriptRecord->evaluations()->create([
+                            'student_category_id' => $activeEvaluation['student_category_id'],
+                            'student_id' => $student->id,
+                            'student_curriculum_id' => $transcriptRecord->student_curriculum_id,
+                            'curriculum_id' =>$transcriptRecord->curriculum_id,
+                            'level_id' => $activeEvaluation['level_id'],
+                            'course_id' => $activeEvaluation['course_id'],
+                            'semester_id' => $activeEvaluation['semester_id'],
+                            'school_category_id' => $activeEvaluation['school_category_id'],
+                            'school_category_id' => $activeEvaluation['school_category_id'],
+                            'evaluation_status_id' => $activeEvaluation['evaluation_status_id'],
+                            'submitted_date' => $activeEvaluation['submitted_date']
+                        ]);
+                    }
+                    else {
+                        $transcriptRecord = $student->transcriptRecords()->create([
+                            'school_category_id' => $schoolCategoryId,
+                            'level_id' => in_array($schoolCategoryId, [4,5,6,7]) ? null : $levelId ,
+                            'course_id' => $courseId,
+                            'transcript_record_status_id' => $transcriptRecordStatusId
+                        ]);
+
+
+                        // $activeEvaluation['student_curriculum_id'] = $transcriptRecord['student_curriculum_id'];
+                        // $activeEvaluation['curriculum_id'] = $transcriptRecord['curriculum_id'];
+                        $student->evaluations()->create([
+                            'student_category_id' => $activeEvaluation['student_category_id'],
+                            'transcript_record_id' => $transcriptRecord['id'],
+                            'school_category_id' => $activeEvaluation['school_category_id'],
+                            'level_id' => $activeEvaluation['level_id'],
+                            'semester_id' => $activeEvaluation['semester_id'],
+                            'course_id' => $activeEvaluation['course_id'],
+                            'submitted_date' => $activeEvaluation['submitted_date'],
+                            'evaluation_status_id' => 2 // evaluation status - submitted
+                        ]);
+                    }
+                }
+            }
+            else {
+                //do if no active application exists
+                $application = Application::find($activeApplication['id']);
+                if ($application) {
+                    $application->update($activeApplication);
+                }
+
+                $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+                if ($activeTranscriptRecord) {
+                    $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+                    if ($transcriptRecord) {
+                        $transcriptRecord->update($activeTranscriptRecord);
+                    }
+                }
+
+                $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
+                if ($activeAcademicRecord) {
+                    $academicRecord = AcademicRecord::find($activeAcademicRecord['id']);
+                    if ($academicRecord) {
+                        $academicRecord->update($activeAcademicRecord);
+                        $subjects = $studentInfo['subjects'] ?? false;
+                        if ($subjects) {
+                            $academicRecord->subjects()->sync($subjects);
+                        }
+                    }
+                }
+
+                $activeEvaluation = $studentInfo['evaluation'] ?? false;
+                if ($activeEvaluation) {
+                    $evaluation = Evaluation::find($activeEvaluation['id']);
+                    if ($evaluation) {
+                        $evaluation->update($activeEvaluation);
+                    }
+                }
+
+            }
+
+
+            $student->load(['address', 'family', 'education', 'photo', 'user', ])->fresh();
+            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
+            DB::commit();
+            return $student;
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService enroll method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

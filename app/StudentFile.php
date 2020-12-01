@@ -17,4 +17,8 @@ class StudentFile extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    public function documentType() {
+        return $this->belongsTo('App\DocumentType');
+    }
 }
