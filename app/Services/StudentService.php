@@ -321,7 +321,7 @@ class StudentService
     {
         try {
             $student = Student::find($id);
-            $student->load(['address', 'family', 'education', 'photo']);
+            $student->load(['address', 'family', 'education', 'photo', 'user']);
             $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record', 'evaluation');
             return $student;
         } catch (Exception $e) {
