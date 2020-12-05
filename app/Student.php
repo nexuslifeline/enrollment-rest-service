@@ -136,7 +136,7 @@ class Student extends Model
 
     public function getLatestManualAcademicRecordAttribute()
     {
-        return $this->academicRecords()->where('is_manual', 1)->latest()->first();
+        return $this->academicRecords()->where('is_manual', 1)->where('academic_record_status_id', '!=', 3)->latest()->first();
     }
 
     public function getActiveTranscriptRecordAttribute()

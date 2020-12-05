@@ -16,44 +16,44 @@ class PaymentService
         try {
             //added billing related model
             //10 10 2020
-            $query = Payment::with(['paymentMode', 'billing', 'student' => function($query) {
+            $query = Payment::with(['paymentMode', 'billing', 'student' => function ($query) {
                 $query->with(['address', 'photo']);
             }])
-            ->where('payment_status_id', '!=', 1);
+                ->where('payment_status_id', '!=', 1);
             //filter
             //payment status
             $paymentStatusId = $filters['payment_status_id'] ?? false;
-            $query->when($paymentStatusId, function($q) use ($paymentStatusId) {
-                    return $q->where('payment_status_id', $paymentStatusId);
+            $query->when($paymentStatusId, function ($q) use ($paymentStatusId) {
+                return $q->where('payment_status_id', $paymentStatusId);
             });
 
             $dateFrom = $filters['date_from'] ?? false;
             $dateTo = $filters['date_to'] ?? false;
-            $query->when($dateFrom, function($q) use ($dateFrom, $dateTo) {
+            $query->when($dateFrom, function ($q) use ($dateFrom, $dateTo) {
                 return $q->whereBetween('date_paid', [$dateFrom, $dateTo]);
             });
 
             //criteria
             $criteria = $filters['criteria'] ?? false;
-            $query->when($criteria, function($q) use ($criteria) {
-              return $q->where(function($q) use ($criteria) {
-                  return $q->where('date_paid', 'like', '%'.$criteria.'%')
-                  ->orWhere('amount', 'like', '%'.$criteria.'%')
-                  ->orWhere('reference_no', 'like', '%'.$criteria.'%')
-                  ->orWhereHas('student', function($query) use ($criteria) {
-                      return $query->where(function($q) use ($criteria) {
-                          return $q->where('name', 'like', '%'.$criteria.'%')
-                          ->orWhere('first_name', 'like', '%'.$criteria.'%')
-                          ->orWhere('middle_name', 'like', '%'.$criteria.'%')
-                          ->orWhere('last_name', 'like', '%'.$criteria.'%');
-                      });
-                  });
-              });
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->where(function ($q) use ($criteria) {
+                    return $q->where('date_paid', 'like', '%' . $criteria . '%')
+                        ->orWhere('amount', 'like', '%' . $criteria . '%')
+                        ->orWhere('reference_no', 'like', '%' . $criteria . '%')
+                        ->orWhereHas('student', function ($query) use ($criteria) {
+                            return $query->where(function ($q) use ($criteria) {
+                                return $q->where('name', 'like', '%' . $criteria . '%')
+                                    ->orWhere('first_name', 'like', '%' . $criteria . '%')
+                                    ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+                                    ->orWhere('last_name', 'like', '%' . $criteria . '%');
+                            });
+                        });
+                });
             });
 
             // order by
             $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function($q) use ($orderBy, $filters) {
+            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
                 $sort = $filters['sort'] ?? 'ASC';
                 return $q->orderBy($orderBy, $sort);
             });
@@ -72,16 +72,16 @@ class PaymentService
     public function get(int $id)
     {
         try {
-          $payment = Payment::find($id);
-          $payment->load(['paymentMode', 'student' => function($query) {
-              $query->with(['address', 'photo']);
-          }]);
-          return $payment;
+            $payment = Payment::find($id);
+            $payment->load(['paymentMode', 'student' => function ($query) {
+                $query->with(['address', 'photo']);
+            }]);
+            return $payment;
         } catch (Exception $e) {
-          Log::info('Error occured during PaymentService get method call: ');
-          Log::info($e->getMessage());
-          throw $e;
-      }
+            Log::info('Error occured during PaymentService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function store(array $data)
@@ -89,6 +89,38 @@ class PaymentService
         DB::beginTransaction();
         try {
             $payment = Payment::create($data);
+
+            $billing = $payment->billing;
+            //check if billing is initial
+            if ($billing->billing_type_id === 1) {
+                $student = $payment->student;
+                $academicRecord = $student->academicRecords()->get()->last();
+                // update application status and step to completed and waiting
+                $academicRecord->application->update([
+                    'application_status_id' => 7,
+                    'application_step_id' => 10
+                ]);
+                //check if student is new or old
+                if ($academicRecord['student_category_id'] === 1) {
+                    $students = Student::with(['academicRecords'])
+                        ->whereHas('academicRecords', function ($query) {
+                            return $query->where('student_category_id', 1)
+                                ->where('academic_record_status_id', 3);
+                        })
+                        ->get();
+
+                    $student->update([
+                        'student_no' => '11' . str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
+                    ]);
+                }
+                //update academic record status to enrolled
+                $academicRecord->update([
+                    'academic_record_status_id' => 3
+                ]);
+                $studentFee = StudentFee::find($billing->student_fee_id);
+                $studentFee->recomputeTerms($payment->amount);
+            }
+
             DB::commit();
             // $payment->load(['billing' => function($q) {
             //     $q->append('total_paid');
@@ -115,14 +147,14 @@ class PaymentService
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])
-                    ->whereHas('academicRecords', function ($query) {
-                        return $query->where('student_category_id',1)
-                        ->where('academic_record_status_id', 3);
-                    })
-                    ->get();
+                        ->whereHas('academicRecords', function ($query) {
+                            return $query->where('student_category_id', 1)
+                                ->where('academic_record_status_id', 3);
+                        })
+                        ->get();
 
                     $student->update([
-                        'student_no' => '11'. str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
+                        'student_no' => '11' . str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
                     ]);
                 }
                 $billing = $payment->billing;

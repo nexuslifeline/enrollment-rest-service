@@ -145,6 +145,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('collection-report', 'ReportController@collectionReport');
         Route::get('student-ledger/{studentId}', 'ReportController@studentLedger');
         Route::get('registration-form/{academicRecordId}', 'ReportController@registrationForm');
+        Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');
         // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
 

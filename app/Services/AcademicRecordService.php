@@ -68,10 +68,28 @@ class AcademicRecordService
                 });
             });
 
+            //not equals to application status
+            $notApplicationStatusId = $filters['not_application_status_id'] ?? false;
+            $query->when($notApplicationStatusId, function ($q) use ($notApplicationStatusId) {
+                return $q->where(function ($q) use ($notApplicationStatusId) {
+                    return $q->whereHas('application', function ($query) use ($notApplicationStatusId) {
+                        return $query->where('application_status_id', '!=', $notApplicationStatusId);
+                    })->orWhereHas('admission', function ($query) use ($notApplicationStatusId) {
+                        return $query->where('application_status_id', '!=', $notApplicationStatusId);
+                    });
+                });
+            });
+
             // academicRecord status
             $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
             $query->when($academicRecordStatusId, function ($query) use ($academicRecordStatusId) {
                 return $query->where('academic_record_status_id', $academicRecordStatusId);
+            });
+
+            // not equals to academicRecord status
+            $notAcademicRecordStatusId = $filters['not_academic_record_status_id'] ?? false;
+            $query->when($notAcademicRecordStatusId, function ($query) use ($notAcademicRecordStatusId) {
+                return $query->where('academic_record_status_id', '!=', $notAcademicRecordStatusId);
             });
 
             //is manual
