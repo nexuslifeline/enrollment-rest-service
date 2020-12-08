@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\PaymentResource;
 use App\SchoolFeeCategory;
+use App\Semester;
 use App\TranscriptRecord;
 
 class ReportController extends Controller
@@ -228,6 +229,7 @@ class ReportController extends Controller
     {
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $data['transcriptRecord'] = TranscriptRecord::find($transcriptRecordId);
+        $data['semesters'] = Semester::get();
         $mpdf = new Mpdf();
         $content = view('reports.transcriptrecord')->with($data);
         $mpdf->WriteHTML($content);
