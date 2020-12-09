@@ -6,6 +6,7 @@ use App\Semester;
 use Illuminate\Http\Request;
 use App\Services\SemesterService;
 use App\Http\Resources\SemesterResource;
+use App\Http\Requests\SemesterUpdateRequest;
 
 class SemesterController extends Controller
 {
@@ -66,23 +67,14 @@ class SemesterController extends Controller
      * @param  \App\Semester  $semester
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Semester $semester)
+    public function update(SemesterUpdateRequest $request, int $id)
     {
-        $this->validate($request, [
-            'name' => 'required|max:191',
-            'description' => 'required|max:191'
-        ]);
 
-        $data = $request->all();
-
-        $success = $semester->update($data);
-
-        if($success){
-            return (new SemesterResource($semester))
+        $semesterService = new SemesterService();
+        $semester = $semesterService->update($request->all(), $id);
+        return (new SemesterResource($semester))
                 ->response()
                 ->setStatusCode(200);
-        }
-        return response()->json([], 400); // Note! add error here
     }
 
     /**

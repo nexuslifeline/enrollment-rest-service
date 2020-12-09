@@ -29,4 +29,27 @@ class SemesterService
             throw $e;
         }
     }
+
+    public function update(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $semester = Semester::find($id);
+            $semester->update($data);
+            if ($data['is_active']) {
+                $activeSemester = Semester::where('id', '!=', $semester->id)
+                ->where('is_active', 1);
+                $activeSemester->update([
+                    'is_active' => 0
+                ]);
+            }
+            DB::commit();
+            return $semester;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SemesterService update method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }
