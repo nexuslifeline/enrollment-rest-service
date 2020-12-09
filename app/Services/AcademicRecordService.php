@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Student;
 use App\AcademicRecord;
+use App\Evaluation;
+use App\Payment;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -333,5 +335,27 @@ class AcademicRecordService
             Log::info($e->getMessage());
             throw $e;
         }
+    }
+
+    public function getPendingApprovalCount()
+    {
+        $data['evaluation'] = Evaluation::where('evaluation_status_id', 2)->count();
+        $data['enlistment'] = AcademicRecord::where(function ($q) {
+            return $q->whereHas('application', function ($query) {
+                return $query->where('application_status_id', 4);
+            })->orWhereHas('admission', function ($query) {
+                return $query->where('application_status_id', 4);
+            });
+        })->where('academic_record_status_id', 1)->count();
+        $data['assessment'] = AcademicRecord::where(function ($q) {
+            return $q->whereHas('application', function ($query) {
+                return $query->where('application_status_id', 4);
+            })->orWhereHas('admission', function ($query) {
+                return $query->where('application_status_id', 4);
+            });
+        })->where('academic_record_status_id', 2)->count();
+        $data['payment'] = Payment::where('payment_status_id', 4)->count();
+
+        return $data;
     }
 }

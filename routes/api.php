@@ -166,6 +166,9 @@ Route::group(['prefix' => 'v1'], function () {
 
         //document types
         Route::resource('/document-types', 'DocumentTypeController');
+
+        //approval counts
+        Route::get('/approval-count', 'AcademicRecordController@getPendingApprovalCount');
     });
     // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');

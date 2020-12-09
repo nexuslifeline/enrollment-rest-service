@@ -91,7 +91,6 @@ class AcademicRecordController extends Controller
         $academicRecordInfo = $request->only($except);
         $academicRecord = $academicRecordService->update($data, $academicRecordInfo, $id);
         return new AcademicRecordResource($academicRecord);
-
     }
 
     /**
@@ -113,5 +112,11 @@ class AcademicRecordController extends Controller
         $filters = $request->except('per_page', 'paginate');
         $evaluations = $academicRecordService->getAcademicRecordsOfStudent($studentId, $isPaginated, $perPage, $filters);
         return AcademicRecordResource::collection($evaluations);
+    }
+
+    public function getPendingApprovalCount()
+    {
+        $academicRecordService = new AcademicRecordService();
+        return $academicRecordService->getPendingApprovalCount();
     }
 }
