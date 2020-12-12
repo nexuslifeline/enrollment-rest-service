@@ -146,6 +146,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('student-ledger/{studentId}', 'ReportController@studentLedger');
         Route::get('registration-form/{academicRecordId}', 'ReportController@registrationForm');
         Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');
+        Route::get('enrolled-list', 'ReportController@enrolledList');
         // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
 
@@ -170,6 +171,7 @@ Route::group(['prefix' => 'v1'], function () {
     // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
+    //Route::get('enrolled-list', 'ReportController@enrolledList');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {

@@ -2,22 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Level;
 use Mpdf\Mpdf;
+use App\Course;
 use App\Billing;
 use App\Payment;
 use App\Student;
+use App\Semester;
 use Carbon\Carbon;
+use App\SchoolYear;
 use App\StudentFee;
 use App\AcademicRecord;
+use App\SchoolCategory;
+use App\TranscriptRecord;
+use App\SchoolFeeCategory;
 use App\OrganizationSetting;
 use Illuminate\Http\Request;
 use App\Services\PaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\PaymentResource;
-use App\SchoolFeeCategory;
-use App\Semester;
-use App\TranscriptRecord;
+use App\Services\AcademicRecordService;
 
 class ReportController extends Controller
 {
@@ -232,6 +237,29 @@ class ReportController extends Controller
         $data['semesters'] = Semester::get();
         $mpdf = new Mpdf();
         $content = view('reports.transcriptrecord')->with($data);
+        $mpdf->WriteHTML($content);
+        return $mpdf->Output('', 'S');
+    }
+
+    public function enrolledList(Request $request)
+    {
+        // $academicRecord = AcademicRecord::find($academicRecordId);
+        $academicRecordService = new AcademicRecordService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
+        $data['academicRecords'] = $academicRecordService->list($isPaginated, $perPage, $filters);
+
+        $data['schoolCategory'] =  $request->school_category_id ? SchoolCategory::find($request->school_category_id) : null;
+        $data['schoolYear'] =  $request->school_year_id ? SchoolYear::find($request->school_year_id) : 'All';
+        $data['level'] =  $request->level_id ? Level::find($request->level_id) : 'All';
+        $data['course'] =  $request->course_id ? Course::find($request->course_id) : (in_array($request->school_category_id,[4,5,6]) ? 'All' : null);
+        $data['semester'] =  $request->semester_id ? Course::find($request->semester_id) : (in_array($request->school_category_id,[4,5,6]) ? 'All' : null);
+        //return $data;
+        // return $data;
+        $mpdf = new Mpdf();
+        $content = view('reports.enrolledlist')->with($data);
         $mpdf->WriteHTML($content);
         return $mpdf->Output('', 'S');
     }
