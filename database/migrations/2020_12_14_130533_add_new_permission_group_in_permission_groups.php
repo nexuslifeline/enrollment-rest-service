@@ -16,11 +16,11 @@ class AddNewPermissionGroupInPermissionGroups extends Migration
     {
         DB::table('permission_groups')->insert(
             [
-                ['id' => 22, 'name' => 'Manual Enrollment'],
-                ['id' => 23, 'name' => 'Payment'],
-                ['id' => 24, 'name' => 'Statement of Account (SOA)'],
-                ['id' => 25, 'name' => 'Other Billing'],
-                ['id' => 26, 'name' => 'Transcript Record']
+                ['id' => 22, 'name' => 'Manual Enrollment Management'],
+                ['id' => 23, 'name' => 'Payment Management'],
+                ['id' => 24, 'name' => 'Statement of Account (SOA) Management'],
+                ['id' => 25, 'name' => 'Other Billing Management'],
+                ['id' => 26, 'name' => 'Transcript Record Management']
             ]
         );
     }
