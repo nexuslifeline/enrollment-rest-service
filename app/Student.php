@@ -131,7 +131,7 @@ class Student extends Model
 
     public function getLatestAcademicRecordAttribute()
     {
-        return $this->academicRecords()->where('academic_record_status_id', 3)->latest()->first();
+        return $this->academicRecords()->where('academic_record_status_id', 3)->with(['level', 'course', 'semester', 'schoolYear'])->latest()->first();
     }
 
     public function getLatestManualAcademicRecordAttribute()

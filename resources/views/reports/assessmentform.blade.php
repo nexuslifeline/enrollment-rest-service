@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Assessment Form</title>
+        <title>Assessment</title>
 
         <style type="text/css">
             @page { sheet-size: A4; }
@@ -133,7 +133,7 @@
                 <td></td>
             </tr>
         </table>
-        <div class="title">ASSESMENT FORM</div>
+        <div class="title">ASSESSMENT</div>
         <table class="student__info" style="width: 100%">
             <!-- <tr>
                 <td style="width: 17%; font-weight: bold;">Student No. : </td>

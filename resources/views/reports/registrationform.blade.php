@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Assessment Form</title>
+        <title>Registration Form</title>
 
         <style type="text/css">
             @page { sheet-size: A4; }
