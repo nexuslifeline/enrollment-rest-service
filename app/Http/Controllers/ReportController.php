@@ -219,7 +219,7 @@ class ReportController extends Controller
             'subjects',
         ]);
         $mpdf = new Mpdf();
-        $content = view('reports.registrationForm')->with($data);
+        $content = view('reports.registrationform')->with($data);
         $mpdf->WriteHTML($content);
         return $mpdf->Output('', 'S');
         // return $mpdf->Output();

@@ -305,9 +305,12 @@ class StudentService
                 });
             });
 
+
             $students = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
+
+            $students->append(['latest_academic_record']);
 
             return $students;
         } catch (Exception $e) {
