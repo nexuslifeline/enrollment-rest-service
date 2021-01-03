@@ -134,8 +134,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
-        // evaluations
-        Route::resource('evaluations', 'EvaluationController');
+        // // evaluations
+        // Route::resource('evaluations', 'EvaluationController');
         // pera padala accounts
         Route::resource('pera-padala-accounts', 'PeraPadalaAccountController');
         // reports

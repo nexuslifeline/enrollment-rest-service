@@ -83,7 +83,8 @@ class TranscriptRecordController extends Controller
         $transcriptRecordService = new TranscriptRecordService();
         $data = $request->except('subjects');
         $subjects = $request->subjects ?? [];
-        $transcriptRecord = $transcriptRecordService->update($data, $subjects, $id);
+        $requirements = $request->requirements ?? [];
+        $transcriptRecord = $transcriptRecordService->update($data, $subjects, $requirements, $id);
         return new TranscriptRecordResource($transcriptRecord);
     }
 

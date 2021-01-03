@@ -15,7 +15,12 @@ class StudentFileService
         try {
             $perPage = $request->per_page ?? 20;
             $query = StudentFile::where('student_id', $studentId)
-                    ->with('documentType');
+                ->with('documentType');
+
+            $evaluationId = $request->evaluation_id ?? false;
+            $query->when($evaluationId, function ($q) use ($evaluationId) {
+                return $q->where('evaluation_id', $evaluationId);
+            });
 
             $files = !$request->has('paginate') || $request->paginate === 'true'
                 ? $query->paginate($perPage)
@@ -41,11 +46,11 @@ class StudentFileService
             }
 
             $extension = $file->extension();
-            $imageExtensions = ['jpg','png','jpeg','gif','svg','bmp', 'jfif', 'tiff', 'tif'];
+            $imageExtensions = ['jpg', 'png', 'jpeg', 'gif', 'svg', 'bmp', 'jfif', 'tiff', 'tif'];
 
             //if there's a better condition to check if the file is an image or not
             //and the resize value
-            if (in_array($extension, $imageExtensions )) {
+            if (in_array($extension, $imageExtensions)) {
 
                 $width = Image::make($file)->width();
                 $image = Image::make($file);
@@ -58,8 +63,7 @@ class StudentFileService
 
                 $path = 'files/student/' . $file->hashName();
                 Storage::put($path, $image->stream());
-            }
-            else {
+            } else {
                 $path = $file->store('files/student');
             }
 
@@ -102,7 +106,8 @@ class StudentFileService
         }
     }
 
-    public function preview($fileId) {
+    public function preview($fileId)
+    {
         try {
             if (!$fileId) {
                 throw new \Exception('File id not found!');
@@ -124,7 +129,8 @@ class StudentFileService
         }
     }
 
-    public function update($data, $fileId) {
+    public function update($data, $fileId)
+    {
         try {
             if (!$fileId) {
                 throw new \Exception('File id not found!');
