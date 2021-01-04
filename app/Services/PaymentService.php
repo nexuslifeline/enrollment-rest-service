@@ -21,6 +21,13 @@ class PaymentService
             }])
                 ->where('payment_status_id', '!=', 1);
             //filter
+
+            //student
+            $studentId = $filters['student_id'] ?? false;
+            $query->when($studentId, function ($q) use ($studentId) {
+                return $q->where('student_id', $studentId);
+            });
+
             //payment status
             $paymentStatusId = $filters['payment_status_id'] ?? false;
             $query->when($paymentStatusId, function ($q) use ($paymentStatusId) {
