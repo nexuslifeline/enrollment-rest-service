@@ -68,14 +68,4 @@ class TranscriptRecord extends Model
             'is_taken'
         ])->withTimestamps();
     }
-
-    public function requirements()
-    {
-        return $this->belongsToMany(
-            'App\Requirement',
-            'transcript_record_requirements',
-            'transcript_record_id',
-            'requirement_id'
-        )->withTimestamps();
-    }
 }

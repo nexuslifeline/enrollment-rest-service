@@ -17,10 +17,10 @@ class StudentFileService
             $query = StudentFile::where('student_id', $studentId)
                 ->with('documentType');
 
-            $evaluationId = $request->evaluation_id ?? false;
-            $query->when($evaluationId, function ($q) use ($evaluationId) {
-                return $q->where('evaluation_id', $evaluationId);
-            });
+            // $evaluationId = $request->evaluation_id ?? false;
+            // $query->when($evaluationId, function ($q) use ($evaluationId) {
+            //     return $q->where('evaluation_id', $evaluationId);
+            // });
 
             $files = !$request->has('paginate') || $request->paginate === 'true'
                 ? $query->paginate($perPage)

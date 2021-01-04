@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTranscriptRecordRequirementsTable extends Migration
+class CreateStudentRequirementsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,14 @@ class CreateTranscriptRecordRequirementsTable extends Migration
      */
     public function up()
     {
-        Schema::create('transcript_record_requirements', function (Blueprint $table) {
+        Schema::create('student_requirements', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('transcript_record_id')->nullable();
-            $table->foreign('transcript_record_id')->references('id')->on('transcript_records');
+            $table->unsignedBigInteger('student_id')->nullable();
+            $table->foreign('student_id')->references('id')->on('students');
             $table->unsignedBigInteger('requirement_id')->nullable();
             $table->foreign('requirement_id')->references('id')->on('requirements');
+            $table->unsignedBigInteger('school_category_id')->nullable();
+            $table->foreign('school_category_id')->references('id')->on('school_categories');
             $table->integer('deleted_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('created_by')->nullable();
@@ -34,6 +36,6 @@ class CreateTranscriptRecordRequirementsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('transcript_record_requirements');
+        Schema::dropIfExists('student_requirements');
     }
 }

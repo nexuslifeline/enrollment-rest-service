@@ -87,7 +87,7 @@ class TranscriptRecordService
         $transcriptRecord->subjects()->sync($items);
       }
 
-      $transcriptRecord->requirements()->sync($requirements);
+      // $transcriptRecord->requirements()->sync($requirements);
 
       DB::commit();
       return $transcriptRecord;

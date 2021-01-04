@@ -187,4 +187,14 @@ class Student extends Model
         }
         return null;
     }
+
+    public function requirements()
+    {
+        return $this->belongsToMany(
+            'App\Requirement',
+            'student_requirements',
+            'student_id',
+            'requirement_id'
+        )->withPivot('school_category_id')->withTimestamps();
+    }
 }
