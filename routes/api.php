@@ -134,8 +134,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
-        // evaluations
-        Route::resource('evaluations', 'EvaluationController');
+        // // evaluations
+        // Route::resource('evaluations', 'EvaluationController');
         // pera padala accounts
         Route::resource('pera-padala-accounts', 'PeraPadalaAccountController');
         // reports
@@ -169,6 +169,10 @@ Route::group(['prefix' => 'v1'], function () {
 
         //approval counts
         Route::get('/approval-count', 'AcademicRecordController@getPendingApprovalCount');
+
+        //requirements
+        Route::resource('requirements', 'RequirementController');
+        Route::post('requirements/update-create-multiple/{schoolCategoryId}', 'RequirementController@updateCreateMultiple');
     });
     // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');

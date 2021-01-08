@@ -80,7 +80,7 @@ class StudentController extends Controller
     public function update(StudentUpdateRequest $request, int $id)
     {
         $related = ['address', 'family', 'education'];
-        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record'];
+        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record', 'requirements'];
         $studentService = new StudentService();
         $studentInfo = $request->only($except);
         $data = $request->except($except);

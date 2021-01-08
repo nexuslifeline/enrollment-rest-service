@@ -48,7 +48,8 @@ class TranscriptRecord extends Model
         return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
     }
 
-    public function evaluations() {
+    public function evaluations()
+    {
         return $this->hasMany('App\Evaluation');
     }
 
@@ -60,11 +61,11 @@ class TranscriptRecord extends Model
             'transcript_record_id',
             'subject_id'
         )->withPivot([
-          'level_id',
-          'semester_id',
-          'grade',
-          'notes',
-          'is_taken'
+            'level_id',
+            'semester_id',
+            'grade',
+            'notes',
+            'is_taken'
         ])->withTimestamps();
     }
 }

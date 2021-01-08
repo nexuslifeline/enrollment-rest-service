@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TranscriptRecordResource;
-use App\Services\TranscriptRecordService;
+use App\Http\Resources\RequirementResource;
+use App\Requirement;
+use App\Services\RequirementService;
 use Illuminate\Http\Request;
 
-class TranscriptRecordController extends Controller
+class RequirementController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,14 +16,13 @@ class TranscriptRecordController extends Controller
      */
     public function index(Request $request)
     {
-        $transcriptRecordService = new transcriptRecordService();
+        $requirementService = new RequirementService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $filters = $request->except('per_page', 'paginate');
-        $transcriptRecords = $transcriptRecordService->list($isPaginated, $perPage, $filters);
-
-        return TranscriptRecordResource::collection(
-            $transcriptRecords
+        $requirements = $requirementService->list($isPaginated, $perPage, $filters);
+        return RequirementResource::collection(
+            $requirements
         );
     }
 
@@ -50,23 +50,21 @@ class TranscriptRecordController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Requirement  $requirement
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Requirement $requirement)
     {
-        $transcriptRecordService = new TranscriptRecordService();
-        $transcriptRecord = $transcriptRecordService->get($id);
-        return new TranscriptRecordResource($transcriptRecord);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Requirement  $requirement
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Requirement $requirement)
     {
         //
     }
@@ -75,27 +73,37 @@ class TranscriptRecordController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Requirement  $requirement
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Requirement $requirement)
     {
-        $transcriptRecordService = new TranscriptRecordService();
-        $data = $request->except('subjects');
-        $subjects = $request->subjects ?? [];
-        $requirements = $request->requirements ?? [];
-        $transcriptRecord = $transcriptRecordService->update($data, $subjects, $requirements, $id);
-        return new TranscriptRecordResource($transcriptRecord);
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Requirement  $requirement
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        //
+        $requirementService = new RequirementService();
+        $requirementService->delete($id);
+        return response()->json([], 204);
+    }
+
+    public function updateCreateMultiple(int $schoolCategoryId, Request $request)
+    {
+        $requirementService = new RequirementService();
+        $data = $request->all();
+        // $arrTerms = $request->except('school_category_id', 'semester_id', 'school_year_id');
+
+        $requirements = $requirementService->updateCreateMultiple($schoolCategoryId, $data);
+
+        return (new RequirementResource($requirements))
+            ->response()
+            ->setStatusCode(200);
     }
 }

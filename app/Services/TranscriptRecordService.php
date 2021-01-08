@@ -64,7 +64,7 @@ class TranscriptRecordService
     }
   }
 
-  public function update(array $data, array $subjects, int $id)
+  public function update(array $data, array $subjects, array $requirements, int $id)
   {
     DB::beginTransaction();
     try {
@@ -86,6 +86,9 @@ class TranscriptRecordService
         // return $items;
         $transcriptRecord->subjects()->sync($items);
       }
+
+      // $transcriptRecord->requirements()->sync($requirements);
+
       DB::commit();
       return $transcriptRecord;
     } catch (Exception $e) {

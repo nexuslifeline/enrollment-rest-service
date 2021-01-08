@@ -16,7 +16,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id', 'name', 'current_address']; //added name on guarded to prevent updating, coz we already have name attrib
-    protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'latest_manual_academic_record'];
+    protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'latest_manual_academic_record', 'requirement_percentage'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -186,5 +186,29 @@ class Student extends Model
             return $collection;
         }
         return null;
+    }
+
+    public function getRequirementPercentageAttribute()
+    {
+        $academicRecord = $this->getLatestAcademicRecordAttribute();
+        $percentage = 0;
+        if ($academicRecord) {
+            $count = Requirement::where('school_category_id', $academicRecord->school_category_id)->count();
+            $studentRequirements = $this->requirements()->wherePivot('school_category_id', $academicRecord->school_category_id)->count();
+            if ($count > 0) {
+                $percentage = number_format(($studentRequirements / $count) * 100, 2);
+            }
+        }
+        return $percentage;
+    }
+
+    public function requirements()
+    {
+        return $this->belongsToMany(
+            'App\Requirement',
+            'student_requirements',
+            'student_id',
+            'requirement_id'
+        )->withPivot('school_category_id')->withTimestamps();
     }
 }
