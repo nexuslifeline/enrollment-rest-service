@@ -22,16 +22,16 @@ class SubjectService
 
             //filter by school category
             $schoolCategoryId = $filters['school_category_id'] ?? false;
-            $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
             $criteria = $filters['criteria'] ?? false;
-            $query->when($criteria, function($query) use ($criteria) {
-                return $query->where(function($q) use ($criteria) {
-                    return $q->where('name', 'like', '%'.$criteria.'%')
-                    ->orWhere('description', 'like', '%'.$criteria.'%')
-                    ->orWhere('code', 'like', '%'.$criteria.'%');
+            $query->when($criteria, function ($query) use ($criteria) {
+                return $query->where(function ($q) use ($criteria) {
+                    return $q->where('name', 'like', '%' . $criteria . '%')
+                        ->orWhere('description', 'like', '%' . $criteria . '%')
+                        ->orWhere('code', 'like', '%' . $criteria . '%');
                 });
             });
 
@@ -108,17 +108,17 @@ class SubjectService
 
     public function getSubjectsOfLevel(int $levelId, bool $isPaginated, int $perPage, array $filters)
     {
-        try{
+        try {
             $query = Level::find($levelId)->subjects();
 
             // filters
             $courseId = $filters['course_id'] ?? false;
-            $query->when($courseId, function($q) use ($courseId) {
+            $query->when($courseId, function ($q) use ($courseId) {
                 return $q->where('course_id', $courseId);
             });
 
             $semesterId = $filters['semester_id'] ?? false;
-            $query->when($semesterId, function($q) use ($semesterId) {
+            $query->when($semesterId, function ($q) use ($semesterId) {
                 return $q->where('semester_id', $semesterId);
             });
 
@@ -175,11 +175,11 @@ class SubjectService
         try {
             $transriptRecord = TranscriptRecord::find($transcriptRecordId);
             $query = $transriptRecord->subjects()
-            ->with(['prerequisites' => function($query) use ($transriptRecord) {
-                return $query->with(['prerequisites' => function ($query) use ($transriptRecord) {
-                    $query->where('curriculum_id', $transriptRecord->curriculum_id);
+                ->with(['prerequisites' => function ($query) use ($transriptRecord) {
+                    return $query->with(['prerequisites' => function ($query) use ($transriptRecord) {
+                        $query->where('curriculum_id', $transriptRecord->curriculum_id);
+                    }]);
                 }]);
-            }]);
 
             $subjects = $isPaginated
                 ? $query->paginate($perPage)
@@ -202,7 +202,7 @@ class SubjectService
                 ->get()
                 ->pluck('subject_id');
 
-            $query = Subject::with(['schedules' => function($q) use ($sectionId) {
+            $query = Subject::with(['schedules' => function ($q) use ($sectionId) {
                 return $sectionId ? $q->where('section_id', $sectionId)->with(['personnel', 'section']) : $q;
             }])->whereIn('id', $subjectIds);
 
@@ -279,7 +279,7 @@ class SubjectService
                 ->get()
                 ->pluck('subject_id');
 
-            $query = Subject::with(['schedules' => function($q) use ($sectionId) {
+            $query = Subject::with(['schedules' => function ($q) use ($sectionId) {
                 return $sectionId ? $q->where('section_id', $sectionId)->with(['personnel', 'section']) : $q;
             }])->whereIn('id', $subjectIds);
 
@@ -358,7 +358,7 @@ class SubjectService
 
     private function arePrereqPassed(int $studentId, int $subjectId, int $curriculumId)
     {
-       $subjects = Subject::with(['prerequisites' => function($query) use ($curriculumId) {
+        $subjects = Subject::with(['prerequisites' => function ($query) use ($curriculumId) {
             return $query->where('curriculum_id', $curriculumId);
         }])->find($subjectId);
 

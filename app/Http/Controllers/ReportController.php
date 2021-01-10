@@ -229,10 +229,42 @@ class ReportController extends Controller
     {
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $data['transcriptRecord'] = TranscriptRecord::find($transcriptRecordId);
+        $subjects = $data['transcriptRecord']->subjects;
+        foreach ($subjects as $subject) {
+            $subject->school_year = $this->schoolYear($data['transcriptRecord'], $subject['id']);
+        }
+        $subjects->append('school_year');
         $data['semesters'] = Semester::get();
+        return $subjects;
         $mpdf = new Mpdf();
         $content = view('reports.transcriptrecord')->with($data);
         $mpdf->WriteHTML($content);
         return $mpdf->Output('', 'S');
+    }
+
+    private function schoolYear(TranscriptRecord $transcriptRecord, int $subjectId)
+    {
+        $academicRecords = AcademicRecord::where('student_id', $transcriptRecord->student_id)
+            ->where('course_id', $transcriptRecord->course_id)
+            ->where('level_id', $transcriptRecord->level_id)
+            ->where('school_category_id', $transcriptRecord->school_category_id)
+            ->with(['subjects', 'schoolYear'])
+            ->get();
+
+        $schoolYears = $academicRecords->map(function ($item) {
+            return [
+                'subject_ids' => $item->subjects->pluck('id'),
+                'school_year' => $item->schoolYear
+            ];
+        });
+
+        $schoolYear = [];
+        foreach ($schoolYears as $value) {
+            if ($value['subject_ids']->contains($subjectId)) {
+                $schoolYear = $value['school_year'];
+            }
+        }
+
+        return $schoolYear;
     }
 }

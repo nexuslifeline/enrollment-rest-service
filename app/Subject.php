@@ -23,21 +23,21 @@ class Subject extends Model
     public function levels()
     {
         return $this->belongsToMany(
-          'App\Level',
-          'level_subjects',
-          'subject_id',
-          'level_id'
+            'App\Level',
+            'level_subjects',
+            'subject_id',
+            'level_id'
         );
     }
 
     public function courses()
     {
-        return $this->belongsToMany('App\Course', 'level_subjects', 'subject_id','course_id');
+        return $this->belongsToMany('App\Course', 'level_subjects', 'subject_id', 'course_id');
     }
 
     public function semesters()
     {
-        return $this->belongsToMany('App\Semester', 'level_subjects', 'subject_id','semester_id');
+        return $this->belongsToMany('App\Semester', 'level_subjects', 'subject_id', 'semester_id');
     }
 
     public function department()
@@ -70,7 +70,8 @@ class Subject extends Model
         return Section::find($this->pivot->section_id);
     }
 
-    public function getSectionScheduleAttribute() {
+    public function getSectionScheduleAttribute()
+    {
         $sectionSchedule =  Section::with(['schedules' => function ($query) {
             return $query->with('personnel', 'section')->where('section_id', $this->pivot->section_id)
                 ->where('subject_id', $this->id);
@@ -79,12 +80,23 @@ class Subject extends Model
         return $sectionSchedule->schedules ?? null;
     }
 
-    public function getIsAllowedAttribute() {
+    public function getIsAllowedAttribute()
+    {
         return $this->attributes['is_allowed'];
     }
 
     public function setIsAllowedAttribute($value)
     {
         $this->attributes['is_allowed'] = $value;
+    }
+
+    public function getSchoolYearAttribute()
+    {
+        return $this->attributes['school_year'];
+    }
+
+    public function setSchoolYearAttribute($value)
+    {
+        $this->attributes['school_year'] = $value;
     }
 }
