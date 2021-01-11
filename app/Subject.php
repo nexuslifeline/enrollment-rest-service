@@ -99,4 +99,14 @@ class Subject extends Model
     {
         $this->attributes['school_year'] = $value;
     }
+
+    public function getLevelAttribute()
+    {
+        return Level::find($this->pivot->level_id);
+    }
+
+    public function getSemesterAttribute()
+    {
+        return Semester::find($this->pivot->semester_id);
+    }
 }

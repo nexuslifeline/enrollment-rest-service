@@ -123,15 +123,16 @@
     </tr>
     {{-- for school category with sem --}}
     @if (in_array($transcriptRecord->school_category_id, [4,5,6]))
-    @foreach ($semesters as $semester)
+    {{-- @foreach ($semesters as $semester) --}}
     @php
-    $subjects = $transcriptRecord->subjects()->wherePivot('semester_id', $semester->id)->get();
+    $groupedSubjects = $transcriptRecord->subjects->groupBy(['schoolYear.name', 'level.name', 'semester.name']);
     @endphp
-    @if (count($subjects) > 0)
+    @foreach ($groupedSubjects as $schoolYearName => $level)
+    @foreach ($level as $levelName => $semester)
+    @foreach ($semester as $semesterName => $subjects)
     <tr>
-      <td colspan="5" style="text-align: center; font-weight: bold;">{{$semester->name}}</td>
+      <td colspan="5" style="text-align: center; font-weight: bold;">{{$levelName}} {{$semesterName}} {{$schoolYearName}}</td>
     </tr>
-    @endif
     @foreach ($subjects as $subject)
     <tr>
       <td>{{ $subject->name }}</td>
@@ -142,6 +143,9 @@
     </tr>
     @endforeach
     @endforeach
+    @endforeach
+    @endforeach
+    {{-- @endforeach --}}
     {{-- for school category without sem --}}
     @else
     @foreach ($transcriptRecord->subjects as $subject)

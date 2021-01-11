@@ -230,24 +230,35 @@ class ReportController extends Controller
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $data['transcriptRecord'] = TranscriptRecord::find($transcriptRecordId);
         $subjects = $data['transcriptRecord']->subjects;
+        // return $subjects;
         foreach ($subjects as $subject) {
-            $subject->school_year = $this->schoolYear($data['transcriptRecord'], $subject['id']);
+            $subject->school_year = $this->schoolYear(
+                $data['transcriptRecord']->student_id,
+                $data['transcriptRecord']->school_category_id,
+                $subject['pivot']['level_id'],
+                $data['transcriptRecord']->course_id,
+                $subject['pivot']['semester_id'],
+                $subject['id']
+            );
         }
-        $subjects->append('school_year');
-        $data['semesters'] = Semester::get();
-        return $subjects;
+        // $subjects->load('level');
+        $subjects->append('level', 'semester', 'school_year');
+        // $data['semesters'] = Semester::get();
+        // return $data;
         $mpdf = new Mpdf();
         $content = view('reports.transcriptrecord')->with($data);
         $mpdf->WriteHTML($content);
+        return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
 
-    private function schoolYear(TranscriptRecord $transcriptRecord, int $subjectId)
+    private function schoolYear(int $studentId, int $schoolCategoryId, int $levelId, ?int $courseId, ?int $semesterId, int $subjectId)
     {
-        $academicRecords = AcademicRecord::where('student_id', $transcriptRecord->student_id)
-            ->where('course_id', $transcriptRecord->course_id)
-            ->where('level_id', $transcriptRecord->level_id)
-            ->where('school_category_id', $transcriptRecord->school_category_id)
+        $academicRecords = AcademicRecord::where('student_id', $studentId)
+            ->where('course_id', $courseId)
+            ->where('level_id', $levelId)
+            ->where('school_category_id', $schoolCategoryId)
+            ->where('semester_id', $semesterId)
             ->with(['subjects', 'schoolYear'])
             ->get();
 
