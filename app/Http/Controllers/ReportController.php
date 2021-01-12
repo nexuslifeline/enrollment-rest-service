@@ -248,7 +248,7 @@ class ReportController extends Controller
         $mpdf = new Mpdf();
         $content = view('reports.transcriptrecord')->with($data);
         $mpdf->WriteHTML($content);
-        return $mpdf->Output();
+        // return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
 

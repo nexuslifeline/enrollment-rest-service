@@ -408,14 +408,16 @@ class StudentService
                 }
             }
 
-            $requirements = $studentInfo['requirements'] ?? [];
-            $items = [];
-            foreach ($requirements as $requirement) {
-                $items[$requirement['requirement_id']] = [
-                    'school_category_id' => $requirement['school_category_id']
-                ];
+            if (isset($studentInfo['requirements'])) {
+                $requirements = $studentInfo['requirements'] ?? [];
+                $items = [];
+                foreach ($requirements as $requirement) {
+                    $items[$requirement['requirement_id']] = [
+                        'school_category_id' => $requirement['school_category_id']
+                    ];
+                }
+                $student->requirements()->wherePivot('school_category_id', $student->latestAcademicRecord->school_category_id)->sync($items);
             }
-            $student->requirements()->wherePivot('school_category_id', $student->latestAcademicRecord->school_category_id)->sync($items);
 
             foreach ($related as $item) {
                 $info = $studentInfo[$item] ?? false;
