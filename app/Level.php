@@ -21,7 +21,7 @@ class Level extends Model
     ];
 
     /* Get the school category that owns the level */
-    public function schoolCategories()
+    public function schoolCategory()
     {
         return $this->belongsTo('App\SchoolCategory');
     }

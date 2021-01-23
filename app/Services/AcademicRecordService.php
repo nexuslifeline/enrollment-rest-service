@@ -42,6 +42,31 @@ class AcademicRecordService
                 });
             });
 
+            // schoolYear
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function ($q) use ($schoolYearId) {
+                return $q->whereHas('schoolYear', function ($query) use ($schoolYearId) {
+                    return $query->where('school_year_id', $schoolYearId);
+                });
+            });
+
+
+            // school category
+            $schoolCategoryId = $filters['school_category_id'] ?? false;
+            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
+                return $q->whereHas('schoolCategory', function ($query) use ($schoolCategoryId) {
+                    return $query->where('school_category_id', $schoolCategoryId);
+                });
+            });
+
+            // level
+            $levelId = $filters['level_id'] ?? false;
+            $query->when($levelId, function ($q) use ($levelId) {
+                return $q->whereHas('level', function ($query) use ($levelId) {
+                    return $query->where('level_id', $levelId);
+                });
+            });
+
             // course
             $courseId = $filters['course_id'] ?? false;
             $query->when($courseId, function ($q) use ($courseId) {
@@ -50,11 +75,11 @@ class AcademicRecordService
                 });
             });
 
-            // school category
-            $schoolCategoryId = $filters['school_category_id'] ?? false;
-            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
-                return $q->whereHas('schoolCategory', function ($query) use ($schoolCategoryId) {
-                    return $query->where('school_category_id', $schoolCategoryId);
+            // semester
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function ($q) use ($semesterId) {
+                return $q->whereHas('semester', function ($query) use ($semesterId) {
+                    return $query->where('semester_id', $semesterId);
                 });
             });
 
