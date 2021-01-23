@@ -3,9 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
+use App\Rules\IsOldPasswordMatched;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StudentUpdateRequest extends FormRequest
 {
@@ -83,6 +84,7 @@ class StudentUpdateRequest extends FormRequest
             'subjects' => 'sometimes|array|min:1',
             // user account
             'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$this->id.',userable_id',
+            'user.old_password' => ['sometimes', 'required', new IsOldPasswordMatched()],
             'user.password' => 'sometimes|required|string|min:6|confirmed|',
             //evaluation
             'evaluation.last_school_attended' => 'sometimes|required',
@@ -127,6 +129,7 @@ class StudentUpdateRequest extends FormRequest
             'academicRecord.course_id' => 'course',
             'academicRecord.semester_id' => 'semester',
             'user.username' => 'username',
+            'user.old_password' => 'old password',
             'user.password' => 'password',
             'evaluation.level_id' => 'level',
             'evaluation.last_school_attended' => 'last school attended',
@@ -137,7 +140,6 @@ class StudentUpdateRequest extends FormRequest
             'evaluation.course_id' => 'course',
             'evaluation.semester_id' => 'semester',
         ];
-        
     }
 
     public function messages()
