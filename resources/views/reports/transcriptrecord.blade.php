@@ -131,7 +131,7 @@
     @foreach ($level as $levelName => $semester)
     @foreach ($semester as $semesterName => $subjects)
     <tr>
-      <td colspan="5" style="text-align: center; font-weight: bold;">{{$levelName}} {{$semesterName}} {{$schoolYearName}}</td>
+      <td colspan="5" style="text-align: center; font-weight: bold; padding-top: 10px;">{{$levelName}} {{$semesterName}} {{$schoolYearName}}</td>
     </tr>
     @foreach ($subjects as $subject)
     <tr>
