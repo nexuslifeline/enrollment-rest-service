@@ -103,10 +103,12 @@ class PaymentService
                 $student = $payment->student;
                 $academicRecord = $student->academicRecords()->get()->last();
                 // update application status and step to completed and waiting
-                $academicRecord->application->update([
-                    'application_status_id' => 7,
-                    'application_step_id' => 10
-                ]);
+                if($academicRecord['is_manual'] === 1) {
+                    $academicRecord->application->update([
+                        'application_status_id' => 7,
+                        'application_step_id' => 10
+                    ]);
+                }
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])
