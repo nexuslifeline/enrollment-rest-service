@@ -39,8 +39,7 @@
     }
 
     .header__details {
-      font-size: 11pt;
-      font-weight: bold;
+      font-size: 8pt;
     }
 
     .header__details-other {
