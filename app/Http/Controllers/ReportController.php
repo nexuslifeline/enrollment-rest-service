@@ -157,8 +157,8 @@ class ReportController extends Controller
             [
                 'billing_no as reference',
                 'billing_types.name as txn_type',
-                DB::raw('0 as debit'),
-                DB::raw('(total_amount) as credit'),
+                DB::raw('0 as credit'),
+                DB::raw('(total_amount) as debit'),
                 'billings.created_at as txn_date'
             ]
         )
@@ -174,8 +174,8 @@ class ReportController extends Controller
             [
                 'reference_no as reference',
                 DB::raw("'Payment' as txn_type"),
-                'amount as debit',
-                DB::raw('0 as credit'),
+                'amount as credit',
+                DB::raw('0 as debit'),
                 'created_at as txn_date'
             ]
         )->where('student_id', $studentId)
@@ -189,7 +189,7 @@ class ReportController extends Controller
         $billingPayments = $billings->with('billingItems')->union($payments)->orderBy('txn_date');
 
         $result = DB::table(function ($query) use ($billingPayments) {
-            $query->select('*', DB::raw('(@bal := @bal + (credit - debit)) as balance'))
+            $query->select('*', DB::raw('(@bal := @bal + (debit - credit)) as balance'))
                 ->from($billingPayments);
         })->get();
 
