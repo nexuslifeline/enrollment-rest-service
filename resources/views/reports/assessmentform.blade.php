@@ -135,27 +135,6 @@
         </table>
         <div class="title">ASSESSMENT</div>
         <table class="student__info" style="width: 100%">
-            <!-- <tr>
-                <td style="width: 17%; font-weight: bold;">Student No. : </td>
-                <td style="width: 28%">{{ $academicRecord->student->student_no ? $academicRecord->student->student_no : 'Awaiting Confirmation' }}</td>
-                <td style="width: 15%; font-weight: bold;" >Level : </td>
-                <td style="width: 40%; text-transform: none;">{{ $academicRecord->level->name }}</td>
-            </tr>
-            <tr>
-                <td style="font-weight: bold;">Name : </td>
-                <td>{{ $academicRecord->student->last_name .', '. $academicRecord->student->first_name .' '. $academicRecord->student->middle_name }}</td>
-                @if($academicRecord->course_id)
-                <td style="font-weight: bold;">Course : </td>
-                <td style="text-transform: none;">{{ $academicRecord->course->description }}</td>
-                @endif
-            </tr>
-            <tr>
-                <td style="font-weight: bold;">Address : </td>
-                <td>{{ $academicRecord->student->address->current_complete_address }}</td>
-                <td style="font-weight: bold;">School Year : </td>
-                <td style="text-transform: none;">{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
-            </tr> -->
-
             <tr>
                 <td style="width: 50%; font-weight: bold;">Student No. : </td>
                 <td style="width: 50%; font-weight: bold;" >Level : </td>
@@ -184,7 +163,7 @@
             </tr>
 
             <tr>
-                <td>{{ $academicRecord->student->address->current_complete_address }}</td>
+                <td>{{ $academicRecord->student->address ? $academicRecord->student->address->current_complete_address : '' }}</td>
                 <td style="text-transform: none;">{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
             </tr>
 
@@ -266,7 +245,7 @@
                             <td class="float-right" style="font-weight: bold;">
                             @php
                             $payment = $academicRecord->studentFee->billings
-                                    ->where('billing_type_id', 1)->first()->payments()->sum('amount');
+                                    ->where('billing_type_id', 1)->first()->payments()->where('payment_status_id', 2)->sum('amount');
                             @endphp
                             ({{
                                 (number_format($payment,2))

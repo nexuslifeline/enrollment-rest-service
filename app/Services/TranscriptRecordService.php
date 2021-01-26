@@ -37,6 +37,12 @@ class TranscriptRecordService
         return $q->where('transcript_record_status_id', $transcriptRecordStatusId);
       });
 
+      //not transcript record status id
+      $notTranscriptRecordStatusId = $filters['not_transcript_record_status_id'] ?? false;
+      $query->when($notTranscriptRecordStatusId, function ($q) use ($notTranscriptRecordStatusId) {
+        return $q->where('transcript_record_status_id', '!=', $notTranscriptRecordStatusId);
+      });
+
       //course id
       $courseId = $filters['course_id'] ?? false;
       $query->when($courseId, function ($q) use ($courseId) {
@@ -51,6 +57,28 @@ class TranscriptRecordService
         $q->whereHas('level', function ($query) use ($levelId) {
           return $query->where('level_id', $levelId);
         });
+      });
+
+      //criteria
+      $criteria = $filters['criteria'] ?? false;
+      // return $criteria;
+      $query->when($criteria, function ($q) use ($criteria) {
+        $q->whereHas('student', function ($query) use ($criteria) {
+          return $query->where('name', 'like', '%' . $criteria . '%')
+            ->orWhere('first_name', 'like', '%' . $criteria . '%')
+            ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+            ->orWhere('last_name', 'like', '%' . $criteria . '%')
+            ->orWhere('email', 'like', '%' . $criteria . '%');
+        })
+          ->orWhereHas('course', function ($query) use ($criteria) {
+            return $query->where('description', 'like', '%' . $criteria . '%');
+          })
+          ->orWhereHas('level', function ($query) use ($criteria) {
+            return $query->where('name', 'like', '%' . $criteria . '%');
+          })
+          ->orWhereHas('curriculum', function ($query) use ($criteria) {
+            return $query->where('name', 'like', '%' . $criteria . '%');
+          });
       });
 
       $transcriptRecords = $isPaginated

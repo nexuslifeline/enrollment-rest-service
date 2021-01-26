@@ -111,6 +111,14 @@
       text-transform: capitalize;
     }
 
+    .table__previous-billing {
+      width: 100%;
+      border-collapse: collapse;
+      border-right: 1px solid gray;
+      margin: 0 15px;
+      /* border-top: 1px solid gray; */
+    }
+
     hr {
       margin: 2px 0;
     }
@@ -134,15 +142,6 @@
   </table>
   <div class="title">STATEMENT OF ACCOUNT</div>
   <table class="table__student-info">
-    <!-- <tr>
-      <td class="student-label" style="width: 85px">Student No. :</td>
-      <td>{{$student->student_no}}</td>
-      <td colspan="2"></td>
-      <td class="student-label">{{$academicRecord->course ? "Course :" : ""}}</td>
-      <td>{{$academicRecord->course ? $academicRecord->course->name : ""}}</td>
-      <td class="student-label">Term :</td>
-      <td>{{$billing->term->name}}</td>
-    </tr> -->
     <tr>
       <td style="width: 30%;" class="student-label">
         STUDENT NO :
@@ -208,52 +207,11 @@
         </table>
       </td>
     </tr>
-
-    <!-- <tr>
-      <td style="width: 30%;">
-        {{$academicRecord->level->name}}
-      </td>
-      <td>
-       
-      </td>
-      <td style="width: 20%;" >
-        {{date('F j, Y', strtotime($billing->created_at))}}
-      </td>
-    </tr> -->
-
-    <!-- <tr>
-      <td></td>
-      <td colspan=2 class="student-label"> SECTION : </td>
-    </tr>
-    <tr>
-      <td></td>
-      <td colspan=2 >{{$academicRecord->section->name}}</td>
-    </tr> -->
-
-    <!-- <tr>
-      <td class="student-label">Name :</td>
-      <td style="width: 150px;">{{$student->last_name.', '.$student->first_name.' '.$student->middle_name}}</td>
-      <td colspan="2"></td>
-      <td class="student-label">{{$academicRecord->semester ? "Semester :" : ""}}</td>
-      <td>{{$academicRecord->semester ? $academicRecord->semester->name : ""}}</td>
-      <td class="student-label" style="width: 100px;">Generate Date :</td>
-      <td>{{date('F j, Y', strtotime($billing->created_at))}}</td>
-    </tr>
-    <tr>
-      <td class="student-label">Level :</td>
-      <td>{{$academicRecord->level->name}}</td>
-      <td class="student-label" style="width: 55px;">Section :</td>
-      <td>{{$academicRecord->section->name}}</td>
-      <td class="student-label" style="width: 85px;">School Year :</td>
-      <td>{{$academicRecord->schoolYear->name}}</td>
-      <td class="student-label">Due Date :</td>
-      <td>{{date('F j, Y', strtotime($billing->created_at))}}</td>
-    </tr> -->
   </table>
   <br>
   <table style="width: 100%;">
     <tr>
-      <td style="vertical-align: top;">
+      <td style="width: 60%; vertical-align: top;">
         <table class="table__payment-history" style="width: 100%; border-collapse: collapse; margin: 0 15px; border-right: 1px solid gray;">
           <tr>
             <td colspan="4" style="text-align: center;">
@@ -266,7 +224,7 @@
             <td style="border-bottom: 1px solid gray; width: 25%; font-weight: bold; text-transform: none;">O.R. Number</td>
             <td style="border-bottom: 1px solid gray; width: 30%; font-weight: bold; text-align: right;">AMOUNT PAID</td>
           </tr>
-          @if($previousBilling && $previousBilling->payments)
+          @if($previousBilling && count($previousBilling->payments) != 0)
           @foreach ($previousBilling->payments as $key=>$payment)
           <tr>
             <td style="text-align: left; font-weight: bold;">{{$key === 0 ? $previousBilling->term->name : ''}}</td>
@@ -281,6 +239,27 @@
           </tr>
           @endif
         </table>
+        @if ($previousBilling)
+        <table class="table__previous-billing">
+          <tr>
+            <td colspan="4" style="text-align: center; padding-top: 15px;">
+              <h3>Previous Billing</h3>
+            </td>
+          </tr>
+          <tr>
+            <td style="border-bottom: 1px solid gray; width: 20%; font-weight: bold;">Term</td>
+            <td style="border-bottom: 1px solid gray; width: 34%; font-weight: bold;">Billing No.</td>
+            <td style="border-bottom: 1px solid gray; width: 22%; font-weight: bold;">Due Date</td>
+            <td style="border-bottom: 1px solid gray; width: 22%; font-weight: bold; text-align: right;">Balance</td>
+          </tr>
+          <tr>
+            <td style="text-align: left; font-weight: bold;">{{ $previousBilling->term->name }}</td>
+            <td>{{$previousBilling->billing_no}}</td>
+            <td>{{date('M j, Y', strtotime($previousBilling->due_date))}}</td>
+            <td style="text-align: right;">{{number_format($previousBilling->total_amount,2)}}</td>
+          </tr>
+        </table>
+        @endif
       </td>
       <td style="width: 40%; vertical-align: top;">
         <table class="table__billing-details" style="width: 100%; border-collapse: collapse; font-size: 10pt;">
