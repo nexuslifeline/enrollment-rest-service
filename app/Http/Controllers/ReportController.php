@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use App\SchoolYear;
 use App\StudentFee;
 use App\AcademicRecord;
+use App\GeneralSetting;
 use App\SchoolCategory;
 use App\TranscriptRecord;
 use App\SchoolFeeCategory;
@@ -30,6 +31,7 @@ class ReportController extends Controller
     {
         $data['academicRecord'] = AcademicRecord::find($academicRecordId);
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
+        $data['general'] = GeneralSetting::find(1)->load('miscellaneousFeeCategory');
         // $data['academicRecord'] = $academicRecord;
         // return $data['academicRecord']->studentFee;
         // return SchoolFeeCategory::with(['schoolFees' => function ($q) use ($data) {
@@ -37,16 +39,16 @@ class ReportController extends Controller
         //         return $query->where('student_fee_id', $data['academicRecord']->studentFee->id);
         //     }]);
         // }])->get();
-        $data['schoolFeeCategories'] = SchoolFeeCategory::whereHas('schoolFees', function ($q) use ($data) {
-            return $q->whereHas('studentFeeItems', function ($query) use ($data) {
-                return $query->where('student_fee_id', $data['academicRecord']->studentFee->id);
-            });
-        })->get();
+        $data['schoolFeeCategories'] = SchoolFeeCategory::get();
+        // $data['schoolFeeCategories'] = SchoolFeeCategory::whereHas('schoolFees', function ($q) use ($data) {
+        //     return $q->whereHas('studentFeeItems', function ($query) use ($data) {
+        //         // return $query->where('student_fee_id', $data['academicRecord']->studentFee->id);
+        //     });
+        // })->get();
         $mpdf = new Mpdf();
         $content = view('reports.assessmentform')->with($data);
         $mpdf->WriteHTML($content);
         return $mpdf->Output('', 'S');
-        // return $mpdf->Output();
     }
 
     public function requirementList()
@@ -283,7 +285,7 @@ class ReportController extends Controller
 
         return $schoolYear;
     }
-    
+
     public function enrolledList(Request $request)
     {
         // $academicRecord = AcademicRecord::find($academicRecordId);
@@ -297,8 +299,8 @@ class ReportController extends Controller
         $data['schoolCategory'] =  $request->school_category_id ? SchoolCategory::find($request->school_category_id) : null;
         $data['schoolYear'] =  $request->school_year_id ? SchoolYear::find($request->school_year_id) : 'All';
         $data['level'] =  $request->level_id ? Level::find($request->level_id) : 'All';
-        $data['course'] =  $request->course_id ? Course::find($request->course_id) : (in_array($request->school_category_id,[4,5,6]) ? 'All' : null);
-        $data['semester'] =  $request->semester_id ? Course::find($request->semester_id) : (in_array($request->school_category_id,[4,5,6]) ? 'All' : null);
+        $data['course'] =  $request->course_id ? Course::find($request->course_id) : (in_array($request->school_category_id, [4, 5, 6]) ? 'All' : null);
+        $data['semester'] =  $request->semester_id ? Course::find($request->semester_id) : (in_array($request->school_category_id, [4, 5, 6]) ? 'All' : null);
         //return $data;
         // return $data;
         $mpdf = new Mpdf();

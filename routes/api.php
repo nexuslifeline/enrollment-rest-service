@@ -174,8 +174,11 @@ Route::group(['prefix' => 'v1'], function () {
         //requirements
         Route::resource('requirements', 'RequirementController');
         Route::post('requirements/update-create-multiple/{schoolCategoryId}', 'RequirementController@updateCreateMultiple');
+
+        //general settings
+        Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
+        Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
     });
-    // Route::get('assessment-form/{academicRecordId}', 'ReportController@assessmentForm');
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
     // Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');

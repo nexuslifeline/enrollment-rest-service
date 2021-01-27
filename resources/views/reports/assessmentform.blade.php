@@ -281,9 +281,9 @@
                 <td style="width: 50%; vertical-align: top">
                     <table class="table__fees">
                         <tr>
-                            <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt;">MISCELLANEOUS FEES</td>
+                            <td colspan="2" style="text-align: center; font-weight: bold; font-size: 11pt;">{{ strtoupper($general->miscellaneousFeeCategory->name) }}</td>
                         </tr>
-                        @foreach($fees->where('school_fee_category_id', 1) as $fee)
+                        @foreach($fees->where('school_fee_category_id', $general->miscellaneous_fee_category_id) as $fee)
                         <tr>
                             <td>{{ $fee->name }}</td>
                             <td class="float-right">{{ number_format($fee->pivot->amount, 2) }}</td>
@@ -291,7 +291,7 @@
                         @endforeach
                         <tr>
                             <td style="border-top: 1px solid gray; width: 70%;" class="float-right total">TOTAL</td>
-                            <td style="border-top: 1px solid gray; width: 30%;" class="float-right total">{{ number_format($fees->where('school_fee_category_id', 1)->sum('pivot.amount'), 2) }}</td>
+                            <td style="border-top: 1px solid gray; width: 30%;" class="float-right total">{{ number_format($fees->where('school_fee_category_id', $general->miscellaneous_fee_category_id)->sum('pivot.amount'), 2) }}</td>
                         </tr>
                     </table>
                 </td>
