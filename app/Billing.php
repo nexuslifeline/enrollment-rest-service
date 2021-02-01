@@ -62,4 +62,9 @@ class Billing extends Model
         return $this->belongsTo('App\Term');
     }
 
+    public function getSubmittedPaymentsAttribute() {
+        $submittedStatus = 4;
+        return  $this->payments->where('payment_status_id', $submittedStatus);
+    }
+
 }

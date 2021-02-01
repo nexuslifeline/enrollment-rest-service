@@ -476,20 +476,20 @@ class StudentService
                 ->take(1)
                 ->get();
 
-            $soaBillings->append('total_paid');
+            $soaBillings->append(['total_paid', 'submitted_payments']);
 
             //soa billing type id
             $billingTypeId = 1;
             $initialBilling = Billing::where('billing_type_id', $billingTypeId)
                 ->where('student_id', $id)
                 ->get();
-            $initialBilling->append('total_paid');
+            $initialBilling->append(['total_paid', 'submitted_payments']);
 
             //other billing type id
             $billingTypeId = 3;
             $otherBillings = Billing::where('billing_type_id', $billingTypeId)
                 ->where('student_id', $id)->get();
-            $otherBillings->append('total_paid');
+            $otherBillings->append(['total_paid','submitted_payments']);
 
 
             $billings = $soaBillings->merge($initialBilling)->merge($otherBillings);

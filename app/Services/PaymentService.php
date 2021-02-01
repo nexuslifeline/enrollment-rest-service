@@ -108,6 +108,11 @@ class PaymentService
                         'application_status_id' => 7,
                         'application_step_id' => 10
                     ]);
+
+                    //update academic record status to enrolled
+                    $academicRecord->update([
+                        'academic_record_status_id' => 3
+                    ]);
                 }
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
@@ -122,10 +127,7 @@ class PaymentService
                         'student_no' => '11' . str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
                     ]);
                 }
-                //update academic record status to enrolled
-                $academicRecord->update([
-                    'academic_record_status_id' => 3
-                ]);
+
                 $studentFee = StudentFee::find($billing->student_fee_id);
                 $studentFee->recomputeTerms($payment->amount);
             }
