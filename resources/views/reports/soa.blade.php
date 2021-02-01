@@ -256,7 +256,7 @@
             <td style="text-align: left; font-weight: bold;">{{ $previousBilling->term->name }}</td>
             <td>{{$previousBilling->billing_no}}</td>
             <td>{{date('M j, Y', strtotime($previousBilling->due_date))}}</td>
-            <td style="text-align: right;">{{number_format($previousBilling->total_amount,2)}}</td>
+            <td style="text-align: right;">{{number_format($previousBilling->total_amount + $previousBilling->previous_balance,2)}}</td>
           </tr>
         </table>
         @endif
