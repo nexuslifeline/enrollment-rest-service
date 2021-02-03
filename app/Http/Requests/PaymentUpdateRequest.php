@@ -25,7 +25,7 @@ class PaymentUpdateRequest extends FormRequest
     {
         return [
             'amount' => 'sometimes|required|numeric|min:0|not_in:0',
-            'reference_no' => 'sometimes|required|max:191',
+            'reference_no' => 'sometimes|required|max:191|unique:payments,reference_no,' . $this->id,
             'date_paid' => 'sometimes|required',
             'payment_mode_id' => 'sometimes|required',
             'notes' => 'sometimes|required_if:payment_mode_id,==,3'

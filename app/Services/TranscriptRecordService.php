@@ -65,6 +65,7 @@ class TranscriptRecordService
       $query->when($criteria, function ($q) use ($criteria) {
         $q->whereHas('student', function ($query) use ($criteria) {
           return $query->where('name', 'like', '%' . $criteria . '%')
+            ->orWhere('student_no', 'like', '%' . $criteria . '%')
             ->orWhere('first_name', 'like', '%' . $criteria . '%')
             ->orWhere('middle_name', 'like', '%' . $criteria . '%')
             ->orWhere('last_name', 'like', '%' . $criteria . '%')

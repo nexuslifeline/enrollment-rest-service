@@ -50,6 +50,7 @@ class PaymentService
                         ->orWhereHas('student', function ($query) use ($criteria) {
                             return $query->where(function ($q) use ($criteria) {
                                 return $q->where('name', 'like', '%' . $criteria . '%')
+                                    ->orWhere('student_no', 'like', '%' . $criteria . '%')
                                     ->orWhere('first_name', 'like', '%' . $criteria . '%')
                                     ->orWhere('middle_name', 'like', '%' . $criteria . '%')
                                     ->orWhere('last_name', 'like', '%' . $criteria . '%');
@@ -103,7 +104,7 @@ class PaymentService
                 $student = $payment->student;
                 $academicRecord = $student->academicRecords()->get()->last();
                 // update application status and step to completed and waiting
-                if($academicRecord['is_manual'] === 1) {
+                if ($academicRecord['is_manual'] === 1) {
                     $academicRecord->application->update([
                         'application_status_id' => 7,
                         'application_step_id' => 10
