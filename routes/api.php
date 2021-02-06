@@ -37,6 +37,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/students/{studentId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfStudent');
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');
         Route::delete('/students/{studentId}/photos', 'StudentPhotoController@destroy');
+        Route::get('/students/{studentId}/ledgers', 'StudentController@getLedgerOfStudent');
 
         // student file
         Route::get('/students/{studentId}/files', 'StudentFileController@index');

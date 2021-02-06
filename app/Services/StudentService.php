@@ -5,6 +5,7 @@ namespace App\Services;
 use Image;
 use Exception;
 use App\Billing;
+use App\Payment;
 use App\Student;
 use App\Admission;
 use Carbon\Carbon;
@@ -636,6 +637,61 @@ class StudentService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during StudentService enroll method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getLedgerOfStudent($studentId, $schoolYearId, $asOfDate) 
+    {
+        try {
+            DB::statement(DB::raw('set @bal=0;'));
+
+            $billings = Billing::select(
+                [
+                    'billing_no as reference',
+                    'billing_types.name as txn_type',
+                    DB::raw('0 as credit'),
+                    DB::raw('(total_amount) as debit'),
+                    'billings.created_at as txn_date'
+                ]
+            )
+                ->join('billing_types', 'billings.billing_type_id', '=', 'billing_types.id')
+                ->where('student_id', $studentId)
+                ->whereDate('billings.created_at', '<=', $asOfDate);
+
+            $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
+
+            $payments = Payment::select(
+                [
+                    'reference_no as reference',
+                    DB::raw("'Payment' as txn_type"),
+                    'amount as credit',
+                    DB::raw('0 as debit'),
+                    'created_at as txn_date'
+                ]
+            )->where('student_id', $studentId)
+                ->where('payment_status_id', '=', 2) //added filter payment status = approved
+                ->whereDate('created_at', '<=', $asOfDate);
+
+            $payments->when($schoolYearId, function ($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
+
+            $billingPayments = $billings->with('billingItems')->union($payments)->orderBy('txn_date');
+
+            $result = DB::table(function ($query) use ($billingPayments) {
+                $query->select('*', DB::raw('(@bal := @bal + (debit - credit)) as balance'))
+                    ->from($billingPayments);
+            })->get();
+
+            return $result;
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService getBillingsOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

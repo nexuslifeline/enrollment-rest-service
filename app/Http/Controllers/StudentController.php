@@ -131,4 +131,18 @@ class StudentController extends Controller
         $student = $studentService->enroll($data, $studentInfo, $related, $id);
         return new StudentResource($student);
     }
+
+    public function getLedgerOfStudent(Request $request, int $id)
+    {
+        $studentService = new StudentService();
+        $asOfDate = $request->as_of_date ?? Carbon::now()->format('Y-m-d');
+        $schoolYearId = $request->school_year_id ?? false;
+
+        $ledger = $studentService->getLedgerOfStudent($id, $schoolYearId, $asOfDate);
+
+        return new BillingResource(
+            $ledger
+        );
+    }
+
 }

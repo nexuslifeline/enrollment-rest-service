@@ -167,7 +167,7 @@ class ReportController extends Controller
         )
             ->join('billing_types', 'billings.billing_type_id', '=', 'billing_types.id')
             ->where('student_id', $studentId)
-            ->whereDate('billings.created_at', '<', $asOfDate);
+            ->whereDate('billings.created_at', '<=', $asOfDate);
 
         $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
@@ -183,7 +183,7 @@ class ReportController extends Controller
             ]
         )->where('student_id', $studentId)
             ->where('payment_status_id', '=', 2) //added filter payment status = approved
-            ->whereDate('created_at', '<', $asOfDate);
+            ->whereDate('created_at', '<=', $asOfDate);
 
         $payments->when($schoolYearId, function ($q) use ($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);

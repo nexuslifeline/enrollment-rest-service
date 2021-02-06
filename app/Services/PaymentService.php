@@ -81,7 +81,7 @@ class PaymentService
     {
         try {
             $payment = Payment::find($id);
-            $payment->load(['paymentMode', 'student' => function ($query) {
+            $payment->load(['paymentMode', 'files', 'paymentReceiptFiles', 'student' => function ($query) {
                 $query->with(['address', 'photo']);
             }]);
             return $payment;
