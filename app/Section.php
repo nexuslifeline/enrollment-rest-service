@@ -62,4 +62,9 @@ class Section extends Model
         return $this->hasMany('App\SectionSchedule');
     }
 
+    public function getSubjectsAttribute()
+    {
+        return $this->schedules()->distinct()->with('subject')->get(['subject_id'])->pluck('subject');
+    }
+
 }
