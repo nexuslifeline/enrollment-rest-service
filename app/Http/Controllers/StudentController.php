@@ -48,7 +48,7 @@ class StudentController extends Controller
     public function store(StudentUpdateRequest $request)
     {
         $studentService = new StudentService();
-        $related = ['address', 'family', 'education', 'photo', 'user', 'academicRecord'];
+        $related = ['address', 'family', 'education', 'photo', 'user'];
         $studentInfo = $request->only($related);
         $data = $request->except($related);
         $student = $studentService->store($data, $studentInfo, $related);
