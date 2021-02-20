@@ -295,6 +295,26 @@ class StudentService
         try {
             $query = Student::with(['address', 'family', 'education', 'photo', 'user']);
 
+            $sectionId = $filters['section_id'] ?? false;
+            $query->when($sectionId, function ($q) use ($sectionId) {
+                return $q->whereHas('academicRecords', function ($query) use ($sectionId) {
+                    return $query->where('academic_record_status_id', 3)
+                    ->whereHas('subjects', function ($q) use ($sectionId) {
+                        return $q->where('section_id', $sectionId);
+                    });
+                });
+            });
+
+            $subjectId = $filters['subject_id'] ?? false;
+            $query->when($subjectId, function ($q) use ($subjectId) {
+                return $q->whereHas('academicRecords', function ($query) use ($subjectId) {
+                    return $query->where('academic_record_status_id', 3)
+                    ->whereHas('subjects', function ($q) use ($subjectId) {
+                        return $q->where('subject_id', $subjectId);
+                    });
+                });
+            });
+
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($query) use ($criteria) {
                 return $query->where(function ($q) use ($criteria) {

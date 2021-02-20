@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\AcademicRecord;
+use App\Observers\AcademicRecordObserver;
 use App\Observers\StudentFeeObserver;
 use App\StudentFee;
 use Illuminate\Support\Facades\DB;
@@ -43,5 +45,6 @@ class AppServiceProvider extends ServiceProvider
             });
         }
         StudentFee::observe(StudentFeeObserver::class);
+        AcademicRecord::observe(AcademicRecordObserver::class);
     }
 }

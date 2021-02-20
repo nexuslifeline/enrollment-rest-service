@@ -211,4 +211,9 @@ class Student extends Model
             'requirement_id'
         )->withPivot('school_category_id')->withTimestamps();
     }
+
+    public function grades()
+    {
+        return $this->hasMany('App\StudentGrade');
+    }
 }

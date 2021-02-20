@@ -97,4 +97,14 @@ class SectionController extends Controller
         ->response()
         ->setStatusCode(200);
     }
+
+    public function getSectionsOfPersonnel(Request $request, int $personnelId)
+    {
+        $sectionService = new SectionService();
+        $schoolCategoryId = $request->school_category_id;
+        $schoolYearId = $request->school_year_id;
+        $semesterId = $request->semester_id;
+        $sections = $sectionService->getSectionsOfPersonnel($schoolCategoryId, $schoolYearId, $semesterId, $personnelId);
+        return SectionResource::collection($sections);
+    }
 }

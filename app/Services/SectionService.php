@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Section;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -190,6 +191,28 @@ class SectionService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during SectionService get sections of subject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getSectionsOfPersonnel(int $schoolCategoryId, int $schoolYearId, ?int $semesterId, int $personnelId)
+    {
+        try {
+            $sections = Section::where('school_category_id', $schoolCategoryId)
+                ->where('school_year_id', $schoolYearId)
+                ->when($semesterId, function ($q) use ($semesterId) {
+                    $q->where('semester_id', $semesterId);
+                })
+                ->whereHas('schedules', function ($q) use ($personnelId) {
+                    return $q->where('personnel_id', $personnelId);
+                })
+                ->get();
+            $sections->append('subjects');
+            return $sections;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SectionService getSectionsOfPersonnel method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
