@@ -13,27 +13,18 @@
             font-family: Calibri;
         }
 
-        .header__name {
+        /* .header__name {
             font-size: 13pt;
             font-weight: bold;
         }
         .header__details {
             font-size: 11pt;
             font-weight: bold;
-        }
+        } */
 
         .report-headers {
             width: 100%;
             text-align: center;
-        }
-
-        .report__title {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-
-        .report__sub-title {
-            font-size: 8pt;
         }
 
         .table-container {
@@ -43,29 +34,28 @@
 
         .table-details {
             width: 100%;
-            /* border: solid 0.5px lightgray; */
-            font-size: 8pt;
+            border: solid 0.5px gray;
+            font-size: 12px;
         }
 
         table {
             border-collapse: collapse;
+            border: solid 0.5px gray;
         }
 
         th {
-            padding: 5px;
-            height: 30px;
+            padding: 3px 5px;
             text-align: left;
-            border: solid 1.5px black;
-            font-size: 9pt;
-            height: 45px;
+            border: solid 0.5px #bff2d2;
+            font-size: 11px;
+            background-color: #bff2d2;
         }
         td {
             padding: 5px;
             height: 15px;
             text-align: left;
             font-size: 8pt;
-            border: 1px solid lightgray;
-            height: 45px;
+            border: 1px solid #bff2d2;
         }
 
         .report-footer  {
@@ -80,14 +70,9 @@
     </style>
 </head>
 <body>
-    <div class="report-headers">
-        <div class="header__name">{{$organization->name}}</div>
-        <div class="header__details">{{$organization->address}}</div>
-        <div class="header__details">{{$organization->telephone_no}}</div>
-        <div class="header__details">{{$organization->email_address}}</div>
-        <div class="report__title">COLLECTION REPORT</div>
-        <div class="report__sub-title">Period: {{ $date_from }} - {{ $date_to }} </div>
-    </div>
+    @include('partials.header')
+    @include('partials.title', ['title' => 'Collection Report', 'subtitle' => 'Period: ' . $date_from . ' - ' . $date_to])
+
     <div class="table-container">
         <table class="table-details">
             <tr>
