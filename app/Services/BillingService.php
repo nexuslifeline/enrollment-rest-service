@@ -45,9 +45,18 @@ class BillingService
             // school category
             $schoolCategoryId = $filters['school_category_id'] ?? false;
             $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
-                return $q->whereHas('studentFee', function ($query) use ($schoolCategoryId) {
-                    return $query->whereHas('academicRecord', function ($q) use ($schoolCategoryId) {
-                        return $q->where('school_category_id', $schoolCategoryId);
+                $q->where(function ($q) use ($schoolCategoryId) {
+                    return $q->whereHas('studentFee', function ($query) use ($schoolCategoryId) {
+                        return $query->whereHas('academicRecord', function ($q) use ($schoolCategoryId) {
+                            return $q->where('school_category_id', $schoolCategoryId);
+                        });
+                    })->orWhere(function ($q) use ($schoolCategoryId) {
+                        return $q->whereDoesntHave('studentFee')
+                        ->whereHas('student', function ($q) use ($schoolCategoryId) {
+                            return $q->whereHas('academicRecords', function ($q) use ($schoolCategoryId) {
+                                return $q->where('school_category_id', $schoolCategoryId);
+                            });
+                        });
                     });
                 });
             });
