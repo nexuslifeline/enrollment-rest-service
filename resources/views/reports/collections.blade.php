@@ -10,101 +10,109 @@
         }
 
         body {
-            font-family: Calibri;
-        }
-
-        /* .header__name {
-            font-size: 13pt;
-            font-weight: bold;
-        }
-        .header__details {
-            font-size: 11pt;
-            font-weight: bold;
-        } */
-
-        .report-headers {
-            width: 100%;
-            text-align: center;
+            font-family: Arial;
+            text-align: left;
         }
 
         .table-container {
             margin-top: 10px;
             width: 100%;
+            text-align: left;
         }
 
-        .table-details {
-            width: 100%;
-            border: solid 0.5px gray;
-            font-size: 12px;
+        .no-records {
+            padding: 20px;
+            background-color: white;
+            border: 1px solid black;
         }
 
         table {
-            border-collapse: collapse;
-            border: solid 0.5px gray;
-        }
-
-        th {
-            padding: 3px 5px;
-            text-align: left;
-            border: solid 0.5px #bff2d2;
-            font-size: 11px;
-            background-color: #bff2d2;
-        }
-        td {
-            padding: 5px;
-            height: 15px;
-            text-align: left;
-            font-size: 8pt;
-            border: 1px solid #bff2d2;
-        }
-
-        .report-footer  {
+            font-size: 12px;
             width: 100%;
-            margin-top: 10px;
-            font-size: 9pt;
-            text-align: right;
-            padding-right: 4px;
-            font-weight: bold;
+            border-collapse: collapse;
+
+            thead {
+                th {
+                    padding: 5px;
+                    border: 1px solid black;
+                    font-size: 11px;
+                    background-color: #9cf0bb;
+                }
+            }
+
+           tbody {
+                td {
+                    padding: 5px;
+                    height: 15px;
+                    border: 1px solid black;
+                }
+           }
+
+           tfoot {
+                td {
+                    padding: 5px;
+                    height: 15px;
+                    border: 1px solid black;
+                }
+           }
         }
 
     </style>
 </head>
 <body>
     @include('partials.header')
-    @include('partials.title', ['title' => 'Collection Report', 'subtitle' => 'Period: ' . $date_from . ' - ' . $date_to])
+    @include('partials.title', ['title' => 'Collection Report', 'subtitle' => $date_from . ' to ' . $date_to])
 
     <div class="table-container">
-        <table class="table-details">
-            <tr>
-                <th style="width: 20%; ">STUDENT</th>
-                <th style="width: 12%;  text-align: left;">TRANSACTION NO</th>
-                <th style="width: 12%; ">REFERENCE NO</th>
-                <th style="width: 12%; ">PAYMENT MODE</th>
-                <th style="width: 11%; ">BILLING NO</th>
-                <th style="width: 10%; ">DATE PAID</th>
-                <!-- <th style="width: 12%;">Posted By</th> -->
-                <th style="width: 10%; text-align: right;">AMOUNT</th>
-            </tr>
-            @foreach ($payments as $payment)
-            <tr>
-                <td>
-                    <div style="margin-bottom: 10px;">{{ $payment->student->student_no }}</div>
-                    <div >{{ $payment->student->name }}</div>
-                </td>
-                <td>{{ $payment->transaction_no }}</td>
-                <td>{{ $payment->reference_no }}</td>
-                <td>{{ $payment->paymentMode->name }}</td>
-                <td>{{ $payment->billing->billing_no }}</td>
-                <td>{{ date_format(date_create($payment->date_paid),'m/d/Y')  }}</td>
-                <!-- <td></td> -->
-                <td style="text-align: right;">{{ number_format($payment->amount, 2) }}</td>
-            </tr>
-            @endforeach
+        <table>
+           <thead>
+                <tr>
+                    <th width="20%" align="left">STUDENT</th>
+                    <th width="12%" align="left">TRANSACTION NO</th>
+                    <th width="12%" align="left">REFERENCE NO</th>
+                    <th width="12%" align="left">PAYMENT MODE</th>
+                    <th width="11%" align="left">BILLING NO</th>
+                    <th width="10%" align="left">DATE PAID</th>
+                    <!-- <th style="width: 12%;">Posted By</th> -->
+                    <th width="10%" align="right">AMOUNT</th>
+                </tr>
+           </thead>
+           <tbody>
+                @if (count($payments) > 0)
+                    @foreach ($payments as $payment)
+                    <tr>
+                        <td align="left">
+                            <div style="margin-bottom: 10px;">{{ $payment->student->student_no }}</div>
+                            <div >{{ $payment->student->name }}</div>
+                        </td>
+                        <td align="left">{{ $payment->transaction_no }}</td>
+                        <td align="left">{{ $payment->reference_no }}</td>
+                        <td align="left">{{ $payment->paymentMode->name }}</td>
+                        <td align="left">{{ $payment->billing->billing_no }}</td>
+                        <td align="left">{{ date_format(date_create($payment->date_paid),'m/d/Y')  }}</td>
+                        <!-- <td></td> -->
+                        <td align="right">{{ number_format($payment->amount, 2) }}</td>
+                    </tr>
+                    @endforeach
+                @else
+                <tr>
+                    <td colspan="7" align="center" class="no-records">
+                        No record(s) found.
+                    </td>
+                </tr>
+                @endif
+           </tbody>
+           <tfoot>
+                <tr>
+                    <td colspan="6" align="right">
+                        <b>TOTAL:</b>
+                    </td>
+                    <td align="right">
+                        <b>{{ number_format(array_sum(array_column(iterator_to_array($payments), 'amount')), 2) }}</b>
+                    </td>
+                </tr>
+           </tfoot>
         </table>
-    </div>
-    <div class="report-footer">
-        <span>TOTAL AMOUNT : </span>
-        {{ number_format(array_sum(array_column(iterator_to_array($payments), 'amount')), 2) }}
     </div>
 </body>
 </html>
