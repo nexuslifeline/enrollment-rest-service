@@ -131,8 +131,8 @@ class ReportController extends Controller
             });
         });
 
-        $data['date_from'] = date('m/d/Y', strtotime($dateFrom));
-        $data['date_to'] = date('m/d/Y', strtotime($dateTo));
+        $data['date_from'] = date('M d, Y', strtotime($dateFrom));
+        $data['date_to'] = date('M d, Y', strtotime($dateTo));
         $data['payments'] = $query->get();
 
         // return $data;
