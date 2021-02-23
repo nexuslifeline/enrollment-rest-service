@@ -89,6 +89,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
         // academic records
         Route::resource('/academic-records', 'AcademicRecordController');
+        Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
+        Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
         Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');
@@ -180,10 +182,9 @@ Route::group(['prefix' => 'v1'], function () {
         //general settings
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
-        Route::resource('student-grades', 'StudentGradeController');
-        Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
+        // Route::resource('student-grades', 'StudentGradeController');
+        // Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
     });
-    
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
     // Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');

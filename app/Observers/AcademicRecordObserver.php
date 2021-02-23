@@ -3,8 +3,6 @@
 namespace App\Observers;
 
 use App\AcademicRecord;
-use App\Services\StudentGradeService;
-use App\Services\TermService;
 use App\Term;
 
 class AcademicRecordObserver
@@ -17,7 +15,27 @@ class AcademicRecordObserver
      */
     public function created(AcademicRecord $academicRecord)
     {
-        //
+        if ($academicRecord->academic_record_status_id === 3) {
+            $subjects = $academicRecord->subjects()->get();
+            $terms = Term::where('school_category_id', $academicRecord->school_category_id)
+                ->where('school_year_id', $academicRecord->school_year_id)
+                ->where('semester_id', $academicRecord->semester_id)
+                ->get()
+                ->pluck('id');
+            foreach ($subjects as $subject) {
+                $studentGrades = $academicRecord->grades();
+                $items = [];
+                foreach ($terms as $term) {
+                    $items[$term] = [
+                        'subject_id' => $subject['id'],
+                        'personnel_id' => null,
+                        'grade' => 0,
+                        'notes' => ''
+                    ];
+                }
+                $studentGrades->wherePivot('subject_id', $subject['id'])->sync($items);
+            }
+        }
     }
 
     /**
@@ -35,21 +53,18 @@ class AcademicRecordObserver
                 ->where('semester_id', $academicRecord->semester_id)
                 ->get()
                 ->pluck('id');
-            $studentGrades = $academicRecord->student->grades();
             foreach ($subjects as $subject) {
-                $studentGrade = $studentGrades->create([
-                    'section_id' => $subject['pivot']['section_id'],
-                    'subject_id' => $subject['id']
-                ]);
-                $studentGrade->details()->sync($terms);
-                // $items = [];
-                // foreach ($terms as $term) {
-                //     $items[$term['term_id']] = [
-                //         'personnel_id' => null,
-                //         'grade' => 0,
-                //         'notes' => ''
-                //     ];
-                // }
+                $studentGrades = $academicRecord->grades();
+                $items = [];
+                foreach ($terms as $term) {
+                    $items[$term] = [
+                        'subject_id' => $subject['id'],
+                        'personnel_id' => null,
+                        'grade' => 0,
+                        'notes' => ''
+                    ];
+                }
+                $studentGrades->wherePivot('subject_id', $subject['id'])->sync($items);
             }
         }
     }

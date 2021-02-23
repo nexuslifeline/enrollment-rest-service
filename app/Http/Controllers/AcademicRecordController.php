@@ -119,4 +119,25 @@ class AcademicRecordController extends Controller
         $academicRecordService = new AcademicRecordService();
         return $academicRecordService->getPendingApprovalCount();
     }
+
+    public function getGradesOfAcademicRecords($subjectId, $sectionId, Request $request)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $academicRecords = $academicRecordService->getGradesOfAcademicRecords($subjectId, $sectionId, $isPaginated, $perPage, $filters);
+        return AcademicRecordResource::collection($academicRecords);
+    }
+
+    public function gradeBatchUpdate(Request $request)
+    {
+        $data = $request->all();
+        $academicRecordService = new AcademicRecordService();
+        $academicRecords = $academicRecordService->gradeBatchUpdate($data);
+
+        return AcademicRecordResource::collection(
+            $academicRecords
+        );
+    }
 }

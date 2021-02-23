@@ -389,4 +389,71 @@ class AcademicRecordService
 
         return $data;
     }
+
+
+    public function getGradesOfAcademicRecords(int $subjectId, int $sectionId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = AcademicRecord::where('academic_record_status_id', 3)
+            ->with(['grades' => function ($q) use ($subjectId) {
+                $q->where('subject_id', $subjectId);
+            }, 'student'])
+            ->whereHas('subjects', function ($q) use ($sectionId) {
+                return $q->where('section_id', $sectionId);
+            })->whereHas('grades', function ($q) use ($subjectId) {
+                return $q->where('subject_id', $subjectId);
+            });
+
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->where(function ($q) use ($criteria) {
+                    return $q->whereHas('student', function ($q) use ($criteria) {
+                        return $q->where('first_name', 'LIKE', '%' . $criteria . '%')
+                            ->orWhere('middle_name', 'LIKE', '%' . $criteria . '%')
+                            ->orWhere('last_name', 'LIKE', '%' . $criteria . '%')
+                            ->orWhere('student_no', 'LIKE', '%' . $criteria . '%');
+                    });
+                });
+            });
+
+            $academicRecords = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            return $academicRecords;
+        } catch (Exception $e) {
+            Log::info('Error occured during AcademicRecordService getGradesOfAcademicRecords method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function gradeBatchUpdate(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $result = [];
+            foreach ($data as $value) {
+                $academicRecord = AcademicRecord::find($value['id']);
+                if ($value['grades']) {
+                    $items = [];
+                    foreach ($value['grades'] as $grade) {
+                        $items[$grade['term_id']] = [
+                            'personnel_id' => Auth::user()->id,
+                            'grade' => $grade['grade']
+                            // 'notes' => $detail['notes']
+                        ];
+                    }
+                    $academicRecord->grades()->wherePivot('subject_id', $value['subject_id'])->sync($items);
+                }
+                $result[] = $academicRecord;
+            }
+            DB::commit();
+            return $result;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during TermService batchUpdate method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }
