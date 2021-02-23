@@ -18,7 +18,7 @@ class DropStudentGradesTable extends Migration
             $table->dropColumn('student_grade_id');
         });
         Schema::dropIfExists('student_grades');
-        Schema::renameIfExists('student_grade_details', 'student_grades');
+        Schema::rename('student_grade_details', 'student_grades');
         Schema::table('student_grades', function (Blueprint $table) {
             $table->unsignedBigInteger('academic_record_id')->nullable()->after('id');
             $table->foreign('academic_record_id')->references('id')->on('academic_records');
