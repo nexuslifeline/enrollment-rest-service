@@ -80,6 +80,11 @@ class Subject extends Model
         return $sectionSchedule->schedules ?? null;
     }
 
+    public function grades()
+    {
+        return $this->belongsToMany('App\Term', 'student_grades', 'subject_id', 'term_id');
+    }
+
     public function getIsAllowedAttribute()
     {
         return $this->attributes['is_allowed'];

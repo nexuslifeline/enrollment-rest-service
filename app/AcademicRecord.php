@@ -87,4 +87,9 @@ class AcademicRecord extends Model
     {
         return "{$this->student->first_name} {$this->student->middle_name} {$this->student->last_name}";
     }
+
+    public function grades()
+    {
+        return $this->belongsToMany('App\Term', 'student_grades', 'academic_record_id', 'term_id');
+    }
 }
