@@ -182,8 +182,12 @@ Route::group(['prefix' => 'v1'], function () {
         //general settings
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
-        // Route::resource('student-grades', 'StudentGradeController');
-        // Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
+        Route::resource('student-grades', 'StudentGradeController');
+        Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
+
+        //student clearances
+        Route::resource('/student-clearances','StudentClearanceController');
+        Route::post('/student-clearances/batch-store', 'StudentClearanceController@batchStore');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
