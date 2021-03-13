@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StudentClearanceBatchCreateRequest;
 use App\Http\Resources\StudentClearanceResource;
 use App\Services\StudentClearanceService;
 use App\StudentClearance;
@@ -44,7 +45,7 @@ class StudentClearanceController extends Controller
             ->setStatusCode(201);
     }
 
-    public function batchStore(Request $request)
+    public function batchStore(StudentClearanceBatchCreateRequest $request)
     {
         $studentClearanceService = new StudentClearanceService();
         $data = $request->except('signatories');

@@ -22,7 +22,7 @@ class StudentClearance extends Model
     public function signatories()
     {
         return $this->belongsToMany('App\Personnel', 'student_clearance_signatories', 'student_clearance_id', 'personnel_id')
-            ->withPivot('is_cleared','date_cleared','remarks');
+            ->withPivot('subject_id','description','is_cleared','date_cleared','remarks');
     }
 
     public function student()

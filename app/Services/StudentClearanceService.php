@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\AcademicRecord;
+use App\Section;
 use App\StudentClearance;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +15,9 @@ class StudentClearanceService
   {
     try {
       $query = StudentClearance::with([
-        'student', 'academicRecord'
+        'student', 'academicRecord' => function ($query) {
+          return $query->with(['level','course','semester','schoolYear']);
+        }
       ]);
       // filters
       // student
@@ -96,7 +100,9 @@ class StudentClearanceService
     try {
       $studentClearance = StudentClearance::find($id);
       $studentClearance->load([
-        'student', 'academicRecord','signatories'
+        'student', 'academicRecord' => function ($query) {
+          return $query->with(['level', 'course', 'semester', 'schoolYear', 'section']);
+        },'signatories'
       ]);
       return $studentClearance;
     } catch (Exception $e) {
@@ -110,9 +116,54 @@ class StudentClearanceService
   {
     DB::beginTransaction();
     try {
-      
+      $academicRecords = AcademicRecord::where('section_id', $data['section_id'])->get();
+      $studentClearances = [];
+      foreach ($academicRecords as $academicRecord) {
+        $studentClearance = StudentClearance::updateOrCreate([
+          'academic_record_id' => $academicRecord->id,
+          'student_id' => $academicRecord->student_id,
+        ], [
+          'academic_record_id' => $academicRecord->id,
+          'student_id' => $academicRecord->student_id,
+        ]);
+
+        $items = [];
+
+        foreach ($signatories as $signatory) {
+          $items[$signatory['personnel_id']] = [
+            'description' => $signatory['description']
+          ];
+        }
+
+        $studentClearance->signatories()->wherePivot('subject_id', null)->sync($items);
+
+        $items = [];
+        if($data['include_instructor']) {
+          $instructors = Section::find($data['section_id'])
+            ->schedules()->with('subject')->select('personnel_id', 'subject_id')
+            ->groupBy('personnel_id')
+            ->groupBy('subject_id')
+            ->get();
+          // return $instructors;
+
+          foreach ($instructors as $instructor) {
+            $items[$instructor['subject_id']] = [
+              'subject_id' => $instructor['subject_id'],
+              'personnel_id' => $instructor['personnel_id'],
+              'description' => $instructor['subject']['name'].' '.$instructor['subject']['description']
+            ];
+          }
+        }
+
+        $studentClearance->signatories()->wherePivot('subject_id', '!=', null)->sync($items);
+        // return $items;
+        
+        // return $items;
+        
+        $studentClearances[] = $studentClearance;
+      }
       DB::commit();
-      // return $billings;
+      return $studentClearances;
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during StudentClearanceService storeBatchClearance method call: ');
@@ -142,6 +193,23 @@ class StudentClearanceService
     try {
 
       $studentClearance = StudentClearance::find($id);
+      $items = [];
+      $instructorItems = [];
+      foreach ($signatories as $signatory) {
+        if($signatory['subject_id']) {
+          $instructorItems[$signatory['subject_id']] = [
+            'subject_id' => $signatory['subject_id'],
+            'personnel_id' => $signatory['personnel_id'],
+            'description' => $signatory['description']
+          ];
+        } else {
+          $items[$signatory['personnel_id']] = [
+            'description' => $signatory['description']
+          ];
+        }
+      }
+      $studentClearance->signatories()->wherePivot('subject_id', null)->sync($items);
+      $studentClearance->signatories()->wherePivot('subject_id', '!=' , null)->sync($instructorItems);
 
       $studentClearance->update($data);
       DB::commit();
