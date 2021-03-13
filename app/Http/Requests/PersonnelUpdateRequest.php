@@ -31,7 +31,12 @@ class PersonnelUpdateRequest extends FormRequest
             'user.old_password' => ['sometimes', 'required', new IsOldPasswordMatched()],
             'user.password' => 'sometimes|required|string|min:6|confirmed',
             'user.user_group_id' => 'sometimes|required',
-            'birth_date' => 'sometimes|required|date'
+            'birth_date' => 'sometimes|required|date',
+            'department_id' => 'sometimes|required',
+            'personnel_status_id' => 'sometimes|required',
+            'job_title' => 'required|string|max:255',
+            'complete_address' => 'required|string',
+            'birth_date' => 'required|date'
         ];
     }
 
@@ -41,7 +46,9 @@ class PersonnelUpdateRequest extends FormRequest
             'user.username' => 'email',
             'user.old_password' => 'old password',
             'user.password' => 'password',
-            'user.user_group_id' => 'user group'
+            'user.user_group_id' => 'user group',
+            'department_id' => 'department',
+            'personnel_status_id' => 'status',
         ];
     }
 }

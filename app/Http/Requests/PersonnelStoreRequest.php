@@ -29,7 +29,11 @@ class PersonnelStoreRequest extends FormRequest
             'user.username' => 'required|string|email|max:255|unique:users,username',
             'user.password' => 'required|string|min:6|confirmed',
             'user.user_group_id' => 'required',
-            'birth_date' => 'required|date'
+            'department_id' => 'required',
+            'personnel_status_id' => 'required',
+            'job_title' => 'required|string|max:255',
+            'birth_date' => 'required|date',
+            'complete_address' => 'required|string',
         ];
     }
 
@@ -38,7 +42,9 @@ class PersonnelStoreRequest extends FormRequest
         return [
             'user.username' => 'email',
             'user.password' => 'password',
-            'user.user_group_id' => 'user group'
+            'user.user_group_id' => 'user group',
+            'department_id' => 'department',
+            'personnel_status_id' => 'status',
         ];
     }
 }
