@@ -71,8 +71,8 @@ class StudentUpdateRequest extends FormRequest
             // student family
             'family.father_name' => 'sometimes|required|string|max:255',
             'family.mother_name' => 'sometimes|required|string|max:255',
-            'family.father_email' => 'sometimes|nullable|email',
-            'family.mother_email' => 'sometimes|nullable|email',
+            'family.father_email' => 'sometimes|nullable|email:filter',
+            'family.mother_email' => 'sometimes|nullable|email:filter',
             'family.parent_guardian_name' => 'sometimes|required|string|max:255',
             'family.parent_guardian_contact_no' => 'sometimes|required|string|max:255',
             // academicRecord
@@ -83,7 +83,7 @@ class StudentUpdateRequest extends FormRequest
             'academicRecord.semester_id' => 'sometimes|required_if:academicRecord.school_category_id,4,5,6',
             'subjects' => 'sometimes|array|min:1',
             // user account
-            'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,'.$this->id.',userable_id',
+            'user.username' => 'sometimes|required|string|email:filter|max:255|unique:users,username,'.$this->id.',userable_id',
             'user.old_password' => ['sometimes', 'required', new IsOldPasswordMatched()],
             'user.password' => 'sometimes|required|string|min:6|confirmed|',
             //evaluation

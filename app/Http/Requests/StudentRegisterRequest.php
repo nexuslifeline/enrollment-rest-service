@@ -27,7 +27,7 @@ class StudentRegisterRequest extends FormRequest
             'student_no' => 'sometimes|nullable|unique:students',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'username' => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|email:filter|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed'
         ];
     }

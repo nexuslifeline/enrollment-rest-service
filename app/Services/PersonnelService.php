@@ -85,11 +85,27 @@ class PersonnelService
             $personnel->update($data);
 
             if ($user) {
-                $personnel->user()->update([
-                    'username' => $user['username'],
-                    'user_group_id' => $user['user_group_id'],
-                    'password' => Hash::make($user['password'])
-                ]);
+
+                $password = $user['password'] ?? false;
+                $username = $user['username'] ?? false;
+                if($username && $password) {
+                    $personnel->user()->update([
+                        'username' => $user['username'],
+                        'user_group_id' => $user['user_group_id'],
+                        'password' => Hash::make($user['password'])
+                    ]);
+                }
+                elseif($username && !$password) {
+                    $personnel->user()->update([
+                        'username' => $user['username'],
+                        'user_group_id' => $user['user_group_id']
+                    ]);
+                }
+                else {
+                    $personnel->user()->update([
+                        'password' => Hash::make($user['password'])
+                    ]);
+                }
             }
 
             $personnel->load(['photo','user' => function($query) {
