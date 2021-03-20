@@ -5,6 +5,8 @@ namespace App\Services;
 use App\AcademicRecord;
 use App\Section;
 use App\StudentClearance;
+use App\StudentClearanceSignatory;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -90,6 +92,118 @@ class StudentClearanceService
       return $studentClearances;
     } catch (Exception $e) {
       Log::info('Error occured during StudentClearanceService list method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function signatoriesList(bool $isPaginated, int $perPage, array $filters)
+  {
+    try {
+      $query = StudentClearanceSignatory::with(['studentClearance' => function($q) {
+        return $q->with(['student', 'academicRecord' => function ($q) {
+          return $q->with(['level', 'course', 'semester', 'schoolYear']);
+        }]);
+      }])
+      ->whereHas('studentClearance');
+
+      //school year
+      $schoolYearId = $filters['school_year_id'] ?? false;
+      $query->when($schoolYearId, function ($query) use ($schoolYearId) {
+        return $query->whereHas('studentClearance', function ($q) use ($schoolYearId) {
+          return $q->whereHas('academicRecord', function ($query) use ($schoolYearId) {
+            return $query->where('school_year_id', $schoolYearId);
+          });
+        });
+      });
+
+      //school category
+      $schoolCategoryId = $filters['school_category_id'] ?? false;
+      $query->when($schoolCategoryId, function ($query) use ($schoolCategoryId) {
+        return $query->whereHas('studentClearance', function ($q) use ($schoolCategoryId) {
+          return $q->whereHas('academicRecord', function ($query) use ($schoolCategoryId) {
+            return $query->where('school_category_id', $schoolCategoryId);
+          });
+        });
+      });
+      
+
+      //course
+      $courseId = $filters['course_id'] ?? false;
+      $query->when($courseId, function ($query) use ($courseId) {
+        return $query->whereHas('studentClearance', function ($q) use ($courseId) {
+          return $q->whereHas('academicRecord', function ($query) use ($courseId) {
+            return $query->where('course_id', $courseId);
+          });
+        });
+      });
+
+      //semester
+      $semesterId = $filters['semester_id'] ?? false;
+      $query->when($semesterId, function ($query) use ($semesterId) {
+        return $query->whereHas('studentClearance', function ($q) use ($semesterId) {
+          return $q->whereHas('academicRecord', function ($query) use ($semesterId) {
+            return $query->where('semester_id', $semesterId);
+          });
+        });
+      });
+
+      //level
+      $levelId = $filters['level_id'] ?? false;
+      $query->when($levelId, function ($query) use ($levelId) {
+        return $query->whereHas('studentClearance', function ($q) use ($levelId) {
+          return $q->whereHas('academicRecord', function ($query) use ($levelId) {
+            return $query->where('level_id', $levelId);
+          });
+        });
+      });
+
+      //section
+      $sectionId = $filters['section_id'] ?? false;
+      $query->when($sectionId, function ($query) use ($sectionId) {
+        return $query->whereHas('studentClearance', function ($q) use ($sectionId) {
+          return $q->whereHas('academicRecord', function ($query) use ($sectionId) {
+            return $query->where('section_id', $sectionId);
+          });
+        });
+      });
+
+      //personnel
+      $personnelId = $filters['personnel_id'] ?? false;
+      $query->when($personnelId, function ($q) use ($personnelId) {
+          return $q->where('personnel_id', $personnelId);
+      });
+
+      $studentClearances = $isPaginated
+        ? $query->paginate($perPage)
+        : $query->get();
+      return $studentClearances;
+    } catch (Exception $e) {
+      Log::info('Error occured during StudentClearanceService signatorieslist method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function signatoriesUpdate(array $data) 
+  {
+    DB::beginTransaction();
+    try {
+      $studentClearanceSignatories = [];
+      foreach ($data as $signatory) {
+        $studentClearanceSignatory = StudentClearanceSignatory::find($signatory['id']);
+        $studentClearanceSignatory->update($signatory);
+        if ($signatory['is_cleared']) {
+          $studentClearanceSignatory->update([
+            'date_cleared' => Carbon::now()
+          ]);
+        }
+        $studentClearanceSignatories[] = $studentClearanceSignatory;
+      }
+      DB::commit();
+      return $studentClearanceSignatories;
+    } catch (Exception $e) {
+      Log::info('Error occured during StudentClearanceService signatoriesUpdate method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

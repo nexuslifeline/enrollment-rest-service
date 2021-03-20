@@ -99,4 +99,24 @@ class StudentClearanceController extends Controller
         $studentClearanceService->delete($id);
         return response()->json([], 204);
     }
+
+    public function signatoriesList(Request $request)
+    {
+        $studentClearanceService = new StudentClearanceService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $studentClearances = $studentClearanceService->signatoriesList($isPaginated, $perPage, $filters);
+        return StudentClearanceResource::collection(
+            $studentClearances
+        );
+    }
+
+    public function signatoriesUpdate(Request $request) 
+    {
+        $studentClearanceService = new StudentClearanceService();
+        $data = $request->all();
+        $studentClearances = $studentClearanceService->signatoriesUpdate($data);
+        return StudentClearanceResource::collection($studentClearances);
+    }
 }

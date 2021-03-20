@@ -187,7 +187,9 @@ Route::group(['prefix' => 'v1'], function () {
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');
+        Route::get('/signatories', 'StudentClearanceController@signatoriesList');
         Route::post('/student-clearances/batch-store', 'StudentClearanceController@batchStore');
+        Route::post('/signatories/update', 'StudentClearanceController@signatoriesUpdate');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
