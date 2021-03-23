@@ -211,4 +211,13 @@ class Student extends Model
             'requirement_id'
         )->withPivot('school_category_id')->withTimestamps();
     }
+
+    public function scopeWhereLike($query, $value) {
+        return $query->where('name', 'like', '%' . $value . '%')
+            ->orWhere('first_name', 'like', '%' . $value . '%')
+            ->orWhere('middle_name', 'like', '%' . $value . '%')
+            ->orWhere('student_no', 'like', '%' . $value . '%')
+            ->orWhere('last_name', 'like', '%' . $value . '%')
+            ->orWhere('email', 'like', '%' . $value . '%');
+    }
 }

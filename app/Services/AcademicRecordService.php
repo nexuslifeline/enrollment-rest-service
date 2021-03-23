@@ -141,13 +141,16 @@ class AcademicRecordService
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($q) use ($criteria) {
                 return $q->whereHas('student', function ($query) use ($criteria) {
-                    return $query->where(function ($q) use ($criteria) {
-                        return $q->where('name', 'like', '%' . $criteria . '%')
-                            ->orWhere('student_no', 'like', '%' . $criteria . '%')
-                            ->orWhere('first_name', 'like', '%' . $criteria . '%')
-                            ->orWhere('middle_name', 'like', '%' . $criteria . '%')
-                            ->orWhere('last_name', 'like', '%' . $criteria . '%');
-                    });
+                    // return $query->where(function ($q) use ($criteria) {
+                    //     return $q->where('name', 'like', '%' . $criteria . '%')
+                    //         ->orWhere('student_no', 'like', '%' . $criteria . '%')
+                    //         ->orWhere('first_name', 'like', '%' . $criteria . '%')
+                    //         ->orWhere('middle_name', 'like', '%' . $criteria . '%')
+                    //         ->orWhere('last_name', 'like', '%' . $criteria . '%');
+                    // });
+
+                    //scopedWhereLike on student model
+                    $query->whereLike($criteria);
                 });
             });
 
