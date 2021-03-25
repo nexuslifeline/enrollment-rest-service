@@ -441,7 +441,7 @@ class AcademicRecordService
                     $items = [];
                     foreach ($value['grades'] as $grade) {
                         $items[$grade['term_id']] = [
-                            'personnel_id' => Auth::user()->id,
+                            'personnel_id' => Auth::user()->userable->id,
                             'grade' => $grade['grade']
                             // 'notes' => $detail['notes']
                         ];
