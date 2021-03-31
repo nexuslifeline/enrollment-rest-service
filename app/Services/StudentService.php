@@ -587,10 +587,10 @@ class StudentService
                             'student_id' => $student->id,
                             'student_curriculum_id' => $transcriptRecord->student_curriculum_id,
                             'curriculum_id' => $transcriptRecord->curriculum_id,
+                            'school_year_id' => $activeEvaluation['school_year_id'],
                             'level_id' => $activeEvaluation['level_id'],
                             'course_id' => $activeEvaluation['course_id'],
                             'semester_id' => $activeEvaluation['semester_id'],
-                            'school_category_id' => $activeEvaluation['school_category_id'],
                             'school_category_id' => $activeEvaluation['school_category_id'],
                             'evaluation_status_id' => $activeEvaluation['evaluation_status_id'],
                             'submitted_date' => $activeEvaluation['submitted_date']
@@ -610,6 +610,7 @@ class StudentService
                             'student_category_id' => $activeEvaluation['student_category_id'],
                             'transcript_record_id' => $transcriptRecord['id'],
                             'school_category_id' => $activeEvaluation['school_category_id'],
+                            'school_year_id' => $activeEvaluation['school_year_id'],
                             'level_id' => $activeEvaluation['level_id'],
                             'semester_id' => $activeEvaluation['semester_id'],
                             'course_id' => $activeEvaluation['course_id'],
@@ -667,7 +668,7 @@ class StudentService
         }
     }
 
-    public function getLedgerOfStudent($studentId, $schoolYearId, $asOfDate) 
+    public function getLedgerOfStudent($studentId, $schoolYearId, $asOfDate)
     {
         try {
             DB::statement(DB::raw('set @bal=0;'));

@@ -37,6 +37,12 @@ class EvaluationService
                 });
             });
 
+            // school year
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function ($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
+
             //school category
             $schoolCategoryId = $filters['school_category_id'] ?? false;
             $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
