@@ -67,16 +67,14 @@ class StudentClearanceService
           return $q->where('school_category_id', $schoolCategoryId);
         });
       });
-      
+
       // filter by student name
       $criteria = $filters['criteria'] ?? false;
       $query->when($criteria, function ($q) use ($criteria) {
-        return $q->whereHas('student', function ($query) use ($criteria) {
-          return $query->where('name', 'like', '%' . $criteria . '%')
-            ->orWhere('student_no', 'like', '%' . $criteria . '%')
-            ->orWhere('first_name', 'like', '%' . $criteria . '%')
-            ->orWhere('middle_name', 'like', '%' . $criteria . '%')
-            ->orWhere('last_name', 'like', '%' . $criteria . '%');
+        return $q->whereHas('studentClearance', function ($query) use ($criteria) {
+          return $query->whereHas('student', function ($q) use ($criteria) {
+            return $q->whereLike($criteria);
+          });
         });
       });
 
@@ -126,7 +124,6 @@ class StudentClearanceService
           });
         });
       });
-      
 
       //course
       $courseId = $filters['course_id'] ?? false;
@@ -172,6 +169,16 @@ class StudentClearanceService
       $personnelId = $filters['personnel_id'] ?? false;
       $query->when($personnelId, function ($q) use ($personnelId) {
           return $q->where('personnel_id', $personnelId);
+      });
+
+      // filter by student name
+      $criteria = $filters['criteria'] ?? false;
+      $query->when($criteria, function ($q) use ($criteria) {
+        return $q->whereHas('studentClearance', function ($query) use ($criteria) {
+          return $query->whereHas('student', function ($q) use ($criteria) {
+            return $q->whereLike($criteria);
+          });
+        });
       });
 
       $studentClearances = $isPaginated

@@ -112,7 +112,7 @@ class StudentClearanceController extends Controller
         );
     }
 
-    public function signatoriesUpdate(Request $request) 
+    public function signatoriesUpdate(Request $request)
     {
         $studentClearanceService = new StudentClearanceService();
         $data = $request->all();

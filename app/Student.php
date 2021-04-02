@@ -219,6 +219,6 @@ class Student extends Model
             ->orWhere('student_no', 'like', '%' . $value . '%')
             ->orWhere('last_name', 'like', '%' . $value . '%')
             ->orWhere('email', 'like', '%' . $value . '%')
-            ->orWhereRaw('CONCAT(first_name, " ", coalesce(concat(middle_name, " "),""), last_name)', 'like', '%' . $value . '%');
+            ->orWhereRaw('CONCAT(first_name, " ", coalesce(concat(middle_name, " "),""), last_name) like' .  "'%" .  $value  . "%'");
     }
 }
