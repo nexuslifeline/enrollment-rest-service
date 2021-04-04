@@ -21,7 +21,7 @@ class UpdateDataOfApplicationStepsTable extends Migration
         );
 
         DB::table('application_steps')->where(['id' => 5])->update(['name' => 'Request Evaluation']);
-        DB::table('application_steps')->where(['id' => 6])->update(['name' => 'Waiting Evaluation']); 
+        DB::table('application_steps')->where(['id' => 6])->update(['name' => 'Waiting Evaluation']);
         DB::table('application_steps')->where(['id' => 7])->update(['name' => 'Academic Year - Application']);
         DB::table('application_steps')->where(['id' => 8])->update(['name' => 'Status']);
     }

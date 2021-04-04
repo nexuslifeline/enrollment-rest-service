@@ -114,10 +114,11 @@ class AcademicRecordController extends Controller
         return AcademicRecordResource::collection($evaluations);
     }
 
-    public function getPendingApprovalCount()
+    public function getPendingApprovalCount(Request $request)
     {
         $academicRecordService = new AcademicRecordService();
-        return $academicRecordService->getPendingApprovalCount();
+        $filters = $request->except('per_page', 'paginate');
+        return $academicRecordService->getPendingApprovalCount($filters);
     }
 
     public function getGradesOfAcademicRecords($subjectId, $sectionId, Request $request)

@@ -371,24 +371,43 @@ class AcademicRecordService
         }
     }
 
-    public function getPendingApprovalCount()
+    public function getPendingApprovalCount(array $filters)
     {
-        $data['evaluation'] = Evaluation::where('evaluation_status_id', 2)->count();
-        $data['enlistment'] = AcademicRecord::where(function ($q) {
+        $schoolYearId = $filters['school_year_id'] ?? false;
+        $evaluation = Evaluation::where('evaluation_status_id', 2)
+        ->when($schoolYearId, function($q) use($schoolYearId) {
+            return $q->where('school_year_id', $schoolYearId);
+        });
+
+        $enlistment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
             })->orWhereHas('admission', function ($query) {
                 return $query->where('application_status_id', 4);
             });
-        })->where('academic_record_status_id', 1)->count();
-        $data['assessment'] = AcademicRecord::where(function ($q) {
+        })->where('academic_record_status_id', 1)
+        ->when($schoolYearId, function($q) use($schoolYearId) {
+            return $q->where('school_year_id', $schoolYearId);
+        });
+
+
+       $assessment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
             })->orWhereHas('admission', function ($query) {
                 return $query->where('application_status_id', 4);
             });
-        })->where('academic_record_status_id', 2)->count();
+        })->where('academic_record_status_id', 2)
+        ->when($schoolYearId, function($q) use($schoolYearId) {
+            return $q->where('school_year_id', $schoolYearId);
+        });
+
         $data['payment'] = Payment::where('payment_status_id', 4)->count();
+
+
+        $data['evaluation'] = $evaluation->count();
+        $data['enlistment']  = $enlistment->count();
+        $data['assessment'] = $assessment->count();
 
         return $data;
     }

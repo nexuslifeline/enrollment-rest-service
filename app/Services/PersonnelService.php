@@ -13,17 +13,22 @@ class PersonnelService
     public function list(bool $isPaginated, int $perPage, array $filter)
     {
         try {
-            $query = Personnel::with(['photo','user' => function ($query) {
+            $query = Personnel::with(['photo','department', 'user' => function ($query) {
               $query->with('userGroup');
             }]);
-            $userGroupId = $filter['user_group_id'] ?? false;
 
+            $userGroupId = $filter['user_group_id'] ?? false;
             $query->when($userGroupId, function($q) use ($userGroupId) {
               return $q->whereHas('user', function($query) use ($userGroupId) {
                 return $query->whereHas('userGroup', function($q) use ($userGroupId) {
                   return $q->where('user_group_id', $userGroupId);
                 });
               });
+            });
+
+            $departmentId = $filter['department_id'] ?? false;
+            $query->when($departmentId, function($q) use ($departmentId) {
+                return $q->where('department_id', $departmentId);
             });
 
             $personnels = $isPaginated
