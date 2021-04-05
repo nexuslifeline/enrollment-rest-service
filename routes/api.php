@@ -91,6 +91,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/academic-records', 'AcademicRecordController');
         Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
         Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
+        Route::post('academic-records/finalize-grade', 'AcademicRecordController@finalizeGrade');
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
         Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');

@@ -141,4 +141,15 @@ class AcademicRecordController extends Controller
             $academicRecords
         );
     }
+
+    public function finalizeGrade(Request $request)
+    {
+        $data = $request->all();
+        $academicRecordService = new AcademicRecordService();
+        $academicRecords = $academicRecordService->finalizeGrade($data);
+
+        // return AcademicRecordResource::collection(
+            return $academicRecords;
+        // );
+    }
 }

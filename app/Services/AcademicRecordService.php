@@ -6,6 +6,7 @@ use App\Student;
 use App\AcademicRecord;
 use App\Evaluation;
 use App\Payment;
+use App\TranscriptRecord;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -471,6 +472,55 @@ class AcademicRecordService
             }
             DB::commit();
             return $result;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during TermService batchUpdate method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function finalizeGrade(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($data['id']);
+
+            $grades = $academicRecord
+                ->grades()
+                ->wherePivot('subject_id', $data['subject_id']);
+
+            if ($data['grades']) {
+                $items = [];
+                foreach ($data['grades'] as $grade) {
+                    $items[$grade['term_id']] = [
+                        'personnel_id' => Auth::user()->userable->id,
+                        'grade' => $grade['grade']
+                        // 'notes' => $detail['notes']
+                    ];
+                }
+                $grades->sync($items);
+            }
+
+            $grade = $grades
+                ->avg('grade');
+
+            $transcriptRecord = TranscriptRecord::where('student_id', $academicRecord->student_id)
+                ->where('school_category_id', $academicRecord->school_category_id)
+                ->when(!in_array($academicRecord->school_category_id, [4,5,6]), function ($q) use ($academicRecord) {
+                    return $q->where('level_id', $academicRecord->level_id);
+                })
+                ->where('course_id', $academicRecord->course_id)
+                ->first();
+            $subject = $transcriptRecord->subjects()
+                ->where('id', $data['subject_id'])
+                ->where('level_id', $academicRecord->level_id)
+                ->where('semester_id', $academicRecord->semester_id);
+            $subject->updateExistingPivot($data['subject_id'],[
+                'grade' => $grade
+            ]);
+            DB::commit();
+            return $academicRecord;
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during TermService batchUpdate method call: ');
