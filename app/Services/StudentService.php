@@ -175,6 +175,7 @@ class StudentService
         DB::beginTransaction();
         try {
             $studentId = $data['id'] ?? null;
+            $isManual = $studentId ? 1 : 0; // set is_manual for manually registered
             $academicRecord = $data['academic_record'] ?? false;
             $academicRecordSubjects = $data['academic_record_subjects'] ?? false;
             $user = $data['user'] ?? false;
@@ -191,7 +192,8 @@ class StudentService
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'middle_name' => $data['middle_name'],
-                'mobile_no' => $data['mobile_no']
+                'mobile_no' => $data['mobile_no'],
+                'is_manual' =>  $isManual
             ]);
 
             if ($academicRecord) {
@@ -265,7 +267,8 @@ class StudentService
                         'semester_id' => $evaluation['semester_id'],
                         'course_id' => $evaluation['course_id'],
                         'evaluation_status_id' => $evaluation['evaluation_status_id'],
-                        'transcript_record_id' => $transcript->id
+                        'transcript_record_id' => $transcript->id,
+                        'school_year_id' => $evaluation['school_year_id'],
                     ]);
                 }
             }
@@ -301,6 +304,25 @@ class StudentService
                     return $query->where('academic_record_status_id', 3)
                     ->whereHas('subjects', function ($q) use ($sectionId) {
                         return $q->where('section_id', $sectionId);
+                    });
+                });
+            });
+
+            $levelId = $filters['level_id'] ?? false;
+            $courseId = $filters['course_id'] ?? false;
+            $semesterId = $filters['semester_id'] ?? false;
+
+            $query->when($levelId, function ($q) use ($levelId, $courseId, $semesterId) {
+                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId) {
+                    return $query->where('academic_record_status_id', 3)->latest()->limit(1)
+                    ->when($levelId, function ($q) use ($levelId) {
+                        return $q->where('level_id', $levelId);
+                    })
+                    ->when($courseId, function ($q) use ($courseId) {
+                        return $q->where('course_id', $courseId);
+                    })
+                    ->when($semesterId, function ($q) use ($semesterId) {
+                        return $q->where('semester_id', $semesterId);
                     });
                 });
             });
@@ -455,15 +477,40 @@ class StudentService
 
             $user = $studentInfo['user'] ?? false;
             if ($user) {
-                $student->user()->updateOrCreate(
-                    [
-                        'userable_id' => $student->id
-                    ],
-                    [
-                        'username' => $user['username'],
-                        'password' => Hash::make($user['password'])
-                    ]
-                );
+
+                if(array_key_exists('username', $user) && !array_key_exists('password', $user)) {
+                    //username only
+                    $student->user()->updateOrCreate(
+                        [
+                            'userable_id' => $student->id
+                        ],
+                        [
+                            'username' => $user['username'],
+                        ]
+                    );
+                }
+                elseif(!array_key_exists('username', $user) && array_key_exists('password', $user)) {
+                    //password only
+                    $student->user()->updateOrCreate(
+                        [
+                            'userable_id' => $student->id
+                        ],
+                        [
+                            'password' => Hash::make($user['password'])
+                        ]
+                    );
+                }
+                else {
+                    $student->user()->updateOrCreate(
+                        [
+                            'userable_id' => $student->id
+                        ],
+                        [
+                            'username' => $user['username'],
+                            'password' => Hash::make($user['password'])
+                        ]
+                    );
+                }
             }
 
             $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
