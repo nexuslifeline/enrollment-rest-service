@@ -34,6 +34,16 @@ class Personnel extends Model
         return $this->belongsTo('App\Department');
     }
 
+    public function education()
+    {
+        return $this->hasMany('App\PersonnelEducation');
+    }
+
+    public function employments()
+    {
+        return $this->hasMany('App\PersonnelEmployment');
+    }
+
     public function getNameAttribute()
     {
         return "{$this->first_name} {$this->middle_name} {$this->last_name}";

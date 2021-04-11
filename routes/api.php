@@ -96,10 +96,18 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/user-groups', 'UserGroupController');
         Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');
         Route::post('/user-groups/{userGroupId}/permissions', 'PermissionController@storePermissionsOfUserGroup');
-        // user
+        // personnels
         Route::resource('/personnels', 'PersonnelController');
         Route::post('/personnels/{personnelId}/photos', 'PersonnelPhotoController@store');
         Route::delete('/personnels/{personnelId}/photos', 'PersonnelPhotoController@destroy');
+        Route::get('/personnels/{personnelId}/education', 'PersonnelController@getEducationList');
+        Route::post('/personnels/{personnelId}/education', 'PersonnelController@storeEducation');
+        Route::put('/personnels/{personnelId}/education/{educationId}', 'PersonnelController@updateEducation');
+        Route::delete('/personnels/{personnelId}/education/{educationId}', 'PersonnelController@deleteEducation');
+        Route::get('/personnels/{personnelId}/employment', 'PersonnelController@getEmploymentList');
+        Route::post('/personnels/{personnelId}/employment', 'PersonnelController@storeEmployment');
+        Route::put('/personnels/{personnelId}/employment/{employmentId}', 'PersonnelController@updateEmployment');
+        Route::delete('/personnels/{personnelId}/employment/{employmentId}', 'PersonnelController@deleteEmployment');
         // payments
         Route::resource('/payments', 'PaymentController');
         Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');

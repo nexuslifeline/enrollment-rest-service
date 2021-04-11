@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PersonnelStoreRequest;
-use App\Http\Requests\PersonnelUpdateRequest;
 use App\Personnel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use App\Http\Resources\PersonnelResource;
-use App\Services\PersonnelService;
 use Faker\Provider\ar_JO\Person;
+use App\Services\PersonnelService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\PersonnelResource;
+use App\Http\Requests\PersonnelStoreRequest;
+use App\Http\Requests\PersonnelUpdateRequest;
+use App\Http\Requests\PersonnelEducationStoreRequest;
+use App\Http\Requests\PersonnelEducationUpdateRequest;
+use App\Http\Requests\PersonnelEmploymentStoreRequest;
+use App\Http\Requests\PersonnelEmploymentUpdateRequest;
 
 class PersonnelController extends Controller
 {
@@ -87,6 +91,82 @@ class PersonnelController extends Controller
     {
         $personnelService = new PersonnelService();
         $personnelService->delete($id);
+        return response()->json([], 204);
+    }
+
+    public function getEducationList(Request $request, int $id)
+    {
+        $personnelService = new PersonnelService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $personnel = $personnelService->getEducationList($id, $isPaginated, $perPage);
+        return (new PersonnelResource($personnel))
+        ->response()
+        ->setStatusCode(200);
+    }
+
+    public function storeEducation(PersonnelEducationStoreRequest $request, int $id)
+    {
+        $personnelService = new PersonnelService();
+        $data = $request->all();
+        $personnel = $personnelService->storeEducation($id, $data);
+        return (new PersonnelResource($personnel))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function updateEducation(PersonnelEducationUpdateRequest $request, int $id, int $educationId)
+    {
+        $personnelService = new PersonnelService();
+        $data = $request->all();
+        $personnel = $personnelService->updateEducation($id, $educationId, $data);
+        return (new PersonnelResource($personnel))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function deleteEducation(int $id, int $educationId)
+    {
+        $personnelService = new PersonnelService();
+        $personnelService->deleteEducation($id, $educationId);
+        return response()->json([], 204);
+    }
+
+    public function getEmploymentList(Request $request, int $id)
+    {
+        $personnelService = new PersonnelService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $personnel = $personnelService->getEmploymentList($id, $isPaginated, $perPage);
+        return (new PersonnelResource($personnel))
+        ->response()
+        ->setStatusCode(200);
+    }
+
+    public function storeEmployment(PersonnelEmploymentStoreRequest $request, int $id)
+    {
+        $personnelService = new PersonnelService();
+        $data = $request->all();
+        $personnel = $personnelService->storeEmployment($id, $data);
+        return (new PersonnelResource($personnel))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function updateEmployment(PersonnelEmploymentUpdateRequest $request, int $id, int $employmentId)
+    {
+        $personnelService = new PersonnelService();
+        $data = $request->all();
+        $personnel = $personnelService->updateEmployment($id, $employmentId, $data);
+        return (new PersonnelResource($personnel))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function deleteEmployment(int $id, int $employmentId)
+    {
+        $personnelService = new PersonnelService();
+        $personnelService->deleteEmployment($id, $employmentId);
         return response()->json([], 204);
     }
 }

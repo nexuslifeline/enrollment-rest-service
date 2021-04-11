@@ -139,4 +139,124 @@ class PersonnelService
             throw $e;
         }
     }
+
+    public function getEducationList(int $id, $isPaginated, $perPage)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $query = $personnel->education();
+            $education = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            return $education;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService getEducationList method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function storeEducation(int $id, array $data)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $education = $personnel->education()->create($data);
+            return $education;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService addEducation method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function updateEducation(int $id, int $educationId, array $data)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $education = $personnel->education()->find($educationId);
+            $education->update($data);
+            return $education;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService updateEducation method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function deleteEducation(int $id, int $educationId)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $education = $personnel->education()->find($educationId);
+            $education->delete();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService updateEducation method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getEmploymentList(int $id, $isPaginated, $perPage)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $query = $personnel->employments();
+            $employments = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            return $employments;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService getEmploymentList method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function storeEmployment(int $id, array $data)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $employment = $personnel->employments()->create($data);
+            return $employment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService storeEmployment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function updateEmployment(int $id, int $employmentId, array $data)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $employment = $personnel->employments()->find($employmentId);
+            $employment->update($data);
+            return $employment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService updateEmployment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function deleteEmployment(int $id, int $employmentId)
+    {
+        try {
+            $personnel = Personnel::find($id);
+            $employment = $personnel->employments()->find($employmentId);
+            $employment->delete();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PersonnelService deleteEmployment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }
