@@ -133,6 +133,13 @@ class TranscriptRecordService
     try {
       $transcriptRecord = TranscriptRecord::find($id);
       $transcriptRecord->load([
+        'level',
+        'course',
+        'curriculum',
+        'studentCurriculum',
+        'student' => function ($query) {
+          $query->with(['address', 'photo']);
+        },
         'subjects' => function ($query) {
           $query->with('prerequisites');
         },
