@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Scopes\SchoolCategoryScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,6 +18,13 @@ class AcademicRecord extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new SchoolCategoryScope);
+    }
 
     public function student()
     {

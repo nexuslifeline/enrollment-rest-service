@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Scopes\SchoolCategoryScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,6 +19,14 @@ class Payment extends Model
         'updated_by',
         'deleted_by'
     ];
+
+    // temporarily commented this, because we need to add first school category in this
+    // protected static function boot()
+    // {
+    //     parent::boot();
+
+    //     static::addGlobalScope(new SchoolCategoryScope);
+    // }
 
     public function files()
     {
