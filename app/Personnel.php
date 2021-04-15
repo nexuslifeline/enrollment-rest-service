@@ -10,6 +10,7 @@ class Personnel extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id'];
+    protected $appends = ['name'];
     protected $hidden = [
         'created_at',
         'deleted_at',

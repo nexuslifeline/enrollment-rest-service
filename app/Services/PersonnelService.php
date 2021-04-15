@@ -93,20 +93,30 @@ class PersonnelService
 
                 $password = $user['password'] ?? false;
                 $username = $user['username'] ?? false;
-                if($username && $password) {
+                $userGroupId = $user['user_group_id'] ?? false;
+                if($username && $password && $userGroupId) {
+                    //username, usergroup and password
                     $personnel->user()->update([
                         'username' => $user['username'],
                         'user_group_id' => $user['user_group_id'],
                         'password' => Hash::make($user['password'])
                     ]);
                 }
-                elseif($username && !$password) {
+                elseif($username && $userGroupId &&!$password) {
+                    //username and usergroup
                     $personnel->user()->update([
                         'username' => $user['username'],
                         'user_group_id' => $user['user_group_id']
                     ]);
                 }
+                elseif($username && !$userGroupId &&!$password) {
+                    //username only
+                    $personnel->user()->update([
+                        'username' => $user['username'],
+                    ]);
+                }
                 else {
+                    //password only
                     $personnel->user()->update([
                         'password' => Hash::make($user['password'])
                     ]);
@@ -116,6 +126,7 @@ class PersonnelService
             $personnel->load(['photo','user' => function($query) {
                 $query->with('userGroup');
             }]);
+
             DB::commit();
             return $personnel;
         } catch (Exception $e) {

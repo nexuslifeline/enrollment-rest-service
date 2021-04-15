@@ -24,7 +24,9 @@ class PersonnelEducationStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'school' => 'required|string|max:255'
+            'school' => 'required|string|max:255',
+            'address' => 'required',
+            'societies' => 'required'
         ];
     }
 }
