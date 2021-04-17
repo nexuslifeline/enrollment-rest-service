@@ -28,7 +28,7 @@ class ManualRegisterRequest extends FormRequest
             'last_name' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'civil_status_id' => 'required',
-            'user.username' => 'sometimes|required|string|email|max:255|unique:users,username,' . $this->id . ',userable_id',
+            'user.username' => 'sometimes|required|string|email:filter|max:255|unique:users,username,' . $this->id . ',userable_id',
             'user.password' => 'sometimes|required|string|min:6|confirmed',
             'academic_record.level_id' => 'required',
             'academic_record.school_year_id' => 'required',

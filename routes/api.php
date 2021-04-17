@@ -68,6 +68,10 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/school-categories', 'SchoolCategoryController');
         Route::get('/user-groups/{userGroupId}/school-categories', 'SchoolCategoryController@getSchoolCategoriesOfUserGroup');
         Route::post('/user-groups/{userGroupId}/school-categories', 'SchoolCategoryController@storeSchoolCategoriesOfUserGroup');
+        // users
+        Route::resource('/users', 'UserController');
+        Route::put('/users/{id}/update-password', 'UserController@updatePassword');
+        Route::put('/users/{id}/update-email', 'UserController@updateEmail');
         // school years
         Route::resource('/school-years', 'SchoolYearController');
         // semesters
