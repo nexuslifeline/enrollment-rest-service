@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Requests\UserEmailUpdateRequest;
@@ -83,7 +84,10 @@ class UserController extends Controller
     public function updatePassword(UserPasswordUpdateRequest $request, int $id)
     {
         $userService = new UserService();
-        $user = $userService->update($request->only(['password']), $id);
+        $password = $request->only('password');
+        $data = ['password' => Hash::make($password['password'])];
+        // return $data['password'];
+        $user = $userService->update($data, $id);
 
         return (new UserResource($user))
         ->response()
