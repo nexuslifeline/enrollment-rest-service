@@ -26,8 +26,8 @@ class UserService
     public function get(int $id)
     {
         try {
-            $User = User::find($id);
-            return $User;
+            $user = User::find($id);
+            return $user;
         } catch (Exception $e) {
             Log::info('Error occured during UserService get method call: ');
             Log::info($e->getMessage());
@@ -39,9 +39,9 @@ class UserService
     {
         DB::beginTransaction();
         try {
-            $User = User::create($data);
+            $user = User::create($data);
             DB::commit();
-            return $User;
+            return $user;
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during UserService store method call: ');
@@ -54,10 +54,27 @@ class UserService
     {
         DB::beginTransaction();
         try {
-            $User = User::find($id);
-            $User->update($data);
+            $user = User::find($id);
+            $user->update($data);
+            $user->load(['userable', 'userable.photo']);
+            if ($user->userable_type === 'App\\Student') {
+                $user->userable->load('academicRecords');
+                $user->userable->append([
+                  'active_admission',
+                  'active_application',
+                  'academic_record',
+                  'active_transcript_record',
+                ]);
+            } else {
+            $user->load(['userGroup' => function ($q) {
+                return $q->select(['id', 'name'])->with(['permissions' => function ($q) {
+                return $q->select(['permissions.id', 'permission_group_id']);
+                }, 'schoolCategories']);
+            }]);
+            }
+
             DB::commit();
-            return $User;
+            return $user;
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during UserService update method call: ');
@@ -69,8 +86,8 @@ class UserService
     public function delete(int $id)
     {
         try {
-            $User = User::find($id);
-            $User->delete();
+            $user = User::find($id);
+            $user->delete();
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during UserService delete method call: ');
