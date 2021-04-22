@@ -24,7 +24,6 @@ class StudentFileUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'notes' => ['required']
         ];
     }
 }

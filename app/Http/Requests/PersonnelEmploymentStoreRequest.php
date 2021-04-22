@@ -25,7 +25,8 @@ class PersonnelEmploymentStoreRequest extends FormRequest
     {
         return [
             'position' => 'required|string|max:255',
-            'company' => 'required|string|max:255'
+            'company' => 'required|string|max:255',
+            'address' => 'required'
         ];
     }
 }

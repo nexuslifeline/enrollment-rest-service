@@ -24,7 +24,6 @@ class PaymentFileUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'notes' => ['required']
         ];
     }
 }

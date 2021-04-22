@@ -26,7 +26,7 @@ class PersonnelEducationStoreRequest extends FormRequest
         return [
             'school' => 'required|string|max:255',
             'address' => 'required',
-            'societies' => 'required'
+            'degree' => 'required|string|max:255',
         ];
     }
 }
