@@ -66,13 +66,18 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/levels/{levelId}/courses', 'CourseController@getCoursesOfLevel');
         // school categories
         Route::resource('/school-categories', 'SchoolCategoryController');
+        Route::post('/school-categories/{schoolCategoryId}/modes', 'SchoolCategoryModeController@store');
+        Route::put('/school-categories/{schoolCategoryId}/modes', 'SchoolCategoryModeController@update');
         Route::get('/user-groups/{userGroupId}/school-categories', 'SchoolCategoryController@getSchoolCategoriesOfUserGroup');
         Route::post('/user-groups/{userGroupId}/school-categories', 'SchoolCategoryController@storeSchoolCategoriesOfUserGroup');
         // users
         Route::resource('/users', 'UserController');
         Route::put('/users/{id}/update-password', 'UserController@updatePassword');
         Route::put('/users/{id}/update-email', 'UserController@updateEmail');
+        // grading periods
+        Route::resource('/grading-periods', 'GradingPeriodController');
         // school years
+        Route::patch('/school-years/{id}', 'SchoolYearController@patch');
         Route::resource('/school-years', 'SchoolYearController');
         // semesters
         Route::resource('/semesters', 'SemesterController');
@@ -195,8 +200,8 @@ Route::group(['prefix' => 'v1'], function () {
         //general settings
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
-        Route::resource('student-grades', 'StudentGradeController');
-        Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
+        //Route::resource('student-grades', 'StudentGradeController');
+        //Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');

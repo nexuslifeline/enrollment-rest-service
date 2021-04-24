@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SchoolYearStoreRequest;
-use App\Http\Requests\SchoolYearUpdateRequest;
 use App\SchoolYear;
 use Illuminate\Http\Request;
-use App\Http\Resources\SchoolYearResource;
 use App\Services\SchoolFeeService;
 use App\Services\SchoolYearService;
+use App\Http\Resources\SchoolYearResource;
+use App\Http\Requests\SchoolYearPatchRequest;
+use App\Http\Requests\SchoolYearStoreRequest;
+use App\Http\Requests\SchoolYearUpdateRequest;
 
 class SchoolYearController extends Controller
 {
@@ -66,6 +67,16 @@ class SchoolYearController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(SchoolYearUpdateRequest $request, int $id)
+    {
+        $schoolYearService = new SchoolYearService();
+        $schoolYear = $schoolYearService->update($request->all(), $id);
+
+        return (new SchoolYearResource($schoolYear))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function patch(SchoolYearPatchRequest $request, int $id)
     {
         $schoolYearService = new SchoolYearService();
         $schoolYear = $schoolYearService->update($request->all(), $id);

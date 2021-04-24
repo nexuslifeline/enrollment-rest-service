@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SchoolYearStoreRequest extends FormRequest
+class SchoolYearPatchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,7 +15,6 @@ class SchoolYearStoreRequest extends FormRequest
     {
         return true;
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,9 +23,14 @@ class SchoolYearStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'sometimes|required|max:191',
-            'description' => 'sometimes|required|max:191',
-            'start_date' => 'sometimes|required|date'
+            'school_year_status_id' => 'sometimes|required|in:1,2,3,4'
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'school_year_status_id' => 'status'
         ];
     }
 }

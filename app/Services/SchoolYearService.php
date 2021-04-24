@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\SchoolYear;
 use Exception;
+use App\SchoolYear;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -46,6 +47,10 @@ class SchoolYearService
     {
         DB::beginTransaction();
         try {
+            if (!Arr::exists($data, 'is_active')) {
+                $data['is_active'] = 1;
+            }
+
             $schoolYear = SchoolYear::create($data);
             if ($data['is_active']) {
                 $activeSchoolYear = SchoolYear::where('id', '!=', $schoolYear->id)
@@ -70,7 +75,7 @@ class SchoolYearService
         try {
             $schoolYear = SchoolYear::find($id);
             $schoolYear->update($data);
-            if ($data['is_active']) {
+            if (Arr::exists($data, 'is_active') && $data['is_active']) {
                 $activeSchoolYear = SchoolYear::where('id', '!=', $schoolYear->id)
                 ->where('is_active', 1);
                 $activeSchoolYear->update([
