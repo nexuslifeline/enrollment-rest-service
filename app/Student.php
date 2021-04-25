@@ -3,14 +3,15 @@
 namespace App;
 
 use App\User;
+use Carbon\Carbon;
+use App\Evaluation;
+use App\StudentPhoto;
 use App\StudentFamily;
 use App\StudentAddress;
+use Illuminate\Support\Arr;
 use App\StudentPreviousEducation;
-use App\StudentPhoto;
-use App\Evaluation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\Carbon;
 
 class Student extends Model
 {
@@ -157,7 +158,9 @@ class Student extends Model
 
     public function getAgeAttribute()
     {
-        return Carbon::parse($this->attributes['birth_date'])->age;
+        return Arr::exists($this->attributes, 'birth_date')
+            ? Carbon::parse($this->attributes['birth_date'])->age
+            : 0;
     }
 
     public function getCurrentAddressAttribute()
