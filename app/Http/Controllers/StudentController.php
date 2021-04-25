@@ -4,19 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Student;
 use App\Admission;
+use Carbon\Carbon;
 use App\Evaluation;
 use App\Application;
 use App\AcademicRecord;
-use App\Http\Requests\ManualRegisterRequest;
-use App\Http\Requests\StudentRegisterRequest;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 use App\Services\StudentService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\BillingResource;
 use App\Http\Resources\StudentResource;
 use App\Http\Requests\StudentStoreRequest;
 use App\Http\Requests\StudentUpdateRequest;
+use App\Http\Requests\ManualRegisterRequest;
+use App\Http\Requests\StudentRegisterRequest;
+use App\Http\Requests\StudentUserStoreRequest;
 
 class StudentController extends Controller
 {
@@ -143,6 +147,14 @@ class StudentController extends Controller
         return new BillingResource(
             $ledger
         );
+    }
+
+    public function storeUser(StudentUserStoreRequest $request, int $id){
+        $userService = new UserService();
+        $user = $userService->store($request->all());
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(201);
     }
 
 }

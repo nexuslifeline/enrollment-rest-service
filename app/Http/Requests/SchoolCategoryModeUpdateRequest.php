@@ -16,6 +16,11 @@ class SchoolCategoryModeUpdateRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge(['school_category_id' => (int)$this->route('schoolCategoryId')]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -26,15 +31,17 @@ class SchoolCategoryModeUpdateRequest extends FormRequest
         return [
             'is_open' => 'required',
             'school_year_id' => 'required',
-             //'school_category_id' => 'required', // this is already in path params
+            'school_category_id' => 'required', // this is already in path params
+            'semester_id' => 'required_if:school_category_id,4,5', // this is already in path params
         ];
     }
 
     public function attributes()
     {
         return [
-            //'school_category_id' => 'school category',
+            'school_category_id' => 'school category',
             'school_year_id' => 'school year',
+            'semester_id' => 'semester',
             'is_open' => 'mode'
         ];
     }

@@ -6,6 +6,7 @@ use App\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -39,6 +40,8 @@ class UserService
     {
         DB::beginTransaction();
         try {
+            $data['password'] = Hash::make($data['password']);
+
             $user = User::create($data);
             DB::commit();
             return $user;
@@ -54,6 +57,8 @@ class UserService
     {
         DB::beginTransaction();
         try {
+            $data['password'] = Hash::make($data['password']);
+
             $user = User::find($id);
             $user->update($data);
             $user->load(['userable', 'userable.photo']);
@@ -66,11 +71,11 @@ class UserService
                   'active_transcript_record',
                 ]);
             } else {
-            $user->load(['userGroup' => function ($q) {
-                return $q->select(['id', 'name'])->with(['permissions' => function ($q) {
-                return $q->select(['permissions.id', 'permission_group_id']);
-                }, 'schoolCategories']);
-            }]);
+                $user->load(['userGroup' => function ($q) {
+                    return $q->select(['id', 'name'])->with(['permissions' => function ($q) {
+                    return $q->select(['permissions.id', 'permission_group_id']);
+                    }, 'schoolCategories']);
+                }]);
             }
 
             DB::commit();

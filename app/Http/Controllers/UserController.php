@@ -84,8 +84,7 @@ class UserController extends Controller
     public function updatePassword(UserPasswordUpdateRequest $request, int $id)
     {
         $userService = new UserService();
-        $password = $request->only('password');
-        $data = ['password' => Hash::make($password['password'])];
+        $data = $request->only('password');
         // return $data['password'];
         $user = $userService->update($data, $id);
 

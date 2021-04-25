@@ -38,6 +38,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');
         Route::delete('/students/{studentId}/photos', 'StudentPhotoController@destroy');
         Route::get('/students/{studentId}/ledgers', 'StudentController@getLedgerOfStudent');
+        Route::post('/students/{studentId}/user', 'StudentController@storeUser');
 
         // student file
         Route::get('/students/{studentId}/files', 'StudentFileController@index');
@@ -118,6 +119,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/personnels/{personnelId}/employment', 'PersonnelController@storeEmployment');
         Route::put('/personnels/{personnelId}/employment/{employmentId}', 'PersonnelController@updateEmployment');
         Route::delete('/personnels/{personnelId}/employment/{employmentId}', 'PersonnelController@deleteEmployment');
+        Route::post('/personnels/{personnelId}/user', 'PersonnelController@storeUser');
         // payments
         Route::resource('/payments', 'PaymentController');
         Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');

@@ -35,11 +35,8 @@ class SchoolCategoryModeController extends Controller
      */
     public function store(SchoolCategoryModeStoreRequest $request, int $id)
     {
-        $data = $request->all();
-        $data['school_category_id'] = $id;
-
         $schoolCategoryModeService = new SchoolCategoryModeService();
-        $schoolCategoryMode = $schoolCategoryModeService->store($data);
+        $schoolCategoryMode = $schoolCategoryModeService->store($request->all());
         return (new SchoolCategoryModeResource($schoolCategoryMode))
                 ->response()
                 ->setStatusCode(201);
@@ -67,9 +64,6 @@ class SchoolCategoryModeController extends Controller
      */
     public function update(SchoolCategoryModeUpdateRequest $request, int $id)
     {
-        $data = $request->all();
-        $data['school_category_id'] = $id;
-
         $schoolCategoryModeService = new SchoolCategoryModeService();
         $schoolCategoryMode = $schoolCategoryModeService->update($request->all(), $id);
 

@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Personnel;
 use Illuminate\Http\Request;
+use App\Services\UserService;
 use Faker\Provider\ar_JO\Person;
 use App\Services\PersonnelService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\PersonnelResource;
 use App\Http\Requests\PersonnelStoreRequest;
 use App\Http\Requests\PersonnelUpdateRequest;
+use App\Http\Requests\PersonnelUserStoreRequest;
 use App\Http\Requests\PersonnelEducationStoreRequest;
 use App\Http\Requests\PersonnelEducationUpdateRequest;
 use App\Http\Requests\PersonnelEmploymentStoreRequest;
@@ -168,5 +171,13 @@ class PersonnelController extends Controller
         $personnelService = new PersonnelService();
         $personnelService->deleteEmployment($id, $employmentId);
         return response()->json([], 204);
+    }
+
+    public function storeUser(PersonnelUserStoreRequest $request, int $id){
+        $userService = new UserService();
+        $user = $userService->store($request->all());
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(201);
     }
 }
