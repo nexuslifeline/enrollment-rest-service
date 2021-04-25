@@ -15,21 +15,21 @@ class TermObserver
      */
     public function created(Term $term)
     {
-        $academicRecords = AcademicRecord::where('school_category_id', $term->school_category_id)
-        ->where('academic_record_status_id', 3)->get();
-        foreach ($academicRecords as $academicRecord) {
-            $subjects = $academicRecord->subjects()->get();
-            $studentGrades = $academicRecord->grades();
-            foreach ($subjects as $subject) {
-                $item = [
-                    'subject_id' => $subject['id'],
-                    'personnel_id' => null,
-                    'grade' => 0,
-                    'notes' => ''
-                ];
-                $studentGrades->wherePivot('subject_id', $subject['id'])->attach($term->id, $item);
-            }
-        }
+        // $academicRecords = AcademicRecord::where('school_category_id', $term->school_category_id)
+        // ->where('academic_record_status_id', 3)->get();
+        // foreach ($academicRecords as $academicRecord) {
+        //     $subjects = $academicRecord->subjects()->get();
+        //     $studentGrades = $academicRecord->grades();
+        //     foreach ($subjects as $subject) {
+        //         $item = [
+        //             'subject_id' => $subject['id'],
+        //             'personnel_id' => null,
+        //             'grade' => 0,
+        //             'notes' => ''
+        //         ];
+        //         $studentGrades->wherePivot('subject_id', $subject['id'])->attach($term->id, $item);
+        //     }
+        // }
     }
 
     /**
@@ -51,12 +51,12 @@ class TermObserver
      */
     public function deleted(Term $term)
     {
-        $academicRecords = AcademicRecord::where('school_category_id', $term->school_category_id)
-            ->where('academic_record_status_id', 3)->get();
-        foreach ($academicRecords as $academicRecord) {
-            $studentGrades = $academicRecord->grades();
-            $studentGrades->detach($term->id);
-        }
+        // $academicRecords = AcademicRecord::where('school_category_id', $term->school_category_id)
+        //     ->where('academic_record_status_id', 3)->get();
+        // foreach ($academicRecords as $academicRecord) {
+        //     $studentGrades = $academicRecord->grades();
+        //     $studentGrades->detach($term->id);
+        // }
     }
 
     /**

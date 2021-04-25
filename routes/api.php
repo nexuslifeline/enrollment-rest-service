@@ -76,6 +76,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::put('/users/{id}/update-email', 'UserController@updateEmail');
         // grading periods
         Route::resource('/grading-periods', 'GradingPeriodController');
+        Route::post('grading-periods/update-multiple', 'GradingPeriodController@updateCreateBulk');
         // school years
         Route::patch('/school-years/{id}', 'SchoolYearController@patch');
         Route::resource('/school-years', 'SchoolYearController');
@@ -100,7 +101,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/academic-records', 'AcademicRecordController');
         Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
         Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
-        Route::post('academic-records/finalize-grade', 'AcademicRecordController@finalizeGrade');
+        Route::post('academic-records/finalize-grades', 'AcademicRecordController@finalizeGrades');
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
         Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');

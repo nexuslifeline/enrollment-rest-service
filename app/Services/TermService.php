@@ -130,6 +130,7 @@ class TermService
                 ['id' => $term->id],
                 [
                     'name' => $term->name,
+                    'description' => $term->description,
                     'school_year_id' => $schoolYearId,
                     'school_category_id' => $schoolCategoryId,
                     'semester_id' => $semesterId,

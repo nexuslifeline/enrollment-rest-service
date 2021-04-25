@@ -85,4 +85,18 @@ class GradingPeriodController extends Controller
         $gradingPeriodService->delete($id);
         return response()->json([], 204);
     }
+
+    public function updateCreateBulk(Request $request)
+    {
+        $gradingPeriodService = new GradingPeriodService();
+        $filters = $request->except('grading_periods');
+        $data = $request->grading_periods;
+        // $arrTerms = $request->except('school_category_id', 'semester_id', 'school_year_id');
+
+        $gradingPeriods = $gradingPeriodService->updateCreateBulk($data, $filters);
+
+        return (new GradingPeriodResource($gradingPeriods))
+            ->response()
+            ->setStatusCode(200);
+    }
 }

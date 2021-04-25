@@ -142,11 +142,11 @@ class AcademicRecordController extends Controller
         );
     }
 
-    public function finalizeGrade(Request $request)
+    public function finalizeGrades(Request $request)
     {
         $data = $request->all();
         $academicRecordService = new AcademicRecordService();
-        $academicRecords = $academicRecordService->finalizeGrade($data);
+        $academicRecords = $academicRecordService->finalizeGrades($data);
 
         // return AcademicRecordResource::collection(
             return $academicRecords;

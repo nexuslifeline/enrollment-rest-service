@@ -3,7 +3,8 @@
 namespace App\Observers;
 
 use App\AcademicRecord;
-use App\Term;
+use App\GradingPeriod;
+use App\GradingPeriods;
 
 class AcademicRecordObserver
 {
@@ -17,7 +18,7 @@ class AcademicRecordObserver
     {
         if ($academicRecord->academic_record_status_id === 3) {
             $subjects = $academicRecord->subjects()->get();
-            $terms = Term::where('school_category_id', $academicRecord->school_category_id)
+            $gradingPeriods = GradingPeriod::where('school_category_id', $academicRecord->school_category_id)
                 ->where('school_year_id', $academicRecord->school_year_id)
                 ->where('semester_id', $academicRecord->semester_id)
                 ->get()
@@ -25,8 +26,8 @@ class AcademicRecordObserver
             foreach ($subjects as $subject) {
                 $studentGrades = $academicRecord->grades();
                 $items = [];
-                foreach ($terms as $term) {
-                    $items[$term] = [
+                foreach ($gradingPeriods as $gradingPeriod) {
+                    $items[$gradingPeriod] = [
                         'subject_id' => $subject['id'],
                         'personnel_id' => null,
                         'grade' => 0,
@@ -48,7 +49,7 @@ class AcademicRecordObserver
     {
         if ($academicRecord->academic_record_status_id === 3) {
             $subjects = $academicRecord->subjects()->get();
-            $terms = Term::where('school_category_id', $academicRecord->school_category_id)
+            $gradingPeriods = GradingPeriod::where('school_category_id', $academicRecord->school_category_id)
                 ->where('school_year_id', $academicRecord->school_year_id)
                 ->where('semester_id', $academicRecord->semester_id)
                 ->get()
@@ -56,8 +57,8 @@ class AcademicRecordObserver
             foreach ($subjects as $subject) {
                 $studentGrades = $academicRecord->grades();
                 $items = [];
-                foreach ($terms as $term) {
-                    $items[$term] = [
+                foreach ($gradingPeriods as $gradingPeriod) {
+                    $items[$gradingPeriod] = [
                         'subject_id' => $subject['id'],
                         'personnel_id' => null,
                         'grade' => 0,

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\AcademicRecord;
+use App\GradingPeriod;
 use App\Observers\AcademicRecordObserver;
+use App\Observers\GradingPeriodObserver;
 use App\Observers\StudentFeeObserver;
 use App\Observers\TermObserver;
 use App\StudentFee;
@@ -48,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
         }
         StudentFee::observe(StudentFeeObserver::class);
         AcademicRecord::observe(AcademicRecordObserver::class);
-        Term::observe(TermObserver::class);
+        // Term::observe(TermObserver::class);
+        GradingPeriod::observe(GradingPeriodObserver::class);
     }
 }

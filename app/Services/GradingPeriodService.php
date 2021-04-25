@@ -26,6 +26,12 @@ class GradingPeriodService
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
+            // filter by Semester id
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function ($q) use ($semesterId) {
+                return $q->where('semester_id', $semesterId);
+            });
+
             $gradingPeriods = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
@@ -92,6 +98,43 @@ class GradingPeriodService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during GradingPeriodService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function updateCreateBulk(array $gradingPeriods, array $filters)
+    {
+        DB::beginTransaction();
+        try {
+
+            $schoolYearId = $filters['school_year_id'] ?? null;
+            $schoolCategoryId = $filters['school_category_id'] ?? null;
+            $semesterId = $filters['semester_id'] ?? null;
+
+            foreach ($gradingPeriods as $period) {
+                GradingPeriod::updateOrCreate(
+                    ['id' => $period['id']],
+                    [
+                        'name' => $period['name'],
+                        'description' => $period['description'],
+                        'school_year_id' => $schoolYearId,
+                        'school_category_id' => $schoolCategoryId,
+                        'semester_id' => $semesterId,
+                    ]
+                );
+            }
+
+            DB::commit();
+
+            $query = GradingPeriod::where('school_year_id', $schoolYearId)
+                ->where('school_category_id', $schoolCategoryId)
+                ->where('semester_id', $semesterId);
+
+            return $query->get();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during GradingPeriodService updateCreateBulk method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
