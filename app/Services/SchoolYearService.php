@@ -35,6 +35,7 @@ class SchoolYearService
     {
         try {
             $schoolYear = SchoolYear::find($id);
+            $schoolYear->load('schoolCategoryModes');
             return $schoolYear;
         } catch (Exception $e) {
             Log::info('Error occured during SchoolYearService get method call: ');

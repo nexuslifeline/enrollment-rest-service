@@ -27,4 +27,9 @@ class GradingPeriod extends Model
     {
         return $this->belongsTo('App\SchoolCategory');
     }
+
+    public function semester()
+    {
+        return $this->belongsTo('App\Semester');
+    }
 }

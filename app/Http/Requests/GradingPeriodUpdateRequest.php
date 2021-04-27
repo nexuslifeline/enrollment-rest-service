@@ -27,6 +27,7 @@ class GradingPeriodUpdateRequest extends FormRequest
             'name' => 'required|max:255',
             'school_year_id' => 'required',
             'school_category_id' => 'required',
+            'semester_id' => 'required_if:school_category_id,4,5'
         ];
     }
 
@@ -34,7 +35,15 @@ class GradingPeriodUpdateRequest extends FormRequest
     {
         return [
             'school_category_id' => 'school category',
-            'school_year_id' => 'school year'
+            'school_year_id' => 'school year',
+            'semester' => 'semester'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'required_if' => 'The :attribute field is required.'
         ];
     }
 }

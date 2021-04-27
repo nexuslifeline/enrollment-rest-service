@@ -12,7 +12,7 @@ class GradingPeriodService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = GradingPeriod::with(['schoolYear', 'schoolCategory']);
+            $query = GradingPeriod::with(['schoolYear', 'schoolCategory','semester']);
 
             // filter by School Year id
             $schoolYearId = $filters['school_year_id'] ?? false;
@@ -48,7 +48,7 @@ class GradingPeriodService
         DB::beginTransaction();
         try {
             $gradingPeriod = GradingPeriod::create($data);
-            $gradingPeriod->load(['schoolYear', 'schoolCategory']);
+            $gradingPeriod->load(['schoolYear', 'schoolCategory', 'semester']);
             DB::commit();
             return $gradingPeriod;
         } catch (Exception $e) {
@@ -63,7 +63,7 @@ class GradingPeriodService
     {
         try {
             $gradingPeriod = GradingPeriod::find($id);
-            $gradingPeriod->load(['schoolYear', 'schoolCategory']);
+            $gradingPeriod->load(['schoolYear', 'schoolCategory', 'semester']);
             return $gradingPeriod;
         } catch (Exception $e) {
             Log::info('Error occured during GradingPeriodService get method call: ');
@@ -78,6 +78,7 @@ class GradingPeriodService
         try {
             $gradingPeriod = GradingPeriod::find($id);
             $gradingPeriod->update($data);
+            $gradingPeriod->load(['schoolYear', 'schoolCategory', 'semester']);
             DB::commit();
             return $gradingPeriod;
         } catch (Exception $e) {

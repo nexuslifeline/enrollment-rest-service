@@ -148,5 +148,4 @@ class StudentUpdateRequest extends FormRequest
             'required_if' => 'The :attribute field is required.'
         ];
     }
-    
 }

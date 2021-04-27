@@ -14,7 +14,7 @@ class AddNewFieldsToTermsTable extends Migration
     public function up()
     {
         Schema::table('terms', function (Blueprint $table) {
-            $table->string('description')->default('')->after('name');
+            $table->string('description')->default('')->nullable()->after('name');
         });
     }
 

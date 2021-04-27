@@ -22,4 +22,8 @@ class SchoolYear extends Model
     public function terms(){
         return $this->hasMany('App\Term');
     }
+
+    public function schoolCategoryModes() {
+        return $this->hasMany('App\SchoolCategoryMode');
+    }
 }

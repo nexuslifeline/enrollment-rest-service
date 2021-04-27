@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\TermService;
 use App\Http\Resources\TermResource;
+use App\Http\Requests\TermStoreRequest;
+use App\Http\Requests\TermUpdateRequest;
 
 class TermController extends Controller
 {
@@ -44,7 +46,7 @@ class TermController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(TermStoreRequest $request)
     {
         $termService = new TermService();
         $term = $termService->store($request->all());
@@ -60,7 +62,7 @@ class TermController extends Controller
      * @param  \App\Term  $term
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $id)
+    public function update(TermUpdateRequest $request, int $id)
     {
         $termService = new TermService();
         $term = $termService->update($request->all(), $id);
