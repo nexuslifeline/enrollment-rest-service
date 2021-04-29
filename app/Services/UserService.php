@@ -57,7 +57,9 @@ class UserService
     {
         DB::beginTransaction();
         try {
-            $data['password'] = Hash::make($data['password']);
+            if (array_key_exists('password', $data)) {
+                $data['password'] = Hash::make($data['password']);
+            }
 
             $user = User::find($id);
             $user->update($data);

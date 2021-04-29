@@ -24,7 +24,7 @@ class UserEmailUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'username' => 'required|string|email:filter|max:255|unique:users,username,' . $this->id . ',userable_id',
+            'username' => 'required|string|email:filter|max:255|unique:users,username,' . $this->id . ',id',
             'user_group_id' => 'sometimes|required',
         ];
     }
