@@ -24,15 +24,16 @@ class PersonnelStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'user.username' => 'required|string|email:filter|max:255|unique:users,username',
-            'user.password' => 'required|string|min:6|confirmed',
-            'user.user_group_id' => 'required',
-            'department_id' => 'required',
+            'first_name' => 'sometimes|required|string|max:255',
+            'last_name' => 'sometimes|required|string|max:255',
+            'user.username' => 'sometimes|required|string|email:filter|max:255|unique:users,username',
+            'user.password' => 'sometimes|required|string|min:6|confirmed',
+            'user.user_group_id' => 'sometimes|required',
+            'department_id' => 'sometimes|required',
             //'personnel_status_id' => 'required',
-            'job_title' => 'required|string|max:255',
-            'birth_date' => 'required|date',
+            'job_title' => 'sometimes|required|string|max:255',
+            'birth_date' => 'sometimes|required|date',
+            'civil_status_id' => 'sometimes|required',
             //'complete_address' => 'required|string',
         ];
     }
