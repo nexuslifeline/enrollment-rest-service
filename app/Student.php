@@ -238,4 +238,9 @@ class Student extends Model
         $query->academicRecords;
         return $query;
     }
+
+    public function studentGrades()
+    {
+        return $this->hasMany('App\StudentGrade');
+    }
 }

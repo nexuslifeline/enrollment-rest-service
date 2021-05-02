@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Personnel;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +30,12 @@ class PersonnelService
             $departmentId = $filter['department_id'] ?? false;
             $query->when($departmentId, function($q) use ($departmentId) {
                 return $q->where('department_id', $departmentId);
+            });
+
+            $studentGradesStatusId = $filter['student_grade_status_id'] ?? false;
+            //check if personnel has student grades
+            $query->when($studentGradesStatusId, function ($q) use ($studentGradesStatusId) {
+                return $q->studentGrades($studentGradesStatusId);
             });
 
             $personnels = $isPaginated
@@ -252,20 +259,6 @@ class PersonnelService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PersonnelService updateEmployment method call: ');
-            Log::info($e->getMessage());
-            throw $e;
-        }
-    }
-
-    public function deleteEmployment(int $id, int $employmentId)
-    {
-        try {
-            $personnel = Personnel::find($id);
-            $employment = $personnel->employments()->find($employmentId);
-            $employment->delete();
-        } catch (Exception $e) {
-            DB::rollback();
-            Log::info('Error occured during PersonnelService deleteEmployment method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

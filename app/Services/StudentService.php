@@ -301,7 +301,7 @@ class StudentService
             $sectionId = $filters['section_id'] ?? false;
             $query->when($sectionId, function ($q) use ($sectionId) {
                 return $q->whereHas('academicRecords', function ($query) use ($sectionId) {
-                    return $query->where('academic_record_status_id', 3)
+                    return $query->where('academic_record_status_id', 3)->latest()
                     ->whereHas('subjects', function ($q) use ($sectionId) {
                         return $q->where('section_id', $sectionId);
                     });
@@ -330,7 +330,7 @@ class StudentService
             $subjectId = $filters['subject_id'] ?? false;
             $query->when($subjectId, function ($q) use ($subjectId) {
                 return $q->whereHas('academicRecords', function ($query) use ($subjectId) {
-                    return $query->where('academic_record_status_id', 3)
+                    return $query->where('academic_record_status_id', 3)->latest()
                     ->whereHas('subjects', function ($q) use ($subjectId) {
                         return $q->where('subject_id', $subjectId);
                     });
@@ -769,4 +769,5 @@ class StudentService
             throw $e;
         }
     }
+    
 }

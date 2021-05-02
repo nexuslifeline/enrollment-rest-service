@@ -196,18 +196,32 @@ class SectionService
         }
     }
 
-    public function getSectionsOfPersonnel(int $schoolCategoryId, int $schoolYearId, ?int $semesterId, int $personnelId)
+    public function getSectionsOfPersonnel(array $filters)
     {
         try {
-            $sections = Section::where('school_category_id', $schoolCategoryId)
-                ->where('school_year_id', $schoolYearId)
-                ->when($semesterId, function ($q) use ($semesterId) {
-                    $q->where('semester_id', $semesterId);
-                })
-                ->whereHas('schedules', function ($q) use ($personnelId) {
-                    return $q->where('personnel_id', $personnelId);
-                })
-                ->get();
+            $personnelId = Auth::user()->userable->id;
+            $query = Section::with('level','course','semester')
+            ->whereHas('schedules', function ($q) use ($personnelId) {
+                return $q->where('personnel_id', $personnelId);
+            });
+
+            $schoolCategoryId = $filters['school_category_id'] ?? false;
+            $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) { 
+                return $q->where('school_category_id', $schoolCategoryId);
+            });
+
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function($q) use ($schoolYearId) { 
+                return $q->where('school_year_id', $schoolYearId);
+            });
+
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function ($q) use ($semesterId) {
+                return $q->where('semester_id', $semesterId);
+            });
+
+            $sections = $query->get();
+            
             $sections->append('subjects');
             return $sections;
         } catch (Exception $e) {

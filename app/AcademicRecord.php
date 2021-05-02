@@ -98,6 +98,7 @@ class AcademicRecord extends Model
 
     public function grades()
     {
-        return $this->belongsToMany('App\GradingPeriod', 'student_grades', 'academic_record_id', 'grading_period_id')->withPivot('subject_id','grade');
+        return $this->belongsToMany('App\GradingPeriod', 'student_grades', 'academic_record_id', 'grading_period_id')
+        ->withPivot('subject_id','grade','personnel_id','student_grade_status_id');
     }
 }

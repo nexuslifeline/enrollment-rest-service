@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\StudentGrade;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -12,28 +13,9 @@ class StudentGradeService
   public function list(bool $isPaginated, int $perPage, array $filters)
   {
     try {
-      $query = StudentGrade::with('student', 'details');
-      $sectionId = $filters['section_id'] ?? false;
-
-      $query->when($sectionId, function($q) use($sectionId) {
-        return $q->where('section_id', $sectionId);
-      });
-      $subjectId = $filters['subject_id'] ?? false;
-      $query->when($subjectId, function ($q) use ($subjectId) {
-        return $q->where('subject_id', $subjectId);
-      });
-      $criteria = $filters['criteria'] ?? false;
-      $query->when($criteria, function ($q) use ($criteria) {
-        return $q->where(function($q) use ($criteria) {
-          return $q->whereHas('student', function($q) use ($criteria) {
-            return $q->where('first_name', 'LIKE', '%'.$criteria.'%')
-              ->orWhere('middle_name', 'LIKE', '%'.$criteria.'%')
-              ->orWhere('last_name', 'LIKE', '%' . $criteria . '%')
-              ->orWhere('student_no', 'LIKE', '%' . $criteria . '%');
-            });
-          });
-      });
-
+      $query = StudentGrade::with('grades')
+      ->filters($filters);
+      
 
       $studentGrades = $isPaginated
         ? $query->paginate($perPage)
@@ -47,87 +29,35 @@ class StudentGradeService
     }
   }
 
-  public function store(array $data, array $details)
+  public function batchUpdate(array $studentGrades)
   {
     DB::beginTransaction();
     try {
-      $studentGrade = StudentGrade::create($data);
-      if ($details) {
-        $items = [];
-        foreach ($details as $detail) {
-          $items[$detail['term_id']] = [
-            'personnel_id' => $detail['personnel_id'],
-            'grade' => $detail['grade'],
-            // 'notes' => $detail['notes']
-          ];
-        }
-        $studentGrade->details()->sync($items);
-      }
-      
-      DB::commit();
-      return $studentGrade;
-    } catch (Exception $e) {
-      DB::rollback();
-      Log::info('Error occured during TermService store method call: ');
-      Log::info($e->getMessage());
-      throw $e;
-    }
-  }
-
-  public function update(array $data, array $details, int $id)
-  {
-    DB::beginTransaction();
-    try {
-      $studentGrade = StudentGrade::find($id);
-      $studentGrade->update($data);
-      if ($details) {
-        $items = [];
-        foreach ($details as $detail) {
-          $items[$detail['term_id']] = [
-            'personnel_id' => $detail['personnel_id'],
-            'grade' => $detail['grade'],
-            // 'notes' => $detail['notes']
-          ];
-        }
-        $studentGrade->details()->sync($items);
-      }
-      DB::commit();
-      return $studentGrade;
-    } catch (Exception $e) {
-      DB::rollback();
-      Log::info('Error occured during TermService update method call: ');
-      Log::info($e->getMessage());
-      throw $e;
-    }
-  }
-
-  public function batchUpdate(array $data)
-  {
-    DB::beginTransaction();
-    try {
-      $result = [];
-      foreach ($data as $value) {
-        $studentGrade = StudentGrade::find($value['id']);
-        $studentGrade->update([
-          'student_id' => $value['student_id'],
-          'section_id' => $value['section_id'],
-          'subject_id' => $value['subject_id'],
+      $data = [];
+      foreach ($studentGrades as $studentGrade) {
+        $studentGradeData = StudentGrade::updateOrCreate(['id' => $studentGrade['student_grade_id']],[
+          'student_id' => $studentGrade['student_id'],
+          'school_year_id' => $studentGrade['school_year_id'],
+          'course_id' => $studentGrade['course_id'],
+          'level_id' => $studentGrade['level_id'],
+          'semester_id' => $studentGrade['semester_id'],
+          'section_id' => $studentGrade['section_id'],
+          'subject_id' => $studentGrade['subject_id'],
+          'personnel_id' => Auth::user()->userable->id,
+          'notes' => $studentGrade['notes'],
+          'student_grade_status_id' => $studentGrade['student_grade_status_id'],
         ]);
-        if ($value['details']) {
-          $items = [];
-          foreach ($value['details'] as $detail) {
-            $items[$detail['term_id']] = [
-              'personnel_id' => $detail['personnel_id'],
-              'grade' => $detail['grade'],
-              // 'notes' => $detail['notes']
-            ];
-          }
-          $studentGrade->details()->sync($items);
+        $item = [];
+        foreach ($studentGrade['grades'] as $grade) {
+          $item[$grade['grading_period_id']] = [
+            'grade' => $grade['grade']
+          ];
         }
-        $result[] = $studentGrade;
+
+        $studentGradeData->grades()->sync($item);
       }
       DB::commit();
-      return $result;
+      return $data;
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during TermService batchUpdate method call: ');

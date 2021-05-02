@@ -148,7 +148,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/bank-accounts', 'BankAccountController');
         // sections
         Route::resource('/sections', 'SectionController');
-        Route::get('/personnels/{personnelId}/sections', 'SectionController@getSectionsOfPersonnel');
+        Route::get('/me/sections', 'SectionController@getSectionsOfPersonnel');
         // student fee
         Route::resource('/student-fees', 'StudentFeeController');
         Route::get('/academic-records/{academicRecordId}/student-fees', 'StudentFeeController@getStudentFeeOfAcademicRecord');
@@ -203,8 +203,8 @@ Route::group(['prefix' => 'v1'], function () {
         //general settings
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
-        //Route::resource('student-grades', 'StudentGradeController');
-        //Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
+        Route::resource('student-grades', 'StudentGradeController');
+        Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');

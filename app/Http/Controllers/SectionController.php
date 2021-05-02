@@ -98,13 +98,11 @@ class SectionController extends Controller
         ->setStatusCode(200);
     }
 
-    public function getSectionsOfPersonnel(Request $request, int $personnelId)
+    public function getSectionsOfPersonnel(Request $request)
     {
         $sectionService = new SectionService();
-        $schoolCategoryId = $request->school_category_id;
-        $schoolYearId = $request->school_year_id;
-        $semesterId = $request->semester_id;
-        $sections = $sectionService->getSectionsOfPersonnel($schoolCategoryId, $schoolYearId, $semesterId, $personnelId);
+        $filters = $request->all();
+        $sections = $sectionService->getSectionsOfPersonnel($filters);
         return SectionResource::collection($sections);
     }
 }
