@@ -44,6 +44,10 @@ class UserService
 
             $user = User::create($data);
             DB::commit();
+
+            if ($user->userable_type === 'App\\Personnel') {
+                $user->load(['userGroup']);
+            }
             return $user;
         } catch (Exception $e) {
             DB::rollback();

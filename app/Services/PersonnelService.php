@@ -63,11 +63,13 @@ class PersonnelService
         try {
             $personnel = Personnel::create($data);
 
-            $personnel->user()->create([
-                'username' => $user['username'],
-                'user_group_id' => $user['user_group_id'],
-                'password' => Hash::make($user['password'])
-            ]);
+            if (array_key_exists('user', $data)) {
+                $personnel->user()->create([
+                    'username' => $user['username'],
+                    'user_group_id' => $user['user_group_id'],
+                    'password' => Hash::make($user['password'])
+                ]);
+            }
 
             $personnel->load(['photo','user' => function($query) {
                 $query->with('userGroup');
