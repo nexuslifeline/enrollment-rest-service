@@ -33,7 +33,15 @@ class PersonnelUserStoreRequest extends FormRequest
     {
         return [
             'username' => 'required|string|email:filter|max:255|unique:users,username',
+            'user_group_id' => 'required',
             'password' => 'required|string|min:6|confirmed'
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+          'user_group_id' => 'user group'
         ];
     }
 }
