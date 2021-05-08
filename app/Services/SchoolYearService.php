@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class SchoolYearService
 {
-    public function list(bool $isPaginated, int $perPage, array $filters)
+    public function list(bool $isPaginated, int $perPage, array $filters, array $ordering = [])
     {
         try {
 
@@ -18,6 +18,11 @@ class SchoolYearService
             $query = SchoolYear::when($isActive, function($q) use ($isActive){
                 return $q->where('is_active', $isActive);
             });
+
+            if (!Arr::exists($ordering, 'columns')) $ordering['columns'] = 'id';
+            if (!Arr::exists($ordering, 'order_by')) $ordering['order_by'] = 'DESC';
+
+            $query->orderBy($ordering['columns'], $ordering['order_by']);
 
             $schoolYears = $isPaginated
                 ? $query->paginate($perPage)
