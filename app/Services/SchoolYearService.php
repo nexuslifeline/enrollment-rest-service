@@ -70,11 +70,11 @@ class SchoolYearService
         }
     }
 
-    public function update(array $data, int $id)
+    public function update(array $data, int $id = 0)
     {
         DB::beginTransaction();
         try {
-            $schoolYear = SchoolYear::find($id);
+            $schoolYear = $id ? SchoolYear::find($id) : SchoolYear::query(); // update all if no id is provided
             $schoolYear->update($data);
             if (Arr::exists($data, 'is_active') && $data['is_active']) {
                 $activeSchoolYear = SchoolYear::where('id', '!=', $schoolYear->id)

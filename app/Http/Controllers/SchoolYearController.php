@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\SchoolYear;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Services\SchoolFeeService;
 use App\Services\SchoolYearService;
@@ -69,7 +70,13 @@ class SchoolYearController extends Controller
     public function update(SchoolYearUpdateRequest $request, int $id)
     {
         $schoolYearService = new SchoolYearService();
-        $schoolYear = $schoolYearService->update($request->all(), $id);
+        $data = $request->all();
+
+        if (Arr::exists($data, 'is_active')) {
+            $schoolYearService->update(['is_active' => false]); // make sure no other sy is active at the same time
+        }
+
+        $schoolYear = $schoolYearService->update($data, $id);
 
         return (new SchoolYearResource($schoolYear))
             ->response()
@@ -79,7 +86,14 @@ class SchoolYearController extends Controller
     public function patch(SchoolYearPatchRequest $request, int $id)
     {
         $schoolYearService = new SchoolYearService();
-        $schoolYear = $schoolYearService->update($request->all(), $id);
+
+        $data = $request->all();
+
+        if (Arr::exists($data, 'is_active')) {
+            $schoolYearService->update(['is_active' => false]); // make sure no other sy is active at the same time
+        }
+
+        $schoolYear = $schoolYearService->update($data, $id);
 
         return (new SchoolYearResource($schoolYear))
             ->response()
