@@ -450,4 +450,52 @@ class AcademicRecordService
             throw $e;
         }
     }
+
+    public function getSubjects(int $academicRecordId, bool $isPaginated, int $perPage, array $filters)
+    {
+
+        try {
+            $query = AcademicRecord::find($academicRecordId)->subjects();
+            $query->withPivot(['is_dropped']);
+
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+
+            $subjects->append('section');
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjects method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+
+    public function updateSubject(array $data = [], int $academicRecordId, int $subjectId)
+    {
+        try {
+            $subject = AcademicRecord::find($academicRecordId)
+                ->subjects()
+                ->where('subject_id', $subjectId)
+                ->first();
+
+            if (count($data) > 0) {
+                $pivot = $subject->pivot;
+                foreach ($data as $key => $value) {
+                    $pivot->{$key} = $value;
+                }
+                $pivot->save();
+            }
+
+            $subject->append('section');
+            return $subject;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjects method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+
+    }
 }

@@ -152,4 +152,28 @@ class AcademicRecordController extends Controller
             return $academicRecords;
         // );
     }
+
+    public function getSubjects(Request $request, $id)
+    {
+        $academicRecordService = new AcademicRecordService();
+
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+
+        $academicRecord = $academicRecordService->getSubjects($id, $isPaginated, $perPage, $filters);
+        return new AcademicRecordResource($academicRecord);
+    }
+
+    public function updateSubject(Request $request, $academicRecordId, $subjectId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->only(['section_id', 'is_dropped']);
+        $academicRecord = $academicRecordService->updateSubject(
+            $data,
+            $academicRecordId,
+            $subjectId
+        );
+        return new AcademicRecordResource($academicRecord);
+    }
 }

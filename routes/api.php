@@ -51,8 +51,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/subjects', 'SubjectController');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
-        Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord');
-        Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
         Route::get('/subjects/{subjectId}/sections', 'SectionController@getSectionsOfSubject');
         Route::get('/sections/{sectionId}/my-scheduled-subjects', 'SubjectController@getSectionScheduledSubjectsWithStatus');
@@ -103,6 +101,12 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
         Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
         Route::post('academic-records/finalize-grades', 'AcademicRecordController@finalizeGrades');
+        Route::get('/academic-records/{academicRecordId}/student-fees', 'StudentFeeController@getStudentFeeOfAcademicRecord');
+        Route::get('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@getSubjects');
+        Route::put('/academic-records/{academicRecordId}/subjects/{subjectId}', 'AcademicRecordController@updateSubject');
+        //Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord'); // should be removed once frontend is updated
+        Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
+
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
         Route::get('/user-groups/{userGroupId}/permissions', 'PermissionController@getPermissionsOfUserGroup');
@@ -151,7 +155,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/me/sections', 'SectionController@getSectionsOfPersonnel');
         // student fee
         Route::resource('/student-fees', 'StudentFeeController');
-        Route::get('/academic-records/{academicRecordId}/student-fees', 'StudentFeeController@getStudentFeeOfAcademicRecord');
         Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         // curriculum
         Route::resource('curriculums', 'CurriculumController');
