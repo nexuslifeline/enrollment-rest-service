@@ -161,8 +161,11 @@ class AcademicRecordController extends Controller
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $filters = $request->except('per_page', 'paginate');
 
-        $academicRecord = $academicRecordService->getSubjects($id, $isPaginated, $perPage, $filters);
-        return new AcademicRecordResource($academicRecord);
+        $subjects = $academicRecordService->getSubjects($id, $isPaginated, $perPage, $filters);
+
+        return AcademicRecordResource::collection(
+            $subjects
+        );
     }
 
     public function updateSubject(Request $request, $academicRecordId, $subjectId)

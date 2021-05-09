@@ -39,6 +39,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::delete('/students/{studentId}/photos', 'StudentPhotoController@destroy');
         Route::get('/students/{studentId}/ledgers', 'StudentController@getLedgerOfStudent');
         Route::post('/students/{studentId}/user', 'StudentController@storeUser');
+        Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
+        Route::get('/students/{studentId}/academic-records', 'StudentController@getAcademicRecords');
 
         // student file
         Route::get('/students/{studentId}/files', 'StudentFileController@index');
@@ -155,7 +157,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/me/sections', 'SectionController@getSectionsOfPersonnel');
         // student fee
         Route::resource('/student-fees', 'StudentFeeController');
-        Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         // curriculum
         Route::resource('curriculums', 'CurriculumController');
         // school fee categories

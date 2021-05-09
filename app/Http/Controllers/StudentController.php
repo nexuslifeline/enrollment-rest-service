@@ -149,12 +149,28 @@ class StudentController extends Controller
         );
     }
 
-    public function storeUser(StudentUserStoreRequest $request, int $id){
+    public function storeUser(StudentUserStoreRequest $request, int $id)
+    {
         $userService = new UserService();
         $user = $userService->store($request->all());
         return (new UserResource($user))
             ->response()
             ->setStatusCode(201);
+    }
+
+    public function getAcademicRecords(Request $request, $studentId)
+    {
+        $studentService = new StudentService();
+
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+
+        $academicRecords = $studentService->getAcademicRecords($studentId, $isPaginated, $perPage, $filters);
+
+        return StudentResource::collection(
+            $academicRecords
+        );
     }
 
 }

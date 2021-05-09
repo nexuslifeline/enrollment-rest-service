@@ -769,5 +769,23 @@ class StudentService
             throw $e;
         }
     }
-    
+
+    public function getAcademicRecords(int $studentId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = AcademicRecord::with(['schoolYear', 'schoolCategory', 'level', 'course', 'semester', 'section'])
+                ->where('student_id', $studentId);
+
+            $academicRecord = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+
+            return $academicRecord;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService getAcademicRecords method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
 }
