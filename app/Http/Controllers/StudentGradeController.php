@@ -25,6 +25,23 @@ class StudentGradeController extends Controller
         return StudentGradeResource::collection($studentGrades);
     }
 
+    public function studentGradePersonnels(Request $request)
+    {
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $studentGradeService = new StudentGradeService;
+        $studentGrades = $studentGradeService->studentGradePersonnels($isPaginated, $perPage, $filters);
+        return StudentGradeResource::collection($studentGrades);
+    }
+
+    public function acceptStudentGrade($personnelId, $sectionId, $subjectId)
+    {
+        $studentGradeService = new StudentGradeService;
+        $studentGrades = $studentGradeService->acceptStudentGrade($personnelId, $sectionId, $subjectId);
+        return $studentGrades;
+    }
+
     /**
      * Show the form for creating a new resource.
      *

@@ -208,6 +208,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
         Route::resource('student-grades', 'StudentGradeController');
+        Route::get('student-grades/personnels/list', 'StudentGradeController@studentGradePersonnels');
+        Route::post('student-grades/{personnelId}/{sectionId}/{subjectId}', 'StudentGradeController@acceptStudentGrade');
         Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
 
         //student clearances

@@ -25,6 +25,31 @@ class StudentGrade extends Model
             ->withPivot('grade');
     }
 
+    public function personnel()
+    {
+        return $this->belongsTo('App\Personnel');
+    }
+
+    public function section()
+    {
+        return $this->belongsTo('App\Section');
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo('App\Subject');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo('App\Student');
+    }
+
+    public function schoolYear()
+    {
+        return $this->belongsTo('App\SchoolYear');
+    }
+
     public function scopeFilters($query, $filters)
     {
         //filter by student id
