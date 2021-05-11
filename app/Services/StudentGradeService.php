@@ -80,6 +80,7 @@ class StudentGradeService
         $grade = $studentGrade->grades
           ->avg('pivot.grade');
         $subject->updateExistingPivot($subjectId, [
+          'system_notes' => 'From student_grades table with id of '. $studentGrade->id. '. Accepted by user with id of '. Auth::user()->id .'. Date accepted '. Carbon::now(),
           'grade' => $grade
         ]);
         $studentGrade->update([
