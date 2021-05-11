@@ -106,6 +106,12 @@ class StudentGrade extends Model
             return $q->where('subject_id', $subjectId);
         });
 
+        //filter by section id
+        $sectionId = $filters['section_id'] ?? false;
+        $query->when($subjectId, function ($q) use ($sectionId) {
+            return $q->where('section_id', $sectionId);
+        });
+
         return $query;
     }
 }
