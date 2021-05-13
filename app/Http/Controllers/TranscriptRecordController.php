@@ -98,4 +98,17 @@ class TranscriptRecordController extends Controller
     {
         //
     }
+
+    public function getLevels(Request $request, $id)
+    {
+        $transcriptRecordService = new transcriptRecordService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $levels = $transcriptRecordService->getLevels($id, $isPaginated, $perPage, $filters);
+
+        return TranscriptRecordResource::collection(
+            $levels
+        );
+    }
 }

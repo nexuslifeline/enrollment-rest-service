@@ -152,4 +152,23 @@ class TranscriptRecordService
       throw $e;
     }
   }
+
+
+  public function getLevels(int $id, bool $isPaginated, int $perPage, array $filters)
+  {
+    try {
+      $query = TranscriptRecord::find($id)
+        ->levels()
+        ->distinct();
+
+      $levels = $isPaginated
+        ? $query->paginate($perPage)
+        : $query->get();
+      return $levels;
+    } catch (Exception $e) {
+      Log::info('Error occured during TranscriptRecordService getLevels method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
 }

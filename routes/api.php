@@ -193,6 +193,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/transcript-records', 'TranscriptRecordController');
         Route::get('/transcript-records/{transcriptRecordId}/subjects', 'SubjectController@getSubjectsOfTranscriptRecord');
         Route::get('/transcript-records/{transcriptRecordId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
+        Route::get('/transcript-records/{transcriptRecordId}/levels', 'TranscriptRecordController@getLevels');
 
         //document types
         Route::resource('/document-types', 'DocumentTypeController');

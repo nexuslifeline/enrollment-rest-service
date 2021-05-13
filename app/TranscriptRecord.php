@@ -76,4 +76,14 @@ class TranscriptRecord extends Model
             'is_taken'
         ])->withTimestamps();
     }
+
+    public function levels()
+    {
+        return $this->belongsToMany(
+            'App\Level',
+            'transcript_record_subjects',
+            'transcript_record_id',
+            'level_id'
+        );
+    }
 }
