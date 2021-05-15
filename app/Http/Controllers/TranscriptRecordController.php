@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TranscriptSubjectsUpdateRequest;
 use App\Http\Resources\TranscriptRecordResource;
 use App\Services\TranscriptRecordService;
 use Illuminate\Http\Request;
@@ -110,5 +111,13 @@ class TranscriptRecordController extends Controller
         return TranscriptRecordResource::collection(
             $levels
         );
+    }
+
+    public function updateSubjects(TranscriptSubjectsUpdateRequest $request, $id)
+    {
+        $transcriptRecordService = new TranscriptRecordService();
+        $subjects = $request->all();
+        $transcriptRecord = $transcriptRecordService->updateSubjects($subjects, $id);
+        return new TranscriptRecordResource($transcriptRecord);
     }
 }

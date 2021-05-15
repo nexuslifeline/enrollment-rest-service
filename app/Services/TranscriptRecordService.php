@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\TranscriptRecord;
 use Exception;
+use App\TranscriptRecord;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -167,6 +168,71 @@ class TranscriptRecordService
       return $levels;
     } catch (Exception $e) {
       Log::info('Error occured during TranscriptRecordService getLevels method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  private function makeIndexedArray(string $key, array $source, array $mappers)
+  {
+    if (Arr::exists($source, $key)) return [];
+
+    $items = [];
+    foreach ($source as $item) {
+      $values = [];
+      foreach ($mappers as $mapper) {
+        if (Arr::exists($item, $mapper) && $mapper !== $key) {
+          $values[$mapper] = $item[$mapper];
+        }
+      }
+      $items[$item[$key]] = $values;
+    }
+
+    return $items;
+  }
+
+  private function createPivotInstanceProps($pivot, array $props)
+  {
+    foreach($props as $key => $value) {
+      $pivot->{$key} = $value;
+    }
+    return $pivot;
+  }
+
+  public function updateSubjects(array $subjects, int $id)
+  {
+    DB::beginTransaction();
+    try {
+      $transcriptRecord = TranscriptRecord::find($id);
+
+      // this is to make sure other fields in the pivot table will not be deleted
+      // we just need to update each record with the provided fields
+      $data = $this->makeIndexedArray('subject_id', $subjects, [
+        'subject_id',
+        'semester_id',
+        'is_taken',
+        'grade',
+        'notes'
+      ]);
+
+      $transcriptSubjects = $transcriptRecord->subjects()->get();
+
+      // intead of syncing we will just  update each pivot item to make sure other properties will not be lost
+      foreach($transcriptSubjects as $subject) {
+        $subjectId = $subject->pivot->subject_id;
+        if (Arr::exists($data, $subjectId)) {
+          $this->createPivotInstanceProps(
+            $subject->pivot,
+            $data[$subjectId]
+          )->save();
+        }
+      }
+
+      DB::commit();
+      return $transcriptSubjects;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during TranscriptRecordService updateSubjects method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
