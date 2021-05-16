@@ -15,21 +15,21 @@ class GradingPeriodObserver
      */
     public function created(GradingPeriod $gradingPeriod)
     {
-        $academicRecords = AcademicRecord::where('school_category_id', $gradingPeriod->school_category_id)
-        ->where('academic_record_status_id', 3)->get();
-        foreach ($academicRecords as $academicRecord) {
-            $subjects = $academicRecord->subjects()->get();
-            $studentGrades = $academicRecord->grades();
-            foreach ($subjects as $subject) {
-                $item = [
-                    'subject_id' => $subject['id'],
-                    'personnel_id' => null,
-                    'grade' => 0,
-                    'notes' => ''
-                ];
-                $studentGrades->wherePivot('subject_id', $subject['id'])->attach($gradingPeriod->id, $item);
-            }
-        }
+        // $academicRecords = AcademicRecord::where('school_category_id', $gradingPeriod->school_category_id)
+        // ->where('academic_record_status_id', 3)->get();
+        // foreach ($academicRecords as $academicRecord) {
+        //     $subjects = $academicRecord->subjects()->get();
+        //     $studentGrades = $academicRecord->grades();
+        //     foreach ($subjects as $subject) {
+        //         $item = [
+        //             'subject_id' => $subject['id'],
+        //             'personnel_id' => null,
+        //             'grade' => 0,
+        //             'notes' => ''
+        //         ];
+        //         $studentGrades->wherePivot('subject_id', $subject['id'])->attach($gradingPeriod->id, $item);
+        //     }
+        // }
     }
 
     /**
