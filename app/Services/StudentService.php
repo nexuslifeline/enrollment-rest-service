@@ -47,10 +47,11 @@ class StudentService
             ]);
 
             //create transcript record
-            $transcriptRecord = $student->transcriptRecords()->create([
-                'student_id' => $student->id,
-                'transcript_record_status_id' => $transcriptRecordStatusId
-            ]);
+            ////disabled for adjustment on transcript record 5/15/2021
+            // $transcriptRecord = $student->transcriptRecords()->create([
+            //     'student_id' => $student->id,
+            //     'transcript_record_status_id' => $transcriptRecordStatusId
+            // ]);
 
 
             // student category
@@ -75,7 +76,7 @@ class StudentService
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
                     'evaluation_status_id' => $evaluationStatusId,
-                    'transcript_record_id' => $transcriptRecord->id
+                    // 'transcript_record_id' => $transcriptRecord->id
                 ]);
             } else {
                 if ($studentCategoryId === 2) {
@@ -94,7 +95,7 @@ class StudentService
                         'student_id' => $student->id,
                         'student_category_id' => $studentCategoryId,
                         'evaluation_status_id' => $evaluationStatusId,
-                        'transcript_record_id' => $transcriptRecord->id
+                        // 'transcript_record_id' => $transcriptRecord->id //disabled for adjustment on transcript record 5/15/2021
                     ]);
                 } else {
                     if ($studentCategoryId === 2) {
@@ -148,8 +149,7 @@ class StudentService
                                 'student_id' => $student->id,
                                 'student_category_id' => $studentCategoryId,
                                 'evaluation_status_id' => $evaluationStatusId,
-                                'transcript_record_id' => $transcriptRecord->id
-
+                                // 'transcript_record_id' => $transcriptRecord->id //disabled for adjustment on transcript record 5/15/2021
                             ]);
                         }
                     }
@@ -226,52 +226,53 @@ class StudentService
                 }
             }
 
-            if ($transcriptRecord) {
-                $schoolCategoryId = $academicRecord['school_category_id'];
-                if ($schoolCategoryId === 4 || $schoolCategoryId === 5) {
-                    $activeTranscript = $student->transcriptRecords()
-                        ->where('school_category_id', $schoolCategoryId)
-                        ->where('course_id', $academicRecord['course_id'])
-                        ->where('transcript_record_status_id', 1)
-                        ->first();
-                    if ($activeTranscript) {
-                        $activeTranscript->update($transcriptRecord);
-                        $transcript = $activeTranscript;
-                    } else {
-                        $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
-                    }
-                } else {
-                    $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
-                }
-                if ($transcriptSubjects) {
-                    $items = [];
-                    foreach ($transcriptSubjects as $subject) {
-                        $items[$subject['subject_id']] = [
-                            'level_id' => $subject['level_id'],
-                            'semester_id' => $subject['semester_id'],
-                            'is_taken' => $subject['is_taken'],
-                            'grade' => $subject['grade'],
-                            'notes' => $subject['notes']
-                        ];
-                    }
-                    $transcript->subjects()->sync($items);
-                }
-                if ($evaluation) {
-                    $student->evaluations()->updateOrCreate(['id' => $evaluation['id']], [
-                        'student_id' => $student->id,
-                        'student_curriculum_id' => $evaluation['student_curriculum_id'],
-                        'curriculum_id' => $evaluation['curriculum_id'],
-                        'student_category_id' => $evaluation['student_category_id'],
-                        'school_category_id' => $evaluation['school_category_id'],
-                        'level_id' => $evaluation['level_id'],
-                        'semester_id' => $evaluation['semester_id'],
-                        'course_id' => $evaluation['course_id'],
-                        'evaluation_status_id' => $evaluation['evaluation_status_id'],
-                        'transcript_record_id' => $transcript->id,
-                        'school_year_id' => $evaluation['school_year_id'],
-                    ]);
-                }
-            }
+            //disabled for adjustment on transcript record 5/15/2021
+            // if ($transcriptRecord) {
+            //     $schoolCategoryId = $academicRecord['school_category_id'];
+            //     if ($schoolCategoryId === 4 || $schoolCategoryId === 5) {
+            //         $activeTranscript = $student->transcriptRecords()
+            //             ->where('school_category_id', $schoolCategoryId)
+            //             ->where('course_id', $academicRecord['course_id'])
+            //             ->where('transcript_record_status_id', 1)
+            //             ->first();
+            //         if ($activeTranscript) {
+            //             $activeTranscript->update($transcriptRecord);
+            //             $transcript = $activeTranscript;
+            //         } else {
+            //             $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
+            //         }
+            //     } else {
+            //         $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
+            //     }
+            //     if ($transcriptSubjects) {
+            //         $items = [];
+            //         foreach ($transcriptSubjects as $subject) {
+            //             $items[$subject['subject_id']] = [
+            //                 'level_id' => $subject['level_id'],
+            //                 'semester_id' => $subject['semester_id'],
+            //                 'is_taken' => $subject['is_taken'],
+            //                 'grade' => $subject['grade'],
+            //                 'notes' => $subject['notes']
+            //             ];
+            //         }
+            //         $transcript->subjects()->sync($items);
+            //     }
+            //     if ($evaluation) {
+            //         $student->evaluations()->updateOrCreate(['id' => $evaluation['id']], [
+            //             'student_id' => $student->id,
+            //             'student_curriculum_id' => $evaluation['student_curriculum_id'],
+            //             'curriculum_id' => $evaluation['curriculum_id'],
+            //             'student_category_id' => $evaluation['student_category_id'],
+            //             'school_category_id' => $evaluation['school_category_id'],
+            //             'level_id' => $evaluation['level_id'],
+            //             'semester_id' => $evaluation['semester_id'],
+            //             'course_id' => $evaluation['course_id'],
+            //             'evaluation_status_id' => $evaluation['evaluation_status_id'],
+            //             // 'transcript_record_id' => $transcript->id,
+            //             'school_year_id' => $evaluation['school_year_id'],
+            //         ]);
+            //     }
+            // }
 
 
             if ($user) {
@@ -428,14 +429,16 @@ class StudentService
                 }
             }
 
-            $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
-            if ($activeTranscriptRecord) {
-                $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
-                if ($transcriptRecord) {
-                    $transcriptRecord->update($activeTranscriptRecord);
-                }
-            }
+            //disabled for adjustment on transcript record 5/15/2021
+            // $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+            // if ($activeTranscriptRecord) {
+            //     $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+            //     if ($transcriptRecord) {
+            //         $transcriptRecord->update($activeTranscriptRecord);
+            //     }
+            // }
 
+            //to be handled in academic record model ?
             $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
             if ($activeAcademicRecord) {
                 $academicRecord = AcademicRecord::find($activeAcademicRecord['id']);
@@ -629,9 +632,8 @@ class StudentService
                         // $activeEvaluation->transcript_record_id = $transcriptRecord['id'];
                         // $activeEvaluation->student_curriculum_id = $transcriptRecord['student_curriculum_id'];
                         // $activeEvaluation->curriculum_id = $transcriptRecord['curriculum_id'];
-                        $transcriptRecord->evaluations()->create([
+                        $student->create([
                             'student_category_id' => $activeEvaluation['student_category_id'],
-                            'student_id' => $student->id,
                             'student_curriculum_id' => $transcriptRecord->student_curriculum_id,
                             'curriculum_id' => $transcriptRecord->curriculum_id,
                             'school_year_id' => $activeEvaluation['school_year_id'],
@@ -673,13 +675,14 @@ class StudentService
                     $application->update($activeApplication);
                 }
 
-                $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
-                if ($activeTranscriptRecord) {
-                    $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
-                    if ($transcriptRecord) {
-                        $transcriptRecord->update($activeTranscriptRecord);
-                    }
-                }
+                //disabled for adjustment on transcript record 5/15/2021
+                // $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+                // if ($activeTranscriptRecord) {
+                //     $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+                //     if ($transcriptRecord) {
+                //         $transcriptRecord->update($activeTranscriptRecord);
+                //     }
+                // }
 
                 $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
                 if ($activeAcademicRecord) {

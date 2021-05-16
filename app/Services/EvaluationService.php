@@ -21,7 +21,7 @@ class EvaluationService
                 'studentCategory',
                 'curriculum',
                 'studentCurriculum',
-                'transcriptRecord',
+                // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
@@ -118,7 +118,7 @@ class EvaluationService
                 'studentCategory',
                 'course',
                 'level',
-                'transcriptRecord',
+                // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
@@ -138,23 +138,24 @@ class EvaluationService
             $evaluation = Evaluation::find($id);
             $evaluation->update($data);
 
-            if (count($transcriptData) > 0) {
-                $transcriptRecord = $evaluation->transcriptRecord;
-                $transcriptRecord->update($transcriptData);
-                if ($subjects) {
-                    $items = [];
-                    foreach ($subjects as $subject) {
-                        $items[$subject['subject_id']] = [
-                            'level_id' => $subject['level_id'],
-                            'semester_id' => $subject['semester_id'],
-                            'is_taken' => $subject['is_taken'],
-                            'grade' => $subject['grade'],
-                            'notes' => $subject['notes']
-                        ];
-                    }
-                    $transcriptRecord->subjects()->sync($items);
-                }
-            }
+            //disabled for adjustment on transcript record 5/15/2021
+            // if (count($transcriptData) > 0) {
+            //     $transcriptRecord = $evaluation->transcriptRecord;
+            //     $transcriptRecord->update($transcriptData);
+            //     if ($subjects) {
+            //         $items = [];
+            //         foreach ($subjects as $subject) {
+            //             $items[$subject['subject_id']] = [
+            //                 'level_id' => $subject['level_id'],
+            //                 'semester_id' => $subject['semester_id'],
+            //                 'is_taken' => $subject['is_taken'],
+            //                 'grade' => $subject['grade'],
+            //                 'notes' => $subject['notes']
+            //             ];
+            //         }
+            //         $transcriptRecord->subjects()->sync($items);
+            //     }
+            // }
 
             $evaluation->load([
                 'lastSchoolLevel',
