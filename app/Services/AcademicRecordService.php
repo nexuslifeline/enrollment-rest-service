@@ -461,8 +461,7 @@ class AcademicRecordService
             $subjects = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
-
-            $subjects->append('section');
+            $subjects->append(['sectionSchedule','section']);
             return $subjects;
         } catch (Exception $e) {
             Log::info('Error occured during SubjectService getSubjects method call: ');
