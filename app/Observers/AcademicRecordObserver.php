@@ -10,48 +10,11 @@ use Illuminate\Support\Facades\Config;
 
 class AcademicRecordObserver
 {
-    /**
-     * Handle the academic record "created" event.
-     *
-     * @param  \App\AcademicRecord  $academicRecord
-     * @return void
-     */
-    public function created(AcademicRecord $academicRecord)
-    {
-        if ($academicRecord->academic_record_status_id === 3) {
-            $subjects = $academicRecord->subjects()->get();
-            $gradingPeriods = GradingPeriod::where('school_category_id', $academicRecord->school_category_id)
-                ->where('school_year_id', $academicRecord->school_year_id)
-                ->where('semester_id', $academicRecord->semester_id)
-                ->get()
-                ->pluck('id');
-            foreach ($subjects as $subject) {
-                $studentGrades = $academicRecord->grades();
-                $items = [];
-                foreach ($gradingPeriods as $gradingPeriod) {
-                    $items[$gradingPeriod] = [
-                        'subject_id' => $subject['id'],
-                        'personnel_id' => null,
-                        'grade' => 0,
-                        'notes' => ''
-                    ];
-                }
-                $studentGrades->wherePivot('subject_id', $subject['id'])->sync($items);
-            }
-        }
-    }
-
-    /**
-     * Handle the academic record "updated" event.
-     *
-     * @param  \App\AcademicRecord  $academicRecord
-     * @return void
-     */
-    public function updated(AcademicRecord $academicRecord)
+    private function updateDependecies(AcademicRecord $academicRecord)
     {
         switch ($academicRecord->academic_record_status_id) {
             case Config::get('constants.academic_record_status.ENROLLED'):
-                // Note! should be move to service
+                // NOTE: all business logic should be move to service
                 $subjects = $academicRecord->subjects()->get();
                 $gradingPeriods = GradingPeriod::where('school_category_id', $academicRecord->school_category_id)
                     ->where('school_year_id', $academicRecord->school_year_id)
@@ -73,14 +36,37 @@ class AcademicRecordObserver
                 }
                 break;
             case Config::get('constants.academic_record_status.FINALIZED'):
-                // make sure to link the active transcript to academic record registration
+                // link active transcript to academic record registration
                 $transcriptService = new TranscriptRecordService();
-                $transcript = $transcriptService->activeFirstOrCreate($academicRecord->id);
-                if ($transcript) {
-                    $academicRecord->update(['transcript_id', $transcript->id]);
+                $transcript = $transcriptService->activeFirstOrCreate($academicRecord);
+                if ($transcript && !$academicRecord->transcript_record_id) {
+                    $academicRecord->update(['transcript_record_id' => $transcript->id]);
                 }
                 break;
+            default:
+                break;
         }
+    }
+    /**
+     * Handle the academic record "created" event.
+     *
+     * @param  \App\AcademicRecord  $academicRecord
+     * @return void
+     */
+    public function created(AcademicRecord $academicRecord)
+    {
+        $this->updateDependecies($academicRecord);
+    }
+
+    /**
+     * Handle the academic record "updated" event.
+     *
+     * @param  \App\AcademicRecord  $academicRecord
+     * @return void
+     */
+    public function updated(AcademicRecord $academicRecord)
+    {
+        $this->updateDependecies($academicRecord);
     }
 
     /**

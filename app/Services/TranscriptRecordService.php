@@ -242,18 +242,14 @@ class TranscriptRecordService
   }
 
   // returns active transcript, if no active transcript found new active transcript will be created and returned
-  public function activeFirstOrCreate(int $academicRecordId)
+  public function activeFirstOrCreate(AcademicRecord $academicRecord)
   {
+    DB::beginTransaction();
     try {
-      if (!$academicRecordId) {
-        Log::warning('No academic record id provided.');
-        return;
-      }
-
-      $academicRecord = AcademicRecord::find($academicRecordId);
+      //$academicRecord = AcademicRecord::find($academicRecordId);
 
       if (!$academicRecord) {
-        Log::warning('No academic record found using id: ' . $academicRecord);
+        Log::warning('No academic record found using id: ' . $academicRecord->id);
         return;
       }
 
@@ -265,25 +261,32 @@ class TranscriptRecordService
       if ($transcript) return $transcript;
 
       // if no active transcript, create and return it
-      $transcript = TranscriptRecord::create([
-        'curriculum_id' => $academicRecord->curriculum_id,
-        'student_curriculum_id' => $academicRecord->student_curriculum_id,
-        'student_id' => $academicRecord->student_curriculum_id,
-        'school_category_id' => $academicRecord->school_category_id,
-        'level_id' => $academicRecord->level_id,
-        'course_id' => $academicRecord->course_id,
+      $data =  $academicRecord->only([
+        'curriculum_id',
+        'student_curriculum_id',
+        'student_id',
+        'school_category_id',
+        'level_id',
+        'course_id'
       ]);
+      $transcript = TranscriptRecord::create($data);
 
-      // add subjects of current curriculum
-      $subjects = Curriculum::find($academicRecord->curriculum_id)
-        ->subjects()->map(function($item) {
-          return $item->only(['level_id', 'semester_id', 'subject_id']);
-        });
+      // get subjects of the curriculum and trim only those needed fields in transcript subjects
+      $query = Curriculum::find($academicRecord->curriculum_id)->subjects();
+      $subjects = $query->get()->map(function($item) {
+          $pivot = $item->pivot;
+          return [
+            'level_id' => $pivot->level_id,
+            'semester_id' => $pivot->semester_id,
+            'subject_id' => $pivot->subject_id
+          ];
+        })->toArray();
 
       $transcript->subjects()->attach($subjects);
-
+      DB::commit();
       return $transcript;
     } catch (Exception $e) {
+      DB::rollback();
       Log::info('Error occured during TranscriptRecordService activeFirstOrCreate method call: ');
       Log::info($e->getMessage());
       throw $e;
