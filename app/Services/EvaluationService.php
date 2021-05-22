@@ -16,17 +16,20 @@ class EvaluationService
         try {
             $query = Evaluation::with([
                 'lastSchoolLevel',
-                'level',
-                'course',
-                'studentCategory',
-                'curriculum',
-                'studentCurriculum',
-                // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
+                // 'level',
+                // 'course',
+                // 'studentCategory',
+                //'curriculum',
+                // 'studentCurriculum',
+                // 'transcriptRecord',
+                'academicRecord' => function ($query) {
+                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory']);
+                },
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
             ])
-                ->where('evaluation_status_id', '!=', 1);
+            ->where('evaluation_status_id', '!=', 1);
 
             // filters
             // student
@@ -40,14 +43,19 @@ class EvaluationService
             // school year
             $schoolYearId = $filters['school_year_id'] ?? false;
             $query->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->where('school_year_id', $schoolYearId);
+                return $q->whereHas('academicRecord', function ($query) use ($schoolYearId) {
+                    $query->where('school_year_id', $schoolYearId);
+                });
+                //return $q->where('school_year_id', $schoolYearId);
             });
 
             //school category
-            $schoolCategoryId = $filters['school_category_id'] ?? false;
-            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
-                return $q->where('school_category_id', $schoolCategoryId);
-            });
+            // $schoolCategoryId = $filters['school_category_id'] ?? false;
+            // $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
+            //     return $q->whereHas('academicRecord', function ($query) use ($schoolCategoryId) {
+            //         $query->where('school_category_id', $schoolCategoryId);
+            //     });
+            // });
 
             // course
             $courseId = $filters['course_id'] ?? false;
@@ -75,15 +83,6 @@ class EvaluationService
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($q) use ($criteria) {
                 return $q->whereHas('student', function ($query) use ($criteria) {
-                    // return $query->where(function ($q) use ($criteria, $query) {
-                    //     // return $q->where('name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('student_no', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('first_name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('middle_name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('last_name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('email', 'like', '%' . $criteria . '%');
-                    // });
-
                     //scopedWhereLike on student model
                     return  $query->whereLike($criteria);
                 });

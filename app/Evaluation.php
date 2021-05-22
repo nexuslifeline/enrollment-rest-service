@@ -41,30 +41,11 @@ class Evaluation extends Model
         return $this->belongsTo('App\Level', 'last_school_level_id');
     }
 
-    public function level()
+    public function academicRecord()
     {
-        return $this->belongsTo('App\Level');
+        return $this->hasOne('App\AcademicRecord');
     }
 
-    public function course()
-    {
-        return $this->belongsTo('App\Course');
-    }
-
-    public function curriculum()
-    {
-        return $this->belongsTo('App\Curriculum');
-    }
-
-    public function studentCurriculum()
-    {
-        return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
-    }
-
-    public function transcriptRecord()
-    {
-        return $this->belongsTo('App\TranscriptRecord');
-    }
 
     // public function subjects()
     // {

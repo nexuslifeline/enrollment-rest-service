@@ -46,6 +46,11 @@ class AcademicRecord extends Model
         return $this->belongsTo('App\Admission');
     }
 
+    public function evaluation()
+    {
+        return $this->belongsTo('App\Evaluation');
+    }
+
     public function studentFee()
     {
         return $this->hasOne('App\StudentFee');
@@ -100,5 +105,20 @@ class AcademicRecord extends Model
     {
         return $this->belongsToMany('App\GradingPeriod', 'student_grades', 'academic_record_id', 'grading_period_id')
         ->withPivot('subject_id','grade','personnel_id','student_grade_status_id');
+    }
+
+    public function curriculum()
+    {
+        return $this->belongsTo('App\Curriculum');
+    }
+
+    public function studentCurriculum()
+    {
+        return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
+    }
+
+    public function transcriptRecord()
+    {
+        return $this->belongsTo('App\TranscriptRecord');
     }
 }

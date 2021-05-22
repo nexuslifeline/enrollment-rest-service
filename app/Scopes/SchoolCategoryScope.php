@@ -20,7 +20,6 @@ class SchoolCategoryScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $userGroupId = Auth::user()->user_group_id ?? false;
 
         $user = Auth::user();
         if ($user->userable_type === 'App\Student') {
