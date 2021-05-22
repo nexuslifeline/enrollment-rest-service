@@ -329,12 +329,23 @@ class StudentService
             });
 
             $subjectId = $filters['subject_id'] ?? false;
-            $query->when($subjectId, function ($q) use ($subjectId) {
+            $withTheSubject = $filters['with_the_subject'] ?? false;
+            $query->when($subjectId, function ($q) use ($subjectId, $withTheSubject) {
                 return $q->whereHas('academicRecords', function ($query) use ($subjectId) {
                     return $query->where('academic_record_status_id', 3)->latest()
                     ->whereHas('subjects', function ($q) use ($subjectId) {
                         return $q->where('subject_id', $subjectId);
                     });
+                })->when($withTheSubject, function ($q) use($subjectId) {
+                    return $q->with(['academicRecords' => function ($q) use ($subjectId) {
+                        return $q->where('academic_record_status_id', 3)
+                            ->latest()
+                            // ->first()
+                            ->with(['subjects' => function ($q) use ($subjectId) {
+                                return $q->where('subject_id', $subjectId);
+                                // ->first();
+                            }]);
+                    }]);
                 });
             });
 

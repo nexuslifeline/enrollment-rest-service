@@ -33,7 +33,7 @@ class AcademicRecord extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany('App\Subject', 'academic_record_subjects', 'academic_record_id', 'subject_id')->withPivot('section_id')->withTimestamps();
+        return $this->belongsToMany('App\Subject', 'academic_record_subjects', 'academic_record_id', 'subject_id')->withPivot('section_id','is_dropped')->withTimestamps();
     }
 
     public function application()
