@@ -114,9 +114,12 @@ class EvaluationService
                 // 'subjects' => function ($query) {
                 //     $query->with('prerequisites');
                 // },
-                'studentCategory',
-                'course',
-                'level',
+                //'studentCategory',
+                //'course',
+                //'level',
+                'academicRecord' => function ($query) {
+                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory']);
+                },
                 // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);

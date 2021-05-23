@@ -377,7 +377,9 @@ class AcademicRecordService
         $schoolYearId = $filters['school_year_id'] ?? false;
         $evaluation = Evaluation::where('evaluation_status_id', 2)
         ->when($schoolYearId, function($q) use($schoolYearId) {
-            return $q->where('school_year_id', $schoolYearId);
+            return $q->whereHas('academicRecord', function ($query) use($schoolYearId) {
+                return $query->where('school_year_id', $schoolYearId);
+            });
         });
 
         $enlistment = AcademicRecord::where(function ($q) {
