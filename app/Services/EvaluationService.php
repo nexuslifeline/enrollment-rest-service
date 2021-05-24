@@ -26,7 +26,7 @@ class EvaluationService
                     $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory']);
                 },
                 'student' => function ($query) {
-                    $query->with(['address', 'photo']);
+                    $query->with(['address', 'photo', 'user']);
                 }
             ])
             ->where('evaluation_status_id', '!=', 1);
@@ -122,7 +122,7 @@ class EvaluationService
                 },
                 // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
                 'student' => function ($query) {
-                    $query->with(['address', 'photo']);
+                    $query->with(['address', 'photo', 'user', 'education']);
                 }
             ]);
             return $evaluation;
