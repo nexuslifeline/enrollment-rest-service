@@ -41,6 +41,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/students/{studentId}/user', 'StudentController@storeUser');
         Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         Route::get('/students/{studentId}/academic-records', 'StudentController@getAcademicRecords');
+        Route::get('/me/students', 'StudentController@getStudentsOfPersonnel');
 
         // student file
         Route::get('/students/{studentId}/files', 'StudentFileController@index');
