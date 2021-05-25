@@ -35,14 +35,14 @@ class AcademicRecordObserver
                     $studentGrades->wherePivot('subject_id', $subject['id'])->sync($items);
                 }
                 break;
-            case Config::get('constants.academic_record_status.FINALIZED'):
-                // link active transcript to academic record registration
-                $transcriptService = new TranscriptRecordService();
-                $transcript = $transcriptService->activeFirstOrCreate($academicRecord);
-                if ($transcript && !$academicRecord->transcript_record_id) {
-                    $academicRecord->update(['transcript_record_id' => $transcript->id]);
-                }
-                break;
+            // case Config::get('constants.academic_record_status.FINALIZED'):
+            //     // link active transcript to academic record registration
+            //     $transcriptService = new TranscriptRecordService();
+            //     $transcript = $transcriptService->activeFirstOrCreate($academicRecord);
+            //     if ($transcript && !$academicRecord->transcript_record_id) {
+            //         $academicRecord->update(['transcript_record_id' => $transcript->id]);
+            //     }
+            //     break;
             default:
                 break;
         }

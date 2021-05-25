@@ -27,6 +27,7 @@ class StudentService
     {
         DB::beginTransaction();
         try {
+            // Note! this should be move in Config/Constants
             $academicRecordStatusId = 1;
             $evaluationStatusId = 1;
             $transcriptRecordStatusId = 1; //1 = draft
@@ -46,13 +47,10 @@ class StudentService
                 'email' => $data['username']
             ]);
 
-            //create transcript record
-            ////disabled for adjustment on transcript record 5/15/2021
-            // $transcriptRecord = $student->transcriptRecords()->create([
-            //     'student_id' => $student->id,
-            //     'transcript_record_status_id' => $transcriptRecordStatusId
-            // ]);
-
+            $transcriptRecord = $student->transcriptRecords()->create([
+                'student_id' => $student->id,
+                'transcript_record_status_id' => $transcriptRecordStatusId
+            ]);
 
             // student category
             // 1 - new
@@ -69,7 +67,8 @@ class StudentService
                     'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
-                    'academic_record_status_id' => $academicRecordStatusId
+                    'academic_record_status_id' => $academicRecordStatusId,
+                    'transcript_record_id' => $transcriptRecord->id
                 ]);
 
                 $student->evaluations()->create([
@@ -88,7 +87,8 @@ class StudentService
                         'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                         'student_id' => $student->id,
                         'student_category_id' => $studentCategoryId,
-                        'academic_record_status_id' => $academicRecordStatusId
+                        'academic_record_status_id' => $academicRecordStatusId,
+                        'transcript_record_id' => $transcriptRecord->id
                     ]);
 
                     $student->evaluations()->create([
@@ -107,7 +107,8 @@ class StudentService
                             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                             'student_id' => $student->id,
                             'student_category_id' => $studentCategoryId,
-                            'academic_record_status_id' => $academicRecordStatusId
+                            'academic_record_status_id' => $academicRecordStatusId,
+                            'transcript_record_id' => $transcriptRecord->id
                         ]);
 
                         $student->evaluations()->create([
@@ -125,7 +126,8 @@ class StudentService
                                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                                 'student_id' => $student->id,
                                 'student_category_id' => $studentCategoryId,
-                                'academic_record_status_id' => $academicRecordStatusId
+                                'academic_record_status_id' => $academicRecordStatusId,
+                                'transcript_record_id' => $transcriptRecord->id
                             ]);
 
                             $student->evaluations()->create([
@@ -142,7 +144,8 @@ class StudentService
                                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                                 'student_id' => $student->id,
                                 'student_category_id' => $studentCategoryId,
-                                'academic_record_status_id' => $academicRecordStatusId
+                                'academic_record_status_id' => $academicRecordStatusId,
+                                'transcript_record_id' => $transcriptRecord->id
                             ]);
 
                             $student->evaluations()->create([

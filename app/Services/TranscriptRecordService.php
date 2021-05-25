@@ -242,14 +242,14 @@ class TranscriptRecordService
   }
 
   // returns active transcript, if no active transcript found new active transcript will be created and returned
-  public function activeFirstOrCreate(AcademicRecord $academicRecord)
+  public function activeFirstOrCreate(int $academicRecordId)
   {
     DB::beginTransaction();
     try {
-      //$academicRecord = AcademicRecord::find($academicRecordId);
+      $academicRecord = AcademicRecord::find($academicRecordId);
 
       if (!$academicRecord) {
-        Log::warning('No academic record found using id: ' . $academicRecord->id);
+        Log::warning('No academic record found using id: ' . $academicRecordId);
         return;
       }
 
@@ -262,8 +262,8 @@ class TranscriptRecordService
 
       // if no active transcript, create and return it
       $data =  $academicRecord->only([
-        'curriculum_id',
-        'student_curriculum_id',
+        //'curriculum_id',
+        //'student_curriculum_id',
         'student_id',
         'school_category_id',
         'level_id',
@@ -288,6 +288,32 @@ class TranscriptRecordService
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during TranscriptRecordService activeFirstOrCreate method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function syncCurriculumSubjects(int $transcriptRecordId, int $curriculumId)
+  {
+    DB::beginTransaction();
+    try {
+      $query = Curriculum::find($curriculumId)->subjects();
+      $subjects = $query->get()->map(function($item) {
+        $pivot = $item->pivot;
+        return [
+          'level_id' => $pivot->level_id,
+          'semester_id' => $pivot->semester_id,
+          'subject_id' => $pivot->subject_id
+        ];
+      })->toArray();
+
+      $transcriptRecord = TranscriptRecord::find($transcriptRecordId);
+      $transcriptRecord->subjects()->sync($subjects);
+      DB::commit();
+      return $transcriptRecord;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during TranscriptRecordService syncCurriculumSubjects method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
