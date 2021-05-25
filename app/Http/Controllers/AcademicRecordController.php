@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\AcademicRecord;
 use Illuminate\Http\Request;
-use App\Http\Resources\AcademicRecordResource;
 use App\Services\AcademicRecordService;
+use App\Http\Resources\AcademicRecordResource;
+use App\Http\Requests\AcademicRecordPatchRequest;
 
 class AcademicRecordController extends Controller
 {
@@ -90,7 +91,20 @@ class AcademicRecordController extends Controller
         $data = $request->except($except);
         $academicRecordInfo = $request->only($except);
         $academicRecord = $academicRecordService->update($data, $academicRecordInfo, $id);
-        return new AcademicRecordResource($academicRecord);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function patch(AcademicRecordPatchRequest $request, int $id)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->all();
+        $academicRecordInfo = [];
+        $academicRecord = $academicRecordService->update($data, $academicRecordInfo, $id);
+        return (new AcademicRecordResource($academicRecord))
+        ->response()
+        ->setStatusCode(200);
     }
 
     /**

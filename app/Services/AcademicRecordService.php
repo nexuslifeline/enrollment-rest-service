@@ -299,7 +299,9 @@ class AcademicRecordService
                 }
                 $academicRecord->subjects()->sync($items);
             }
+
             DB::commit();
+
             $academicRecord->load([
                 'schoolYear',
                 'level',
@@ -310,6 +312,7 @@ class AcademicRecordService
                 'studentType',
                 'application',
                 'admission',
+                'curriculum',
                 'student' => function ($query) {
                     $query->with(['address']);
                 }

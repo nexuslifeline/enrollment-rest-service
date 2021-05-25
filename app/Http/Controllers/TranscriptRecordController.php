@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\TranscriptSubjectsUpdateRequest;
-use App\Http\Resources\TranscriptRecordResource;
-use App\Services\TranscriptRecordService;
+use App\AcademicRecord;
 use Illuminate\Http\Request;
+use App\Services\TranscriptRecordService;
+use App\Http\Resources\TranscriptRecordResource;
+use App\Http\Requests\TranscriptSubjectsUpdateRequest;
 
 class TranscriptRecordController extends Controller
 {
@@ -118,6 +119,14 @@ class TranscriptRecordController extends Controller
         $transcriptRecordService = new TranscriptRecordService();
         $subjects = $request->all();
         $transcriptRecord = $transcriptRecordService->updateSubjects($subjects, $id);
+        return new TranscriptRecordResource($transcriptRecord);
+    }
+
+    public function activeFirstOrCreate(Request $request)
+    {
+        $transcriptRecordService = new TranscriptRecordService();
+        $academicRecord = new AcademicRecord($request->all());
+        $transcriptRecord = $transcriptRecordService->activeFirstOrCreate($academicRecord);
         return new TranscriptRecordResource($transcriptRecord);
     }
 }
