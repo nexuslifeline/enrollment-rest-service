@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-use App\AcademicRecord;
-use App\Curriculum;
 use Exception;
+use App\Curriculum;
+use App\AcademicRecord;
 use App\TranscriptRecord;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
 
 class TranscriptRecordService
 {
@@ -98,7 +99,7 @@ class TranscriptRecordService
     }
   }
 
-  public function update(array $data, array $subjects, array $requirements, int $id)
+  public function update(array $data, array $subjects, int $id)
   {
     DB::beginTransaction();
     try {
@@ -308,12 +309,53 @@ class TranscriptRecordService
       })->toArray();
 
       $transcriptRecord = TranscriptRecord::find($transcriptRecordId);
-      $transcriptRecord->subjects()->sync($subjects);
+      $transcriptQuery = $transcriptRecord->subjects();
+      // we just need to delete those subjects without grade
+      $this->deleteEmptyGradeSubjects($transcriptRecord);
+      // we just need to attach those subjects that were not yet in the list
+      // so we need to remove subjects that has grade already in transcript to make sure they will be preserve
+      $subjectsWithoutGrade = $this->removeWithGrade($subjects, $transcriptQuery->get());
+      $transcriptQuery->attach($subjectsWithoutGrade);
       DB::commit();
       return $transcriptRecord;
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during TranscriptRecordService syncCurriculumSubjects method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  private function hasData(int $subjectId, $gradedSubjects)
+  {
+    return $gradedSubjects->some(function ($gradedValue) use($subjectId) {
+      $pivot = $gradedValue->pivot;
+      return $gradedValue->id === $subjectId && (
+        (((int)$pivot->grade) > 0) || $pivot->notes || $pivot->system_notes
+      );
+    });
+  }
+
+  private function removeWithGrade(array $sourceSubjects, $gradedSubjects)
+  {
+    return Arr::where($sourceSubjects, function ($sourceValue, $key) use($gradedSubjects) {
+      return !$this->hasData($sourceValue['subject_id'], $gradedSubjects);
+    });
+  }
+
+  private function deleteEmptyGradeSubjects(TranscriptRecord $transcriptRecord)
+  {
+    try {
+      $subjects =  $transcriptRecord->subjects()->get();
+      foreach($subjects as $subject) {
+        $pivot =$subject->pivot;
+        $hasData = (((int)$pivot->grade) > 0) || $pivot->notes || $pivot->system_notes;
+        if (!$hasData) {
+          $transcriptRecord->subjects()->detach($subject->id);
+        }
+      }
+    } catch (Exception $e) {
+      Log::info('Error occured during TranscriptRecordService deleteEmptyGradeSubjects method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

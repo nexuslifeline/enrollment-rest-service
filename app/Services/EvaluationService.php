@@ -111,14 +111,15 @@ class EvaluationService
         try {
             $evaluation = Evaluation::find($id);
             $evaluation->load([
-                // 'subjects' => function ($query) {
-                //     $query->with('prerequisites');
-                // },
-                //'studentCategory',
-                //'course',
-                //'level',
                 'academicRecord' => function ($query) {
-                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory', 'transcriptRecord']);
+                    $query->with([
+                        'curriculum',
+                        'schoolYear',
+                        'level',
+                        'course',
+                        'studentCategory',
+                        'transcriptRecord'
+                    ]);
                 },
                 // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
                 'student' => function ($query) {

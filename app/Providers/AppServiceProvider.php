@@ -2,19 +2,21 @@
 
 namespace App\Providers;
 
-use App\AcademicRecord;
-use App\GradingPeriod;
-use App\Observers\AcademicRecordObserver;
-use App\Observers\GradingPeriodObserver;
-use App\Observers\StudentFeeObserver;
-use App\Observers\TermObserver;
-use App\StudentFee;
 use App\Term;
+use App\StudentFee;
+use App\GradingPeriod;
+use App\AcademicRecord;
+use App\TranscriptRecord;
+use App\Observers\TermObserver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Observers\StudentFeeObserver;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use App\Observers\GradingPeriodObserver;
+use App\Observers\AcademicRecordObserver;
+use App\Observers\TranscriptRecordObserver;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AppServiceProvider extends ServiceProvider
@@ -50,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
         }
         StudentFee::observe(StudentFeeObserver::class);
         AcademicRecord::observe(AcademicRecordObserver::class);
-        // Term::observe(TermObserver::class);
+        TranscriptRecord::observe(TranscriptRecordObserver::class);
         GradingPeriod::observe(GradingPeriodObserver::class);
     }
 }
