@@ -161,8 +161,8 @@ class EvaluationService
 
             $evaluation->load([
                 'lastSchoolLevel',
-                'level',
-                'course',
+                // 'level',
+                // 'course',
                 'studentCategory',
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
