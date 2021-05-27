@@ -30,7 +30,7 @@ class AcademicRecordService
                 'application',
                 'admission',
                 'student' => function ($query) {
-                    $query->with(['address', 'photo']);
+                    $query->with(['address', 'photo', 'user']);
                 }
             ]);
 
