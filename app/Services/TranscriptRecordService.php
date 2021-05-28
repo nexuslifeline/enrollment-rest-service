@@ -107,23 +107,23 @@ class TranscriptRecordService
       // return $transcriptRecord;
       $transcriptRecord->update($data);
 
-      if ($subjects) {
-        $items = [];
-        foreach ($subjects as $subject) {
-          $items[$subject['subject_id']] = [
-            'level_id' => $subject['level_id'],
-            'semester_id' => $subject['semester_id'],
-            'is_taken' => $subject['is_taken'],
-            'grade' => $subject['grade'],
-            'notes' => $subject['notes']
-          ];
-        }
-        // return $items;
-        $transcriptRecord->subjects()->sync($items);
-      }
+      // if ($subjects) {
+      //   $items = [];
+      //   foreach ($subjects as $subject) {
+      //     $items[$subject['subject_id']] = [
+      //       'level_id' => $subject['level_id'],
+      //       'semester_id' => $subject['semester_id'],
+      //       'is_taken' => $subject['is_taken'],
+      //       'grade' => $subject['grade'],
+      //       'notes' => $subject['notes']
+      //     ];
+      //   }
+      //   // return $items;
+      //   $transcriptRecord->subjects()->sync($items);
+      // }
 
       // $transcriptRecord->requirements()->sync($requirements);
-
+      $transcriptRecord->load(['curriculum', 'studentCurriculum']);
       DB::commit();
       return $transcriptRecord;
     } catch (Exception $e) {
