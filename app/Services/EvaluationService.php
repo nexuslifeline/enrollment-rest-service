@@ -112,14 +112,9 @@ class EvaluationService
             $evaluation = Evaluation::find($id);
             $evaluation->load([
                 'academicRecord' => function ($query) {
-                    $query->with([
-                        'curriculum',
-                        'schoolYear',
-                        'level',
-                        'course',
-                        'studentCategory',
-                        'transcriptRecord'
-                    ]);
+                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory', 'transcriptRecord' => function($q) {
+                        return $q->with(['curriculum', 'studentCurriculum']);
+                    }]);
                 },
                 // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
                 'student' => function ($query) {
@@ -164,7 +159,12 @@ class EvaluationService
                 'lastSchoolLevel',
                 // 'level',
                 // 'course',
-                'studentCategory',
+                // 'studentCategory',
+                'academicRecord' => function ($query) {
+                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory', 'transcriptRecord' => function($q) {
+                        return $q->with(['curriculum', 'studentCurriculum']);
+                    }]);
+                },
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }

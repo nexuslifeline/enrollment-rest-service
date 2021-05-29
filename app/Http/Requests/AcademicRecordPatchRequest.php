@@ -24,13 +24,13 @@ class AcademicRecordPatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'curriculum_id' => 'sometimes|required'
+            'level_id' => 'sometimes'
         ];
     }
 
     public function attributes() {
         return [
-            'curriculum_id' => 'curriculum'
+            'level_id' => 'level'
         ];
     }
 }

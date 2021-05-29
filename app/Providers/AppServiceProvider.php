@@ -54,5 +54,6 @@ class AppServiceProvider extends ServiceProvider
         AcademicRecord::observe(AcademicRecordObserver::class);
         TranscriptRecord::observe(TranscriptRecordObserver::class);
         GradingPeriod::observe(GradingPeriodObserver::class);
+        TranscriptRecord::observe(TranscriptRecordObserver::class);
     }
 }
