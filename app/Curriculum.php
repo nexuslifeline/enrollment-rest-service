@@ -49,7 +49,8 @@ class Curriculum extends Model
             'level_subjects',
             'curriculum_id',
             'subject_id'
-        )->withPivot(['level_id','semester_id'])->withTimestamps();
+        )->withPivot(['level_id','semester_id', 'course_id', 'school_category_id'])
+        ->withTimestamps();
     }
 
     public function prerequisites()

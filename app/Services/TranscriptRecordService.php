@@ -277,6 +277,8 @@ class TranscriptRecordService
       $subjects = $query->get()->map(function($item) {
           $pivot = $item->pivot;
           return [
+            'school_category_id' => $pivot->school_category_id,
+            'course_id' => $pivot->course_id,
             'level_id' => $pivot->level_id,
             'semester_id' => $pivot->semester_id,
             'subject_id' => $pivot->subject_id
@@ -302,6 +304,8 @@ class TranscriptRecordService
       $subjects = $query->get()->map(function($item) {
         $pivot = $item->pivot;
         return [
+          'school_category_id' => $pivot->school_category_id,
+          'course_id' => $pivot->course_id,
           'level_id' => $pivot->level_id,
           'semester_id' => $pivot->semester_id,
           'subject_id' => $pivot->subject_id
@@ -310,11 +314,17 @@ class TranscriptRecordService
 
       $transcriptRecord = TranscriptRecord::find($transcriptRecordId);
       $transcriptQuery = $transcriptRecord->subjects();
+
       // we just need to delete those subjects without grade
       $this->deleteEmptyGradeSubjects($transcriptRecord);
-      // we just need to attach those subjects that were not yet in the list
-      // so we need to remove subjects that has grade already in transcript to make sure they will be preserve
-      $subjectsWithoutGrade = $this->removeWithGrade($subjects, $transcriptQuery->get());
+
+      // since we did not deleted subjects that has grade or notes in current transcript subjects
+      // we need to make sure these subjects will not be attached again
+      $subjectsWithoutGrade = $this->removeWithGrade(
+        $subjects,
+        $transcriptQuery->get()
+      );
+
       $transcriptQuery->attach($subjectsWithoutGrade);
       DB::commit();
       return $transcriptRecord;
