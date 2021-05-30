@@ -3,7 +3,9 @@
 namespace App\Observers;
 
 use App\Term;
+use Exception;
 use App\TranscriptRecord;
+use Illuminate\Support\Facades\Log;
 use App\Services\TranscriptRecordService;
 
 class TranscriptRecordObserver
@@ -27,15 +29,21 @@ class TranscriptRecordObserver
      */
     public function updated(TranscriptRecord $transcriptRecord)
     {
-        // if curriculum changed and subjects are not locked
-        // we will sync the subjects from the transcript record
-        // we will do nothing if subjects are locked
-        if ($transcriptRecord->curriculum_id && !$transcriptRecord->is_subjects_locked) {
-            $transcriptService = new TranscriptRecordService();
-            $transcriptService->syncCurriculumSubjects(
-                $transcriptRecord->id,
-                $transcriptRecord->curriculum_id
-            );
+        try {
+            // if curriculum changed and subjects are not locked
+            // we will sync the subjects from the transcript record
+            // we will do nothing if subjects are locked
+            if ($transcriptRecord->curriculum_id && !$transcriptRecord->is_subjects_locked) {
+                $transcriptService = new TranscriptRecordService();
+                $transcriptService->syncCurriculumSubjects(
+                    $transcriptRecord->id,
+                    $transcriptRecord->curriculum_id
+                );
+            }
+        } catch (Exception $e) {
+            Log::info('Error occured during TranscriptRecordObserver updated event call: ');
+            Log::info($e->getMessage());
+            throw $e;
         }
     }
 

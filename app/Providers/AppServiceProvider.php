@@ -8,6 +8,7 @@ use App\GradingPeriod;
 use App\AcademicRecord;
 use App\TranscriptRecord;
 use App\Observers\TermObserver;
+use App\TranscriptRecordSubject;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Observers\StudentFeeObserver;
@@ -18,6 +19,7 @@ use App\Observers\GradingPeriodObserver;
 use App\Observers\AcademicRecordObserver;
 use App\Observers\TranscriptRecordObserver;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Observers\TranscriptRecordSubjectObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,6 +56,6 @@ class AppServiceProvider extends ServiceProvider
         AcademicRecord::observe(AcademicRecordObserver::class);
         TranscriptRecord::observe(TranscriptRecordObserver::class);
         GradingPeriod::observe(GradingPeriodObserver::class);
-        TranscriptRecord::observe(TranscriptRecordObserver::class);
+        TranscriptRecordSubject::observe(TranscriptRecordSubjectObserver::class);
     }
 }

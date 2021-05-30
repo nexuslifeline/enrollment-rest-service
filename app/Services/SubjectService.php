@@ -351,7 +351,7 @@ class SubjectService
 
         return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
             ->where('subject_id', $subjectId)
-            ->where('grade', '>', 74)
+            ->where('grade', '>', 74.4)
             ->get()
             ->count() > 0;
     }

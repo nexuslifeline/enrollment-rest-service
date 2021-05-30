@@ -7,6 +7,7 @@ use App\Curriculum;
 use App\AcademicRecord;
 use App\TranscriptRecord;
 use Illuminate\Support\Arr;
+use App\TranscriptRecordSubject;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -366,6 +367,20 @@ class TranscriptRecordService
       }
     } catch (Exception $e) {
       Log::info('Error occured during TranscriptRecordService deleteEmptyGradeSubjects method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function hasFailedOrNotTakenSubjects(int $transcriptId)
+  {
+    try {
+      return TranscriptRecord::find($transcriptId)
+        ->subjects()
+        ->wherePivot('grade', '<=', 74.4)
+        ->count();
+    } catch (Exception $e) {
+      Log::info('Error occured during TranscriptRecordService hasFailedOrNotTakenSubjects method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

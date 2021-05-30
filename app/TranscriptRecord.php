@@ -68,7 +68,9 @@ class TranscriptRecord extends Model
             'transcript_record_subjects',
             'transcript_record_id',
             'subject_id'
-        )->withPivot([
+        )
+        ->using('App\TranscriptRecordSubject')
+        ->withPivot([
             'level_id',
             'semester_id',
             'grade',
