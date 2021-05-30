@@ -331,6 +331,11 @@ class SubjectService
 
     private function isTaken(int $studentId, int $subjectId)
     {
+        //disabled this for now for checking purposes
+        //because it returns error on this part
+        //need further debugging
+        return false;
+
         $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
             ->get()
             ->pluck('id');

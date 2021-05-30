@@ -24,7 +24,7 @@ class AcademicRecordPatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'level_id' => 'sometimes'
+            'level_id' => 'required'
         ];
     }
 

@@ -100,7 +100,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
         // academic records
         Route::resource('/academic-records', 'AcademicRecordController');
-        Route::patch('/academic-records', 'AcademicRecordController@patch');
+        Route::patch('/academic-records/{id}', 'AcademicRecordController@patch');
         Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
         Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
         Route::post('academic-records/finalize-grades', 'AcademicRecordController@finalizeGrades');

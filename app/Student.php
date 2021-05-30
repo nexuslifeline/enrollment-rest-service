@@ -116,6 +116,7 @@ class Student extends Model
 
     public function getAcademicRecordAttribute()
     {
+        //this is the active academic record
         $academicRecord = $this->academicRecords();
 
         $application = $this->active_application ?? false;
@@ -223,20 +224,6 @@ class Student extends Model
             ->orWhere('last_name', 'like', '%' . $value . '%')
             ->orWhere('email', 'like', '%' . $value . '%')
             ->orWhereRaw('CONCAT(first_name, " ", coalesce(concat(middle_name, " "),""), last_name) like' .  "'%" .  $value  . "%'");
-    }
-
-    public function scopeWhereLatestAcademicRecord($query, $levelId, $courseId, $semesterId) {
-        // $query->academicRecords->where('level_id', $levelId);
-
-        // $query->when($courseId, function($q) use($courseId) {
-        //     return $q->academicRecords->where('course_id', $courseId);
-        // });
-
-        // $query->when($semesterId, function($q) use($semesterId) {
-        //     return $q->academicRecords->where('semester_id', $semesterId);
-        // });
-        $query->academicRecords;
-        return $query;
     }
 
     public function studentGrades()

@@ -52,6 +52,13 @@ class StudentService
                 'transcript_record_status_id' => $transcriptRecordStatusId
             ]);
 
+            $evaluation = $student->evaluations()->create([
+                'student_id' => $student->id,
+                // 'student_category_id' => $studentCategoryId, //remove on evaluation table 5/22021
+                'evaluation_status_id' => $evaluationStatusId,
+                // 'transcript_record_id' => $transcriptRecord->id
+            ]);
+
             // student category
             // 1 - new
             // 2 - old
@@ -59,6 +66,7 @@ class StudentService
             $studentCategoryId = $data['student_category_id'];
 
             if ($isEnrolled) {
+                //
                 $student->applications()->create([
                     'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                     'application_step_id' => 1,
@@ -68,17 +76,12 @@ class StudentService
                     'student_id' => $student->id,
                     'student_category_id' => $studentCategoryId,
                     'academic_record_status_id' => $academicRecordStatusId,
-                    'transcript_record_id' => $transcriptRecord->id
-                ]);
-
-                $student->evaluations()->create([
-                    'student_id' => $student->id,
-                    'student_category_id' => $studentCategoryId,
-                    'evaluation_status_id' => $evaluationStatusId,
-                    // 'transcript_record_id' => $transcriptRecord->id
+                    'transcript_record_id' => $transcriptRecord->id,
+                    'evaluation_id' =>  $evaluation->id
                 ]);
             } else {
                 if ($studentCategoryId === 2) {
+
                     $student->applications()->create([
                         'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                         'application_step_id' => 1,
@@ -88,17 +91,14 @@ class StudentService
                         'student_id' => $student->id,
                         'student_category_id' => $studentCategoryId,
                         'academic_record_status_id' => $academicRecordStatusId,
-                        'transcript_record_id' => $transcriptRecord->id
+                        'transcript_record_id' => $transcriptRecord->id,
+                        'evaluation_id' =>  $evaluation->id
                     ]);
 
-                    $student->evaluations()->create([
-                        'student_id' => $student->id,
-                        'student_category_id' => $studentCategoryId,
-                        'evaluation_status_id' => $evaluationStatusId,
-                        // 'transcript_record_id' => $transcriptRecord->id //disabled for adjustment on transcript record 5/15/2021
-                    ]);
+
                 } else {
                     if ($studentCategoryId === 2) {
+
                         $student->applications()->create([
                             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                             'application_step_id' => 1,
@@ -108,16 +108,13 @@ class StudentService
                             'student_id' => $student->id,
                             'student_category_id' => $studentCategoryId,
                             'academic_record_status_id' => $academicRecordStatusId,
-                            'transcript_record_id' => $transcriptRecord->id
+                            'transcript_record_id' => $transcriptRecord->id,
+                            'evaluation_id' =>  $evaluation->id
                         ]);
 
-                        $student->evaluations()->create([
-                            'student_id' => $student->id,
-                            'student_category_id' => $studentCategoryId,
-                            'evaluation_status_id' => $evaluationStatusId
-                        ]);
                     } else {
                         if ($studentCategoryId === 2) {
+
                             $student->applications()->create([
                                 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                                 'application_step_id' => 1,
@@ -127,15 +124,12 @@ class StudentService
                                 'student_id' => $student->id,
                                 'student_category_id' => $studentCategoryId,
                                 'academic_record_status_id' => $academicRecordStatusId,
-                                'transcript_record_id' => $transcriptRecord->id
+                                'transcript_record_id' => $transcriptRecord->id,
+                                'evaluation_id' =>  $evaluation->id
                             ]);
 
-                            $student->evaluations()->create([
-                                'student_id' => $student->id,
-                                'student_category_id' => $studentCategoryId,
-                                'evaluation_status_id' => $evaluationStatusId
-                            ]);
                         } else {
+
                             $student->admission()->create([
                                 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                                 'admission_step_id' => 1,
@@ -145,14 +139,8 @@ class StudentService
                                 'student_id' => $student->id,
                                 'student_category_id' => $studentCategoryId,
                                 'academic_record_status_id' => $academicRecordStatusId,
-                                'transcript_record_id' => $transcriptRecord->id
-                            ]);
-
-                            $student->evaluations()->create([
-                                'student_id' => $student->id,
-                                'student_category_id' => $studentCategoryId,
-                                'evaluation_status_id' => $evaluationStatusId,
-                                // 'transcript_record_id' => $transcriptRecord->id //disabled for adjustment on transcript record 5/15/2021
+                                'transcript_record_id' => $transcriptRecord->id,
+                                'evaluation_id' =>  $evaluation->id
                             ]);
                         }
                     }
@@ -458,6 +446,12 @@ class StudentService
                 $academicRecord = AcademicRecord::find($activeAcademicRecord['id']);
                 if ($academicRecord) {
                     $academicRecord->update($activeAcademicRecord);
+
+                    //update transcript record school category
+                    $academicRecord->transcriptRecord()->update([
+                        'school_category_id' => $academicRecord->school_category_id
+                    ]);
+
                     $subjects = $studentInfo['subjects'] ?? false;
                     if ($subjects) {
                         $academicRecord->subjects()->sync($subjects);
