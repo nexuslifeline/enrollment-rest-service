@@ -17,7 +17,7 @@ class PaymentService
             //added billing related model
             //10 10 2020
             $query = Payment::with(['paymentMode', 'billing', 'student' => function ($query) {
-                $query->with(['address', 'photo']);
+                $query->with(['address', 'photo', 'user']);
             }])
                 ->where('payment_status_id', '!=', 1);
             //filter

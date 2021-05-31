@@ -23,7 +23,7 @@ class EvaluationService
                 'studentCurriculum',
                 'transcriptRecord',
                 'student' => function ($query) {
-                    $query->with(['address', 'photo']);
+                    $query->with(['address', 'photo', 'user']);
                 }
             ])
                 ->where('evaluation_status_id', '!=', 1);
@@ -120,7 +120,7 @@ class EvaluationService
                 'level',
                 'transcriptRecord',
                 'student' => function ($query) {
-                    $query->with(['address', 'photo']);
+                    $query->with(['address', 'photo', 'user']);
                 }
             ]);
             return $evaluation;
