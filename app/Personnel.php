@@ -50,6 +50,11 @@ class Personnel extends Model
         return $this->hasMany('App\StudentGrade');
     }
 
+    public function schedules()
+    {
+        return $this->hasMany('App\SectionSchedule');
+    }
+
     public function getNameAttribute()
     {
         return "{$this->first_name} {$this->middle_name} {$this->last_name}";
