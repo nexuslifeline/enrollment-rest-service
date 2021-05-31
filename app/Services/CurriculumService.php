@@ -12,12 +12,14 @@ class CurriculumService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Curriculum::with(['schoolCategory', 'course', 'level']);
+            $query = Curriculum::with(['schoolCategories', 'course', 'level']);
 
             // filters
             $schoolCategoryId = $filters['school_category_id'] ?? false;
             $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-                return $q->where('school_category_id', $schoolCategoryId);
+                return $q->whereHas('schoolCategories', function ($q) use ($schoolCategoryId) {
+                    return $q->where('school_category_id', $schoolCategoryId);
+                });
             });
 
             $courseId = $filters['course_id'] ?? false;
@@ -25,10 +27,10 @@ class CurriculumService
                 return $q->where('course_id', $courseId);
             });
 
-            $levelId = $filters['level_id'] ?? false;
-            $query->when($levelId && !$courseId, function($q) use ($levelId) {
-                return $q->where('level_id', $levelId);
-            });
+            // $levelId = $filters['level_id'] ?? false;
+            // $query->when($levelId && !$courseId, function($q) use ($levelId) {
+            //     return $q->where('level_id', $levelId);
+            // });
 
             $active = $filters['active'] ?? false;
             $query->when($active, function($q) use ($active) {
@@ -64,7 +66,7 @@ class CurriculumService
     {
         try {
             $curriculum = Curriculum::find($id);
-            $curriculum->load(['schoolCategory', 'course', 'level', 'subjects' => function($query) use ($id) {
+            $curriculum->load(['schoolCategories', 'course', 'level', 'subjects' => function($query) use ($id) {
                 return $query->with(['prerequisites' => function ($query) use ($id) {
                     $query->where('curriculum_id', $id);
                 }]);
@@ -79,18 +81,19 @@ class CurriculumService
         return $curriculum;
     }
 
-    public function store(array $data, array $subjects, array $prerequisites)
+    public function store(array $data, array $subjects, array $schoolCategories, array $prerequisites)
     {
         // return $data;
         DB::beginTransaction();
         try {
             $curriculum = Curriculum::create($data);
+            $curriculum->schoolCategories()->sync($schoolCategories);
             $items = [];
             // if ($subjects) {
             foreach ($subjects as $subject) {
                 $items[$subject['subject_id']] = [
                     'course_id' => $data['course_id'],
-                    'school_category_id' => $data['school_category_id'],
+                    'school_category_id' => $subject['school_category_id'],
                     'level_id' => $subject['level_id'],
                     'semester_id' => $subject['semester_id']
                 ];
@@ -112,17 +115,17 @@ class CurriculumService
             }
             $curriculum->subjects()->sync($items);
 
-            if ($data['active']) {
-              $curriculums = Curriculum::where('school_category_id', $data['school_category_id'])
-              ->where('course_id', $data['course_id'])
-              ->where('level_id', $data['level_id'])
-              ->where('id', '!=', $curriculum['id']);
-              $curriculums->update([
-                'active' => 0
-              ]);
-            }
+            // if ($data['active']) {
+            //   $curriculums = Curriculum::where('school_category_id', $data['school_category_id'])
+            //   ->where('course_id', $data['course_id'])
+            //   ->where('level_id', $data['level_id'])
+            //   ->where('id', '!=', $curriculum['id']);
+            //   $curriculums->update([
+            //     'active' => 0
+            //   ]);
+            // }
 
-            $curriculum->load(['schoolCategory', 'course', 'level']);
+            $curriculum->load(['schoolCategories', 'course', 'level']);
             DB::commit();
             return $curriculum;
         } catch (Exception $e) {
@@ -133,18 +136,19 @@ class CurriculumService
         }
     }
 
-    public function update(array $data, array $subjects, array $prerequisites, int $id)
+    public function update(array $data, array $subjects, array $schoolCategories, array $prerequisites, int $id)
     {
         DB::beginTransaction();
         try {
             $curriculum = Curriculum::find($id);
             $curriculum->update($data);
+            $curriculum->schoolCategories()->sync($schoolCategories);
             $items = [];
             // if (count($subjects) > 0) {
             foreach ($subjects as $subject) {
                 $items[$subject['subject_id']] = [
                     'course_id' => $data['course_id'],
-                    'school_category_id' => $data['school_category_id'],
+                    'school_category_id' => $subject['school_category_id'],
                     'level_id' => $subject['level_id'],
                     'semester_id' => $subject['semester_id']
                 ];
@@ -166,16 +170,16 @@ class CurriculumService
             }
             $curriculum->subjects()->sync($items);
 
-            if ($data['active']) {
-              $curriculums = Curriculum::where('school_category_id', $data['school_category_id'])
-              ->where('course_id', $data['course_id'])
-              ->where('level_id', $data['level_id'])
-              ->where('id', '!=', $id);
-              $curriculums->update([
-                'active' => 0
-              ]);
-            }
-            $curriculum->load(['schoolCategory', 'course', 'level']);
+            // if ($data['active']) {
+            //   $curriculums = Curriculum::where('school_category_id', $data['school_category_id'])
+            //   ->where('course_id', $data['course_id'])
+            //   ->where('level_id', $data['level_id'])
+            //   ->where('id', '!=', $id);
+            //   $curriculums->update([
+            //     'active' => 0
+            //   ]);
+            // }
+            $curriculum->load(['schoolCategories', 'course', 'level']);
             DB::commit();
             return $curriculum;
         } catch (Exception $e) {

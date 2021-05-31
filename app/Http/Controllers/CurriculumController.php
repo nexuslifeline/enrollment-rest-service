@@ -35,10 +35,11 @@ class CurriculumController extends Controller
     public function store(CurriculumStoreRequest $request)
     {
         $curriculumService = new CurriculumService();
-        $data = $request->except('subjects', 'prerequisites');
+        $data = $request->except('subjects', 'school_categories', 'prerequisites');
         $subjects = $request->subjects ?? [];
+        $schoolCategories = $request->school_categories ?? [];
         $prerequisites = $request->prerequisites ?? [];
-        $curriculum = $curriculumService->store($data, $subjects, $prerequisites);
+        $curriculum = $curriculumService->store($data, $subjects, $schoolCategories, $prerequisites);
         return (new CurriculumResource($curriculum))
             ->response()
             ->setStatusCode(201);
@@ -67,10 +68,11 @@ class CurriculumController extends Controller
     public function update(CurriculumUpdateRequest $request, int $id)
     {
         $curriculumService = new CurriculumService();
-        $data = $request->except('subjects', 'prerequisites');
+        $data = $request->except('subjects', 'prerequisites', 'school_categories');
         $subjects = $request->subjects ?? [];
+        $schoolCategories = $request->school_categories ?? [];
         $prerequisites = $request->prerequisites ?? [];
-        $curriculum = $curriculumService->update($data, $subjects, $prerequisites, $id);
+        $curriculum = $curriculumService->update($data, $subjects, $schoolCategories, $prerequisites, $id);
         return (new CurriculumResource($curriculum))
         ->response()
         ->setStatusCode(200);

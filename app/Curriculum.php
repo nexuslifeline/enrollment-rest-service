@@ -24,13 +24,13 @@ class Curriculum extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new SchoolCategoryScope);
+        // static::addGlobalScope(new SchoolCategoryScope);
     }
 
-    public function schoolCategory()
-    {
-        return $this->belongsTo('App\SchoolCategory');
-    }
+    // public function schoolCategory()
+    // {
+    //     return $this->belongsTo('App\SchoolCategory');
+    // }
 
     public function course()
     {
@@ -46,7 +46,7 @@ class Curriculum extends Model
     {
         return $this->belongsToMany(
             'App\Subject',
-            'level_subjects',
+            'curriculum_subjects',
             'curriculum_id',
             'subject_id'
         )->withPivot(['level_id','semester_id', 'course_id', 'school_category_id'])
@@ -61,5 +61,15 @@ class Curriculum extends Model
             'curriculum_id',
             'prerequisite_subject_id'
         )->withPivot(['subject_id'])->withTimestamps();
+    }
+
+    public function schoolCategories()
+    {
+        return $this->belongsToMany(
+            'App\SchoolCategory',
+            'curriculum_school_categories',
+            'curriculum_id',
+            'school_category_id'
+        );
     }
 }

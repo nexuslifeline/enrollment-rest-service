@@ -36,7 +36,7 @@ class Level extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany('App\Subject', 'level_subjects', 'level_id','subject_id')->withTimestamps();
+        return $this->belongsToMany('App\Subject', 'curriculum_subjects', 'level_id','subject_id')->withTimestamps();
     }
 
     public function courses()

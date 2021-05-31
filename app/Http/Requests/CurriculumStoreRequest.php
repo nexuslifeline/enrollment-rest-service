@@ -25,9 +25,9 @@ class CurriculumStoreRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:191',
-            'school_category_id' => 'required|numeric',
-            'course_id' => 'required_if:school_category_id,4,5,6,7',
-            'level_id' => 'required_if:school_category_id,1,2,3,6,7',
+            // 'school_category_id' => 'required|numeric',
+            // 'course_id' => 'required_if:school_category_id,4,5,6,7',
+            // 'level_id' => 'required_if:school_category_id,1,2,3,6,7',
             'effective_year' => 'required|digits:4|integer|min:1950|max:2100'
         ];
     }
@@ -43,8 +43,8 @@ class CurriculumStoreRequest extends FormRequest
     public function attributes()
     {
         return [
-            'school_category_id' => 'school category',
-            'course_id' => 'course'
+            // 'school_category_id' => 'school category',
+            // 'course_id' => 'course'
         ];
     }
 }

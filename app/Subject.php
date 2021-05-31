@@ -32,7 +32,7 @@ class Subject extends Model
     {
         return $this->belongsToMany(
             'App\Level',
-            'level_subjects',
+            'curriculum_subjects',
             'subject_id',
             'level_id'
         );
@@ -40,12 +40,12 @@ class Subject extends Model
 
     public function courses()
     {
-        return $this->belongsToMany('App\Course', 'level_subjects', 'subject_id', 'course_id');
+        return $this->belongsToMany('App\Course', 'curriculum_subjects', 'subject_id', 'course_id');
     }
 
     public function semesters()
     {
-        return $this->belongsToMany('App\Semester', 'level_subjects', 'subject_id', 'semester_id');
+        return $this->belongsToMany('App\Semester', 'curriculum_subjects', 'subject_id', 'semester_id');
     }
 
     public function department()
