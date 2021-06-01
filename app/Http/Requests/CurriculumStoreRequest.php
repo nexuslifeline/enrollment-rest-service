@@ -26,8 +26,9 @@ class CurriculumStoreRequest extends FormRequest
         return [
             'name' => 'required|string|max:191',
             // 'school_category_id' => 'required|numeric',
-            // 'course_id' => 'required_if:school_category_id,4,5,6,7',
+            'course_id' => 'required_if:school_categories.0,4,5,6,7',
             // 'level_id' => 'required_if:school_category_id,1,2,3,6,7',
+            'school_categories' => 'min:1',
             'effective_year' => 'required|digits:4|integer|min:1950|max:2100'
         ];
     }
@@ -35,6 +36,7 @@ class CurriculumStoreRequest extends FormRequest
     public function messages()
     {
         return [
+            'school_categories.min' => 'The :attribute must have atleast 1.',
             'required_if' => 'The :attribute field is required.',
             'effective_year.digits' => 'The :attribute field is invalid.'
         ];
@@ -44,7 +46,7 @@ class CurriculumStoreRequest extends FormRequest
     {
         return [
             // 'school_category_id' => 'school category',
-            // 'course_id' => 'course'
+            'course_id' => 'course'
         ];
     }
 }
