@@ -296,32 +296,32 @@ class StudentService
             $semesterId = $filters['semester_id'] ?? false;
             $subjectId = $filters['subject_id'] ?? false;
             $withTheSubject = $filters['with_the_subject'] ?? false;
-            $isDropped = in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
+            $isDropped = isset($filters['is_dropped']) && in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
             // return $isDropped;
 
-            // $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
-            //     return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
-            //         return $query->where('academic_record_status_id', 3)->latest()->limit(1)
-            //         ->when($levelId, function ($q) use ($levelId) {
-            //             return $q->where('level_id', $levelId);
-            //         })
-            //         ->when($courseId, function ($q) use ($courseId) {
-            //             return $q->where('course_id', $courseId);
-            //         })
-            //         ->when($semesterId, function ($q) use ($semesterId) {
-            //             return $q->where('semester_id', $semesterId);
-            //         })
-            //         ->whereHas('subjects', function ($q) use ($sectionId, $subjectId, $isDropped) {
-            //             $q->when($sectionId, function ($q) use ($sectionId) {
-            //                 return $q->where('section_id', $sectionId);
-            //             })->when($subjectId, function ($q) use ($subjectId) {
-            //                 return $q->where('subject_id', $subjectId);
-            //             })->when(in_array($isDropped, [0, 1]), function ($q) use ($isDropped) {
-            //                 return $q->where('is_dropped', $isDropped);
-            //             });
-            //         });
-            //     });
-            // });
+            $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
+                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
+                    return $query->where('academic_record_status_id', 3)->latest()->limit(1)
+                    ->when($levelId, function ($q) use ($levelId) {
+                        return $q->where('level_id', $levelId);
+                    })
+                    ->when($courseId, function ($q) use ($courseId) {
+                        return $q->where('course_id', $courseId);
+                    })
+                    ->when($semesterId, function ($q) use ($semesterId) {
+                        return $q->where('semester_id', $semesterId);
+                    })
+                    ->whereHas('subjects', function ($q) use ($sectionId, $subjectId, $isDropped) {
+                        $q->when($sectionId, function ($q) use ($sectionId) {
+                            return $q->where('section_id', $sectionId);
+                        })->when($subjectId, function ($q) use ($subjectId) {
+                            return $q->where('subject_id', $subjectId);
+                        })->when(in_array($isDropped, [0, 1]), function ($q) use ($isDropped) {
+                            return $q->where('is_dropped', $isDropped);
+                        });
+                    });
+                });
+            });
 
             $query->when($withTheSubject && $subjectId, function ($q) use ($subjectId) {
                 return $q->with(['academicRecords' => function ($q) use ($subjectId) {
