@@ -51,12 +51,12 @@ class GradingPeriodObserver
      */
     public function deleted(GradingPeriod $gradingPeriod)
     {
-        $academicRecords = AcademicRecord::where('school_category_id', $gradingPeriod->school_category_id)
-            ->where('academic_record_status_id', 3)->get();
-        foreach ($academicRecords as $academicRecord) {
-            $studentGrades = $academicRecord->grades();
-            $studentGrades->detach($gradingPeriod->id);
-        }
+        // $academicRecords = AcademicRecord::where('school_category_id', $gradingPeriod->school_category_id)
+        //     ->where('academic_record_status_id', 3)->get();
+        // foreach ($academicRecords as $academicRecord) {
+        //     $studentGrades = $academicRecord->grades();
+        //     $studentGrades->detach($gradingPeriod->id);
+        // }
     }
 
     /**
