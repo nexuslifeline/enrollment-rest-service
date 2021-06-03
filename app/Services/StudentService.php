@@ -304,7 +304,7 @@ class StudentService
             $semesterId = $filters['semester_id'] ?? false;
             $subjectId = $filters['subject_id'] ?? false;
             $withTheSubject = $filters['with_the_subject'] ?? false;
-            $isDropped = in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
+            $isDropped = isset($filters['is_dropped']) && in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
             // return $isDropped;
 
             $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
