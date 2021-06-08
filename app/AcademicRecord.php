@@ -23,7 +23,7 @@ class AcademicRecord extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new SchoolCategoryScope);
+        // static::addGlobalScope(new SchoolCategoryScope);
     }
 
     public function student()

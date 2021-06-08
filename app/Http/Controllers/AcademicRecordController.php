@@ -50,7 +50,7 @@ class AcademicRecordController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
@@ -192,5 +192,14 @@ class AcademicRecordController extends Controller
             $subjectId
         );
         return new AcademicRecordResource($academicRecord);
+    }
+
+    public function quickEnroll(int $studentId) 
+    {
+        $academicRecordService = new AcademicRecordService();
+        $academicRecord = $academicRecordService->quickEnroll($studentId);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(201);
     }
 }

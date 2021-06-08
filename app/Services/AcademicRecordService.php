@@ -209,6 +209,37 @@ class AcademicRecordService
         }
     }
 
+    public function quickEnroll(int $studentId)
+    {
+        DB::beginTransaction();
+        try {
+            $transcriptRecord = Student::find($studentId)->transcriptRecords()
+                ->where('transcript_record_status_id', 1) //active transcript
+                ->latest()
+                ->first();
+
+            $transcriptRecordId = $transcriptRecord ? $transcriptRecord->id 
+                : TranscriptRecord::create([
+                    'student_id' => $studentId
+                ])->id;
+
+
+            $academicRecord = AcademicRecord::create([
+                'student_id' => $studentId,
+                'transcript_record_id' => $transcriptRecordId,
+                'is_manual' => 1
+            ]);
+
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService store method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function update(array $data, array $academicRecordInfo, int $id)
     {
         DB::beginTransaction();

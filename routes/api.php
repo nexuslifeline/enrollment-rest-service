@@ -222,6 +222,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/signatories', 'StudentClearanceController@signatoriesList');
         Route::post('/student-clearances/batch-store', 'StudentClearanceController@batchStore');
         Route::post('/signatories/update', 'StudentClearanceController@signatoriesUpdate');
+        Route::post('/students/{id}/quick-enroll', 'AcademicRecordController@quickEnroll');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
