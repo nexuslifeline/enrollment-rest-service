@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AcademicRecordPatchRequest extends FormRequest
+class TranscriptRecordPatchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,13 +24,14 @@ class AcademicRecordPatchRequest extends FormRequest
     public function rules()
     {
         return [
-            'level_id' => 'sometimes|required',
+            'curriculum_id' => 'required'
         ];
     }
 
-    public function attributes() {
+    public function attributes()
+    {
         return [
-            'level_id' => 'level'
+            'curriculum_id' => 'curriculum'
         ];
     }
 }

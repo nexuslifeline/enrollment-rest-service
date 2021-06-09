@@ -185,4 +185,12 @@ class SubjectController extends Controller
         return SubjectResource::collection($subjects);
     }
 
+    public function syncSubjectsOfAcademicRecord(Request $request, int $academicRecordId)
+    {
+        $subjectService = new SubjectService();
+        $subjects = $request->subjects ?? [];
+        $subjects = $subjectService->syncSubjectsOfAcademicRecord($academicRecordId, $subjects);
+        return SubjectResource::collection($subjects);
+    }
+
 }

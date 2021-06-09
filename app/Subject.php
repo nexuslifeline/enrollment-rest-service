@@ -53,6 +53,17 @@ class Subject extends Model
         return $this->belongsTo('App\Department');
     }
 
+    public function curriculums()
+    {
+        return $this->belongsToMany(
+            'App\Curriculum',
+            'curriculum_subjects',
+            'subject_id',
+            'curriculum_id'
+        )->withPivot(['level_id', 'semester_id', 'course_id', 'school_category_id'])
+        ->withTimestamps();
+    }
+
     public function schoolCategory()
     {
         return $this->belongsTo('App\SchoolCategory');

@@ -21,6 +21,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', 'AuthController@login'); // for student
     Route::post('/personnel/login', 'AuthController@loginPersonnel'); // for personnels
     Route::post('/register', 'AuthController@register');
+    Route::resource('/subjects', 'SubjectController');
 
     Route::group(['middleware' => ['auth:api']], function () {
         // secured endpoints here
@@ -52,6 +53,7 @@ Route::group(['prefix' => 'v1'], function () {
 
         // subjects
         Route::resource('/subjects', 'SubjectController');
+        Route::post('/academic-records/{academicRecordId}/subjects', 'SubjectController@syncSubjectsOfAcademicRecord');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
@@ -100,8 +102,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
         // academic records
-        Route::resource('/academic-records', 'AcademicRecordController');
         Route::patch('/academic-records/{id}', 'AcademicRecordController@patch');
+        Route::resource('/academic-records', 'AcademicRecordController');
         Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
         Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
         Route::post('academic-records/finalize-grades', 'AcademicRecordController@finalizeGrades');

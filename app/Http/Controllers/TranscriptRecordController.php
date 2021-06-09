@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AcademicRecord;
+use App\Http\Requests\TranscriptRecordPatchRequest;
 use Illuminate\Http\Request;
 use App\Services\TranscriptRecordService;
 use App\Http\Resources\TranscriptRecordResource;

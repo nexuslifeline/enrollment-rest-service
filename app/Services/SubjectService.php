@@ -26,6 +26,34 @@ class SubjectService
                 return $q->where('school_category_id', $schoolCategoryId);
             });
 
+            $sectionId = $filters['section_id'] ?? false;
+            $query->when($sectionId, function ($q) use ($sectionId) {
+                return $q->whereHas('schedules', function ($q) use ($sectionId) {
+                    return $q->where('section_id', $sectionId);
+                });
+            });
+
+            $curriculumId = $filters['curriculum_id'] ?? false;
+            $levelId = $filters['level_id'] ?? false;
+            $courseId = $filters['course_id'] ?? false;
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($curriculumId, function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
+                return $q->whereHas('curriculums', function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
+                    return $q->where('curriculum_id', $curriculumId)
+                        ->when($levelId, function ($q) use ($levelId) {
+                            return $q->where('level_id', $levelId);
+                        })
+                        ->when($courseId, function ($q) use ($courseId) {
+                            return $q->where('course_id', $courseId);
+                        })
+                        ->when($semesterId, function ($q) use ($semesterId) {
+                            return $q->where('semester_id', $semesterId);
+                        });
+                });
+            });
+            
+            
+
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($query) use ($criteria) {
                 return $query->where(function ($q) use ($criteria) {
@@ -300,6 +328,29 @@ class SubjectService
             return $subjects;
         } catch (Exception $e) {
             Log::info('Error occured during SubjectService getSectionScheduledSubjectsWithStatus method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function syncSubjectsOfAcademicRecord(int $academicRecordId, array $subjects)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $items = [];
+            foreach ($subjects as $subject) {
+                $items[$subject['subject_id']] = [
+                    'section_id' => $subject['section_id'],
+                ];
+            }
+            $subjects = $academicRecord->subjects();
+            $subjects->sync($items);
+            DB::commit();
+            return $subjects->get();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SubjectService syncSubjectsOfAcademicRecord method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
