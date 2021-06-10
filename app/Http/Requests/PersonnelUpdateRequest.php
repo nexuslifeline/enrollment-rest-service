@@ -35,7 +35,7 @@ class PersonnelUpdateRequest extends FormRequest
             'department_id' => 'sometimes|required',
             //'personnel_status_id' => 'sometimes|required',
             'job_title' => 'sometimes|required|string|max:255',
-            //'complete_address' => 'required|string',
+            'complete_address' => 'required|string',
             'birth_date' => 'sometimes|required|date'
         ];
     }

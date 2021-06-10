@@ -367,7 +367,7 @@ class StudentService
     public function get(int $id)
     {
         try {
-            $student = Student::find($id);
+            $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
             $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
             $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record', 'evaluation');
             return $student;

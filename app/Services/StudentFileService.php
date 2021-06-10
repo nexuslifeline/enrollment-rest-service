@@ -67,11 +67,12 @@ class StudentFileService
                 $path = $file->store('files/student');
             }
 
-            $studentFile = StudentFile::Create(
+            $studentFile = StudentFile::create(
                 [
                     'student_id' => $studentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
                     'hash_name' => $file->hashName()
                 ]
             );

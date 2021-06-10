@@ -64,7 +64,8 @@ class PaymentFileService
                     'payment_id' => $paymentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
-                    'hash_name' => $file->hashName()
+                    'hash_name' => $file->hashName(),
+                    'size' => $file->getSize(),
                 ]
             );
 
@@ -166,7 +167,8 @@ class PaymentFileService
                     'payment_id' => $paymentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
-                    'hash_name' => $file->hashName()
+                    'hash_name' => $file->hashName(),
+                    'size' => $file->getSize()
                 ]
             );
         }
