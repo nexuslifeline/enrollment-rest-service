@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\AcademicRecordService;
 use App\Http\Resources\AcademicRecordResource;
 use App\Http\Requests\AcademicRecordPatchRequest;
+use App\Http\Resources\SubjectResource;
 
 class AcademicRecordController extends Controller
 {
@@ -145,27 +146,27 @@ class AcademicRecordController extends Controller
         return AcademicRecordResource::collection($academicRecords);
     }
 
-    public function gradeBatchUpdate(Request $request)
-    {
-        $data = $request->all();
-        $academicRecordService = new AcademicRecordService();
-        $academicRecords = $academicRecordService->gradeBatchUpdate($data);
+    // public function gradeBatchUpdate(Request $request)
+    // {
+    //     $data = $request->all();
+    //     $academicRecordService = new AcademicRecordService();
+    //     $academicRecords = $academicRecordService->gradeBatchUpdate($data);
 
-        return AcademicRecordResource::collection(
-            $academicRecords
-        );
-    }
+    //     return AcademicRecordResource::collection(
+    //         $academicRecords
+    //     );
+    // }
 
-    public function finalizeGrades(Request $request)
-    {
-        $data = $request->all();
-        $academicRecordService = new AcademicRecordService();
-        $academicRecords = $academicRecordService->finalizeGrades($data);
+    // public function finalizeGrades(Request $request)
+    // {
+    //     $data = $request->all();
+    //     $academicRecordService = new AcademicRecordService();
+    //     $academicRecords = $academicRecordService->finalizeGrades($data);
 
-        // return AcademicRecordResource::collection(
-            return $academicRecords;
-        // );
-    }
+    //     // return AcademicRecordResource::collection(
+    //         return $academicRecords;
+    //     // );
+    // }
 
     public function getSubjects(Request $request, $id)
     {
@@ -201,5 +202,13 @@ class AcademicRecordController extends Controller
         return (new AcademicRecordResource($academicRecord))
             ->response()
             ->setStatusCode(201);
+    }
+
+    public function syncSubjectsOfAcademicRecord(Request $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $subjects = $request->subjects ?? [];
+        $subjects = $academicRecordService->syncSubjectsOfAcademicRecord($academicRecordId, $subjects);
+        return SubjectResource::collection($subjects);
     }
 }

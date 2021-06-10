@@ -333,29 +333,6 @@ class SubjectService
         }
     }
 
-    public function syncSubjectsOfAcademicRecord(int $academicRecordId, array $subjects)
-    {
-        DB::beginTransaction();
-        try {
-            $academicRecord = AcademicRecord::find($academicRecordId);
-            $items = [];
-            foreach ($subjects as $subject) {
-                $items[$subject['subject_id']] = [
-                    'section_id' => $subject['section_id'],
-                ];
-            }
-            $subjects = $academicRecord->subjects();
-            $subjects->sync($items);
-            DB::commit();
-            return $subjects->get();
-        } catch (Exception $e) {
-            DB::rollback();
-            Log::info('Error occured during SubjectService syncSubjectsOfAcademicRecord method call: ');
-            Log::info($e->getMessage());
-            throw $e;
-        }
-    }
-
     private function isAllowedToTake(int $studentId, int $subjectId, $curriculumId)
     {
 

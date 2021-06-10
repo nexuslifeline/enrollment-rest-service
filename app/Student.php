@@ -96,9 +96,12 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $completedStatus = 7;
+        $enrolledStatus = 10;
         return $this->admission()
-            ->where('application_status_id', '!=', $completedStatus)
+            ->whereHas('academicRecord', function ($q) use ($enrolledStatus) {
+                return $q->where('academic_record_status_id', '!=', $enrolledStatus);
+            })
+            ->with('academicRecord')
             ->where('student_id', $this->id)
             ->latest()
             ->first();
@@ -106,9 +109,12 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $completedStatus = 7;
+        $enrolledStatus = 10;
         return $this->applications()
-            ->where('application_status_id', '!=', $completedStatus)
+            ->whereHas('academicRecord', function($q) use($enrolledStatus) {
+                return $q->where('academic_record_status_id', '!=', $enrolledStatus);
+            })
+            ->with('academicRecord')
             ->where('student_id', $this->id)
             ->latest()
             ->first();

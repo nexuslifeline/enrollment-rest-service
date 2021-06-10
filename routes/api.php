@@ -53,7 +53,6 @@ Route::group(['prefix' => 'v1'], function () {
 
         // subjects
         Route::resource('/subjects', 'SubjectController');
-        Route::post('/academic-records/{academicRecordId}/subjects', 'SubjectController@syncSubjectsOfAcademicRecord');
         Route::get('/levels/{levelId}/subjects', 'SubjectController@getSubjectsOfLevel');
         Route::post('/levels/{levelId}/subjects', 'SubjectController@storeSubjectsOfLevel');
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
@@ -112,6 +111,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::put('/academic-records/{academicRecordId}/subjects/{subjectId}', 'AcademicRecordController@updateSubject');
         //Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord'); // should be removed once frontend is updated
         Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
+        Route::post('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@syncSubjectsOfAcademicRecord');
 
         // user groups
         Route::resource('/user-groups', 'UserGroupController');

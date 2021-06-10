@@ -111,7 +111,7 @@ class AcademicRecordService
             // academicRecord status
             $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
             $query->when($academicRecordStatusId, function ($query) use ($academicRecordStatusId) {
-                return $query->where('academic_record_status_id', $academicRecordStatusId);
+                return $query->whereIn('academic_record_status_id', $academicRecordStatusId);
             });
 
             // not equals to academicRecord status
@@ -533,5 +533,28 @@ class AcademicRecordService
             throw $e;
         }
 
+    }
+
+    public function syncSubjectsOfAcademicRecord(int $academicRecordId, array $subjects)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $items = [];
+            foreach ($subjects as $subject) {
+                $items[$subject['subject_id']] = [
+                    'section_id' => $subject['section_id'],
+                ];
+            }
+            $subjects = $academicRecord->subjects();
+            $subjects->sync($items);
+            DB::commit();
+            return $subjects->get();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SubjectService syncSubjectsOfAcademicRecord method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 }
