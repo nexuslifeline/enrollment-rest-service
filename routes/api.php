@@ -225,6 +225,10 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/student-clearances/batch-store', 'StudentClearanceController@batchStore');
         Route::post('/signatories/update', 'StudentClearanceController@signatoriesUpdate');
         Route::post('/students/{id}/quick-enroll', 'AcademicRecordController@quickEnroll');
+
+        //application
+        Route::post('/applications/{id}/request-evaluation', 'ApplicationController@requestEvaluation');
+        Route::post('/applications/{id}/submit', 'ApplicationController@submit');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

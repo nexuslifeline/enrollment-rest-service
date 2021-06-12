@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use App\StudentPreviousEducation;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Config;
 
 class Student extends Model
 {
@@ -79,9 +80,13 @@ class Student extends Model
 
     public function getEvaluationAttribute()
     {
-        $completedStatus = 5;
+        $completedStatus = Config::get('constants.evaluation_status.COMPLETED');
+        $approvedStatus = Config::get('constants.evaluation_status.APPROVED');
         //return $this->hasOne('App\Evaluation');
-        return  $this->evaluations()->where('evaluation_status_id', '!=', $completedStatus)->latest()->first();
+        return  $this->evaluations()->where('evaluation_status_id', '!=', $completedStatus)
+            ->where('evaluation_status_id', '!=', $approvedStatus)
+            ->latest()
+            ->first();
     }
 
     public function evaluations()
@@ -96,7 +101,7 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $enrolledStatus = 10;
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
         return $this->admission()
             ->whereHas('academicRecord', function ($q) use ($enrolledStatus) {
                 return $q->where('academic_record_status_id', '!=', $enrolledStatus);
@@ -109,7 +114,7 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $enrolledStatus = 10;
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
         return $this->applications()
             ->whereHas('academicRecord', function($q) use($enrolledStatus) {
                 return $q->where('academic_record_status_id', '!=', $enrolledStatus);
@@ -123,34 +128,38 @@ class Student extends Model
     public function getAcademicRecordAttribute()
     {
         //this is the active academic record
-        $academicRecord = $this->academicRecords();
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        $academicRecord = $this->academicRecords()
+            ->where('academic_record_status_id', '!=', $enrolledStatus);
 
-        $application = $this->active_application ?? false;
-        $admission = $this->active_admission ?? false;
-        $academicRecord->when($application, function ($query) use ($application) {
-            return $query->where('application_id', $application['id']);
-        });
-        $academicRecord->when($admission, function ($query) use ($admission) {
-            return $query->where('admission_id', $admission['id']);
-        });
+        // $application = $this->active_application ?? false;
+        // $admission = $this->active_admission ?? false;
+        // $academicRecord->when($application, function ($query) use ($application) {
+        //     return $query->where('application_id', $application['id']);
+        // });
+        // $academicRecord->when($admission, function ($query) use ($admission) {
+        //     return $query->where('admission_id', $admission['id']);
+        // });
 
         return $academicRecord->first();
     }
 
     public function getLatestAcademicRecordAttribute()
     {
-        return $this->academicRecords()->where('academic_record_status_id', 3)->with(['level', 'course', 'semester', 'schoolYear'])->latest()->first();
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        return $this->academicRecords()->where('academic_record_status_id', $enrolledStatus)->with(['level', 'course', 'semester', 'schoolYear'])->latest()->first();
     }
 
     public function getLatestManualAcademicRecordAttribute()
     {
-        return $this->academicRecords()->where('is_manual', 1)->where('academic_record_status_id', '!=', 3)->latest()->first();
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        return $this->academicRecords()->where('is_manual', 1)->where('academic_record_status_id', '!=', $enrolledStatus)->latest()->first();
     }
 
     public function getActiveTranscriptRecordAttribute()
     {
-        $draftStatus = 1; // draft transcript status
-        $pendingStatus = 3; // pending transcript status
+        $draftStatus = Config::get('constants.transcript_record_status.DRAFT'); // draft transcript status
+        $pendingStatus = Config::get('constants.transcript_record_status.PENDING'); // pending transcript status
         return $this->transcriptRecords()
             ->where('transcript_record_status_id', $draftStatus)
             ->orWhere('transcript_record_status_id', $pendingStatus)
