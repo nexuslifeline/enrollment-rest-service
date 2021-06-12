@@ -77,6 +77,8 @@ class StudentFileService
                 ]
             );
 
+            $studentFile->load(['documentType']);
+
             return $studentFile;
         } catch (Exception $e) {
             Log::info('Error occured during StudentFileService store method call: ');
@@ -142,6 +144,7 @@ class StudentFileService
 
             $studentFile->update($data);
 
+            $studentFile->load(['documentType']);
             return  $studentFile;
         } catch (Exception $e) {
             Log::info('Error occured during StudentFileService preview method call: ');
