@@ -86,6 +86,7 @@ class AuthController extends Controller
         'active_application',
         'academic_record',
         'active_transcript_record',
+        'active_evaluation'
       ]);
     } else {
       $user->load(['userGroup' => function ($q) {
