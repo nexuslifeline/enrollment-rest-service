@@ -14,10 +14,12 @@ class RemoveApplicationStatusIdColumnInAdmissionsAndApplicationsTable extends Mi
     public function up()
     {
         Schema::table('admissions', function (Blueprint $table) {
-            $table->removeColumn('application_status_id');
+            $table->dropForeign(['application_status_id']);
+            $table->dropColumn('application_status_id');
         });
         Schema::table('applications', function (Blueprint $table) {
-            $table->removeColumn('application_status_id');
+            $table->dropForeign(['application_status_id']);
+            $table->dropColumn('application_status_id');
         });
     }
 }
