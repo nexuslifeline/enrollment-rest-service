@@ -88,8 +88,8 @@ class Student extends Model
     public function getActiveEvaluationAttribute()
     {
         // Note! should
-        $draft = 1;
-        $evaluationPending = 2;
+        $draft = Config::get('constants.academic_record_status.DRAFT');
+        $evaluationPending = Config::get('constants.academic_record_status.EVALUATION_PENDING');
 
         return $this->evaluations()
             ->whereHas('academicRecord', function ($q) use ($draft, $evaluationPending) {
@@ -113,7 +113,7 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $enrolledStatus = 10; // Note! should be move in constants
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
         return $this->admission()
             ->whereHas('academicRecord', function ($q) use ($enrolledStatus) {
                 return $q->where('academic_record_status_id', '!=', $enrolledStatus);
@@ -126,7 +126,7 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $enrolledStatus = 10; // Note! should be move in constants
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
         return $this->applications()
             ->whereHas('academicRecord', function($q) use($enrolledStatus) {
                 return $q->where('academic_record_status_id', '!=', $enrolledStatus);

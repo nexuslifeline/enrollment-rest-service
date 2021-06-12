@@ -16,18 +16,17 @@ class ApplicationService
     DB::beginTransaction();
     try {
       $application = Application::find($applicationId);
-      $student = $application->student;
-      $evaluation = $student->evaluation;
-      $academicRecord = $student->academicRecord;
+      $academicRecord = $application->academicRecord;
       $evaluationPendingStatus = Config::get('constants.academic_record_status.EVALUATION_PENDING');
 
       $academicRecord->update([
         'academic_record_status_id' => $evaluationPendingStatus
       ]);
 
-      $evaluation->update([
+      $academicRecord->evaluation->update([
         'submitted_date' => Carbon::now()
       ]);
+
       DB::commit();
       return $application;
     } catch (Exception $e) {
@@ -43,9 +42,7 @@ class ApplicationService
     DB::beginTransaction();
     try {
       $application = Application::find($applicationId);
-      $student = $application->student;
-      $evaluation = $student->evaluation;
-      $academicRecord = $student->academicRecord;
+      $academicRecord = $application->academicRecord;
       $enlistmentPendingStatus = Config::get('constants.academic_record_status.ENLISTMENT_PENDING');
 
       $academicRecord->update([
