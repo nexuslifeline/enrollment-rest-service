@@ -78,13 +78,25 @@ class Student extends Model
         return $this->hasMany('App\TranscriptRecord');
     }
 
-    public function getEvaluationAttribute()
+    // public function getEvaluationAttribute()
+    // {
+    //     $completedStatus = 5;
+    //     //return $this->hasOne('App\Evaluation');
+    //     return  $this->evaluations()->where('evaluation_status_id', '!=', $completedStatus)->latest()->first();
+    // }
+
+    public function getActiveEvaluationAttribute()
     {
-        $completedStatus = Config::get('constants.evaluation_status.COMPLETED');
-        $approvedStatus = Config::get('constants.evaluation_status.APPROVED');
-        //return $this->hasOne('App\Evaluation');
-        return  $this->evaluations()->where('evaluation_status_id', '!=', $completedStatus)
-            ->where('evaluation_status_id', '!=', $approvedStatus)
+        // Note! should
+        $draft = 1;
+        $evaluationPending = 2;
+
+        return $this->evaluations()
+            ->whereHas('academicRecord', function ($q) use ($draft, $evaluationPending) {
+                return $q->whereIn('academic_record_status_id', [$draft, $evaluationPending]);
+            })
+            ->with('academicRecord')
+            ->where('student_id', $this->id)
             ->latest()
             ->first();
     }
@@ -101,7 +113,7 @@ class Student extends Model
 
     public function getActiveAdmissionAttribute()
     {
-        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        $enrolledStatus = 10; // Note! should be move in constants
         return $this->admission()
             ->whereHas('academicRecord', function ($q) use ($enrolledStatus) {
                 return $q->where('academic_record_status_id', '!=', $enrolledStatus);
@@ -114,7 +126,7 @@ class Student extends Model
 
     public function getActiveApplicationAttribute()
     {
-        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        $enrolledStatus = 10; // Note! should be move in constants
         return $this->applications()
             ->whereHas('academicRecord', function($q) use($enrolledStatus) {
                 return $q->where('academic_record_status_id', '!=', $enrolledStatus);
