@@ -195,10 +195,11 @@ class AcademicRecordController extends Controller
         return new AcademicRecordResource($academicRecord);
     }
 
-    public function quickEnroll(int $studentId) 
+    public function quickEnroll(Request $request, int $studentId)
     {
         $academicRecordService = new AcademicRecordService();
-        $academicRecord = $academicRecordService->quickEnroll($studentId);
+        $data = $request->only('school_year_id','school_category_id');
+        $academicRecord = $academicRecordService->quickEnroll($data, $studentId);
         return (new AcademicRecordResource($academicRecord))
             ->response()
             ->setStatusCode(201);

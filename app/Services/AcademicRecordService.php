@@ -187,6 +187,7 @@ class AcademicRecordService
                 'studentType',
                 'application',
                 'admission',
+                'transcriptRecord',
                 'studentFee' => function ($query) {
                     $query->with(['studentFeeItems']);
                 },
@@ -195,7 +196,7 @@ class AcademicRecordService
                     // return $q->with(['grades' => function ($q) use ($id) {
                     //     $q->wherePivot('academic_record_id', $id);
                     // }]);
-                }, 
+                },
                 // 'grades',
                 'student' => function ($query) {
                     $query->with(['address', 'photo', 'user']);
@@ -209,24 +210,46 @@ class AcademicRecordService
         }
     }
 
-    public function quickEnroll(int $studentId)
+    public function quickEnroll(array $data, int $studentId )
     {
         DB::beginTransaction();
         try {
+
+            $schoolCategoryId  = $data['school_category_id'];
+            $schoolYearId  = $data['school_year_id'];
+
+            if (!$studentId) {
+                throw new Exception('Student id not found!');
+            }
+
+            if (!$schoolCategoryId) {
+                throw new Exception('School Category id not found!');
+            }
+
+            if (!$schoolYearId) {
+                throw new Exception('School Year id not found!');
+            }
+
             $transcriptRecord = Student::find($studentId)->transcriptRecords()
                 ->where('transcript_record_status_id', 1) //active transcript
                 ->latest()
                 ->first();
 
-            $transcriptRecordId = $transcriptRecord ? $transcriptRecord->id 
+            $transcriptRecordId = $transcriptRecord ? $transcriptRecord->id
                 : TranscriptRecord::create([
-                    'student_id' => $studentId
+                    'student_id' => $studentId,
+                    'school_category_id' => $schoolCategoryId,
+                    'transcript_record_status_id' => 1 //draft
                 ])->id;
 
 
             $academicRecord = AcademicRecord::create([
                 'student_id' => $studentId,
                 'transcript_record_id' => $transcriptRecordId,
+                'school_category_id' => $schoolCategoryId,
+                'school_year_id' => $schoolYearId,
+                'academic_record_status_id' => 1,
+                'manual_step_id' => 1,
                 'is_manual' => 1
             ]);
 
