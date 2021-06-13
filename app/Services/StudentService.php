@@ -29,7 +29,7 @@ class StudentService
         try {
             // Note! this should be move in Config/Constants
             $academicRecordStatusId = 1;
-            $evaluationStatusId = 1;
+            // $evaluationStatusId = 1;
             $transcriptRecordStatusId = 1; //1 = draft
             $isEnrolled = $data['is_enrolled'];
 
@@ -55,7 +55,7 @@ class StudentService
             $evaluation = $student->evaluations()->create([
                 'student_id' => $student->id,
                 // 'student_category_id' => $studentCategoryId, //remove on evaluation table 5/22021
-                'evaluation_status_id' => $evaluationStatusId,
+                // 'evaluation_status_id' => $evaluationStatusId,
                 // 'transcript_record_id' => $transcriptRecord->id
             ]);
 
@@ -70,7 +70,7 @@ class StudentService
                 $student->applications()->create([
                     'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                     'application_step_id' => 1,
-                    'application_status_id' => 2
+                    // 'application_status_id' => 2
                 ])->academicRecord()->create([
                     'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                     'student_id' => $student->id,
@@ -85,7 +85,7 @@ class StudentService
                     $student->applications()->create([
                         'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                         'application_step_id' => 1,
-                        'application_status_id' => 2
+                        // 'application_status_id' => 2
                     ])->academicRecord()->create([
                         'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                         'student_id' => $student->id,
@@ -102,7 +102,7 @@ class StudentService
                         $student->applications()->create([
                             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                             'application_step_id' => 1,
-                            'application_status_id' => 2
+                            // 'application_status_id' => 2
                         ])->academicRecord()->create([
                             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                             'student_id' => $student->id,
@@ -118,7 +118,7 @@ class StudentService
                             $student->applications()->create([
                                 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                                 'application_step_id' => 1,
-                                'application_status_id' => 2
+                                // 'application_status_id' => 2
                             ])->academicRecord()->create([
                                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                                 'student_id' => $student->id,
@@ -133,7 +133,7 @@ class StudentService
                             $student->admission()->create([
                                 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
                                 'admission_step_id' => 1,
-                                'application_status_id' => 2
+                                // 'application_status_id' => 2
                             ])->academicRecord()->create([
                                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                                 'student_id' => $student->id,
@@ -207,7 +207,7 @@ class StudentService
                     $activeApplication = $student->applications()->create([
                         'applied_date' => Carbon::now(),
                         'school_year_id' => $application['school_year_id'],
-                        'application_status_id' => $application['application_status_id'],
+                        // 'application_status_id' => $application['application_status_id'],
                         'application_step_id' => $application['application_step_id'],
                         'approved_by' => Auth::user()->id,
                         'approved_date' => Carbon::now()
@@ -593,9 +593,9 @@ class StudentService
         DB::beginTransaction();
 
         try {
-
-            $academicRecordStatusId = 1; //pending
-            $evaluationStatusId = 1; // pending
+            // Note! should be moved in constants
+            $academicRecordStatusId = 1; // draft
+            // $evaluationStatusId = 1; // pending
             $transcriptRecordStatusId = 1; //1 = draft
             $studentCategoryId = 2; //old
             $isManual = 1;
@@ -615,7 +615,7 @@ class StudentService
                 $student->applications()->create([
                     'school_year_id' =>  $activeSchoolYear['id'],
                     'application_step_id' =>  $activeApplication['application_step_id'],
-                    'application_status_id' =>  $activeApplication['application_status_id'],
+                    // 'application_status_id' =>  $activeApplication['application_status_id'],
                     'is_manual' =>  $isManual
                 ])->academicRecord()->create([
                     'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
