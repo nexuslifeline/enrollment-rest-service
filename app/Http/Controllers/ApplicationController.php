@@ -13,9 +13,9 @@ class ApplicationController extends Controller
     public function requestEvaluation(ApplicationRequestEvaluation $request, int $applicationId)
     {
         $applicationService = new ApplicationService();
-        $data = $request->except('level_id');
-        $levelId = $request->level_id;
-        $evaluation = $applicationService->requestEvaluation($data, $applicationId, $levelId);
+        $data = $request->except('level_id','course_id','semester_id');
+        $academicRecordData = $request->only('level_id', 'course_id', 'semester_id');
+        $evaluation = $applicationService->requestEvaluation($data, $academicRecordData, $applicationId);
         return (new EvaluationResource($evaluation))
             ->response()
             ->setStatusCode(201);

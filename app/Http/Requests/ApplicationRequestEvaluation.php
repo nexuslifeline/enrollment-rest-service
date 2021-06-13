@@ -25,6 +25,8 @@ class ApplicationRequestEvaluation extends FormRequest
     {
         return [
             'level_id' => 'required|not_in:0',
+            'course_id' => 'required_if:level_id,13,14,15,16,17,18,19,20,21,22',
+            'semester_id' => 'required_if:level_id,13,14,15,16,17,18,19',
             'last_school_attended' => 'required',
             'last_school_year_from' => 'required',
             'last_school_year_to' => 'required',
@@ -35,7 +37,9 @@ class ApplicationRequestEvaluation extends FormRequest
     public function attributes()
     {
         return [
-            'level_id' => 'level'
+            'level_id' => 'level',
+            'course_id' => 'course',
+            'semester_id' => 'semester'
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Application;
+use App\Level;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Config;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class ApplicationService
 {
-  public function requestEvaluation(array $data, int $applicationId, int $levelId)
+  public function requestEvaluation(array $data, array $academicRecordData, int $applicationId)
   {
     DB::beginTransaction();
     try {
@@ -20,10 +21,10 @@ class ApplicationService
       $evaluation = $academicRecord->evaluation;
       $evaluationPendingStatus = Config::get('constants.academic_record_status.EVALUATION_PENDING');
 
-      $academicRecord->update([
-        'academic_record_status_id' => $evaluationPendingStatus,
-        'level_id' => $levelId
-      ]);
+      $level = Level::find($academicRecordData['level_id']);
+      $academicRecordData['academic_record_status_id'] = $evaluationPendingStatus;
+      $academicRecordData['school_category_id'] = $level->school_category_id;
+      $academicRecord->update($academicRecordData);
 
       $data['submitted_date'] = Carbon::now();
       $evaluation->update($data);
