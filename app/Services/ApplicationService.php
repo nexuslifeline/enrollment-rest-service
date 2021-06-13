@@ -24,8 +24,16 @@ class ApplicationService
         'academic_record_status_id' => $evaluationPendingStatus,
         'level_id' => $levelId
       ]);
+
       $data['submitted_date'] = Carbon::now();
       $evaluation->update($data);
+
+      if ($academicRecord->application) {
+        $evaluationReview = Config::get('constants.application_step.EVALUATION_IN_REVIEW');
+        $academicRecord->application->update([
+            'application_step_id' => $evaluationReview
+        ]);
+      }
 
       DB::commit();
       return $evaluation->load('academicRecord');

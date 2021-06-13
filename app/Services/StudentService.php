@@ -452,7 +452,7 @@ class StudentService
                 }
             }
 
-            $activeEvaluation = $studentInfo['evaluation'] ?? false;
+            $activeEvaluation = $studentInfo['active_evaluation'] ?? false;
             if ($activeEvaluation) {
                 $evaluation = Evaluation::find($activeEvaluation['id']);
                 if ($evaluation) {

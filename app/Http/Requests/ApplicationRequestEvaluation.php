@@ -24,7 +24,11 @@ class ApplicationRequestEvaluation extends FormRequest
     public function rules()
     {
         return [
-            'level_id' => 'required|not_in:0'
+            'level_id' => 'required|not_in:0',
+            'last_school_attended' => 'required',
+            'last_school_year_from' => 'required',
+            'last_school_year_to' => 'required',
+            'last_school_level_id' => 'required'
         ];
     }
 
