@@ -90,4 +90,20 @@ class EvaluationController extends Controller
         $evaluations = $evaluationService->getEvaluationsOfStudent($studentId, $isPaginated, $perPage, $filters);
         return EvaluationResource::collection($evaluations);
     }
+
+    public function approve(Request $request, int $id)
+    {
+        $evaluationService = new EvaluationService();
+        $data = $request->all();
+        $evaluation = $evaluationService->approve($data, $id);
+        return new EvaluationResource($evaluation);
+    }
+
+    public function reject(Request $request, int $id)
+    {
+        $evaluationService = new EvaluationService();
+        $data = $request->all();
+        $evaluation = $evaluationService->reject($data, $id);
+        return new EvaluationResource($evaluation);
+    }
 }

@@ -11,24 +11,24 @@ use Illuminate\Support\Facades\Log;
 
 class ApplicationService
 {
-  public function requestEvaluation(int $applicationId)
+  public function requestEvaluation(array $data, int $applicationId, int $levelId)
   {
     DB::beginTransaction();
     try {
       $application = Application::find($applicationId);
       $academicRecord = $application->academicRecord;
+      $evaluation = $academicRecord->evaluation;
       $evaluationPendingStatus = Config::get('constants.academic_record_status.EVALUATION_PENDING');
 
       $academicRecord->update([
-        'academic_record_status_id' => $evaluationPendingStatus
+        'academic_record_status_id' => $evaluationPendingStatus,
+        'level_id' => $levelId
       ]);
-
-      $academicRecord->evaluation->update([
-        'submitted_date' => Carbon::now()
-      ]);
+      $data['submitted_date'] = Carbon::now();
+      $evaluation->update($data);
 
       DB::commit();
-      return $application;
+      return $evaluation->load('academicRecord');
     } catch (Exception $e) {
       DB::rollBack();
       Log::info('Error occured during ApplicationService requestEvaluation method call: ');

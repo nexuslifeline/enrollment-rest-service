@@ -167,6 +167,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
+        Route::post('/evaluations/{id}/approve', 'EvaluationController@approve');
+        Route::post('/evaluations/{id}/reject', 'EvaluationController@reject');
         // // evaluations
         // Route::resource('evaluations', 'EvaluationController');
         // pera padala accounts

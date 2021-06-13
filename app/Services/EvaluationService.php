@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Evaluation;
 use App\Student;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -205,6 +208,71 @@ class EvaluationService
             return $evaluations;
         } catch (Exception $e) {
             Log::info('Error occured during EvaluationService getEvaluationOfStudent method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function approve(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            // POST -> payload is { approval_notes: '' } /evaluations/:evaluationId/approve -> update academic record status to Evaluation Approved(id 4) 
+            // then update approval_notes, approved_date, approved_by in evaluation. also if there is an application update the application step id to Academic Record Application(id 7)
+
+            $evaluation = Evaluation::find($id);
+            $data['approved_date'] = Carbon::now();
+            $data['approved_by'] = Auth::user()->id;
+            $evaluation->update($data);
+            $evaluationApprovedStatus = Config::get('constants.academic_record_status.EVALUATION_APPROVED');
+
+            $academicRecord = $evaluation->academicRecord;
+            $academicRecord->update([
+                'academic_record_status_id' => $evaluationApprovedStatus
+            ]);
+
+            if ($academicRecord->application) {
+                $academicRecordApplicationStep = Config::get('constants.application_step.ACADEMIC_RECORD_APPLICATION');
+                $academicRecord->application->update([
+                    'application_step_id' => $academicRecordApplicationStep
+                ]);
+            }
+            DB::commit();
+            return $evaluation;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during EvaluationService reject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function reject(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $evaluation = Evaluation::find($id);
+            $data['disapproved_date'] = Carbon::now();
+            $data['disapproved_by'] = Auth::user()->id;
+            $evaluation->update($data);
+            $evaluationRejectedStatus = Config::get('constants.academic_record_status.EVALUATION_REJECTED');
+
+            $academicRecord = $evaluation->academicRecord;
+            $academicRecord->update([
+                'academic_record_status_id' => $evaluationRejectedStatus
+            ]);
+
+            if ($academicRecord->application) {
+                $requestEvaluationStep = Config::get('constants.application_step.REQUEST_EVALUATION');
+                $academicRecord->application->update([
+                    'application_step_id' => $requestEvaluationStep
+                ]);
+            }
+            DB::commit();
+            return $evaluation;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during EvaluationService reject method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

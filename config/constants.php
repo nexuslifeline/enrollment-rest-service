@@ -25,11 +25,11 @@ return [
     'FAMILY' => 3, 
     'EDUCATION' => 4,
     'REQUEST_EVALUATION' => 5,
-    'WAITING_EVALUATION' => 6,
-    'ACADEMIC_YEAR_APPLICATION' => 7,
-    'STATUS' => 8,
+    'EVALUATION_IN_REVIEW' => 6,
+    'ACADEMIC_RECORD_APPLICATION' => 7,
+    'ACADEMIC_RECORD_IN_REVIEW' => 8,
     'PAYMENTS' => 9,
-    'WAITING' => 10
+    'PAYMENT_IN_REVIEW' => 10
   ],
   'evaluation_status' => [
     'PENDING' => 1,
