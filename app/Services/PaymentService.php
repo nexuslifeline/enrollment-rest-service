@@ -6,6 +6,7 @@ use App\Payment;
 use App\Student;
 use App\StudentFee;
 use Exception;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -100,7 +101,7 @@ class PaymentService
         DB::beginTransaction();
         try {
             $payment = Payment::create($data);
-
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
             $billing = $payment->billing;
             //check if billing is initial
             if ($billing->billing_type_id === 1) {
@@ -108,22 +109,22 @@ class PaymentService
                 $academicRecord = $student->academicRecords()->get()->last();
                 // update application status and step to completed and waiting
                 if ($academicRecord['is_manual'] === 1) {
-                    $academicRecord->application->update([
-                        'application_status_id' => 7,
-                        'application_step_id' => 10
-                    ]);
+                    // $academicRecord->application->update([
+                    //     'application_status_id' => 7,
+                    //     'application_step_id' => 10
+                    // ]);
 
                     //update academic record status to enrolled
                     $academicRecord->update([
-                        'academic_record_status_id' => 3
+                        'academic_record_status_id' => $enrolledStatus
                     ]);
                 }
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])
-                        ->whereHas('academicRecords', function ($query) {
+                        ->whereHas('academicRecords', function ($query) use ($enrolledStatus) {
                             return $query->where('student_category_id', 1)
-                                ->where('academic_record_status_id', 3);
+                                ->where('academic_record_status_id', $enrolledStatus);
                         })
                         ->get();
 
@@ -155,6 +156,7 @@ class PaymentService
         try {
             $payment = Payment::find($id);
             $payment->update($data);
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
             $paymentStatusId = $data['payment_status_id'] ?? false;
             if ($paymentStatusId === 2) {
                 $student = $payment->student()->first();
@@ -162,9 +164,9 @@ class PaymentService
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])
-                        ->whereHas('academicRecords', function ($query) {
+                        ->whereHas('academicRecords', function ($query) use ($enrolledStatus) {
                             return $query->where('student_category_id', 1)
-                                ->where('academic_record_status_id', 3);
+                                ->where('academic_record_status_id', $enrolledStatus);
                         })
                         ->get();
 

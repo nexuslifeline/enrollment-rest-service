@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
 
 class AcademicRecordService
 {
@@ -270,7 +271,7 @@ class AcademicRecordService
             $academicRecord = AcademicRecord::find($id);
 
             $academicRecord->update($data);
-
+            
             if ($academicRecordInfo['application'] ?? false) {
                 $application = $academicRecord->application();
                 if ($application) {
@@ -433,6 +434,8 @@ class AcademicRecordService
     public function getPendingApprovalCount(array $filters)
     {
         $schoolYearId = $filters['school_year_id'] ?? false;
+        $evaluationApprovedStatus = Config::get('constants.academic_record_status.EVALUATION_APPROVED');
+        $enlistmentApprovedStatus = Config::get('constants.academic_record_status.ENLISTMENT_APPROVED');
         $evaluation = Evaluation::where('evaluation_status_id', 2)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->whereHas('academicRecord', function ($query) use($schoolYearId) {
@@ -446,19 +449,19 @@ class AcademicRecordService
             })->orWhereHas('admission', function ($query) {
                 return $query->where('application_status_id', 4);
             });
-        })->where('academic_record_status_id', 1)
+        })->where('academic_record_status_id', $evaluationApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
         });
 
 
-       $assessment = AcademicRecord::where(function ($q) {
+        $assessment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
             })->orWhereHas('admission', function ($query) {
                 return $query->where('application_status_id', 4);
             });
-        })->where('academic_record_status_id', 2)
+        })->where('academic_record_status_id', $enlistmentApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
         });
@@ -477,7 +480,8 @@ class AcademicRecordService
     public function getGradesOfAcademicRecords(int $subjectId, int $sectionId, bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = AcademicRecord::where('academic_record_status_id', 3)
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $query = AcademicRecord::where('academic_record_status_id', $enrolledStatus)
             ->with(['grades' => function ($q) use ($subjectId) {
                 $q->where('subject_id', $subjectId);
             }, 'student'])

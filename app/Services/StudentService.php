@@ -17,6 +17,7 @@ use App\TranscriptRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -298,10 +299,10 @@ class StudentService
             $withTheSubject = $filters['with_the_subject'] ?? false;
             $isDropped = isset($filters['is_dropped']) && in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
             // return $isDropped;
-
-            $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
-                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped) {
-                    return $query->where('academic_record_status_id', 3)->latest()->limit(1)
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus) {
+                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus) {
+                    return $query->where('academic_record_status_id', $enrolledStatus)->latest()->limit(1)
                     ->when($levelId, function ($q) use ($levelId) {
                         return $q->where('level_id', $levelId);
                     })
@@ -323,9 +324,9 @@ class StudentService
                 });
             });
 
-            $query->when($withTheSubject && $subjectId, function ($q) use ($subjectId) {
-                return $q->with(['academicRecords' => function ($q) use ($subjectId) {
-                    return $q->where('academic_record_status_id', 3)
+            $query->when($withTheSubject && $subjectId, function ($q) use ($subjectId, $enrolledStatus) {
+                return $q->with(['academicRecords' => function ($q) use ($subjectId, $enrolledStatus) {
+                    return $q->where('academic_record_status_id', $enrolledStatus)
                     ->latest()
                         ->with(['subjects' => function ($q) use ($subjectId) {
                             return $q->where('subject_id', $subjectId);

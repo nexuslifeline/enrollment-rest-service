@@ -3,8 +3,11 @@
 namespace App;
 
 use App\Scopes\SchoolCategoryScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class Curriculum extends Model
 {
@@ -23,8 +26,24 @@ class Curriculum extends Model
     protected static function boot()
     {
         parent::boot();
+        $user = Auth::user();
 
-        // static::addGlobalScope(new SchoolCategoryScope);
+        if ($user->userable_type === 'App\Student') {
+            return;
+        }
+
+        $userGroup = $user->userGroup()->first();
+        Log::error($userGroup);
+        if ($userGroup) {
+            $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
+            Log::error($schoolCategories);
+            static::addGlobalScope('school_categories', function (Builder $builder) use ($schoolCategories) {
+                $builder->whereHas('schoolCategories', function($q) use ($schoolCategories) {
+                    return $q->whereIn('school_category_id', $schoolCategories)
+                        ->orWhereNull('school_category_id');
+                });
+            });
+        }
     }
 
     // public function schoolCategory()

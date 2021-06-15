@@ -29,7 +29,8 @@ class SchoolCategoryScope implements Scope
         $userGroup = $user->userGroup()->first();
         if ($userGroup) {
             $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
-            $builder->whereIn($model->getTable() . '.school_category_id', $schoolCategories);
+            $builder->whereIn($model->getTable() . '.school_category_id', $schoolCategories)
+            ->orWhereNull('school_category_id');
         }
     }
 }
