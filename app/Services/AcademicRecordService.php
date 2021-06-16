@@ -436,7 +436,11 @@ class AcademicRecordService
         $schoolYearId = $filters['school_year_id'] ?? false;
         $evaluationApprovedStatus = Config::get('constants.academic_record_status.EVALUATION_APPROVED');
         $enlistmentApprovedStatus = Config::get('constants.academic_record_status.ENLISTMENT_APPROVED');
-        $evaluation = Evaluation::where('evaluation_status_id', 2)
+        $draft = Config::get('constants.academic_record_status.DRAFT');
+        $evaluationPending = Config::get('constants.academic_record_status.EVALUATION_PENDING');
+        $evaluation = Evaluation::whereHas('academicRecord', function ($q) use ($draft, $evaluationPending) {
+            return $q->whereIn('academic_record_status_id', [$draft, $evaluationPending]);
+        })
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->whereHas('academicRecord', function ($query) use($schoolYearId) {
                 return $query->where('school_year_id', $schoolYearId);
