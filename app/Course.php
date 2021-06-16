@@ -24,7 +24,7 @@ class Course extends Model
         return $this->belongsToMany('App\Level', 'level_courses', 'course_id','level_id');
     }
 
-    public function school_categories()
+    public function schoolCategories()
     {
         return $this->belongsToMany('App\SchoolCategory', 'level_courses', 'course_id','school_category_id');
     }
