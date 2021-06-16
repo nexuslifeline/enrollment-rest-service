@@ -6,6 +6,7 @@ use App\GradingPeriod;
 use App\AcademicRecord;
 use App\GradingPeriods;
 use App\Services\TranscriptRecordService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 
 class AcademicRecordObserver
@@ -48,34 +49,23 @@ class AcademicRecordObserver
         }
     }
     /**
-     * Handle the academic record "created" event.
+     * Handle the academic record "creating" event.
      *
      * @param  \App\AcademicRecord  $academicRecord
      * @return void
      */
-    public function created(AcademicRecord $academicRecord)
+    public function creating(AcademicRecord $academicRecord)
     {
-        // if ($academicRecord->academic_record_status_id === 3) {
-        //     $subjects = $academicRecord->subjects()->get();
-        //     $gradingPeriods = GradingPeriod::where('school_category_id', $academicRecord->school_category_id)
-        //         ->where('school_year_id', $academicRecord->school_year_id)
-        //         ->where('semester_id', $academicRecord->semester_id)
-        //         ->get()
-        //         ->pluck('id');
-        //     foreach ($subjects as $subject) {
-        //         $studentGrades = $academicRecord->grades();
-        //         $items = [];
-        //         foreach ($gradingPeriods as $gradingPeriod) {
-        //             $items[$gradingPeriod] = [
-        //                 'subject_id' => $subject['id'],
-        //                 'personnel_id' => null,
-        //                 'grade' => 0,
-        //                 'notes' => ''
-        //             ];
-        //         }
-        //         $studentGrades->wherePivot('subject_id', $subject['id'])->sync($items);
-        //     }
-        // }
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        if ($academicRecord->academic_record_status_id === $enrolledStatus) {
+            $academicRecord->enrolled_date = Carbon::now();
+            if ($academicRecord->application) {
+                $academicRecord->application->update([
+                    'is_completed' => 1,
+                    'completed_date' => Carbon::now()
+                ]);
+            }
+        }
     }
 
     /**
@@ -84,29 +74,18 @@ class AcademicRecordObserver
      * @param  \App\AcademicRecord  $academicRecord
      * @return void
      */
-    public function updated(AcademicRecord $academicRecord)
+    public function updating(AcademicRecord $academicRecord)
     {
-        // if ($academicRecord->academic_record_status_id === 3) {
-        //     $subjects = $academicRecord->subjects()->get();
-        //     $gradingPeriods = GradingPeriod::where('school_category_id', $academicRecord->school_category_id)
-        //         ->where('school_year_id', $academicRecord->school_year_id)
-        //         ->where('semester_id', $academicRecord->semester_id)
-        //         ->get()
-        //         ->pluck('id');
-        //     foreach ($subjects as $subject) {
-        //         $studentGrades = $academicRecord->grades();
-        //         $items = [];
-        //         foreach ($gradingPeriods as $gradingPeriod) {
-        //             $items[$gradingPeriod] = [
-        //                 'subject_id' => $subject['id'],
-        //                 'personnel_id' => null,
-        //                 'grade' => 0,
-        //                 'notes' => ''
-        //             ];
-        //         }
-        //         $studentGrades->wherePivot('subject_id', $subject['id'])->sync($items);
-        //     }
-        // }
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        if ($academicRecord->academic_record_status_id === $enrolledStatus) {
+            $academicRecord->enrolled_date = Carbon::now();
+            if ($academicRecord->application) {
+                $academicRecord->application->update([
+                    'is_completed' => 1,
+                    'completed_date' => Carbon::now()
+                ]);
+            }
+        }
     }
 
     /**

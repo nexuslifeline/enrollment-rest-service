@@ -111,18 +111,18 @@ class Student extends Model
         return $this->hasMany('App\StudentFee');
     }
 
-    public function getActiveAdmissionAttribute()
-    {
-        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
-        return $this->admission()
-            ->whereHas('academicRecord', function ($q) use ($enrolledStatus) {
-                return $q->where('academic_record_status_id', '!=', $enrolledStatus);
-            })
-            ->with('academicRecord')
-            ->where('student_id', $this->id)
-            ->latest()
-            ->first();
-    }
+    // public function getActiveAdmissionAttribute()
+    // {
+    //     $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
+    //     return $this->admission()
+    //         ->whereHas('academicRecord', function ($q) use ($enrolledStatus) {
+    //             return $q->where('academic_record_status_id', '!=', $enrolledStatus);
+    //         })
+    //         ->with('academicRecord')
+    //         ->where('student_id', $this->id)
+    //         ->latest()
+    //         ->first();
+    // }
 
     public function getActiveApplicationAttribute()
     {
@@ -133,8 +133,14 @@ class Student extends Model
             })
             ->with('academicRecord')
             ->where('student_id', $this->id)
+            ->where('is_completed', 0)
             ->latest()
             ->first();
+    }
+
+    public function getHasOpenApplicationAttribute()
+    {
+        return $this->active_application ? true : false;
     }
 
     public function getAcademicRecordAttribute()

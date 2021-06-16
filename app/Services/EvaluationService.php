@@ -211,12 +211,12 @@ class EvaluationService
                 'academic_record_status_id' => $evaluationApprovedStatus
             ]);
 
-            if ($academicRecord->application) {
-                $academicRecordApplicationStep = Config::get('constants.application_step.ACADEMIC_RECORD_APPLICATION');
-                $academicRecord->application->update([
-                    'application_step_id' => $academicRecordApplicationStep
-                ]);
-            }
+            // if ($academicRecord->application) {
+            //     $academicRecordApplicationStep = Config::get('constants.onboarding_step.ACADEMIC_RECORD_APPLICATION');
+            //     $academicRecord->application->update([
+            //         'application_step_id' => $academicRecordApplicationStep
+            //     ]);
+            // }
             DB::commit();
             return $evaluation;
         } catch (Exception $e) {
@@ -242,12 +242,12 @@ class EvaluationService
                 'academic_record_status_id' => $evaluationRejectedStatus
             ]);
 
-            if ($academicRecord->application) {
-                $requestEvaluationStep = Config::get('constants.application_step.REQUEST_EVALUATION');
-                $academicRecord->application->update([
-                    'application_step_id' => $requestEvaluationStep
-                ]);
-            }
+            // if ($academicRecord->application) {
+            //     $requestEvaluationStep = Config::get('constants.onboarding_step.REQUEST_EVALUATION');
+            //     $academicRecord->application->update([
+            //         'application_step_id' => $requestEvaluationStep
+            //     ]);
+            // }
             DB::commit();
             return $evaluation;
         } catch (Exception $e) {

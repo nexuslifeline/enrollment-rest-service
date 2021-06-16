@@ -28,7 +28,7 @@ class StudentUpdateRequest extends FormRequest
     public function rules()
     {
         $activeApplication = $this->active_application ?? false;
-        $activeAdmission = $this->active_admission ?? false;
+        // $activeAdmission = $this->active_admission ?? false;
 
         return [
             'active_application.*' => [
@@ -38,13 +38,13 @@ class StudentUpdateRequest extends FormRequest
                     }
                 }
             ],
-            'active_admission.*' => [
-                function ($attribute, $value, $fail) use($activeAdmission) {
-                    if ($activeAdmission && !Arr::get($activeAdmission, 'id')) {
-                        $fail('Admission id is required.');
-                    }
-                }
-              ],
+            // 'active_admission.*' => [
+            //     function ($attribute, $value, $fail) use($activeAdmission) {
+            //         if ($activeAdmission && !Arr::get($activeAdmission, 'id')) {
+            //             $fail('Admission id is required.');
+            //         }
+            //     }
+            //   ],
             // student
             'student_no' => 'sometimes|nullable|string',
             'first_name' => 'sometimes|required|string|max:255',

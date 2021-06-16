@@ -29,12 +29,12 @@ class ApplicationService
       $data['submitted_date'] = Carbon::now();
       $evaluation->update($data);
 
-      if ($academicRecord->application) {
-        $evaluationReview = Config::get('constants.application_step.EVALUATION_IN_REVIEW');
-        $academicRecord->application->update([
-            'application_step_id' => $evaluationReview
-        ]);
-      }
+      // if ($academicRecord->application) {
+      //   $evaluationReview = Config::get('constants.onboarding_step.EVALUATION_IN_REVIEW');
+      //   $academicRecord->application->update([
+      //       'application_step_id' => $evaluationReview
+      //   ]);
+      // }
 
       DB::commit();
       return $evaluation->load('academicRecord');
@@ -46,17 +46,25 @@ class ApplicationService
     }
   }
 
-  public function submit(int $applicationId)
+  public function submit(array $data, array $subjects, int $applicationId)
   {
     DB::beginTransaction();
     try {
       $application = Application::find($applicationId);
       $academicRecord = $application->academicRecord;
       $enlistmentPendingStatus = Config::get('constants.academic_record_status.ENLISTMENT_PENDING');
+      
+      $data['academic_record_status_id'] = $enlistmentPendingStatus;
+      $academicRecord->update($data);
 
-      $academicRecord->update([
-        'academic_record_status_id' => $enlistmentPendingStatus
-      ]);
+      $items = [];
+      foreach ($subjects as $subject) {
+        $items[$subject['subject_id']] = [
+          'section_id' => $subject['section_id']
+        ];
+      }
+
+      $academicRecord->subjects()->sync($items);
 
       $application->update([
         'applied_date' => Carbon::now()

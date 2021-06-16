@@ -19,7 +19,7 @@ return [
     'FINALIZED' => 2,
     'PENDING' => 3
   ],
-  'application_step' => [
+  'onboarding_step' => [
     'PROFILE' => 1,
     'ADDRESS' => 2,
     'FAMILY' => 3, 

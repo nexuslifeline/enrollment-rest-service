@@ -45,7 +45,8 @@ class StudentService
                 'middle_name' => $data['middle_name'],
                 'last_name' => $data['last_name'],
                 'mobile_no' => $data['mobile_no'],
-                'email' => $data['username']
+                'email' => $data['username'],
+                'is_onboarding' => 1
             ]);
 
             $transcriptRecord = $student->transcriptRecords()->create([
@@ -70,7 +71,7 @@ class StudentService
                 //
                 $student->applications()->create([
                     'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                    'application_step_id' => 1,
+                    // 'application_step_id' => 1,
                     // 'application_status_id' => 2
                 ])->academicRecord()->create([
                     'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
@@ -85,7 +86,7 @@ class StudentService
 
                     $student->applications()->create([
                         'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                        'application_step_id' => 1,
+                        // 'application_step_id' => 1,
                         // 'application_status_id' => 2
                     ])->academicRecord()->create([
                         'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
@@ -102,7 +103,7 @@ class StudentService
 
                         $student->applications()->create([
                             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                            'application_step_id' => 1,
+                            // 'application_step_id' => 1,
                             // 'application_status_id' => 2
                         ])->academicRecord()->create([
                             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
@@ -118,7 +119,7 @@ class StudentService
 
                             $student->applications()->create([
                                 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                                'application_step_id' => 1,
+                                // 'application_step_id' => 1,
                                 // 'application_status_id' => 2
                             ])->academicRecord()->create([
                                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
@@ -209,7 +210,7 @@ class StudentService
                         'applied_date' => Carbon::now(),
                         'school_year_id' => $application['school_year_id'],
                         // 'application_status_id' => $application['application_status_id'],
-                        'application_step_id' => $application['application_step_id'],
+                        // 'application_step_id' => $application['application_step_id'],
                         'approved_by' => Auth::user()->id,
                         'approved_date' => Carbon::now()
                     ]);
@@ -370,7 +371,7 @@ class StudentService
         try {
             $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
             $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
-            $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record', 'active_evaluation');
+            $student->append('active_application', 'academic_record', 'active_transcript_record', 'active_evaluation');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -409,21 +410,21 @@ class StudentService
             $student = Student::find($id);
             $student->update($data);
 
-            $activeApplication = $studentInfo['active_application'] ?? false;
-            if ($activeApplication) {
-                $application = Application::find($activeApplication['id']);
-                if ($application) {
-                    $application->update($activeApplication);
-                }
-            }
+            // $activeApplication = $studentInfo['active_application'] ?? false;
+            // if ($activeApplication) {
+            //     $application = Application::find($activeApplication['id']);
+            //     if ($application) {
+            //         $application->update($activeApplication);
+            //     }
+            // }
 
-            $activeAdmission = $studentInfo['active_admission'] ?? false;
-            if ($activeAdmission) {
-                $admission = Admission::find($activeAdmission['id']);
-                if ($admission) {
-                    $admission->update($activeAdmission);
-                }
-            }
+            // $activeAdmission = $studentInfo['active_admission'] ?? false;
+            // if ($activeAdmission) {
+            //     $admission = Admission::find($activeAdmission['id']);
+            //     if ($admission) {
+            //         $admission->update($activeAdmission);
+            //     }
+            // }
 
             //disabled for adjustment on transcript record 5/15/2021
             // $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
@@ -520,7 +521,6 @@ class StudentService
 
             $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
             $student->append([
-                'active_admission',
                 'active_application',
                 'academic_record',
                 'active_transcript_record',
@@ -615,7 +615,7 @@ class StudentService
                 //do if no active application
                 $student->applications()->create([
                     'school_year_id' =>  $activeSchoolYear['id'],
-                    'application_step_id' =>  $activeApplication['application_step_id'],
+                    // 'application_step_id' =>  $activeApplication['application_step_id'],
                     // 'application_status_id' =>  $activeApplication['application_status_id'],
                     'is_manual' =>  $isManual
                 ])->academicRecord()->create([
@@ -716,7 +716,7 @@ class StudentService
 
 
             $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
-            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
+            $student->append(['active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
             DB::commit();
             return $student;
         } catch (Exception $e) {

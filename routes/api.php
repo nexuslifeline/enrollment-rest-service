@@ -30,6 +30,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/me', 'AuthController@getAuthUser');
         Route::post('/logout', 'AuthController@logout');
         // students
+        Route::patch('/students/{id}', 'StudentController@patch');
         Route::resource('/students', 'StudentController');
         Route::post('/students/manual-registration', 'StudentController@manualRegister');
         Route::post('/students/{studentId}/enroll', 'StudentController@enroll');

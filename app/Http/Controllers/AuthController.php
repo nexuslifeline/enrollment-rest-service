@@ -82,8 +82,9 @@ class AuthController extends Controller
     if ($user->userable_type === 'App\\Student') {
       $user->userable->load('academicRecords');
       $user->userable->append([
-        'active_admission',
+        // 'active_admission',
         'active_application',
+        'has_open_application',
         'academic_record',
         'active_transcript_record',
         'active_evaluation'

@@ -21,10 +21,12 @@ class ApplicationController extends Controller
             ->setStatusCode(201);
     }
 
-    public function submit(int $applicationId)
+    public function submit(Request $request, int $applicationId)
     {
         $applicationService = new ApplicationService();
-        $application = $applicationService->submit($applicationId);
+        $data = $request->except('subjects');
+        $subjects = $request->subjects ?? [];
+        $application = $applicationService->submit($data, $subjects, $applicationId);
         return (new ApplicationResource($application))
             ->response()
             ->setStatusCode(201);
