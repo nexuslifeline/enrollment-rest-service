@@ -19,20 +19,13 @@ class EvaluationService
         try {
             $query = Evaluation::with([
                 'lastSchoolLevel',
-                // 'level',
-                // 'course',
-                // 'studentCategory',
-                //'curriculum',
-                // 'studentCurriculum',
-                // 'transcriptRecord',
                 'academicRecord' => function ($query) {
                     $query->with(['schoolYear', 'level', 'course', 'studentCategory']);
                 },
                 'student' => function ($query) {
                     $query->with(['address', 'photo', 'user']);
                 }
-            ])
-            ->where('evaluation_status_id', '!=', 1);
+            ]);
 
             // filters
             // student
@@ -43,44 +36,31 @@ class EvaluationService
                 });
             });
 
-            // school year
-            $schoolYearId = $filters['school_year_id'] ?? false;
-            $query->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->whereHas('academicRecord', function ($query) use ($schoolYearId) {
-                    $query->where('school_year_id', $schoolYearId);
-                });
-                //return $q->where('school_year_id', $schoolYearId);
-            });
 
-            //school category
-            // $schoolCategoryId = $filters['school_category_id'] ?? false;
-            // $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
-            //     return $q->whereHas('academicRecord', function ($query) use ($schoolCategoryId) {
-            //         $query->where('school_category_id', $schoolCategoryId);
-            //     });
-            // });
+             // academic record status, school year, school cateogry, level, course
+             $academicStatusId = $filters['academic_record_status_id'] ?? false;
+             $schoolYearId = $filters['school_year_id'] ?? false;
+             $courseId = $filters['course_id'] ?? false;
+             $schoolCategoryId = $filters['school_category_id'] ?? false;
+             $levelId = $filters['level_id'] ?? false;
 
-            // course
-            $courseId = $filters['course_id'] ?? false;
-            $query->when($courseId, function ($q) use ($courseId) {
-                return $q->whereHas('course', function ($query) use ($courseId) {
-                    return $query->where('course_id', $courseId);
-                });
-            });
-
-            // level
-            $levelId = $filters['level_id'] ?? false;
-            $query->when($levelId, function ($q) use ($levelId) {
-                return $q->whereHas('level', function ($query) use ($levelId) {
-                    return $query->where('level_id', $levelId);
-                });
-            });
-
-            // evaluation status
-            $evaluationStatusId = $filters['evaluation_status_id'] ?? false;
-            $query->when($evaluationStatusId, function ($query) use ($evaluationStatusId) {
-                return $query->where('evaluation_status_id', $evaluationStatusId);
-            });
+             $query->when(
+                $academicStatusId || $schoolYearId || $courseId || $schoolCategoryId || $levelId,
+                function ($q) use ($academicStatusId, $schoolYearId, $courseId, $schoolCategoryId, $levelId) {
+                    return $q->whereHas(
+                        'academicRecord',
+                        function ($query) use ($academicStatusId, $schoolYearId, $courseId, $schoolCategoryId, $levelId) {
+                            if ($academicStatusId) $query->whereIn('academic_record_status_id', $academicStatusId);
+                            if ($schoolYearId) $query->where('school_year_id', $schoolYearId);
+                            if ($courseId) $query->where('course_id', $courseId);
+                            if ($schoolCategoryId) $query->where('school_category_id', $schoolCategoryId);
+                            if ($levelId) $query->where('level_id', $levelId);
+                            $query->where('is_manual', false);
+                            return $query;
+                        }
+                    );
+                }
+            );
 
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
