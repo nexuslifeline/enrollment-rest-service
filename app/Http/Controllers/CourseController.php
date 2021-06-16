@@ -23,7 +23,8 @@ class CourseController extends Controller
         $courseService = new CourseService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
-        $courses = $courseService->list($isPaginated, $perPage);
+        $filters = $request->all();
+        $courses = $courseService->list($isPaginated, $perPage, $filters);
         return CourseResource::collection($courses);
     }
 

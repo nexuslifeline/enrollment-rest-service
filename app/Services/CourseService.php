@@ -11,12 +11,27 @@ use Illuminate\Support\Facades\Log;
 
 class CourseService
 {
-    public function list(bool $isPaginated, int $perPage)
+    public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
+            $levelId = $filters['level_id'] ?? null;
+            $schoolCategoryId = $filters['school_category_id'] ?? null;
+
+            $query = Course::when($levelId, function($q) use ($levelId) {
+                return $q->whereHas('levels', function($q) use ($levelId) {
+                    return $q->where('level_id', $levelId);
+                });
+            });
+
+            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
+                return $q->whereHas('schoolCategories', function ($q) use ($schoolCategoryId) {
+                    return $q->where('school_category_id', $schoolCategoryId);
+                });
+            });
+
             $courses = $isPaginated
-                ? Course::paginate($perPage)
-                : Course::all();
+                ? $query->paginate($perPage)
+                : $query->get();
             return $courses;
         } catch (Exception $e) {
             Log::info('Error occured during CourseService list method call: ');
