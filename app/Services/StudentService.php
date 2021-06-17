@@ -555,12 +555,12 @@ class StudentService
 
             $soaBillings->append(['total_paid', 'submitted_payments']);
 
-            //soa billing type id
-            $billingTypeId = 1;
-            $initialBilling = Billing::where('billing_type_id', $billingTypeId)
-                ->where('student_id', $id)
-                ->get();
-            $initialBilling->append(['total_paid', 'submitted_payments']);
+            // //inital billing type id
+            // $billingTypeId = 1;
+            // $initialBilling = Billing::where('billing_type_id', $billingTypeId)
+            //     ->where('student_id', $id)
+            //     ->get();
+            // $initialBilling->append(['total_paid', 'submitted_payments']);
 
             //other billing type id
             $billingTypeId = 3;
@@ -569,7 +569,7 @@ class StudentService
             $otherBillings->append(['total_paid','submitted_payments']);
 
 
-            $billings = $soaBillings->merge($initialBilling)->merge($otherBillings);
+            $billings = $soaBillings->merge($otherBillings);
 
             return $billings->sortBy('due_date');
         } catch (Exception $e) {
