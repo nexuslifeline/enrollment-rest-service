@@ -13,6 +13,7 @@ return [
     'ASSESSMENT_APPROVED' => 9,
     'PAYMENT_SUBMITTED' => 10,
     'ENROLLED' => 11,
+    'CLOSED' => 12
   ],
   'transcript_record_status' => [ // should be updated to ACTIVE, COMPLETED, SHIFTED
     'DRAFT' => 1,

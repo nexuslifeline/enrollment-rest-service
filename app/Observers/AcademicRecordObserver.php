@@ -59,12 +59,12 @@ class AcademicRecordObserver
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
         if ($academicRecord->academic_record_status_id === $enrolledStatus) {
             $academicRecord->enrolled_date = Carbon::now();
-            if ($academicRecord->application) {
-                $academicRecord->application->update([
-                    'is_completed' => 1,
-                    'completed_date' => Carbon::now()
-                ]);
-            }
+            // if ($academicRecord->application) {
+            //     $academicRecord->application->update([
+            //         'is_completed' => 1,
+            //         'completed_date' => Carbon::now()
+            //     ]);
+            // }
         }
     }
 
@@ -79,12 +79,12 @@ class AcademicRecordObserver
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
         if ($academicRecord->academic_record_status_id === $enrolledStatus) {
             $academicRecord->enrolled_date = Carbon::now();
-            if ($academicRecord->application) {
-                $academicRecord->application->update([
-                    'is_completed' => 1,
-                    'completed_date' => Carbon::now()
-                ]);
-            }
+            // if ($academicRecord->application) {
+            //     $academicRecord->application->update([
+            //         'is_completed' => 1,
+            //         'completed_date' => Carbon::now()
+            //     ]);
+            // }
         }
     }
 

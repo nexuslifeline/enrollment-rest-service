@@ -127,13 +127,14 @@ class Student extends Model
     public function getActiveApplicationAttribute()
     {
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
+        $closedStatus = Config::get('constants.academic_record_status.CLOSED');
         return $this->applications()
-            ->whereHas('academicRecord', function($q) use($enrolledStatus) {
-                return $q->where('academic_record_status_id', '!=', $enrolledStatus);
+            ->whereHas('academicRecord', function($q) use($enrolledStatus, $closedStatus) {
+                return $q->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
             })
             ->with('academicRecord')
             ->where('student_id', $this->id)
-            ->where('is_completed', 0)
+            // ->where('is_completed', 0)
             ->latest()
             ->first();
     }

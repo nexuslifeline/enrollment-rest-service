@@ -33,7 +33,6 @@ class Curriculum extends Model
         }
 
         $userGroup = $user->userGroup()->first();
-        Log::error($userGroup);
         if ($userGroup) {
             $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
             Log::error($schoolCategories);
