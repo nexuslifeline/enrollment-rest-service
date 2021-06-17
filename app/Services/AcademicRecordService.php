@@ -190,11 +190,7 @@ class AcademicRecordService
                 'studentFee' => function ($query) {
                     $query->with(['studentFeeItems']);
                 },
-                'subjects' => function ($q) use ($id) {
-                    return $q->with(['grades' => function ($q) use ($id) {
-                        $q->wherePivot('academic_record_id', $id);
-                    }]);
-                }, 
+                'subjects', 
                 // 'grades',
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);

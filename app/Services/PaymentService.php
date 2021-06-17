@@ -136,6 +136,14 @@ class PaymentService
                 $studentFee->recomputeTerms($payment->amount);
             }
 
+            $paymentStatusId = $data['payment_status_id'] ?? false;
+            Log::info($paymentStatusId);
+            if ($paymentStatusId === 2) {
+                $billing->update([
+                    'billing_status_id' => 1
+                ]);
+            }
+
             DB::commit();
             // $payment->load(['billing' => function($q) {
             //     $q->append('total_paid');
@@ -177,6 +185,9 @@ class PaymentService
                     $studentFee = StudentFee::find($billing->student_fee_id);
                     $studentFee->recomputeTerms($payment->amount);
                 }
+                $billing->update([
+                    'billing_status_id' => 1
+                ]);
             }
             DB::commit();
             return $payment;

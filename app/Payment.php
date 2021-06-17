@@ -40,7 +40,7 @@ class Payment extends Model
 
     public function paymentMode()
     {
-      return $this->belongsTo('App\PaymentMode');
+        return $this->belongsTo('App\PaymentMode');
     }
 
     public function student()
