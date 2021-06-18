@@ -211,12 +211,14 @@ class EvaluationService
                 'academic_record_status_id' => $evaluationApprovedStatus
             ]);
 
-            // if ($academicRecord->application) {
-            //     $academicRecordApplicationStep = Config::get('constants.onboarding_step.ACADEMIC_RECORD_APPLICATION');
-            //     $academicRecord->application->update([
-            //         'application_step_id' => $academicRecordApplicationStep
-            //     ]);
-            // }
+            $student = $evaluation->student;
+            if ($student && $student->is_onboarding) {
+                $academicRecordApplicationStep = Config::get('constants.onboarding_step.ACADEMIC_RECORD_APPLICATION');
+                $student->update([                 
+                    'onboarding_step_id' => $academicRecordApplicationStep
+                ]);
+            }
+
             DB::commit();
             return $evaluation;
         } catch (Exception $e) {
@@ -242,12 +244,14 @@ class EvaluationService
                 'academic_record_status_id' => $evaluationRejectedStatus
             ]);
 
-            // if ($academicRecord->application) {
-            //     $requestEvaluationStep = Config::get('constants.onboarding_step.REQUEST_EVALUATION');
-            //     $academicRecord->application->update([
-            //         'application_step_id' => $requestEvaluationStep
-            //     ]);
-            // }
+            $student = $evaluation->student;
+            if ($student && $student->is_onboarding) {
+                $requestEvaluationStep = Config::get('constants.onboarding_step.REQUEST_EVALUATION');
+                $student->update([
+                    'onboarding_step_id' => $requestEvaluationStep
+                ]);
+            }
+            
             DB::commit();
             return $evaluation;
         } catch (Exception $e) {
