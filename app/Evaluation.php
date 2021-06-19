@@ -3,8 +3,10 @@
 namespace App;
 
 use App\Scopes\SchoolCategoryScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Evaluation extends Model
 {
@@ -23,7 +25,22 @@ class Evaluation extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new SchoolCategoryScope);
+        $user = Auth::user();
+
+        if (!$user || $user->userable_type === 'App\Student') {
+            return;
+        }
+
+        $userGroup = $user->userGroup()->first();
+        if ($userGroup) {
+            $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
+            static::addGlobalScope('school_category', function (Builder $builder) use ($schoolCategories) {
+                $builder->whereHas('academicRecord', function ($q) use ($schoolCategories) {
+                    return $q->whereIn('school_category_id', $schoolCategories)
+                        ->orWhereNull('school_category_id');
+                });
+            });
+        }
     }
 
     public function student()

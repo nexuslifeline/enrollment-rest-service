@@ -35,7 +35,6 @@ class Curriculum extends Model
         $userGroup = $user->userGroup()->first();
         if ($userGroup) {
             $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
-            Log::error($schoolCategories);
             static::addGlobalScope('school_categories', function (Builder $builder) use ($schoolCategories) {
                 $builder->whereHas('schoolCategories', function($q) use ($schoolCategories) {
                     return $q->whereIn('school_category_id', $schoolCategories)
