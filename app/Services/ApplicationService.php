@@ -18,6 +18,7 @@ class ApplicationService
     try {
       $application = Application::find($applicationId);
       $academicRecord = $application->academicRecord;
+
       $evaluation = $academicRecord->evaluation;
       $evaluationPendingStatus = Config::get('constants.academic_record_status.EVALUATION_PENDING');
 
@@ -28,13 +29,14 @@ class ApplicationService
 
       $data['submitted_date'] = Carbon::now();
       $evaluation->update($data);
-
-      // if ($academicRecord->application) {
-      //   $evaluationReview = Config::get('constants.onboarding_step.EVALUATION_IN_REVIEW');
-      //   $academicRecord->application->update([
-      //       'application_step_id' => $evaluationReview
-      //   ]);
-      // }
+      
+      $student = $application->student;
+      if ($student && $student->is_onboarding) {
+        $evaluationReview = Config::get('constants.onboarding_step.EVALUATION_IN_REVIEW');
+        $student->update([
+            'onboarding_step_id' => $evaluationReview
+        ]);
+      }
 
       DB::commit();
       return $evaluation->load('academicRecord');
@@ -62,6 +64,14 @@ class ApplicationService
         $items[$subject['subject_id']] = [
           'section_id' => $subject['section_id']
         ];
+      }
+
+      $student = $application->student;
+      if ($student && $student->is_onboarding) {
+        $academicRecordInReview = Config::get('constants.onboarding_step.ACADEMIC_RECORD_IN_REVIEW');
+        $student->update([
+          'onboarding_step_id' => $academicRecordInReview
+        ]);
       }
 
       $academicRecord->subjects()->sync($items);

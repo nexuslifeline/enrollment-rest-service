@@ -30,7 +30,7 @@ class ApplicationRequestEvaluation extends FormRequest
             'last_school_attended' => 'required',
             'last_school_year_from' => 'required',
             'last_school_year_to' => 'required',
-            'last_school_level_id' => 'required'
+            'last_school_level_id' => 'required|not_in:0'
         ];
     }
 
@@ -46,7 +46,7 @@ class ApplicationRequestEvaluation extends FormRequest
     public function messages()
     {
         return [
-            'level.not_in' => 'The :attribute field is required.'
+            'not_in' => 'The :attribute field is required.'
         ];
     }
 }
