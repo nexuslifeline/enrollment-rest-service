@@ -88,12 +88,12 @@ class Student extends Model
     public function getActiveEvaluationAttribute()
     {
         // Note! should
-        $draft = Config::get('constants.academic_record_status.DRAFT');
-        $evaluationPending = Config::get('constants.academic_record_status.EVALUATION_PENDING');
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
+        $closedStatus = Config::get('constants.academic_record_status.CLOSED');
 
         return $this->evaluations()
-            ->whereHas('academicRecord', function ($q) use ($draft, $evaluationPending) {
-                return $q->whereIn('academic_record_status_id', [$draft, $evaluationPending]);
+            ->whereHas('academicRecord', function ($q) use ($enrolledStatus, $closedStatus) {
+                return $q->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
             })
             ->with('academicRecord')
             ->where('student_id', $this->id)
