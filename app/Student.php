@@ -95,7 +95,7 @@ class Student extends Model
             ->whereHas('academicRecord', function ($q) use ($enrolledStatus, $closedStatus) {
                 return $q->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
             })
-            ->with('academicRecord')
+            // ->with('academicRecord')
             ->where('student_id', $this->id)
             ->latest()
             ->first();
@@ -132,7 +132,7 @@ class Student extends Model
             ->whereHas('academicRecord', function($q) use($enrolledStatus, $closedStatus) {
                 return $q->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
             })
-            ->with('academicRecord')
+            // ->with('academicRecord')
             ->where('student_id', $this->id)
             // ->where('is_completed', 0)
             ->latest()
@@ -144,23 +144,15 @@ class Student extends Model
         return $this->active_application ? true : false;
     }
 
-    public function getAcademicRecordAttribute()
+    public function getActiveAcademicRecordAttribute()
     {
-        //this is the active academic record
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        $closedStatus = Config::get('constants.academic_record_status.CLOSED');
+
         $academicRecord = $this->academicRecords()
-            ->where('academic_record_status_id', '!=', $enrolledStatus);
-
-        // $application = $this->active_application ?? false;
-        // $admission = $this->active_admission ?? false;
-        // $academicRecord->when($application, function ($query) use ($application) {
-        //     return $query->where('application_id', $application['id']);
-        // });
-        // $academicRecord->when($admission, function ($query) use ($admission) {
-        //     return $query->where('admission_id', $admission['id']);
-        // });
-
-        return $academicRecord->first();
+            ->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
+        $academicRecord->with(['level', 'course', 'semester']);
+        return $academicRecord->latest()->first();
     }
 
     public function getLatestAcademicRecordAttribute()

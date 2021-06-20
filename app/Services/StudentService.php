@@ -378,7 +378,7 @@ class StudentService
         try {
             $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
             $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
-            $student->append('active_application', 'academic_record', 'active_transcript_record', 'active_evaluation');
+            $student->append('active_application', 'active_academic_record', 'active_transcript_record', 'active_evaluation');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
