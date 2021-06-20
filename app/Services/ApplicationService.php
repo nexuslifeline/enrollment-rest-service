@@ -30,7 +30,7 @@ class ApplicationService
       $data['submitted_date'] = Carbon::now();
       $evaluation->update($data);
       
-      $student = $application->student;
+      $student = $academicRecord->student;
       if ($student && $student->is_onboarding) {
         $evaluationReview = Config::get('constants.onboarding_step.EVALUATION_IN_REVIEW');
         $student->update([
@@ -66,7 +66,7 @@ class ApplicationService
         ];
       }
 
-      $student = $application->student;
+      $student = $academicRecord->student;
       if ($student && $student->is_onboarding) {
         $academicRecordInReview = Config::get('constants.onboarding_step.ACADEMIC_RECORD_IN_REVIEW');
         $student->update([

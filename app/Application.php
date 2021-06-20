@@ -18,11 +18,11 @@ class Application extends Model
         'deleted_by'
     ];
 
-    /* Get the student that owns the student previous education */
-    public function student()
-    {
-        return $this->belongsTo('App\Student');
-    }
+    // /* Get the student that owns the student previous education */
+    // public function student()
+    // {
+    //     return $this->belongsTo('App\Student');
+    // }
 
     public function academicRecord()
     {
@@ -34,8 +34,8 @@ class Application extends Model
     //     return $this->hasOne('App\ApplicationStep');
     // }
 
-    public function schoolYear()
-    {
-        return $this->hasOne('App\SchoolYear');
-    }
+    // public function schoolYear()
+    // {
+    //     return $this->hasOne('App\SchoolYear');
+    // }
 }

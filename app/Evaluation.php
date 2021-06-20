@@ -43,15 +43,15 @@ class Evaluation extends Model
         }
     }
 
-    public function student()
-    {
-        return $this->belongsTo('App\Student');
-    }
+    // public function student()
+    // {
+    //     return $this->belongsTo('App\Student');
+    // }
 
-    public function studentCategory()
-    {
-        return $this->belongsTo('App\StudentCategory');
-    }
+    // public function studentCategory()
+    // {
+    //     return $this->belongsTo('App\StudentCategory');
+    // }
 
     public function lastSchoollevel()
     {

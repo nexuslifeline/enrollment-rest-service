@@ -211,7 +211,7 @@ class EvaluationService
                 'academic_record_status_id' => $evaluationApprovedStatus
             ]);
 
-            $student = $evaluation->student;
+            $student = $academicRecord->student;
             if ($student && $student->is_onboarding) {
                 $academicRecordApplicationStep = Config::get('constants.onboarding_step.ACADEMIC_RECORD_APPLICATION');
                 $student->update([                 
@@ -244,7 +244,7 @@ class EvaluationService
                 'academic_record_status_id' => $evaluationRejectedStatus
             ]);
 
-            $student = $evaluation->student;
+            $student = $academicRecord->student;
             if ($student && $student->is_onboarding) {
                 $requestEvaluationStep = Config::get('constants.onboarding_step.REQUEST_EVALUATION');
                 $student->update([
