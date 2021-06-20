@@ -57,12 +57,13 @@ class StudentService
                 'transcript_record_status_id' => $transcriptRecordStatusId
             ]);
 
-            $evaluation = $student->evaluations()->create([
-                'student_id' => $student->id,
-                // 'student_category_id' => $studentCategoryId, //remove on evaluation table 5/22021
-                // 'evaluation_status_id' => $evaluationStatusId,
-                // 'transcript_record_id' => $transcriptRecord->id
-            ]);
+
+            // $evaluation = $student->evaluations()->create([
+            //     'student_id' => $student->id,
+            //     // 'student_category_id' => $studentCategoryId, //remove on evaluation table 5/22021
+            //     // 'evaluation_status_id' => $evaluationStatusId,
+            //     // 'transcript_record_id' => $transcriptRecord->id
+            // ]);
 
             // student category
             // 1 - new
@@ -70,91 +71,104 @@ class StudentService
             // 3 - transferee
             $studentCategoryId = $data['student_category_id'];
 
-            if ($isEnrolled) {
-                //
-                $student->applications()->create([
-                    // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                    'is_admission' => $isAdmission
-                    // 'application_step_id' => 1,
-                    // 'application_status_id' => 2
-                ])->academicRecord()->create([
-                    'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                    'student_id' => $student->id,
-                    'student_category_id' => $studentCategoryId,
-                    'academic_record_status_id' => $academicRecordStatusId,
-                    'transcript_record_id' => $transcriptRecord->id,
-                    'evaluation_id' =>  $evaluation->id
-                ]);
-            } else {
-                if ($studentCategoryId === 2) {
+            $academicRecord = $student->academicRecords()->create([
+                'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+                'student_id' => $student->id,
+                'student_category_id' => $studentCategoryId,
+                'academic_record_status_id' => $academicRecordStatusId,
+                'transcript_record_id' => $transcriptRecord->id,
+            ]);
 
-                    $student->applications()->create([
-                        // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                        'is_admission' => $isAdmission
-                        // 'application_step_id' => 1,
-                        // 'application_status_id' => 2
-                    ])->academicRecord()->create([
-                        'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                        'student_id' => $student->id,
-                        'student_category_id' => $studentCategoryId,
-                        'academic_record_status_id' => $academicRecordStatusId,
-                        'transcript_record_id' => $transcriptRecord->id,
-                        'evaluation_id' =>  $evaluation->id
-                    ]);
+            $academicRecord->application()->create([
+                'is_admission' => $isAdmission
+            ]);
+            $academicRecord->evaluation()->create([]);
+
+            // if ($isEnrolled) {
+            //     //
+            //     $student->applications()->create([
+            //         // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //         'is_admission' => $isAdmission
+            //         // 'application_step_id' => 1,
+            //         // 'application_status_id' => 2
+            //     ])->academicRecord()->create([
+            //         'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //         'student_id' => $student->id,
+            //         'student_category_id' => $studentCategoryId,
+            //         'academic_record_status_id' => $academicRecordStatusId,
+            //         'transcript_record_id' => $transcriptRecord->id,
+            //         'evaluation_id' =>  $evaluation->id
+            //     ]);
+            // } else {
+            //     if ($studentCategoryId === 2) {
+
+            //         $student->applications()->create([
+            //             // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //             'is_admission' => $isAdmission
+            //             // 'application_step_id' => 1,
+            //             // 'application_status_id' => 2
+            //         ])->academicRecord()->create([
+            //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //             'student_id' => $student->id,
+            //             'student_category_id' => $studentCategoryId,
+            //             'academic_record_status_id' => $academicRecordStatusId,
+            //             'transcript_record_id' => $transcriptRecord->id,
+            //             'evaluation_id' =>  $evaluation->id
+            //         ]);
 
 
-                } else {
-                    // if ($studentCategoryId === 2) {
+            //     } else {
+            //         // if ($studentCategoryId === 2) {
 
-                        $student->applications()->create([
-                            // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                            'is_admission' => $isAdmission
-                            // 'application_step_id' => 1,
-                            // 'application_status_id' => 2
-                        ])->academicRecord()->create([
-                            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                            'student_id' => $student->id,
-                            'student_category_id' => $studentCategoryId,
-                            'academic_record_status_id' => $academicRecordStatusId,
-                            'transcript_record_id' => $transcriptRecord->id,
-                            'evaluation_id' =>  $evaluation->id
-                        ]);
+            //             $student->applications()->create([
+            //                 // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //                 'is_admission' => $isAdmission
+            //                 // 'application_step_id' => 1,
+            //                 // 'application_status_id' => 2
+            //             ])->academicRecord()->create([
+            //                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //                 'student_id' => $student->id,
+            //                 'student_category_id' => $studentCategoryId,
+            //                 'academic_record_status_id' => $academicRecordStatusId,
+            //                 'transcript_record_id' => $transcriptRecord->id,
+            //                 'evaluation_id' =>  $evaluation->id
+            //             ]);
 
-                    // } else {
-                    //     if ($studentCategoryId === 2) {
+            //         // } else {
+            //         //     if ($studentCategoryId === 2) {
 
-                    //         $student->applications()->create([
-                    //             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                    //             'is_admission' => $isAdmission
-                    //             // 'application_step_id' => 1,
-                    //             // 'application_status_id' => 2
-                    //         ])->academicRecord()->create([
-                    //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                    //             'student_id' => $student->id,
-                    //             'student_category_id' => $studentCategoryId,
-                    //             'academic_record_status_id' => $academicRecordStatusId,
-                    //             'transcript_record_id' => $transcriptRecord->id,
-                    //             'evaluation_id' =>  $evaluation->id
-                    //         ]);
+            //         //         $student->applications()->create([
+            //         //             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //         //             'is_admission' => $isAdmission
+            //         //             // 'application_step_id' => 1,
+            //         //             // 'application_status_id' => 2
+            //         //         ])->academicRecord()->create([
+            //         //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //         //             'student_id' => $student->id,
+            //         //             'student_category_id' => $studentCategoryId,
+            //         //             'academic_record_status_id' => $academicRecordStatusId,
+            //         //             'transcript_record_id' => $transcriptRecord->id,
+            //         //             'evaluation_id' =>  $evaluation->id
+            //         //         ]);
 
-                    //     } else {
+            //         //     } else {
 
-                    //         $student->admission()->create([
-                    //             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                    //             'admission_step_id' => 1,
-                    //             // 'application_status_id' => 2
-                    //         ])->academicRecord()->create([
-                    //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                    //             'student_id' => $student->id,
-                    //             'student_category_id' => $studentCategoryId,
-                    //             'academic_record_status_id' => $academicRecordStatusId,
-                    //             'transcript_record_id' => $transcriptRecord->id,
-                    //             'evaluation_id' =>  $evaluation->id
-                    //         ]);
-                    //     }
-                    // }
-                }
-            }
+            //         //         $student->admission()->create([
+            //         //             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //         //             'admission_step_id' => 1,
+            //         //             // 'application_status_id' => 2
+            //         //         ])->academicRecord()->create([
+            //         //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //         //             'student_id' => $student->id,
+            //         //             'student_category_id' => $studentCategoryId,
+            //         //             'academic_record_status_id' => $academicRecordStatusId,
+            //         //             'transcript_record_id' => $transcriptRecord->id,
+            //         //             'evaluation_id' =>  $evaluation->id
+            //         //         ]);
+            //         //     }
+            //         // }
+            //     }
+            // }
             $user = $student->user()->create([
                 'username' => $data['username'],
                 'password' => Hash::make($data['password'])
@@ -378,7 +392,7 @@ class StudentService
         try {
             $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
             $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
-            $student->append('active_application', 'active_academic_record', 'active_transcript_record', 'active_evaluation');
+            $student->append('active_academic_record');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -528,10 +542,11 @@ class StudentService
 
             $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
             $student->append([
-                'active_application',
-                'academic_record',
-                'active_transcript_record',
-                'active_evaluation',
+                'active_academic_record'
+                // 'active_application',
+                // 'academic_record',
+                // 'active_transcript_record',
+                // 'active_evaluation',
                 //'evaluation'
             ]);
             DB::commit();

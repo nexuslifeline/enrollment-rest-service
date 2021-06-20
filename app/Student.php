@@ -124,24 +124,29 @@ class Student extends Model
     //         ->first();
     // }
 
-    public function getActiveApplicationAttribute()
-    {
-        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
-        $closedStatus = Config::get('constants.academic_record_status.CLOSED');
-        return $this->applications()
-            ->whereHas('academicRecord', function($q) use($enrolledStatus, $closedStatus) {
-                return $q->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
-            })
-            // ->with('academicRecord')
-            ->where('student_id', $this->id)
-            // ->where('is_completed', 0)
-            ->latest()
-            ->first();
-    }
+    // public function getActiveApplicationAttribute()
+    // {
+    //     $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED'); // Note! should be move in constants
+    //     $closedStatus = Config::get('constants.academic_record_status.CLOSED');
+    //     return $this->applications()
+    //         ->whereHas('academicRecord', function($q) use($enrolledStatus, $closedStatus) {
+    //             return $q->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
+    //         })
+    //         // ->with('academicRecord')
+    //         ->where('student_id', $this->id)
+    //         // ->where('is_completed', 0)
+    //         ->latest()
+    //         ->first();
+    // }
 
-    public function getHasOpenApplicationAttribute()
+    // public function getHasOpenApplicationAttribute()
+    // {
+    //     return $this->active_application ? true : false;
+    // }
+
+    public function getHasOpenAcademicRecordAttribute()
     {
-        return $this->active_application ? true : false;
+        return $this->active_academic_record ? true : false;
     }
 
     public function getActiveAcademicRecordAttribute()
@@ -151,7 +156,15 @@ class Student extends Model
 
         $academicRecord = $this->academicRecords()
             ->whereNotIn('academic_record_status_id', [$enrolledStatus, $closedStatus]);
-        $academicRecord->with(['level', 'course', 'semester']);
+        $academicRecord->with([
+            'level',
+            'course',
+            'semester',
+            'evaluation',
+            'application',
+            'studentFee',
+            'transcriptRecord'
+        ]);
         return $academicRecord->latest()->first();
     }
 
@@ -167,16 +180,16 @@ class Student extends Model
         return $this->academicRecords()->where('is_manual', 1)->where('academic_record_status_id', '!=', $enrolledStatus)->latest()->first();
     }
 
-    public function getActiveTranscriptRecordAttribute()
-    {
-        $draftStatus = Config::get('constants.transcript_record_status.DRAFT'); // draft transcript status
-        $pendingStatus = Config::get('constants.transcript_record_status.PENDING'); // pending transcript status
-        return $this->transcriptRecords()
-            ->where('transcript_record_status_id', $draftStatus)
-            ->orWhere('transcript_record_status_id', $pendingStatus)
-            ->latest()
-            ->first();
-    }
+    // public function getActiveTranscriptRecordAttribute()
+    // {
+    //     $draftStatus = Config::get('constants.transcript_record_status.DRAFT'); // draft transcript status
+    //     $pendingStatus = Config::get('constants.transcript_record_status.PENDING'); // pending transcript status
+    //     return $this->transcriptRecords()
+    //         ->where('transcript_record_status_id', $draftStatus)
+    //         ->orWhere('transcript_record_status_id', $pendingStatus)
+    //         ->latest()
+    //         ->first();
+    // }
 
     public function getNameAttribute()
     {

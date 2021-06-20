@@ -60,7 +60,7 @@ class Evaluation extends Model
 
     public function academicRecord()
     {
-        return $this->hasOne('App\AcademicRecord');
+        return $this->belongsTo('App\AcademicRecord');
     }
 
 

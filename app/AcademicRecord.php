@@ -38,17 +38,17 @@ class AcademicRecord extends Model
 
     public function application()
     {
-        return $this->belongsTo('App\Application');
+        return $this->hasOne('App\Application');
     }
 
-    public function admission()
-    {
-        return $this->belongsTo('App\Admission');
-    }
+    // public function admission()
+    // {
+    //     return $this->hasOne('App\Admission');
+    // }
 
     public function evaluation()
     {
-        return $this->belongsTo('App\Evaluation');
+        return $this->hasOne('App\Evaluation');
     }
 
     public function studentFee()

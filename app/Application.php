@@ -26,13 +26,13 @@ class Application extends Model
 
     public function academicRecord()
     {
-        return $this->hasOne('App\AcademicRecord');
+        return $this->belongsTo('App\AcademicRecord');
     }
 
-    public function applicationStep()
-    {
-        return $this->hasOne('App\ApplicationStep');
-    }
+    // public function applicationStep()
+    // {
+    //     return $this->hasOne('App\ApplicationStep');
+    // }
 
     public function schoolYear()
     {
