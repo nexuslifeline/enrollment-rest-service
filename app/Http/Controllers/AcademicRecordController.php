@@ -255,4 +255,35 @@ class AcademicRecordController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function rejectAssessment(Request $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->all();
+        $academicRecord = $academicRecordService->rejectAssessment($data, $academicRecordId);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function approveEnlistment(Request $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->except('subjects');
+        $subjects = $request->subjects ?? [];
+        $academicRecord = $academicRecordService->approveEnlistment($data, $subjects, $academicRecordId);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function rejectEnlistment(Request $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->all();
+        $academicRecord = $academicRecordService->rejectEnlistment($data, $academicRecordId);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(201);
+    }
 }

@@ -233,7 +233,13 @@ Route::group(['prefix' => 'v1'], function () {
         //academic-record
         Route::post('/academic-records/{id}/request-evaluation', 'AcademicRecordController@requestEvaluation');
         Route::post('/academic-records/{id}/submit-application', 'AcademicRecordController@submit');
+        Route::post('/academic-records/{id}/approve-enlistment', 'AcademicRecordController@approveEnlistment');
+        Route::post('/academic-records/{id}/reject-enlistment', 'AcademicRecordController@rejectEnlistment');
         Route::post('/academic-records/{id}/approve-assessment', 'AcademicRecordController@approveAssessment');
+        Route::post('/academic-records/{id}/reject-assessment', 'AcademicRecordController@rejectAssessment');
+
+        //payment
+        Route::post('/payments/{id}/submit-payment', 'PaymentController@submitPayment');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

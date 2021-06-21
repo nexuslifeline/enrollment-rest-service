@@ -692,6 +692,78 @@ class AcademicRecordService
         }
     }
 
+    public function approveEnlistment(array $data, array $subjects, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+
+            $enlistmentApprovedStatus = Config::get('constants.academic_record_status.ENLISTMENT_APPROVED');
+            $academicRecord->update([
+                'academic_record_status_id' => $enlistmentApprovedStatus
+            ]);
+
+            $items = [];
+            foreach ($subjects as $subject) {
+                $items[$subject['subject_id']] = [
+                    'section_id' => $subject['section_id']
+                ];
+            }
+
+            $academicRecord->subjects()->sync($items);
+
+            $application = $academicRecord->application;
+            $data['approved_date'] = Carbon::now();
+            $data['approved_by'] = Auth::id();
+            if ($application) {
+                $application->update($data);
+            }
+
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService approveEnlistment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function rejectEnlistment(array $data, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $enlistmentRejectedStatus = Config::get('constants.academic_record_status.ENLISTMENT_REJECTED');
+            $academicRecord->update([
+                'academic_record_status_id' => $enlistmentRejectedStatus
+            ]);
+
+            $application = $academicRecord->application;
+            $data['disapproved_date'] = Carbon::now();
+            $data['disapproved_by'] = Auth::id();
+            if ($application) {
+                $application->update($data);
+            }
+
+            $student = $academicRecord->student;
+            if ($student && $student->is_onboarding) {
+                $academicRecordApplication = Config::get('constants.onboarding_step.ACADEMIC_RECORD_APPLICATION');
+                $student->update([
+                    'onboarding_step_id' => $academicRecordApplication
+                ]);
+            }
+
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService rejectEnlistment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function approveAssessment(array $data, array $fees, int $academicRecordId)
     {
         DB::beginTransaction();
@@ -699,14 +771,15 @@ class AcademicRecordService
             $academicRecord = AcademicRecord::find($academicRecordId);
             $studentFee = $academicRecord->studentFee;
             $data['approved_date'] = Carbon::now();
+            $data['approved_by'] = Auth::id();
             $studentFee->update($data);
             $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
             $activeSemester = Semester::where('is_active', 1)->first();
-            
-            $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => 1],
+            $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
+            $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => $initialFee],
             [
-                'billing_status_id' => 2,
-                'billing_type_id' => 1,
+                'billing_status_id' => Config::get('constants.billing_status.UNPAID'),
+                'billing_type_id' => $initialFee,
                 'due_date' => Carbon::now()->addDays(7),
                 'school_year_id' => $activeSchoolYear->id ?? null,
                 'semester_id' => $activeSemester->id ?? null,
@@ -723,10 +796,11 @@ class AcademicRecordService
                 'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
 
-            $billing->payments()->create([
+            $billing->payments()->updateOrCreate(['billing_id' => $billing->id],
+            [
                 'school_year_id' => $activeSchoolYear->id ?? null,
                 'student_id' => $academicRecord->student_id,
-                'payment_status_id' => 1
+                'payment_status_id' => Config::get('constants.payment_status.DRAFT')
             ]);
 
             $studentFee->recomputeTerms();
@@ -762,6 +836,30 @@ class AcademicRecordService
         } catch (Exception $e) {
             DB::rollBack();
             Log::info('Error occured during AcademicRecordService approveAssessment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function rejectAssessment(array $data, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $assessmentRejectedStatus = Config::get('constants.academic_record_status.ASSESSMENT_REJECTED');
+            $academicRecord->update([
+                'academic_record_status_id' => $assessmentRejectedStatus
+            ]);
+
+            $studentFee = $academicRecord->studentFee;
+            $data['disapproved_date'] = Carbon::now();
+            $data['disapproved_by'] = Auth::id();
+            $studentFee->update($data);
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService rejectAssessment method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

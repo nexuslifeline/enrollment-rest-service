@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Requests\PaymentUpdateRequest;
+use App\Http\Requests\SubmitPaymentRequest;
 use App\Payment;
 use App\PaymentFile;
 use App\Student;
@@ -91,5 +92,16 @@ class PaymentController extends Controller
         $paymentService = new PaymentService();
         $paymentService->delete($id);
         return response()->json([], 204);
+    }
+
+    public function submitPayment(SubmitPaymentRequest $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $payment = $paymentService->submitPayment($data, $id);
+
+        return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(201);
     }
 }

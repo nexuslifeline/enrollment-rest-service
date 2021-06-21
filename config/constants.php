@@ -44,6 +44,10 @@ return [
     'SOA' => 2,
     'BILL' => 3
   ],
+  'billing_status' => [
+    'PAID' => 1,
+    'UNPAID' => 2,
+  ],
   'payment_status' => [
     'DRAFT' => 1, // before this is Pending
     'APPROVED' => 2,

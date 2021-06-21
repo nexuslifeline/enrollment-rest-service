@@ -204,4 +204,28 @@ class PaymentService
             throw $e;
         }
     }
+
+    public function submitPayment(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $data['payment_status_id'] = Config::get('constants.payment_status.PENDING');
+            $payment->update($data);
+            $student = $payment->student;
+            if ($student && $student->is_onboarding) {
+                $paymentInReview = Config::get('constants.onboarding_step.PAYMENT_IN_REVIEW');
+                $student->update([
+                    'onboarding_step_id' => $paymentInReview
+                ]);
+            }
+            DB::commit();
+            return $payment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }
