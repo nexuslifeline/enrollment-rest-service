@@ -42,6 +42,6 @@ class SubmitPaymentRequest extends FormRequest
     {
         return [
             'not_id' => 'The :attribute field is required.'
-        ]
+        ];
     }
 }
