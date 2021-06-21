@@ -39,4 +39,9 @@ return [
     'REJECTED' => 4,
     'COMPLETED' => 5
   ],
+  'billing_type' => [
+    'INITIAL_FEE' => 1,
+    'SOA' => 2,
+    'BILL' => 3
+  ],
 ];

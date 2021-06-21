@@ -212,4 +212,11 @@ class AcademicRecordController extends Controller
         $subjects = $academicRecordService->syncSubjectsOfAcademicRecord($academicRecordId, $subjects);
         return SubjectResource::collection($subjects);
     }
+
+    public function getInitialBilling(int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $academicRecordBill = $academicRecordService->getInitialBilling($academicRecordId);
+        return new AcademicRecordResource($academicRecordBill);
+    }
 }
