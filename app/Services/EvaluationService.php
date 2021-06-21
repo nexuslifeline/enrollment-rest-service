@@ -20,10 +20,9 @@ class EvaluationService
             $query = Evaluation::with([
                 'lastSchoolLevel',
                 'academicRecord' => function ($query) {
-                    $query->with(['schoolYear', 'level', 'course', 'studentCategory']);
-                },
-                'student' => function ($query) {
-                    $query->with(['address', 'photo', 'user']);
+                    $query->with(['schoolYear', 'level', 'course', 'studentCategory', 'student' => function ($q) {
+                        return $q->with(['address', 'photo', 'user']);
+                    }]);
                 }
             ]);
 
@@ -95,14 +94,15 @@ class EvaluationService
             $evaluation = Evaluation::find($id);
             $evaluation->load([
                 'academicRecord' => function ($query) {
-                    $query->with(['schoolYear', 'level', 'course', 'studentCategory', 'transcriptRecord' => function($q) {
+                    $query->with(['schoolYear', 'level', 'course', 'studentCategory',
+                        'student' => function ($query) {
+                            $query->with(['address', 'photo', 'user', 'education']);
+                        },
+                        'transcriptRecord' => function($q) {
                         return $q->with(['curriculum', 'studentCurriculum']);
                     }]);
                 },
                 // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
-                'student' => function ($query) {
-                    $query->with(['address', 'photo', 'user', 'education']);
-                }
             ]);
             return $evaluation;
         } catch (Exception $e) {

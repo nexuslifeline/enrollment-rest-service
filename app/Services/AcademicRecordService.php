@@ -34,7 +34,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'student' => function ($query) {
                     $query->with(['address', 'photo', 'user']);
                 }
@@ -192,7 +191,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'transcriptRecord',
                 'studentFee' => function ($query) {
                     $query->with(['studentFeeItems']);
@@ -294,22 +292,22 @@ class AcademicRecordService
                 }
             }
 
-            if ($academicRecordInfo['admission'] ?? false) {
-                $admission = $academicRecord->admission();
-                if ($admission) {
-                    if ($academicRecord->academic_record_status_id === 2) {
-                        $academicRecordInfo['admission']['approved_by'] = Auth::user()->id;
-                        $academicRecordInfo['admission']['approved_date'] = Carbon::now();
-                    }
-                    if ($academicRecordInfo['admission']['application_status_id'] ?? false) {
-                        if ($academicRecordInfo['admission']['application_status_id'] === 3) {
-                            $academicRecordInfo['admission']['disapproved_by'] = Auth::user()->id;
-                            $academicRecordInfo['admission']['disapproved_date'] = Carbon::now();
-                        }
-                    }
-                    $admission->update($academicRecordInfo['admission']);
-                }
-            }
+            // if ($academicRecordInfo['admission'] ?? false) {
+            //     $admission = $academicRecord->admission();
+            //     if ($admission) {
+            //         if ($academicRecord->academic_record_status_id === 2) {
+            //             $academicRecordInfo['admission']['approved_by'] = Auth::user()->id;
+            //             $academicRecordInfo['admission']['approved_date'] = Carbon::now();
+            //         }
+            //         if ($academicRecordInfo['admission']['application_status_id'] ?? false) {
+            //             if ($academicRecordInfo['admission']['application_status_id'] === 3) {
+            //                 $academicRecordInfo['admission']['disapproved_by'] = Auth::user()->id;
+            //                 $academicRecordInfo['admission']['disapproved_date'] = Carbon::now();
+            //             }
+            //         }
+            //         $admission->update($academicRecordInfo['admission']);
+            //     }
+            // }
 
             if ($academicRecordInfo['student_fee'] ?? false) {
                 $student = $academicRecord->student()->first();
@@ -372,7 +370,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'curriculum',
                 'student' => function ($query) {
                     $query->with(['address']);
@@ -401,7 +398,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
@@ -419,9 +415,10 @@ class AcademicRecordService
                 return $q->where(function ($q) use ($applicationStatusId) {
                     return $q->whereHas('application', function ($query) use ($applicationStatusId) {
                         return $query->where('application_status_id', $applicationStatusId);
-                    })->orWhereHas('admission', function ($query) use ($applicationStatusId) {
-                        return $query->where('application_status_id', $applicationStatusId);
                     });
+                    // ->orWhereHas('admission', function ($query) use ($applicationStatusId) {
+                    //     return $query->where('application_status_id', $applicationStatusId);
+                    // });
                 });
             });
 
@@ -455,9 +452,10 @@ class AcademicRecordService
         $enlistment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
-            })->orWhereHas('admission', function ($query) {
-                return $query->where('application_status_id', 4);
             });
+            // ->orWhereHas('admission', function ($query) {
+            //     return $query->where('application_status_id', 4);
+            // });
         })->where('academic_record_status_id', $evaluationApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
@@ -467,9 +465,10 @@ class AcademicRecordService
         $assessment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
-            })->orWhereHas('admission', function ($query) {
-                return $query->where('application_status_id', 4);
             });
+            // ->orWhereHas('admission', function ($query) {
+            //     return $query->where('application_status_id', 4);
+            // });
         })->where('academic_record_status_id', $enlistmentApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
