@@ -785,7 +785,8 @@ class AcademicRecordService
                 'total_amount' => $studentFee->enrollment_fee
             ]);
 
-            $billing->billingItems()->create([
+            $billing->billingItems()->updateOrCreate(['item' => 'Registration Fee'],
+            [
                 'amount' => $studentFee->enrollment_fee,
                 'item' => 'Registration Fee'
             ]);
@@ -798,7 +799,8 @@ class AcademicRecordService
             [
                 'school_year_id' => $academicRecord->school_year_id,
                 'student_id' => $academicRecord->student_id,
-                'payment_status_id' => Config::get('constants.payment_status.DRAFT')
+                'payment_status_id' => Config::get('constants.payment_status.DRAFT'),
+                'payment_mode_id' => Config::get('constants.payment_mode.BANK')
             ]);
 
             $studentFee->recomputeTerms();
