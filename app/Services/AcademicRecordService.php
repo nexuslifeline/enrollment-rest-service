@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Auth;
 use Exception;
-use App\Payment;
 use App\Student;
 use Carbon\Carbon;
 use App\Evaluation;
