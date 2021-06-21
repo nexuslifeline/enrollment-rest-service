@@ -772,21 +772,20 @@ class AcademicRecordService
             $data['approved_date'] = Carbon::now();
             $data['approved_by'] = Auth::id();
             $studentFee->update($data);
-            $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
-            $activeSemester = Semester::where('is_active', 1)->first();
             $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
             $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => $initialFee],
             [
                 'billing_status_id' => Config::get('constants.billing_status.UNPAID'),
                 'billing_type_id' => $initialFee,
                 'due_date' => Carbon::now()->addDays(7),
-                'school_year_id' => $activeSchoolYear->id ?? null,
-                'semester_id' => $activeSemester->id ?? null,
+                'school_year_id' => $academicRecord->school_year_id,
+                'semester_id' => $academicRecord->semester_id,
                 'student_id' => $academicRecord->student_id,
                 'total_amount' => $studentFee->enrollment_fee
             ]);
 
-            $billing->billingItems()->create([
+            $billing->billingItems()->updateOrCreate(['item' => 'Registration Fee'],
+            [
                 'amount' => $studentFee->enrollment_fee,
                 'item' => 'Registration Fee'
             ]);
@@ -797,9 +796,10 @@ class AcademicRecordService
 
             $billing->payments()->updateOrCreate(['billing_id' => $billing->id],
             [
-                'school_year_id' => $activeSchoolYear->id ?? null,
+                'school_year_id' => $academicRecord->school_year_id,
                 'student_id' => $academicRecord->student_id,
-                'payment_status_id' => Config::get('constants.payment_status.DRAFT')
+                'payment_status_id' => Config::get('constants.payment_status.DRAFT'),
+                'payment_mode_id' => Config::get('constants.payment_mode.BANK')
             ]);
 
             $studentFee->recomputeTerms();

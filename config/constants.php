@@ -54,4 +54,11 @@ return [
     'REJECTED' => 3,
     'PENDING' => 4 // before this is Submitted
   ],
+  'payment_mode' => [
+    'BANK' => 1,
+    '7ELEVEN' => 2,
+    'OTHERS' => 3,
+    'EWALLET' => 4,
+    'PERA_PADALA' => 5
+  ],
 ];
