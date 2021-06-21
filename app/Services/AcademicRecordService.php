@@ -595,6 +595,7 @@ class AcademicRecordService
     public function getInitialBilling(int $academicRecordId)
     {
         $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+        $approvePaymentStatus = Config::get('constants.payment_status.APPROVED');
         // Note! update whereHas once academic_record_id id is added in billing table
         $billing = Billing::with(['payments', 'studentFee'])
             ->whereHas('studentFee', function ($q) use ($academicRecordId) {
@@ -603,7 +604,9 @@ class AcademicRecordService
             ->where('billing_type_id', $initialBillingType)
             ->first();
         // If there is payment, this means the initial billing has been fully paid since we dont accept payment less than its initial fee
-        $billing->is_paid = $billing->payments && $billing->payments->count() > 0;
+        $billing->is_paid = $billing->payments &&
+            $billing->payments->count() > 0 &&
+            $billing->payments[0]->payment_status_id === $approvePaymentStatus;
         return $billing;
     }
 }
