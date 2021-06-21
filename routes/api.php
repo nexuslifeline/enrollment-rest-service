@@ -113,6 +113,7 @@ Route::group(['prefix' => 'v1'], function () {
         //Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord'); // should be removed once frontend is updated
         Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
         Route::post('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@syncSubjectsOfAcademicRecord');
+        Route::get('/academic-records/{academicRecordId}/initial-billing', 'AcademicRecordController@getInitialBilling');
 
         // user groups
         Route::resource('/user-groups', 'UserGroupController');

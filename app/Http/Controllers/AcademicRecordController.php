@@ -216,6 +216,13 @@ class AcademicRecordController extends Controller
         return SubjectResource::collection($subjects);
     }
 
+    public function getInitialBilling(int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $academicRecordBill = $academicRecordService->getInitialBilling($academicRecordId);
+        return new AcademicRecordResource($academicRecordBill);
+    }
+    
     public function requestEvaluation(ApplicationRequestEvaluation $request, int $academicRecordId)
     {
         $academicRecordService = new AcademicRecordService();

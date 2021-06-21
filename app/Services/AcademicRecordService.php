@@ -2,19 +2,22 @@
 
 namespace App\Services;
 
+use Auth;
+use Exception;
+use App\Payment;
 use App\Student;
-use App\AcademicRecord;
+use Carbon\Carbon;
 use App\Evaluation;
+use App\AcademicRecord;
+use App\Billing;
 use App\Level;
 use App\Payment;
 use App\SchoolYear;
 use App\Semester;
 use App\TranscriptRecord;
-use Exception;
+use App\Services\BillingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Auth;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 
 class AcademicRecordService
@@ -590,6 +593,24 @@ class AcademicRecordService
             Log::info($e->getMessage());
             throw $e;
         }
+    }
+
+    public function getInitialBilling(int $academicRecordId)
+    {
+        $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+        $approvePaymentStatus = Config::get('constants.payment_status.APPROVED');
+        // Note! update whereHas once academic_record_id id is added in billing table
+        $billing = Billing::with(['payments', 'studentFee'])
+            ->whereHas('studentFee', function ($q) use ($academicRecordId) {
+                return $q->where('academic_record_id', $academicRecordId);
+            })
+            ->where('billing_type_id', $initialBillingType)
+            ->first();
+        // If there is payment, this means the initial billing has been fully paid since we dont accept payment less than its initial fee
+        $billing->is_paid = $billing->payments &&
+            $billing->payments->count() > 0 &&
+            $billing->payments[0]->payment_status_id === $approvePaymentStatus;
+        return $billing;
     }
 
     public function requestEvaluation(array $data, array $evaluationData, int $academicRecordId)
