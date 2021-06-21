@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Services\AcademicRecordService;
 use App\Http\Resources\AcademicRecordResource;
 use App\Http\Requests\AcademicRecordPatchRequest;
+use App\Http\Requests\ApplicationRequestEvaluation;
+use App\Http\Resources\ApplicationResource;
+use App\Http\Resources\EvaluationResource;
 use App\Http\Resources\SubjectResource;
 
 class AcademicRecordController extends Controller
@@ -211,5 +214,38 @@ class AcademicRecordController extends Controller
         $subjects = $request->subjects ?? [];
         $subjects = $academicRecordService->syncSubjectsOfAcademicRecord($academicRecordId, $subjects);
         return SubjectResource::collection($subjects);
+    }
+
+    public function requestEvaluation(ApplicationRequestEvaluation $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $evaluationData = $request->except('level_id', 'course_id', 'semester_id');
+        $data = $request->only('level_id', 'course_id', 'semester_id');
+        $evaluation = $academicRecordService->requestEvaluation($data, $evaluationData, $academicRecordId);
+        return (new EvaluationResource($evaluation))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function submit(Request $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->except('subjects');
+        $subjects = $request->subjects ?? [];
+        $application = $academicRecordService->submit($data, $subjects, $academicRecordId);
+        return (new ApplicationResource($application))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function approveAssessment(Request $request, int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->except('fees');
+        $fees = $request->fees ?? [];
+        $academicRecord = $academicRecordService->approveAssessment($data, $fees, $academicRecordId);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(201);
     }
 }

@@ -23,26 +23,26 @@ class Curriculum extends Model
         'deleted_by'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-        $user = Auth::user();
+    // protected static function boot()
+    // {
+    //     parent::boot();
+    //     $user = Auth::user();
 
-        if ($user->userable_type === 'App\Student') {
-            return;
-        }
+    //     if ($user->userable_type === 'App\Student') {
+    //         return;
+    //     }
 
-        $userGroup = $user->userGroup()->first();
-        if ($userGroup) {
-            $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
-            static::addGlobalScope('school_categories', function (Builder $builder) use ($schoolCategories) {
-                $builder->whereHas('schoolCategories', function($q) use ($schoolCategories) {
-                    return $q->whereIn('school_category_id', $schoolCategories)
-                        ->orWhereNull('school_category_id');
-                });
-            });
-        }
-    }
+    //     $userGroup = $user->userGroup()->first();
+    //     if ($userGroup) {
+    //         $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
+    //         static::addGlobalScope('school_categories', function (Builder $builder) use ($schoolCategories) {
+    //             $builder->whereHas('schoolCategories', function($q) use ($schoolCategories) {
+    //                 return $q->whereIn('school_category_id', $schoolCategories)
+    //                     ->orWhereNull('school_category_id');
+    //             });
+    //         });
+    //     }
+    // }
 
     // public function schoolCategory()
     // {

@@ -21,12 +21,12 @@ class Subject extends Model
         'deleted_by'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::addGlobalScope(new SchoolCategoryScope);
-    }
+    //     static::addGlobalScope(new SchoolCategoryScope);
+    // }
 
     public function levels()
     {

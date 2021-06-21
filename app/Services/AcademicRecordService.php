@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Student;
 use App\AcademicRecord;
 use App\Evaluation;
+use App\Level;
 use App\Payment;
+use App\SchoolYear;
+use App\Semester;
 use App\TranscriptRecord;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -584,6 +587,161 @@ class AcademicRecordService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during SubjectService syncSubjectsOfAcademicRecord method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function requestEvaluation(array $data, array $evaluationData, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            // $application = $academicRecord->application;
+
+            $evaluation = $academicRecord->evaluation;
+            $evaluationPendingStatus = Config::get('constants.academic_record_status.EVALUATION_PENDING');
+
+            $level = Level::find($data['level_id']);
+            $data['academic_record_status_id'] = $evaluationPendingStatus;
+            $data['school_category_id'] = $level->school_category_id;
+            $academicRecord->update($data);
+
+            $evaluationData['submitted_date'] = Carbon::now();
+            $evaluation->update($evaluationData);
+
+            $student = $academicRecord->student;
+            if ($student && $student->is_onboarding) {
+                $evaluationReview = Config::get('constants.onboarding_step.EVALUATION_IN_REVIEW');
+                $student->update([
+                    'onboarding_step_id' => $evaluationReview
+                ]);
+            }
+
+            DB::commit();
+            return $evaluation->load('academicRecord');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService requestEvaluation method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function submit(array $data, array $subjects, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $application = $academicRecord->application;
+            $enlistmentPendingStatus = Config::get('constants.academic_record_status.ENLISTMENT_PENDING');
+
+            $data['academic_record_status_id'] = $enlistmentPendingStatus;
+            $academicRecord->update($data);
+
+            $items = [];
+            foreach ($subjects as $subject) {
+                $items[$subject['subject_id']] = [
+                    'section_id' => $subject['section_id']
+                ];
+            }
+
+            $student = $academicRecord->student;
+            if ($student && $student->is_onboarding) {
+                $academicRecordInReview = Config::get('constants.onboarding_step.ACADEMIC_RECORD_IN_REVIEW');
+                $student->update([
+                    'onboarding_step_id' => $academicRecordInReview
+                ]);
+            }
+
+            $academicRecord->subjects()->sync($items);
+
+            if ($application) {
+                $application->update([
+                    'applied_date' => Carbon::now()
+                ]);
+            }
+
+            DB::commit();
+            return $application->load('academicRecord');;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService submit method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function approveAssessment(array $data, array $fees, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $studentFee = $academicRecord->studentFee;
+            $data['approved_date'] = Carbon::now();
+            $studentFee->update($data);
+            $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+            $activeSemester = Semester::where('is_active', 1)->first();
+            
+            $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => 1],
+            [
+                'billing_status_id' => 2,
+                'billing_type_id' => 1,
+                'due_date' => Carbon::now()->addDays(7),
+                'school_year_id' => $activeSchoolYear->id ?? null,
+                'semester_id' => $activeSemester->id ?? null,
+                'student_id' => $academicRecord->student_id,
+                'total_amount' => $studentFee->enrollment_fee
+            ]);
+
+            $billing->billingItems()->create([
+                'amount' => $studentFee->enrollment_fee,
+                'item' => 'Registration Fee'
+            ]);
+
+            $billing->update([
+                'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+            ]);
+
+            $billing->payments()->create([
+                'school_year_id' => $activeSchoolYear->id ?? null,
+                'student_id' => $academicRecord->student_id,
+                'payment_status_id' => 1
+            ]);
+
+            $studentFee->recomputeTerms();
+
+            $items = [];
+            foreach ($fees as $fee)
+            {
+                $items[$fee['school_fee_id']] = [
+                    'amount' => $fee->amount,
+                    'is_initial_fee' => $fee->is_initial_fee,
+                    'notes' => $fee->notes
+                ];
+            }
+
+            $studentFee->studentFeeItems()->sync($items);
+
+            $student = $academicRecord->student;
+
+            if ($student && $student->is_onboarding) {
+                $payments = Config::get('constants.onboarding_step.PAYMENTS');
+                $student->update([
+                    'onboarding_step_id' => $payments
+                ]);
+            }
+
+            $assessmentApprovedStatus = Config::get('constants.academic_record_status.ASSESSMENT_APPROVED');
+            $academicRecord->update([
+                'academic_record_status_id' => $assessmentApprovedStatus
+            ]);
+
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService approveAssessment method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
