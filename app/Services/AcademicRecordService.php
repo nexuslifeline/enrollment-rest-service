@@ -34,7 +34,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'student' => function ($query) {
                     $query->with(['address', 'photo', 'user']);
                 }
@@ -192,7 +191,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'transcriptRecord',
                 'studentFee' => function ($query) {
                     $query->with(['studentFeeItems']);
@@ -294,22 +292,22 @@ class AcademicRecordService
                 }
             }
 
-            if ($academicRecordInfo['admission'] ?? false) {
-                $admission = $academicRecord->admission();
-                if ($admission) {
-                    if ($academicRecord->academic_record_status_id === 2) {
-                        $academicRecordInfo['admission']['approved_by'] = Auth::user()->id;
-                        $academicRecordInfo['admission']['approved_date'] = Carbon::now();
-                    }
-                    if ($academicRecordInfo['admission']['application_status_id'] ?? false) {
-                        if ($academicRecordInfo['admission']['application_status_id'] === 3) {
-                            $academicRecordInfo['admission']['disapproved_by'] = Auth::user()->id;
-                            $academicRecordInfo['admission']['disapproved_date'] = Carbon::now();
-                        }
-                    }
-                    $admission->update($academicRecordInfo['admission']);
-                }
-            }
+            // if ($academicRecordInfo['admission'] ?? false) {
+            //     $admission = $academicRecord->admission();
+            //     if ($admission) {
+            //         if ($academicRecord->academic_record_status_id === 2) {
+            //             $academicRecordInfo['admission']['approved_by'] = Auth::user()->id;
+            //             $academicRecordInfo['admission']['approved_date'] = Carbon::now();
+            //         }
+            //         if ($academicRecordInfo['admission']['application_status_id'] ?? false) {
+            //             if ($academicRecordInfo['admission']['application_status_id'] === 3) {
+            //                 $academicRecordInfo['admission']['disapproved_by'] = Auth::user()->id;
+            //                 $academicRecordInfo['admission']['disapproved_date'] = Carbon::now();
+            //             }
+            //         }
+            //         $admission->update($academicRecordInfo['admission']);
+            //     }
+            // }
 
             if ($academicRecordInfo['student_fee'] ?? false) {
                 $student = $academicRecord->student()->first();
@@ -372,7 +370,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'curriculum',
                 'student' => function ($query) {
                     $query->with(['address']);
@@ -401,7 +398,6 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'admission',
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
@@ -419,9 +415,10 @@ class AcademicRecordService
                 return $q->where(function ($q) use ($applicationStatusId) {
                     return $q->whereHas('application', function ($query) use ($applicationStatusId) {
                         return $query->where('application_status_id', $applicationStatusId);
-                    })->orWhereHas('admission', function ($query) use ($applicationStatusId) {
-                        return $query->where('application_status_id', $applicationStatusId);
                     });
+                    // ->orWhereHas('admission', function ($query) use ($applicationStatusId) {
+                    //     return $query->where('application_status_id', $applicationStatusId);
+                    // });
                 });
             });
 
@@ -455,9 +452,10 @@ class AcademicRecordService
         $enlistment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
-            })->orWhereHas('admission', function ($query) {
-                return $query->where('application_status_id', 4);
             });
+            // ->orWhereHas('admission', function ($query) {
+            //     return $query->where('application_status_id', 4);
+            // });
         })->where('academic_record_status_id', $evaluationApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
@@ -467,9 +465,10 @@ class AcademicRecordService
         $assessment = AcademicRecord::where(function ($q) {
             return $q->whereHas('application', function ($query) {
                 return $query->where('application_status_id', 4);
-            })->orWhereHas('admission', function ($query) {
-                return $query->where('application_status_id', 4);
             });
+            // ->orWhereHas('admission', function ($query) {
+            //     return $query->where('application_status_id', 4);
+            // });
         })->where('academic_record_status_id', $enlistmentApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
@@ -597,7 +596,7 @@ class AcademicRecordService
     public function getInitialBilling(int $academicRecordId)
     {
         $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
-        $approvePaymentStatus = Config::get('constants.payment_status.APPROVED');
+        // $approvePaymentStatus = Config::get('constants.payment_status.APPROVED');
         // Note! update whereHas once academic_record_id id is added in billing table
         $billing = Billing::with(['payments', 'studentFee'])
             ->whereHas('studentFee', function ($q) use ($academicRecordId) {
@@ -605,10 +604,10 @@ class AcademicRecordService
             })
             ->where('billing_type_id', $initialBillingType)
             ->first();
-        // If there is payment, this means the initial billing has been fully paid since we dont accept payment less than its initial fee
-        $billing->is_paid = $billing->payments &&
-            $billing->payments->count() > 0 &&
-            $billing->payments[0]->payment_status_id === $approvePaymentStatus;
+        // // If there is payment, this means the initial billing has been fully paid since we dont accept payment less than its initial fee
+        // $billing->is_paid = $billing->payments &&
+        //     $billing->payments->count() > 0 &&
+        //     $billing->payments[0]->payment_status_id === $approvePaymentStatus;
         return $billing;
     }
 
@@ -799,6 +798,12 @@ class AcademicRecordService
             $data['approved_date'] = Carbon::now();
             $data['approved_by'] = Auth::id();
             $data['submitted_date'] = Carbon::now();
+
+            $previousBalance = $data['previous_balance'];
+
+            //remove previous balance
+            unset($data['previous_balance']);
+
             $studentFee->update($data);
             $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
             $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => $initialFee],
@@ -809,7 +814,8 @@ class AcademicRecordService
                 'school_year_id' => $academicRecord->school_year_id,
                 'semester_id' => $academicRecord->semester_id,
                 'student_id' => $academicRecord->student_id,
-                'total_amount' => $studentFee->enrollment_fee
+                'total_amount' => $studentFee->enrollment_fee,
+                'previous_balance' => $previousBalance
             ]);
 
             $billing->billingItems()->updateOrCreate(['item' => 'Registration Fee'],
@@ -836,9 +842,9 @@ class AcademicRecordService
             foreach ($fees as $fee)
             {
                 $items[$fee['school_fee_id']] = [
-                    'amount' => $fee->amount,
-                    'is_initial_fee' => $fee->is_initial_fee,
-                    'notes' => $fee->notes
+                    'amount' => $fee['amount'],
+                    'is_initial_fee' => $fee['is_initial_fee'],
+                    'notes' => $fee['notes']
                 ];
             }
 

@@ -240,7 +240,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/academic-records/{id}/request-assessment', 'AcademicRecordController@requestAssessment');
 
         //payment
-        Route::post('/payments/{id}/submit-payment', 'PaymentController@submitPayment');
+        Route::post('/payments/{id}/submit', 'PaymentController@submitPayment');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

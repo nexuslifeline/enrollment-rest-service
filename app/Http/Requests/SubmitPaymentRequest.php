@@ -41,7 +41,7 @@ class SubmitPaymentRequest extends FormRequest
     public function messages()
     {
         return [
-            'not_id' => 'The :attribute field is required.'
-        ]
+            'not_in' => 'The :attribute field is required.'
+        ];
     }
 }

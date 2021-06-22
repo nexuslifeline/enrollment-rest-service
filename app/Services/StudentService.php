@@ -32,7 +32,7 @@ class StudentService
             $academicRecordStatusId = 1;
             // $evaluationStatusId = 1;
             $transcriptRecordStatusId = 1; //1 = draft
-            $isEnrolled = $data['is_enrolled'];
+            // $isEnrolled = $data['is_enrolled'];
             $isAdmission = $data['is_admission'] ?? 0;
 
             $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
@@ -84,6 +84,8 @@ class StudentService
                 // 'is_admission' => $isAdmission
             ]);
             $academicRecord->evaluation()->create([]);
+
+            $academicRecord->studentFee()->create([]);
 
             // if ($isEnrolled) {
             //     //
