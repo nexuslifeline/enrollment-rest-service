@@ -286,4 +286,13 @@ class AcademicRecordController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function requestAssessment(int $academicRecordId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $academicRecord = $academicRecordService->requestAssessment($academicRecordId);
+        return (new AcademicRecordResource($academicRecord))
+            ->response()
+            ->setStatusCode(201);
+    }
 }

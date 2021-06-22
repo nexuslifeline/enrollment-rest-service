@@ -729,6 +729,32 @@ class AcademicRecordService
         }
     }
 
+    public function requestAssessment(int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+
+            $enlistmentApprovedStatus = Config::get('constants.academic_record_status.ENLISTMENT_APPROVED');
+            $academicRecord->update([
+                'academic_record_status_id' => $enlistmentApprovedStatus
+            ]);
+
+            $studentFee = $academicRecord->studentFee;
+            $studentFee->updateOrCreate(['academic_record_id' => $academicRecord->id],
+            [
+                'submitted_date' => Carbon::now()
+            ]);
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService requestAssessment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function rejectEnlistment(array $data, int $academicRecordId)
     {
         DB::beginTransaction();
@@ -772,6 +798,7 @@ class AcademicRecordService
             $studentFee = $academicRecord->studentFee;
             $data['approved_date'] = Carbon::now();
             $data['approved_by'] = Auth::id();
+            $data['submitted_date'] = Carbon::now();
             $studentFee->update($data);
             $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
             $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => $initialFee],

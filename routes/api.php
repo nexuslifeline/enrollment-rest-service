@@ -237,6 +237,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/academic-records/{id}/reject-enlistment', 'AcademicRecordController@rejectEnlistment');
         Route::post('/academic-records/{id}/approve-assessment', 'AcademicRecordController@approveAssessment');
         Route::post('/academic-records/{id}/reject-assessment', 'AcademicRecordController@rejectAssessment');
+        Route::post('/academic-records/{id}/request-assessment', 'AcademicRecordController@requestAssessment');
 
         //payment
         Route::post('/payments/{id}/submit-payment', 'PaymentController@submitPayment');

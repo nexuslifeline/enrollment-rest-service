@@ -77,10 +77,11 @@ class StudentService
                 'student_category_id' => $studentCategoryId,
                 'academic_record_status_id' => $academicRecordStatusId,
                 'transcript_record_id' => $transcriptRecord->id,
+                'is_admission' => $isAdmission
             ]);
 
             $academicRecord->application()->create([
-                'is_admission' => $isAdmission
+                // 'is_admission' => $isAdmission
             ]);
             $academicRecord->evaluation()->create([]);
 
