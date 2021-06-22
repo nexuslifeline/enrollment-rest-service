@@ -771,6 +771,12 @@ class AcademicRecordService
             $studentFee = $academicRecord->studentFee;
             $data['approved_date'] = Carbon::now();
             $data['approved_by'] = Auth::id();
+
+            $previousBalance = $data['previous_balance'];
+
+            //remove previous balance
+            unset($data['previous_balance']);
+
             $studentFee->update($data);
             $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
             $billing = $studentFee->billings()->updateOrCreate(['billing_type_id' => $initialFee],
@@ -781,7 +787,8 @@ class AcademicRecordService
                 'school_year_id' => $academicRecord->school_year_id,
                 'semester_id' => $academicRecord->semester_id,
                 'student_id' => $academicRecord->student_id,
-                'total_amount' => $studentFee->enrollment_fee
+                'total_amount' => $studentFee->enrollment_fee,
+                'previous_balance' => $previousBalance
             ]);
 
             $billing->billingItems()->updateOrCreate(['item' => 'Registration Fee'],
@@ -808,9 +815,9 @@ class AcademicRecordService
             foreach ($fees as $fee)
             {
                 $items[$fee['school_fee_id']] = [
-                    'amount' => $fee->amount,
-                    'is_initial_fee' => $fee->is_initial_fee,
-                    'notes' => $fee->notes
+                    'amount' => $fee['amount'],
+                    'is_initial_fee' => $fee['is_initial_fee'],
+                    'notes' => $fee['notes']
                 ];
             }
 

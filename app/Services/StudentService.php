@@ -84,6 +84,8 @@ class StudentService
             ]);
             $academicRecord->evaluation()->create([]);
 
+            $academicRecord->studentFee()->create([]);
+
             // if ($isEnrolled) {
             //     //
             //     $student->applications()->create([
