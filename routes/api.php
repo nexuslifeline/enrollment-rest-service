@@ -241,6 +241,7 @@ Route::group(['prefix' => 'v1'], function () {
 
         //payment
         Route::post('/payments/{id}/submit', 'PaymentController@submitPayment');
+        Route::post('/payments/{id}/approve', 'PaymentController@approve');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

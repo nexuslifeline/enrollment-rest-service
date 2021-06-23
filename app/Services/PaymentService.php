@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Payment;
 use App\Student;
 use App\StudentFee;
+use Carbon\Carbon;
 use Exception;
+use Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -218,6 +220,36 @@ class PaymentService
                 $student->update([
                     'onboarding_step_id' => $paymentInReview
                 ]);
+            }
+            DB::commit();
+            return $payment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function approve(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
+            $data['approved_date'] = Carbon::now();
+            $data['approved_by'] = Auth::id();
+            $payment->update($data);
+            $billing = $payment->billing;
+            $studentFee = $billing->studentFee;
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            if ($billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $enrolledStatus
+                ]);
+
+                $studentFee->recomputeTerms($payment->amount);
             }
             DB::commit();
             return $payment;
