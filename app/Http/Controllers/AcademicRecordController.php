@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\AcademicRecordService;
 use App\Http\Resources\AcademicRecordResource;
 use App\Http\Requests\AcademicRecordPatchRequest;
+use App\Http\Requests\AcademicRecordUpdateRequest;
 use App\Http\Requests\ApplicationRequestEvaluation;
 use App\Http\Resources\ApplicationResource;
 use App\Http\Resources\EvaluationResource;
@@ -88,7 +89,7 @@ class AcademicRecordController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $id)
+    public function update(AcademicRecordUpdateRequest $request, int $id)
     {
         $academicRecordService = new AcademicRecordService();
         $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];

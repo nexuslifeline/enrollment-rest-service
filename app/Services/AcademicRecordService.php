@@ -585,24 +585,27 @@ class AcademicRecordService
         $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
         // $approvePaymentStatus = Config::get('constants.payment_status.APPROVED');
         // Note! update whereHas once academic_record_id id is added in billing table
-        $billing = Billing::whereHas('studentFee', function ($q) use ($academicRecordId) {
+        $billing = Billing::with('payments')
+            ->whereHas('studentFee', function ($q) use ($academicRecordId) {
                 return $q->where('academic_record_id', $academicRecordId);
             })
             ->where('billing_type_id', $initialBillingType)
             ->first();
+
+        if ($billing->payments->count() === 0) {
+            $billing->payments()->create([
+                    'school_year_id' => $billing->studentFee->academicRecord->school_year_id,
+                    'student_id' => $billing->studentFee->academicRecord->student_id,
+                    'payment_status_id' => Config::get('constants.payment_status.DRAFT'),
+                    'payment_mode_id' => Config::get('constants.payment_mode.BANK')
+                ]
+            );
+        }
         // // If there is payment, this means the initial billing has been fully paid since we dont accept payment less than its initial fee
         // $billing->is_paid = $billing->payments &&
         //     $billing->payments->count() > 0 &&
         //     $billing->payments[0]->payment_status_id === $approvePaymentStatus;
-        $billing->payments()->updateOrCreate(
-            ['billing_id' => $billing->id],
-            [
-                'school_year_id' => $billing->studentFee->academicRecord->school_year_id,
-                'student_id' => $billing->studentFee->academicRecord->student_id,
-                'payment_status_id' => Config::get('constants.payment_status.DRAFT'),
-                'payment_mode_id' => Config::get('constants.payment_mode.BANK')
-            ]
-        );
+        
 
         $billing->load(['payments','studentFee']);
 
