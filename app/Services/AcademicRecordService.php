@@ -436,10 +436,11 @@ class AcademicRecordService
     public function getPendingApprovalCount(array $filters)
     {
         $schoolYearId = $filters['school_year_id'] ?? false;
-        $evaluationApprovedStatus = Config::get('constants.academic_record_status.EVALUATION_APPROVED');
+        $enlistmentPendingStatus = Config::get('constants.academic_record_status.ENLISTMENT_PENDING');
         $enlistmentApprovedStatus = Config::get('constants.academic_record_status.ENLISTMENT_APPROVED');
         $draft = Config::get('constants.academic_record_status.DRAFT');
         $evaluationPending = Config::get('constants.academic_record_status.EVALUATION_PENDING');
+        $pendingStatus = Config::get('constants.payment_status.PENDING');
         $evaluation = Evaluation::whereHas('academicRecord', function ($q) use ($draft, $evaluationPending) {
             return $q->whereIn('academic_record_status_id', [$draft, $evaluationPending]);
         })
@@ -449,32 +450,18 @@ class AcademicRecordService
             });
         });
 
-        $enlistment = AcademicRecord::where(function ($q) {
-            return $q->whereHas('application', function ($query) {
-                return $query->where('application_status_id', 4);
-            });
-            // ->orWhereHas('admission', function ($query) {
-            //     return $query->where('application_status_id', 4);
-            // });
-        })->where('academic_record_status_id', $evaluationApprovedStatus)
+        $enlistment = AcademicRecord::where('academic_record_status_id', $enlistmentPendingStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
         });
 
 
-        $assessment = AcademicRecord::where(function ($q) {
-            return $q->whereHas('application', function ($query) {
-                return $query->where('application_status_id', 4);
-            });
-            // ->orWhereHas('admission', function ($query) {
-            //     return $query->where('application_status_id', 4);
-            // });
-        })->where('academic_record_status_id', $enlistmentApprovedStatus)
+        $assessment = AcademicRecord::where('academic_record_status_id', $enlistmentApprovedStatus)
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->where('school_year_id', $schoolYearId);
         });
 
-        $data['payment'] = Payment::where('payment_status_id', 4)->count();
+        $data['payment'] = Payment::where('payment_status_id', $pendingStatus)->count();
 
 
         $data['evaluation'] = $evaluation->count();
@@ -598,8 +585,7 @@ class AcademicRecordService
         $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
         // $approvePaymentStatus = Config::get('constants.payment_status.APPROVED');
         // Note! update whereHas once academic_record_id id is added in billing table
-        $billing = Billing::with(['payments', 'studentFee'])
-            ->whereHas('studentFee', function ($q) use ($academicRecordId) {
+        $billing = Billing::whereHas('studentFee', function ($q) use ($academicRecordId) {
                 return $q->where('academic_record_id', $academicRecordId);
             })
             ->where('billing_type_id', $initialBillingType)
@@ -608,6 +594,18 @@ class AcademicRecordService
         // $billing->is_paid = $billing->payments &&
         //     $billing->payments->count() > 0 &&
         //     $billing->payments[0]->payment_status_id === $approvePaymentStatus;
+        $billing->payments()->updateOrCreate(
+            ['billing_id' => $billing->id],
+            [
+                'school_year_id' => $billing->studentFee->academicRecord->school_year_id,
+                'student_id' => $billing->studentFee->academicRecord->student_id,
+                'payment_status_id' => Config::get('constants.payment_status.DRAFT'),
+                'payment_mode_id' => Config::get('constants.payment_mode.BANK')
+            ]
+        );
+
+        $billing->load(['payments','studentFee']);
+
         return $billing;
     }
 
