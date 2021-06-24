@@ -115,4 +115,15 @@ class PaymentController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function reject(Request $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $payment = $paymentService->reject($data, $id);
+
+        return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(201);
+    }
 }

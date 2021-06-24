@@ -260,4 +260,30 @@ class PaymentService
             throw $e;
         }
     }
+
+    public function reject(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $data['payment_status_id'] = Config::get('constants.payment_status.REJECTED');
+            $data['disapproved_date'] = Carbon::now();
+            $data['disapproved_by'] = Auth::id();
+            $payment->update($data);
+            $student = $payment->student;
+            if($student && $student->is_onboarding) {
+                $payments = Config::get('constants.onboarding_step.PAYMENTS');
+                $student->update([
+                    'onboarding_step_id' => $payments
+                ]);
+            }
+            DB::commit();
+            return $payment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }
