@@ -740,7 +740,8 @@ class AcademicRecordService
                 'academic_record_status_id' => $enlistmentApprovedStatus
             ]);
 
-            $studentFee = $academicRecord->studentFee;
+            $studentFee = $academicRecord->studentFee();
+            // Log::info($studentFee);
             $studentFee->updateOrCreate(['academic_record_id' => $academicRecord->id],
             [
                 'submitted_date' => Carbon::now()
