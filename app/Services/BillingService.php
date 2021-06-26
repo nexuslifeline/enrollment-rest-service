@@ -6,6 +6,7 @@ use App\AcademicRecord;
 use App\Billing;
 use App\Term;
 use Exception;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -125,9 +126,11 @@ class BillingService
                 ->wherePivot('is_billed', 0);
 
             $levelId = $data['level_id'] ?? false;
-            $studentFees->when($levelId, function ($query) use ($levelId) {
-                $query->whereHas('academicRecord', function ($q) use ($levelId) {
-                    return $q->where('level_id', $levelId);
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $studentFees->when($levelId, function ($query) use ($levelId, $enrolledStatus) {
+                $query->whereHas('academicRecord', function ($q) use ($levelId, $enrolledStatus) {
+                    return $q->where('level_id', $levelId)
+                    ->where('academic_record_status_id', $enrolledStatus);
                 });
             });
 
@@ -183,8 +186,10 @@ class BillingService
     {
         DB::beginTransaction();
         try {
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
             $academicRecords = AcademicRecord::where('school_category_id', $data['school_category_id'])
-                ->where('school_year_id', $data['school_year_id']);
+                ->where('school_year_id', $data['school_year_id'])
+                ->where('academic_record_status_id', $enrolledStatus);
 
             $levelId = $data['level_id'] ?? false;
             $academicRecords->when($levelId, function ($query) use ($levelId) {

@@ -246,7 +246,8 @@ class PaymentService
             if ($billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
                 $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
                 $studentFee->academicRecord->update([
-                    'academic_record_status_id' => $enrolledStatus
+                    'academic_record_status_id' => $enrolledStatus,
+                    'is_initial_billing_paid' => 1
                 ]);
 
                 $studentFee->recomputeTerms($payment->amount);
