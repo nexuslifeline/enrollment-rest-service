@@ -71,7 +71,7 @@ class UserService
             if ($user->userable_type === 'App\\Student') {
                 $user->userable->load('academicRecords');
                 $user->userable->append([
-                    'active_application',
+                    // 'active_application',
                     'academic_record',
                     'active_transcript_record',
                 ]);

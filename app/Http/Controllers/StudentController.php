@@ -87,11 +87,11 @@ class StudentController extends Controller
         $except = ['address',
             'family',
             'education',
-            'active_application',
+            // 'active_application',
             'academic_record',
             'subjects',
             'user',
-            'active_evaluation',
+            // 'active_evaluation',
             'active_transcript_record',
             'requirements'
         ];
@@ -109,11 +109,11 @@ class StudentController extends Controller
             'address',
             'family',
             'education',
-            'active_application',
+            // 'active_application',
             'academic_record',
             'subjects',
             'user',
-            'active_evaluation',
+            // 'active_evaluation',
             'active_transcript_record',
             'requirements'
         ];
@@ -160,7 +160,7 @@ class StudentController extends Controller
     public function enroll(Request $request, int $id)
     {
         $related = ['address', 'family', 'education'];
-        $except = ['address', 'family', 'education', 'active_application', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record'];
+        $except = ['address', 'family', 'education', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record'];
         $studentService = new StudentService();
         $studentInfo = $request->only($except);
         $data = $request->except($except);
