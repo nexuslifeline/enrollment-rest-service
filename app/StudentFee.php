@@ -64,9 +64,9 @@ class StudentFee extends Model
 
   public function recomputeTerms($payment = 0)
   {
-    $terms = Term::where('school_year_id', $this->school_year_id)
+    $terms = Term::where('school_year_id', $this->academicRecord->school_year_id)
       ->where('school_category_id', $this->academicRecord->school_category_id)
-      ->where('semester_id', $this->semester_id)
+      ->where('semester_id', $this->academicRecord->semester_id)
       ->get();
 
     $initialBilling = $this->billings()
@@ -101,11 +101,11 @@ class StudentFee extends Model
     //   $initialPreviousBalance = ($initialBilling['total_amount'] + $initialBilling['previous_balance']) - $initialBilling->payments->sum('amount');
     // }
 
-    $totalBilling = Billing::where('student_id', $this->student_id)
+    $totalBilling = Billing::where('student_id', $this->academicRecord->student_id)
       ->where('billing_type_id', 2)
       ->get()
       ->sum('total_amount');
-    $totalPayment = Payment::where('student_id', $this->student_id)
+    $totalPayment = Payment::where('student_id', $this->academicRecord->student_id)
       ->whereHas('billing', function ($query) {
         return $query->where('billing_type_id', 2);
       })
