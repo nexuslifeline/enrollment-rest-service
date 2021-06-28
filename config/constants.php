@@ -59,6 +59,8 @@ return [
     '7ELEVEN' => 2,
     'OTHERS' => 3,
     'EWALLET' => 4,
-    'PERA_PADALA' => 5
+    'PERA_PADALA' => 5,
+    'CASH' => 6,
+    'CHECK' => 7
   ],
 ];

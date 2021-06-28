@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Billing;
+use App\Http\Requests\BillingPostPaymentRequest;
 use Illuminate\Http\Request;
 use App\Services\BillingService;
 use App\Http\Resources\BillingResource;
@@ -124,5 +125,16 @@ class BillingController extends Controller
         $billingService = new BillingService();
         $schoolFee = $billingService->getBillingItemsOfBilling($id);
         return BillingItemResource::collection($schoolFee);
+    }
+
+    public function postPayment(BillingPostPaymentRequest $request, int $id)
+    {
+        $billingService = new BillingService();
+        $data = $request->all();
+        $billing = $billingService->postPayment($data, $id);
+
+        return (new BillingResource($billing))
+            ->response()
+            ->setStatusCode(201);
     }
 }

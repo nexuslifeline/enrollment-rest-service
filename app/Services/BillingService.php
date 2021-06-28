@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\AcademicRecord;
 use App\Billing;
+use App\SchoolYear;
 use App\Term;
 use Exception;
 use Illuminate\Support\Facades\Config;
@@ -321,6 +322,45 @@ class BillingService
             return $billingItems;
         } catch (Exception $e) {
             Log::info('Error occured during BillingService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function postPayment(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $billing = Billing::find($id);
+            $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+
+            $data['school_year_id'] = $data['school_year_id'] ?? $activeSchoolYear ? $activeSchoolYear->id : $billing->school_year_id;
+            $data['payment_mode_id'] = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
+            $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
+            $data['student_id'] = $billing->student_id;
+            $payment = $billing->payments()->create($data);
+
+            $billingStatusPaid = Config::get('constants.billing_status.PAID');
+            $billing->update([
+                'billing_status_id' => $billingStatusPaid
+            ]);
+            $studentFee = $billing->studentFee;
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $enrolledStatus,
+                    'is_initial_billing_paid' => 1
+                ]);
+
+                $studentFee->recomputeTerms($payment->amount);
+            }
+
+            DB::commit();
+            return $billing;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during BillingService postPayment method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
