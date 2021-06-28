@@ -126,4 +126,12 @@ class PaymentController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function cancel(Request $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $paymentService->cancel($data, $id);
+        return response()->json([], 204);
+    }
 }

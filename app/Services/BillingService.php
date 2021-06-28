@@ -7,6 +7,7 @@ use App\Billing;
 use App\SchoolYear;
 use App\Term;
 use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -332,12 +333,23 @@ class BillingService
         DB::beginTransaction();
         try {
             $billing = Billing::find($id);
-            $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
+            
+            $schoolYearId = $data['school_year_id'] ?? null;
+            if (!$schoolYearId) {
+                $schoolYearId = SchoolYear::where('is_active', 1)->first()->id;
+            }
+            $schoolYearId = $schoolYearId ?? $billing->school_year_id;
+            $paymentModeId = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
 
-            $data['school_year_id'] = $data['school_year_id'] ?? $activeSchoolYear ? $activeSchoolYear->id : $billing->school_year_id;
-            $data['payment_mode_id'] = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
-            $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
-            $data['student_id'] = $billing->student_id;
+            $data = Arr::add($data, 'school_year_id', $schoolYearId);
+            $data = Arr::add($data, 'payment_mode_id', $paymentModeId);
+            $data = Arr::add($data, 'payment_status_id', Config::get('constants.payment_status.APPROVED'));
+            $data = Arr::add($data, 'student_id', $billing->student_id);
+
+            // $data['school_year_id'] = $schoolYearId ?? $billing->school_year_id;
+            // $data['payment_mode_id'] = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
+            // $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
+            // $data['student_id'] = $billing->student_id;
             $payment = $billing->payments()->create($data);
 
             $billingStatusPaid = Config::get('constants.billing_status.PAID');

@@ -287,4 +287,21 @@ class PaymentService
             throw $e;
         }
     }
+
+    public function cancel(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $payment->update($data);
+            $payment->billing->studentFee->recomputeTerms();
+            $payment->delete();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService cancel method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }

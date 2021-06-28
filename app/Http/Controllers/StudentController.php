@@ -137,10 +137,11 @@ class StudentController extends Controller
         return response()->json([], 204);
     }
 
-    public function getBillingsOfStudent(int $id)
+    public function getBillingsOfStudent(Request $request, int $id)
     {
         $studentService = new StudentService();
-        $billings = $studentService->getBillingsOfStudent($id);
+        $data = $request->all();
+        $billings = $studentService->getBillingsOfStudent($data, $id);
 
         return BillingResource::collection(
             $billings
