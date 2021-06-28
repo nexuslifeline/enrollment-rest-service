@@ -122,7 +122,7 @@ class CourseService
             // filters
             $schoolCategoryId = $filters['school_category_id'] ?? false;
             $query->when($schoolCategoryId, function($q) use ($schoolCategoryId, $levelId) {
-                return $q->whereHas('school_categories', function($query) use ($schoolCategoryId, $levelId) {
+                return $q->whereHas('schoolCategories', function($query) use ($schoolCategoryId, $levelId) {
                     return $query->where('school_category_id', $schoolCategoryId)->where('level_id', $levelId);
                 });
             });
