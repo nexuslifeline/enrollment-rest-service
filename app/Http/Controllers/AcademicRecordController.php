@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\AcademicRecordService;
 use App\Http\Resources\AcademicRecordResource;
 use App\Http\Requests\AcademicRecordPatchRequest;
+use App\Http\Requests\AcademicRecordQuickEnrollRequest;
 use App\Http\Requests\AcademicRecordUpdateRequest;
 use App\Http\Requests\ApplicationRequestEvaluation;
 use App\Http\Resources\ApplicationResource;
@@ -199,10 +200,10 @@ class AcademicRecordController extends Controller
         return new AcademicRecordResource($academicRecord);
     }
 
-    public function quickEnroll(Request $request, int $studentId)
+    public function quickEnroll(AcademicRecordQuickEnrollRequest $request, int $studentId)
     {
         $academicRecordService = new AcademicRecordService();
-        $data = $request->only('school_year_id','school_category_id');
+        $data = $request->all();
         $academicRecord = $academicRecordService->quickEnroll($data, $studentId);
         return (new AcademicRecordResource($academicRecord))
             ->response()

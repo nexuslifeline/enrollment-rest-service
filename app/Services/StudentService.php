@@ -380,7 +380,7 @@ class StudentService
                 ? $query->paginate($perPage)
                 : $query->get();
 
-            $students->append(['latest_academic_record']);
+            $students->append(['latest_academic_record', 'has_open_academic_record']);
 
             return $students;
         } catch (Exception $e) {
