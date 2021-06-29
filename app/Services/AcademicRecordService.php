@@ -116,7 +116,11 @@ class AcademicRecordService
             // academicRecord status
             $academicRecordStatusId = $filters['academic_record_status_id'] ?? false;
             $query->when($academicRecordStatusId, function ($query) use ($academicRecordStatusId) {
-                return $query->whereIn('academic_record_status_id', $academicRecordStatusId);
+                if (!is_array($academicRecordStatusId)) {
+                    return $query->where('academic_record_status_id', $academicRecordStatusId);
+                } else {
+                    return $query->whereIn('academic_record_status_id', $academicRecordStatusId);
+                }
             });
 
             // not equals to academicRecord status
