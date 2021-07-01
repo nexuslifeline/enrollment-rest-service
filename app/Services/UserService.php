@@ -72,8 +72,8 @@ class UserService
                 $user->userable->load('academicRecords');
                 $user->userable->append([
                     // 'active_application',
-                    'academic_record',
-                    'active_transcript_record',
+                    'latest_academic_record',
+                    // 'active_transcript_record',
                 ]);
             } else {
                 $user->load(['userGroup' => function ($q) {
