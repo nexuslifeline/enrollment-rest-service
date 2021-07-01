@@ -51,6 +51,7 @@ class StudentUpdateRequest extends FormRequest
             'last_name' => 'sometimes|required|string|max:255',
             'birth_date' => 'sometimes|required|date',
             'civil_status_id' => 'sometimes|required',
+            'email' => 'sometimes|required|string|email:filter|max:255|unique:users,username,' . $this->id . ',userable_id',
             // student address
             'address.current_house_no_street' => 'sometimes|required|string|max:255',
             'address.current_barangay' => 'sometimes|required|string|max:255',

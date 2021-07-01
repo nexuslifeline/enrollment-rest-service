@@ -18,6 +18,7 @@ use App\Services\BillingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\ValidationException;
 
 class AcademicRecordService
 {
@@ -195,7 +196,9 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'transcriptRecord',
+                'transcriptRecord' => function ($q) {
+                    $q->with('curriculum');
+                },
                 'studentFee' => function ($query) {
                     $query->with(['studentFeeItems']);
                 },
@@ -208,7 +211,7 @@ class AcademicRecordService
                 // 'grades',
                 'student' => function ($query) {
                     $query->with(['address', 'photo', 'user']);
-                }
+                },
             ])->find($id);
             return $academicRecord;
         } catch (Exception $e) {
@@ -374,7 +377,7 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
-                'curriculum',
+                // 'curriculum',
                 'student' => function ($query) {
                     $query->with(['address']);
                 }
@@ -596,6 +599,12 @@ class AcademicRecordService
             ->where('billing_type_id', $initialBillingType)
             ->first();
 
+        if (!$billing) {
+            throw ValidationException::withMessages([
+                'initial_billing' => ['No Initial Billing found!']
+            ]);
+        }
+
         if ($billing->payments->count() === 0) {
             $billing->payments()->create([
                     'school_year_id' => $billing->studentFee->academicRecord->school_year_id,
@@ -721,6 +730,14 @@ class AcademicRecordService
             $data['approved_by'] = Auth::id();
             if ($application) {
                 $application->update($data);
+            }
+
+            $student = $academicRecord->student;
+            if ($student && $student->is_onboarding) {
+                $academicRecordApplication = Config::get('constants.onboarding_step.ACADEMIC_RECORD_IN_REVIEW');
+                $student->update([
+                    'onboarding_step_id' => $academicRecordApplication
+                ]);
             }
 
             DB::commit();

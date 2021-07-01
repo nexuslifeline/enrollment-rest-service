@@ -214,6 +214,17 @@ class PaymentService
             $payment = Payment::find($id);
             $data['payment_status_id'] = Config::get('constants.payment_status.PENDING');
             $payment->update($data);
+
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            $billing = $payment->billing;
+            $studentFee = $billing->studentFee;
+            if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $paymentSubmitted = Config::get('constants.academic_record_status.PAYMENT_SUBMITTED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $paymentSubmitted
+                ]);
+            }
+
             $student = $payment->student;
             if ($student && $student->is_onboarding) {
                 $paymentInReview = Config::get('constants.onboarding_step.PAYMENT_IN_REVIEW');
@@ -278,6 +289,17 @@ class PaymentService
                     'onboarding_step_id' => $payments
                 ]);
             }
+
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            $billing = $payment->billing;
+            $studentFee = $billing->studentFee;
+            if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $paymentSubmitted = Config::get('constants.academic_record_status.PAYMENT_SUBMITTED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $paymentSubmitted
+                ]);
+            }
+            
             DB::commit();
             return $payment;
         } catch (Exception $e) {
