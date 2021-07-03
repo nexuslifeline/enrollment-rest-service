@@ -18,7 +18,7 @@ class Student extends Model
 {
     use SoftDeletes;
     protected $guarded = ['id', 'name', 'current_address']; //added name on guarded to prevent updating, coz we already have name attrib
-    protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'latest_manual_academic_record', 'requirement_percentage'];
+    protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'requirement_percentage'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -178,11 +178,11 @@ class Student extends Model
     //     return $this->academicRecords()->where('academic_record_status_id', $enrolledStatus)->with(['level', 'course', 'semester', 'schoolYear'])->latest()->first();
     // }
 
-    public function getLatestManualAcademicRecordAttribute()
-    {
-        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
-        return $this->academicRecords()->where('is_manual', 1)->where('academic_record_status_id', '!=', $enrolledStatus)->latest()->first();
-    }
+    // public function getLatestManualAcademicRecordAttribute()
+    // {
+    //     $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+    //     return $this->academicRecords()->where('is_manual', 1)->where('academic_record_status_id', '!=', $enrolledStatus)->latest()->first();
+    // }
 
     // public function getActiveTranscriptRecordAttribute()
     // {

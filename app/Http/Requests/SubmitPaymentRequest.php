@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Payment;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class SubmitPaymentRequest extends FormRequest
 {
@@ -24,7 +27,17 @@ class SubmitPaymentRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount' => 'required|not_in:0',
+            'amount' => ['required', function ($attribute, $value, $fail) {
+                $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+                $billing = Payment::find($this->id)->billing;
+                Log::info($billing);
+                if ($billing && $billing->billing_type_id === $initialBillingType) {
+
+                    if ($value < $billing->total_amount) {
+                        $fail("The initial fee amount must be fully paid.");
+                    }
+                }
+            },],
             'transaction_no' => 'required',
             'payment_mode_id' => 'required|not_in:0',
             'date_paid' => 'required|date'

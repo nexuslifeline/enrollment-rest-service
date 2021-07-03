@@ -93,7 +93,7 @@ class AcademicRecordController extends Controller
     public function update(AcademicRecordUpdateRequest $request, int $id)
     {
         $academicRecordService = new AcademicRecordService();
-        $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item'];
+        $except = ['application', 'admission', 'student_fee', 'subjects', 'fees', 'billing', 'billing_item', 'transcript_record'];
         $data = $request->except($except);
         $academicRecordInfo = $request->only($except);
         $academicRecord = $academicRecordService->update($data, $academicRecordInfo, $id);

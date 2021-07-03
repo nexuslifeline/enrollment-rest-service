@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PaymentApproveRequest;
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Requests\PaymentUpdateRequest;
 use App\Http\Requests\SubmitPaymentRequest;
@@ -105,7 +106,7 @@ class PaymentController extends Controller
             ->setStatusCode(201);
     }
 
-    public function approve(Request $request, int $id)
+    public function approve(PaymentApproveRequest $request, int $id)
     {
         $paymentService = new PaymentService();
         $data = $request->all();

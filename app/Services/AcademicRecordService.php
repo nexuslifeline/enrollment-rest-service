@@ -366,6 +366,10 @@ class AcademicRecordService
                 $academicRecord->subjects()->sync($items);
             }
 
+            if ($academicRecordInfo['transcript_record'] ?? false) {
+                $academicRecord->transcriptRecord->update($academicRecordInfo['transcript_record']);
+            }
+
             DB::commit();
 
             $academicRecord->load([
