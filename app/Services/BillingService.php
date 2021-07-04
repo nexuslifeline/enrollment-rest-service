@@ -218,9 +218,10 @@ class BillingService
                 $billing = Billing::create([
                     'due_date' => $data['due_date'],
                     'total_amount' => $data['total_amount'],
-                    'student_id' => $academicRecord->student_id,
+                    'student_id' => $academicRecord['student_id'],
                     'billing_type_id' => $data['billing_type_id'],
                     'billing_status_id' => $data['billing_status_id'],
+                    'academic_record_id' => $academicRecord['id']
                     // 'school_year_id' => $data['school_year_id'],
                     // 'semester_id' => $data['semester_id']
                 ]);

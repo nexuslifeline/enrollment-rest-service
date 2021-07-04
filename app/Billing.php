@@ -77,4 +77,8 @@ class Billing extends Model
         return $this->total_amount_due - $this->total_paid;
     }
 
+    public function academicRecord() {
+        return $this->belongsTo('App\AcademicRecord');
+    }
+
 }

@@ -238,7 +238,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/academic-records/{id}/approve-assessment', 'AcademicRecordController@approveAssessment');
         Route::post('/academic-records/{id}/reject-assessment', 'AcademicRecordController@rejectAssessment');
         Route::post('/academic-records/{id}/request-assessment', 'AcademicRecordController@requestAssessment');
-        Route::post('/academic-records/{id}/generate-soa', 'AcademicRecordController@generateSoa');
+        Route::post('/academic-records/{id}/generate-billing', 'AcademicRecordController@generateSoa');
 
         //payment
         Route::post('/payments/{id}/submit', 'PaymentController@submitPayment');

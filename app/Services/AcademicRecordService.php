@@ -927,7 +927,7 @@ class AcademicRecordService
         }
     }
 
-    public function generateSoa(array $data, array $otherFees, int $academicRecordId)
+    public function generateBilling(array $data, array $otherFees, int $academicRecordId)
     {
         DB::beginTransaction();
         try {
@@ -947,10 +947,8 @@ class AcademicRecordService
                 ]);
             }
 
-            $soaBillingType = Config::get('constants.billing_type.SOA');
             $unpaidStatus = Config::get('constants.billing_status.UNPAID');
             $data = Arr::add($data, 'student_fee_id', $studentFee->id);
-            $data = Arr::add($data, 'billing_type_id', $soaBillingType);
             $data = Arr::add($data, 'billing_status_id', $unpaidStatus);
             $data = Arr::add($data, 'student_id', $academicRecord->student_id);
             $amount = Arr::pull($data, 'amount');
@@ -961,10 +959,16 @@ class AcademicRecordService
                 'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
 
-            $billing->billingItems()->create([
-                'term_id' => $data['term_id'],
-                'amount' => $amount
-            ]);
+
+            if ($billing->billing_type_id === 2) {
+                $billing->studentFee()->first()->terms()->wherePivot('term_id', $billing->term_id)
+                    ->update(['is_billed' => 1]);
+                $billing->billingItems()->create([
+                    'term_id' => $data['term_id'],
+                    'amount' => $amount
+                ]);
+            }
+            
 
             foreach ($otherFees as $item) {
                 $billing->billingItems()->create($item);

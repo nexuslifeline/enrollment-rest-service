@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AcademicRecord;
-use App\Http\Requests\AcademicRecordGenerateSoaRequest;
+use App\Http\Requests\AcademicRecordGenerateBillingRequest;
 use Illuminate\Http\Request;
 use App\Services\AcademicRecordService;
 use App\Http\Resources\AcademicRecordResource;
@@ -299,12 +299,12 @@ class AcademicRecordController extends Controller
             ->setStatusCode(201);
     }
 
-    public function generateSoa(AcademicRecordGenerateSoaRequest $request, int $academicRecordId)
+    public function generateSoa(AcademicRecordGenerateBillingRequest $request, int $academicRecordId)
     {
         $academicRecordService = new AcademicRecordService();
         $data = $request->except('other_fees');
         $otherFees = $request->other_fees ?? [];
-        $academicRecord = $academicRecordService->generateSoa($data, $otherFees, $academicRecordId);
+        $academicRecord = $academicRecordService->generateBilling($data, $otherFees, $academicRecordId);
         return (new AcademicRecordResource($academicRecord))
             ->response()
             ->setStatusCode(201);
