@@ -15,6 +15,7 @@ use App\SchoolYear;
 use App\Semester;
 use App\TranscriptRecord;
 use App\Services\BillingService;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
@@ -838,8 +839,9 @@ class AcademicRecordService
                 'billing_status_id' => Config::get('constants.billing_status.UNPAID'),
                 'billing_type_id' => $initialFee,
                 'due_date' => Carbon::now()->addDays(7),
-                'school_year_id' => $academicRecord->school_year_id,
-                'semester_id' => $academicRecord->semester_id,
+                'academic_record_id' => $academicRecordId,
+                // 'school_year_id' => $academicRecord->school_year_id,
+                // 'semester_id' => $academicRecord->semester_id,
                 'student_id' => $academicRecord->student_id,
                 'total_amount' => $studentFee->enrollment_fee,
                 'previous_balance' => $previousBalance
@@ -920,6 +922,59 @@ class AcademicRecordService
         } catch (Exception $e) {
             DB::rollBack();
             Log::info('Error occured during AcademicRecordService rejectAssessment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function generateSoa(array $data, array $otherFees, int $academicRecordId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $studentFee = $academicRecord->studentFee;
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+
+            if ($academicRecord->academic_record_status_id !== $enrolledStatus) {
+                throw ValidationException::withMessages([
+                    'academic_record' => ['Academic record is not enrolled yet.']
+                ]);
+            }
+
+            if (!$academicRecord->schoolYear->is_active) {
+                throw ValidationException::withMessages([
+                    'academic_record' => ['Academic record is not enrolled in current active school year.']
+                ]);
+            }
+
+            $soaBillingType = Config::get('constants.billing_type.SOA');
+            $unpaidStatus = Config::get('constants.billing_status.UNPAID');
+            $data = Arr::add($data, 'student_fee_id', $studentFee->id);
+            $data = Arr::add($data, 'billing_type_id', $soaBillingType);
+            $data = Arr::add($data, 'billing_status_id', $unpaidStatus);
+            $data = Arr::add($data, 'student_id', $academicRecord->student_id);
+            $amount = Arr::pull($data, 'amount');
+            $totalAmount = collect($otherFees)->sum('amount') + $amount;
+            $data = Arr::add($data, 'total_amount', $totalAmount);
+            $billing = $academicRecord->billings()->create($data);
+            $billing->update([
+                'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+            ]);
+
+            $billing->billingItems()->create([
+                'term_id' => $data['term_id'],
+                'amount' => $amount
+            ]);
+
+            foreach ($otherFees as $item) {
+                $billing->billingItems()->create($item);
+            }
+
+            DB::commit();
+            return $academicRecord;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService generateSoa method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

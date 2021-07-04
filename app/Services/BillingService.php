@@ -34,15 +34,19 @@ class BillingService
             // school year
             $schoolYearId = $filters['school_year_id'] ?? false;
             $query->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->whereHas('schoolYear', function ($query) use ($schoolYearId) {
-                    return $query->where('school_year_id', $schoolYearId);
+                return $q->whereHas('academicRecord', function ($q) use ($schoolYearId) {
+                    return $q->whereHas('schoolYear', function ($query) use ($schoolYearId) {
+                        return $query->where('school_year_id', $schoolYearId);
+                    });
                 });
             });
             // semester
             $semesterId = $filters['semester_id'] ?? false;
             $query->when($semesterId, function ($q) use ($semesterId) {
-                return $q->whereHas('semester', function ($query) use ($semesterId) {
-                    return $query->where('semester_id', $semesterId);
+                return $q->whereHas('academicRecord', function ($q) use ($semesterId) {
+                    return $q->whereHas('semester', function ($query) use ($semesterId) {
+                        return $query->where('semester_id', $semesterId);
+                    });
                 });
             });
             // school category
@@ -150,8 +154,9 @@ class BillingService
                     'term_id' => $data['term_id'],
                     'billing_type_id' => 2,
                     'billing_status_id' => 2,
-                    'school_year_id' => $studentFee->school_year_id,
-                    'semester_id' => $studentFee->semester_id,
+                    'academic_record_id' => $studentFee->academic_record_id,
+                    // 'school_year_id' => $studentFee->school_year_id,
+                    // 'semester_id' => $studentFee->semester_id,
                     'student_fee_id' => $studentFee->id,
                     'previous_balance' => $studentFee->getPreviousBalance()
                 ]);
@@ -216,8 +221,8 @@ class BillingService
                     'student_id' => $academicRecord->student_id,
                     'billing_type_id' => $data['billing_type_id'],
                     'billing_status_id' => $data['billing_status_id'],
-                    'school_year_id' => $data['school_year_id'],
-                    'semester_id' => $data['semester_id']
+                    // 'school_year_id' => $data['school_year_id'],
+                    // 'semester_id' => $data['semester_id']
                 ]);
                 $billing->update([
                     'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)

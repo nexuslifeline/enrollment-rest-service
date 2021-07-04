@@ -121,4 +121,9 @@ class AcademicRecord extends Model
     {
         return $this->belongsTo('App\TranscriptRecord');
     }
+
+    public function billings()
+    {
+        return $this->hasMany('App\Billing');
+    }
 }

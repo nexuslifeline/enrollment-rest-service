@@ -30,7 +30,6 @@ class SubmitPaymentRequest extends FormRequest
             'amount' => ['required', function ($attribute, $value, $fail) {
                 $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
                 $billing = Payment::find($this->id)->billing;
-                Log::info($billing);
                 if ($billing && $billing->billing_type_id === $initialBillingType) {
 
                     if ($value < $billing->total_amount) {
