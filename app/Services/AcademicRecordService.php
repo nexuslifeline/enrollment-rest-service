@@ -606,7 +606,7 @@ class AcademicRecordService
 
         if (!$billing) {
             throw ValidationException::withMessages([
-                'initial_billing' => ['No Initial Billing found!']
+                'non_field_error' => ['No Initial Billing found!']
             ]);
         }
 
@@ -937,13 +937,21 @@ class AcademicRecordService
 
             if ($academicRecord->academic_record_status_id !== $enrolledStatus) {
                 throw ValidationException::withMessages([
-                    'academic_record' => ['Academic record is not enrolled yet.']
+                    'non_field_error' => ['Academic record is not enrolled yet.']
                 ]);
             }
 
             if (!$academicRecord->schoolYear->is_active) {
                 throw ValidationException::withMessages([
-                    'academic_record' => ['Academic record is not enrolled in current active school year.']
+                    'non_field_error' => ['Academic record is not enrolled in current active school year.']
+                ]);
+            }
+
+            $soaBillingType = Config::get('constants.billing_type.SOA');
+            $otherBillingType = Config::get('constants.billing_type.BILL');
+            if ($data['billing_type_id'] === $otherBillingType && !$otherFees) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Other Fees must have atleast one item.']
                 ]);
             }
 
@@ -952,7 +960,7 @@ class AcademicRecordService
             $data = Arr::add($data, 'billing_status_id', $unpaidStatus);
             $data = Arr::add($data, 'student_id', $academicRecord->student_id);
             $amount = Arr::pull($data, 'amount');
-            $totalAmount = collect($otherFees)->sum('amount') + $amount;
+            $totalAmount = $data['billing_type_id'] === $soaBillingType ? collect($otherFees)->sum('amount') + $amount : collect($otherFees)->sum('amount');
             $data = Arr::add($data, 'total_amount', $totalAmount);
             $billing = $academicRecord->billings()->create($data);
             $billing->update([
@@ -960,7 +968,7 @@ class AcademicRecordService
             ]);
 
 
-            if ($billing->billing_type_id === 2) {
+            if ($billing->billing_type_id === $soaBillingType) {
                 $billing->studentFee()->first()->terms()->wherePivot('term_id', $billing->term_id)
                     ->update(['is_billed' => 1]);
                 $billing->billingItems()->create([
@@ -978,7 +986,7 @@ class AcademicRecordService
             return $academicRecord;
         } catch (Exception $e) {
             DB::rollBack();
-            Log::info('Error occured during AcademicRecordService generateSoa method call: ');
+            Log::info('Error occured during AcademicRecordService generateBilling method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

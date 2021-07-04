@@ -38,7 +38,7 @@ class StudentService
             $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
             if (!$activeSchoolYear) {
                 throw ValidationException::withMessages([
-                    'school_year_id' => ['No Active SY found!']
+                    'non_field_error' => ['No Active SY found!']
                 ]);
             }
 

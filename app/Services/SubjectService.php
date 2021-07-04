@@ -10,6 +10,7 @@ use App\AcademicRecord;
 use App\SectionSchedule;
 use App\TranscriptRecord;
 use App\TranscriptRecordSubject;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -198,7 +199,7 @@ class SubjectService
         }
     }
 
-    public function getSubjectsOfTranscriptRecord(int $transcriptRecordId, bool $isPaginated, int $perPage)
+    public function getSubjectsOfTranscriptRecord(array $filters, int $transcriptRecordId, bool $isPaginated, int $perPage)
     {
         try {
             $transriptRecord = TranscriptRecord::find($transcriptRecordId);
@@ -208,6 +209,18 @@ class SubjectService
                         $query->where('curriculum_id', $transriptRecord->curriculum_id);
                     }]);
                 }]);
+
+            $query->when(Arr::exists($filters, 'is_completed'), function ($q) use ($filters) {
+                $isCompleted = $filters['is_completed'] ?? false;
+                if ($isCompleted === 'true') {
+                    Log::info('true');
+                    return $q->where('grade', '>', 74.4);
+                } else {
+                    Log::info('false');
+                    return $q->where('grade', '<', 74.4);
+                }
+                
+            });
 
             $subjects = $isPaginated
                 ? $query->paginate($perPage)

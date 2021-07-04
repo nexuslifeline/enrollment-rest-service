@@ -2,11 +2,16 @@
 
 namespace App\Services;
 
+use App\AcademicRecord;
+use App\Billing;
 use Exception;
 use App\SchoolYear;
+use App\Term;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class SchoolYearService
 {
@@ -109,5 +114,142 @@ class SchoolYearService
             Log::info($e->getMessage());
             throw $e;
         }
+    }
+
+    public function generateBatchBilling(array $data, array $otherFees, int $schoolYearId)
+    {
+        DB::beginTransaction();
+        try {
+            $schoolCategoryId = $data['school_category_id'] ?? false;
+
+            $soaBillingType = Config::get('constants.billing_type.SOA');
+            $otherBillingType = Config::get('constants.billing_type.BILL');
+            $unpaidStatus = Config::get('constants.billing_status.UNPAID');
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+
+            if ($data['billing_type_id'] === $otherBillingType && !$otherFees) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Other Fees must have atleast one item.']
+                ]);
+            }
+
+            if (!$schoolYearId) {
+                throw ValidationException::withMessages([
+                    'school_year_id' => ['School year field is required.']
+                ]);
+            }
+
+            $billings = [];
+
+            $totalBillingItems = array_reduce($otherFees, function ($carry, $item) {
+                return $carry + $item['amount'];
+            });
+            
+            if ($data['billing_type_id'] === $soaBillingType) {
+                if ($schoolCategoryId) {
+                    $terms = Term::where('school_category_id', $schoolCategoryId)
+                        ->get();
+
+                    if ($terms->count() === 0) {
+                        throw ValidationException::withMessages([
+                            'non_field_error' => ['School category doesn\'t have billing terms. You need to create a biling terms first.']
+                        ]);
+                    }
+                }
+
+                $studentFees = Term::find($data['term_id'])
+                ->studentFees()
+                ->with('academicRecord')
+                ->wherePivot('is_billed', 0);
+
+                $levelId = $data['level_id'] ?? false;
+                $studentFees->when($levelId, function ($query) use ($levelId, $schoolYearId, $enrolledStatus) {
+                    $query->whereHas('academicRecord', function ($q) use ($levelId, $enrolledStatus) {
+                        return $q->where('level_id', $levelId)
+                        ->where('school_year_id', $schoolYearId)
+                        ->where('academic_record_status_id', $enrolledStatus);
+                    });
+                });
+
+                foreach ($studentFees->get() as $studentFee) {
+                    Log::info('1');
+                    $billing = Billing::create([
+                        'total_amount' => $studentFee->pivot->amount + $totalBillingItems,
+                        'student_id' => $studentFee->academicRecord->student_id,
+                        'due_date' => $data['due_date'],
+                        'term_id' => $data['term_id'],
+                        'billing_type_id' => $soaBillingType,
+                        'billing_status_id' => $unpaidStatus,
+                        'academic_record_id' => $studentFee->academic_record_id,
+                        'student_fee_id' => $studentFee->id,
+                        'previous_balance' => $studentFee->getPreviousBalance()
+                    ]);
+
+                    $billing->update([
+                        'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    ]);
+
+                    foreach ($otherFees as $item) {
+                        $billing->billingItems()->create($item);
+                    }
+
+                    $billing->billingItems()->create([
+                        'term_id' => $billing->term_id,
+                        'amount' => $studentFee->pivot->amount
+                    ]);
+
+                    $billings[] = $billing;
+                }
+                $studentFees->update([
+                    'is_billed' => 1
+                ]);
+            } else {
+                $academicRecords = AcademicRecord::where('school_category_id', $data['school_category_id'])
+                ->where('school_year_id', $schoolYearId)
+                ->where('academic_record_status_id', $enrolledStatus);
+
+                $levelId = $data['level_id'] ?? false;
+                $academicRecords->when($levelId, function ($query) use ($levelId) {
+                    $query->where('level_id', $levelId);
+                });
+
+                $courseId = $data['course_id'] ?? false;
+                $academicRecords->when($courseId, function ($query) use ($courseId) {
+                    $query->where('course_id', $courseId);
+                });
+
+                $semesterId = $data['semester_id'] ?? false;
+                $academicRecords->when($semesterId, function ($query) use ($semesterId) {
+                    $query->where('semester_id', $semesterId);
+                });
+
+                $billings = [];
+                foreach ($academicRecords->get() as $academicRecord) {
+                    $billing = Billing::create([
+                        'due_date' => $data['due_date'],
+                        'total_amount' => $totalBillingItems,
+                        'student_id' => $academicRecord['student_id'],
+                        'billing_type_id' => $otherBillingType,
+                        'billing_status_id' => $unpaidStatus,
+                        'academic_record_id' => $academicRecord['id']
+                    ]);
+                    $billing->update([
+                        'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    ]);
+
+                    foreach ($otherFees as $item) {
+                        $billing->billingItems()->create($item);
+                    }
+                    $billings[] = $billing;
+                }
+            }
+            DB::commit();
+            return $billings;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during SchoolYearService generateBatchBilling method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        } 
     }
 }

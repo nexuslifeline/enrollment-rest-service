@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Curriculum;
+use App\Rules\IsLevelValidInSchoolCategory;
 use App\SchoolCategory;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
@@ -29,12 +30,10 @@ class AcademicRecordUpdateRequest extends FormRequest
     {
         $transcriptRecord = $this->transcript_record ?? false;
         return [
-            'level_id' => ['required','not_in:0', function ($attribute, $value, $fail) {
-                $levelIds = SchoolCategory::find($this->school_category_id)->levels()->get();
-                if (count($levelIds->where('id', $this->level_id)) == 0) {
-                    $fail("The level is not applicable in the school category.");
-                }
-            }],
+            'level_id' => ['required','not_in:0', new IsLevelValidInSchoolCategory(
+                $this->level_id,
+                $this->school_category_id
+            )],
             'course_id' => 'required_if:level_id,13,14,15,16,17,18,19,20,21,22|not_in:0',
             'semester_id' => 'required_if:level_id,13,14,15,16,17,18,19|not_in:0',
             'school_year_id' => 'required|not_in:0',

@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\IsBillingTypeIdExistsInBillingTypes;
+use App\Rules\IsLevelValidInSchoolCategory;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AcademicRecordGenerateBillingRequest extends FormRequest
+class SchoolYearGenerateBatchBillingRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +28,12 @@ class AcademicRecordGenerateBillingRequest extends FormRequest
     {
         return [
             'term_id' => 'required_if:billing_type_id,2|not_in:0',
-            'due_date' => 'required|date',
+            'due_date' => 'required|date|after:'.Carbon::now()->addDays(-1)->format('Y-m-d'),
             'amount' => 'required_if:billing_type_id,2|not_in:0',
-            'billing_type_id' => 'required|not_in:0'
+            'billing_type_id' => ['required', 'not_in:0', new IsBillingTypeIdExistsInBillingTypes($this->billing_type_id)],
+            'level_id' => [new IsLevelValidInSchoolCategory(
+                $this->level_id, $this->school_category_id
+            )]
         ];
     }
 
@@ -35,7 +41,8 @@ class AcademicRecordGenerateBillingRequest extends FormRequest
     {
         return [
             'term_id' => 'term',
-            'billing_type_id' => 'billing type'
+            'billing_type_id' => 'billing type',
+            'school_year_id' => 'school year'
         ];
     }
 
@@ -43,7 +50,7 @@ class AcademicRecordGenerateBillingRequest extends FormRequest
     {
         return [
             'not_in' => 'The :attribute field is required.',
-            'required_if' => 'The :attribute field is required.',
+            'required_if' => 'The :attribute field is required.'
         ];
     }
 }

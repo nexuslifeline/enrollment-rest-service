@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SchoolYearGenerateBatchBillingRequest;
 use App\SchoolYear;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use App\Http\Resources\SchoolYearResource;
 use App\Http\Requests\SchoolYearPatchRequest;
 use App\Http\Requests\SchoolYearStoreRequest;
 use App\Http\Requests\SchoolYearUpdateRequest;
+use App\Http\Resources\BillingResource;
 
 class SchoolYearController extends Controller
 {
@@ -111,5 +113,16 @@ class SchoolYearController extends Controller
         $schoolYearService = new SchoolYearService();
         $schoolYearService->delete($id);
         return response()->json([], 204);
+    }
+
+    public function generateBatchBilling(SchoolYearGenerateBatchBillingRequest $request, int $id)
+    {
+        $schoolYearService = new SchoolYearService();
+        $data = $request->except('other_fees');
+        $otherFees = $request->other_fees ?? [];
+        $billings = $schoolYearService->generateBatchBilling($data, $otherFees, $id);
+        return (new BillingResource($billings))
+            ->response()
+            ->setStatusCode(201);
     }
 }

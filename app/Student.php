@@ -160,8 +160,13 @@ class Student extends Model
             'semester',
             'evaluation',
             'application',
+            'section',
+            'studentType',
             'studentFee',
-            'transcriptRecord',
+            'schoolCategory',
+            'transcriptRecord' => function ($q) {
+                return $q->with('curriculum');
+            },
             'schoolYear'
         ]);
         return $academicRecord->latest()->first();

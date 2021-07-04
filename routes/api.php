@@ -238,7 +238,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/academic-records/{id}/approve-assessment', 'AcademicRecordController@approveAssessment');
         Route::post('/academic-records/{id}/reject-assessment', 'AcademicRecordController@rejectAssessment');
         Route::post('/academic-records/{id}/request-assessment', 'AcademicRecordController@requestAssessment');
-        Route::post('/academic-records/{id}/generate-billing', 'AcademicRecordController@generateSoa');
+        Route::post('/academic-records/{id}/generate-billing', 'AcademicRecordController@generateBilling');
 
         //payment
         Route::post('/payments/{id}/submit', 'PaymentController@submitPayment');
@@ -248,6 +248,9 @@ Route::group(['prefix' => 'v1'], function () {
 
         //billing
         Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
+
+        //school year
+        Route::post('school-years/{id}/generate-batch-billing', 'SchoolYearController@generateBatchBilling');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

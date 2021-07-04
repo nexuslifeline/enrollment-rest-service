@@ -299,7 +299,7 @@ class AcademicRecordController extends Controller
             ->setStatusCode(201);
     }
 
-    public function generateSoa(AcademicRecordGenerateBillingRequest $request, int $academicRecordId)
+    public function generateBilling(AcademicRecordGenerateBillingRequest $request, int $academicRecordId)
     {
         $academicRecordService = new AcademicRecordService();
         $data = $request->except('other_fees');
