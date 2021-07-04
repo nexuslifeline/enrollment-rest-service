@@ -362,31 +362,49 @@ class SubjectService
         //disabled this for now for checking purposes
         //because it returns error on this part
         //need further debugging
-        return false;
+        // return false;
+        // $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
+        //     ->get()
+        //     ->pluck('id')
+        //     ->flatten();
 
-        $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
-            ->get()
-            ->pluck('id');
+        $transcriptRecords = TranscriptRecord::where('student_id', $studentId)
+            ->whereHas('subjects', function ($q) use ($subjectId) {
+                return $q->where('subject_id', $subjectId)
+                ->where('is_taken', 1);
+            })
+            ->get();
 
-        return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
-            ->where('subject_id', $subjectId)
-            ->where('is_taken', 1)
-            ->get()
-            ->count() > 0;
+        return $transcriptRecords->count() > 0;
+        // $transcriptRecordSubjects = TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
+            // ->where('subject_id', $subjectId)
+            // ->where('is_taken', 1)
+            // ->get()
+            // ->count() > 0;
     }
 
     // return true if grade is passed, if not taken yet this will return false
     private function isPassed(int $studentId, int $subjectId)
     {
-        $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
-            ->get()
-            ->pluck('id');
+        // $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
+        //     ->get()
+        //     ->pluck('id')
+        //     ->flatten();
 
-        return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
-            ->where('subject_id', $subjectId)
-            ->where('grade', '>', 74.4)
-            ->get()
-            ->count() > 0;
+        $transcriptRecords = TranscriptRecord::where('student_id', $studentId)
+            ->whereHas('subjects', function ($q) use ($subjectId) {
+                return $q->where('subject_id', $subjectId)
+                ->where('grade', '>', 74.4);
+            })
+            ->get();
+
+        return $transcriptRecords->count() > 0;
+
+        // return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
+        //     ->where('subject_id', $subjectId)
+        //     ->where('grade', '>', 74.4)
+        //     ->get()
+        //     ->count() > 0;
     }
 
     private function arePrereqPassed(int $studentId, int $subjectId, int $curriculumId)
