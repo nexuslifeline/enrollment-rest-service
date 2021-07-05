@@ -29,8 +29,11 @@ class IsLevelValidInSchoolCategory implements Rule
      */
     public function passes($attribute, $value)
     {
-        $levelIds = SchoolCategory::find($this->_schoolCategoryId)->levels()->get();
-        return count($levelIds->where('id', $this->_levelId)) > 0;
+        if($this->_schoolCategoryId) {
+            $levelIds = SchoolCategory::find($this->_schoolCategoryId)->levels()->get();
+            return count($levelIds->where('id', $this->_levelId)) > 0;
+        }
+        return true;
     }
 
     /**

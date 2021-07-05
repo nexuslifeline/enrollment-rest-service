@@ -29,7 +29,6 @@ class SchoolYearGenerateBatchBillingRequest extends FormRequest
         return [
             'term_id' => 'required_if:billing_type_id,2|not_in:0',
             'due_date' => 'required|date|after:'.Carbon::now()->addDays(-1)->format('Y-m-d'),
-            'amount' => 'required_if:billing_type_id,2|not_in:0',
             'billing_type_id' => ['required', 'not_in:0', new IsBillingTypeIdExistsInBillingTypes($this->billing_type_id)],
             'level_id' => [new IsLevelValidInSchoolCategory(
                 $this->level_id, $this->school_category_id

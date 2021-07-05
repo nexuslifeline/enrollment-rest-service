@@ -54,8 +54,7 @@ class AcademicRecordUpdateRequest extends FormRequest
                                 ->where('course_id', $this->course_id)
                                 ->where('curriculum_subjects.school_category_id', $this->school_category_id);
                         })->get()->pluck('id')->flatten();
-
-                        if (in_array($curriculumId, $curriculumIds->all())) {
+                        if (!in_array($curriculumId, $curriculumIds->all())) {
                             $fail('The curriculum is not applicable.');
                         }
                     }
@@ -79,7 +78,8 @@ class AcademicRecordUpdateRequest extends FormRequest
     public function messages()
     {
         return [
-            'not_in' => 'The :attribute field is required.'
+            'not_in' => 'The :attribute field is required.',
+            'required_if' => 'The :attribute field is required.'
         ];
     }
 }
