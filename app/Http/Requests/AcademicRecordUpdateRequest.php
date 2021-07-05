@@ -39,6 +39,7 @@ class AcademicRecordUpdateRequest extends FormRequest
             'school_year_id' => 'required|not_in:0',
             'school_category_id' => 'required|not_in:0',
             'student_category_id' => 'required|not_in:0',
+            'student_type_id' => 'required|not_in:0',
             'transcript_record' => [
                 function ($attribute, $value, $fail) use ($transcriptRecord) {
                     $curriculumId = Arr::get($transcriptRecord, 'curriculum_id');
@@ -71,7 +72,8 @@ class AcademicRecordUpdateRequest extends FormRequest
             'semester_id' => 'semester',
             'school_year_id' => 'school year',
             'school_category_id' => 'school category',
-            'student_category_id' => 'student category'
+            'student_category_id' => 'student category',
+            'student_type_id' => 'student type'
         ];
     }
 
