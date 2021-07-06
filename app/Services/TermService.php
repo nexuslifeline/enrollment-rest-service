@@ -177,6 +177,7 @@ class TermService
                 Log::info($studentFee->id);
                 $terms = $studentFee->terms()->get();
                 $terms->append('previous_balance');
+                $terms->load(['schoolYear', 'semester']);
             }
             return $terms;
         } catch (Exception $e) {
