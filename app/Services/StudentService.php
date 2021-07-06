@@ -77,7 +77,8 @@ class StudentService
                 'student_category_id' => $studentCategoryId,
                 'academic_record_status_id' => $academicRecordStatusId,
                 'transcript_record_id' => $transcriptRecord->id,
-                'is_admission' => $isAdmission
+                'is_admission' => $isAdmission,
+                'student_type_id' => Config::get('constants.student_type.REGULAR')
             ]);
 
             $academicRecord->application()->create([

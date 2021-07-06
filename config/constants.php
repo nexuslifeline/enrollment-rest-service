@@ -47,6 +47,7 @@ return [
   'billing_status' => [
     'PAID' => 1,
     'UNPAID' => 2,
+    'PARTIALLY_PAID' => 3
   ],
   'payment_status' => [
     'DRAFT' => 1, // before this is Pending
@@ -63,4 +64,8 @@ return [
     'CASH' => 6,
     'CHECK' => 7
   ],
+  'student_type' => [
+    'REGULAR' => 1,
+    'IRREGULAR' => 2
+  ]
 ];

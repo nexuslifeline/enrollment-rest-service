@@ -252,10 +252,36 @@ class PaymentService
             $data['approved_by'] = Auth::id();
             $payment->update($data);
             $billing = $payment->billing;
+
+            $billingStatusPaid = Config::get('constants.billing_status.PAID');
+            $billingStatusPartiallyPaid = Config::get('constants.billing_status.PARTIALLY_PAID');
+
+            $billing->update([
+                'billing_status_id' => $payment->amount < $billing->total_amount ? $billingStatusPartiallyPaid : $billingStatusPaid
+            ]);
+
             $studentFee = $billing->studentFee;
             $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
             if ($billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
                 $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                $academicRecord = $studentFee->academicRecord;
+                $student = $academicRecord->student;
+                $academicRecord = $student->academicRecords()->get()->last();
+                //check if student is new or old
+                if ($academicRecord['student_category_id'] === 1) {
+                    $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                    $students = Student::with(['academicRecords'])
+                    ->whereHas('academicRecords', function ($query) use ($enrolledStatus) {
+                        return $query->where('student_category_id', 1)
+                        ->where('academic_record_status_id', $enrolledStatus);
+                    })
+                        ->get();
+
+                    $student->update([
+                        'student_no' => '11' . str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
+                    ]);
+                }
+
                 $studentFee->academicRecord->update([
                     'academic_record_status_id' => $enrolledStatus,
                     'is_initial_billing_paid' => 1

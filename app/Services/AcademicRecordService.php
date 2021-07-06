@@ -956,6 +956,7 @@ class AcademicRecordService
             }
 
             $unpaidStatus = Config::get('constants.billing_status.UNPAID');
+            $partiallyPaidStatus = Config::get('constants.billing_status.PARTIALLY_PAID');
             $data = Arr::add($data, 'student_fee_id', $studentFee->id);
             $data = Arr::add($data, 'billing_status_id', $unpaidStatus);
             $data = Arr::add($data, 'student_id', $academicRecord->student_id);
@@ -975,11 +976,27 @@ class AcademicRecordService
                     'term_id' => $data['term_id'],
                     'amount' => $amount
                 ]);
+
+                $soaBillings = Billing::where('billing_type_id', $soaBillingType)
+                    ->where('student_fee_id', $billing->studentFee->id)
+                    ->whereIn('billing_status_id', [$unpaidStatus, $partiallyPaidStatus])
+                    ->where('is_forwarded', 0)
+                    ->get();
+
+                foreach ($soaBillings as $soaBilling) {
+                    $soaBilling->update([
+                        'is_forwarded' => 1,
+                        'system_notes' => 'Billing No. ' . $soaBilling['billing_no'] . ' is forwarded to Billing No. '. $billing['billing_no']. ' on '.Carbon::now()->format('F d, Y')
+                    ]);
+                }
             }
             
 
             foreach ($otherFees as $item) {
-                $billing->billingItems()->create($item);
+                $billing->billingItems()->create([
+                    'amount' => $item['amount'],
+                    'school_fee_id' => $item['school_fee_id']
+                ]);
             }
 
             DB::commit();
