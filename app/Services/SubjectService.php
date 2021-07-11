@@ -49,7 +49,8 @@ class SubjectService
                         })
                         ->when($semesterId, function ($q) use ($semesterId) {
                             return $q->where('semester_id', $semesterId);
-                        });
+                        })
+                        ->schoolCategoryFilter();
                 });
             });
             
