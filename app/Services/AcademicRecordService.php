@@ -36,6 +36,7 @@ class AcademicRecordService
                 'studentCategory',
                 'studentType',
                 'application',
+                'studentFee',
                 'student' => function ($query) {
                     $query->with(['address', 'photo', 'user']);
                 }
