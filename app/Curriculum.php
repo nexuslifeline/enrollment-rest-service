@@ -23,6 +23,24 @@ class Curriculum extends Model
         'deleted_by'
     ];
 
+    public function scopeSchoolCategoryFilter($query)
+    {
+        $user = Auth::user();
+
+        if ($user->userable_type === 'App\Student') {
+            return;
+        }
+
+        $userGroup = $user->userGroup()->first();
+        Log::info($userGroup);
+        if ($userGroup) {
+            $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
+            return $query->whereHas('subjects', function($q) use ($schoolCategories) {
+                return $q->whereIn('curriculum_subjects.school_category_id', $schoolCategories);
+            });
+        }
+    }
+
     // protected static function boot()
     // {
     //     parent::boot();

@@ -51,6 +51,8 @@ class CurriculumService
                 }]);
             });
 
+            $query->schoolCategoryFilter();
+
             $curriculums = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
