@@ -796,7 +796,11 @@ class StudentService
                 ->whereDate('billings.created_at', '<=', $asOfDate);
 
             $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->where('school_year_id', $schoolYearId);
+                return $q->whereHas('studentFee', function ($q) use ($schoolYearId) {
+                    return $q->whereHas('academicRecord', function ($q) use ($schoolYearId) {
+                        return $q->where('school_year_id', $schoolYearId);
+                    });
+                });
             });
 
             $payments = Payment::select(

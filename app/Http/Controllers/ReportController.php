@@ -26,6 +26,7 @@ use App\Http\Resources\PaymentResource;
 use App\Services\AcademicRecordService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\ValidationException;
 
 class ReportController extends Controller
 {
@@ -72,6 +73,13 @@ class ReportController extends Controller
                 return $query->with(['term', 'schoolFee'])
                     ->orderBy('term_id', 'DESC');
             }]);
+
+        if ($data['billing']->billing_type_id !== Config::get('constants.billing_type.SOA')) {
+            throw ValidationException::withMessages([
+                'non_field_error' => ['Not a valid SOA.']
+            ]);
+        }
+
         $data['student'] = $data['billing']->student()->first();
         $data['academicRecord'] = $data['billing']->studentFee()->first()->academicRecord()
             ->with([
@@ -172,7 +180,11 @@ class ReportController extends Controller
             ->whereDate('billings.created_at', '<=', $asOfDate);
 
         $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
-            return $q->where('school_year_id', $schoolYearId);
+            return $q->whereHas('studentFee', function ($q) use ($schoolYearId) {
+                return $q->whereHas('academicRecord', function ($q) use ($schoolYearId) {
+                    return $q->where('school_year_id', $schoolYearId);
+                });
+            });
         });
 
         $payments = Payment::select(
@@ -221,8 +233,6 @@ class ReportController extends Controller
             'schoolCategory',
             'studentCategory',
             'studentType',
-            'application',
-            'admission',
             'student' => function ($query) {
                 $query->with(['address']);
             },
