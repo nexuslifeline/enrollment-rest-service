@@ -36,10 +36,10 @@ class AcademicRecordUpdateRequest extends FormRequest
             )],
             'course_id' => 'required_if:level_id,13,14,15,16,17,18,19,20,21,22|not_in:0',
             'semester_id' => 'required_if:level_id,13,14,15,16,17,18,19|not_in:0',
-            'school_year_id' => 'required|not_in:0',
+            'school_year_id' => 'sometimes|required|not_in:0',
             'school_category_id' => 'required|not_in:0',
-            'student_category_id' => 'required|not_in:0',
-            'student_type_id' => 'required|not_in:0',
+            'student_category_id' => 'sometimes|required|not_in:0',
+            'student_type_id' => 'sometimes|required|not_in:0',
             'transcript_record' => [
                 function ($attribute, $value, $fail) use ($transcriptRecord) {
                     $curriculumId = Arr::get($transcriptRecord, 'curriculum_id');

@@ -283,7 +283,6 @@ class AcademicRecordService
             $academicRecord = AcademicRecord::find($id);
 
             $academicRecord->update($data);
-            
             if ($academicRecordInfo['application'] ?? false) {
                 $application = $academicRecord->application();
                 if ($application) {
@@ -384,6 +383,9 @@ class AcademicRecordService
                 'studentType',
                 'application',
                 // 'curriculum',
+                'transcriptRecord' => function($q) {
+                    return $q->with(['curriculum']);
+                },
                 'student' => function ($query) {
                     $query->with(['address']);
                 }

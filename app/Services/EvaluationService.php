@@ -20,7 +20,7 @@ class EvaluationService
             $query = Evaluation::with([
                 'lastSchoolLevel',
                 'academicRecord' => function ($query) {
-                    $query->with(['schoolYear', 'level', 'course', 'studentCategory', 'student' => function ($q) {
+                    $query->with(['schoolYear', 'level', 'course', 'studentCategory','semester', 'schoolCategory', 'student' => function ($q) {
                         return $q->with(['address', 'photo', 'user']);
                     }]);
                 }
@@ -94,7 +94,7 @@ class EvaluationService
             $evaluation = Evaluation::find($id);
             $evaluation->load([
                 'academicRecord' => function ($query) {
-                    $query->with(['schoolYear', 'level', 'course', 'studentCategory',
+                    $query->with(['schoolYear', 'level', 'course', 'studentCategory','semester', 'schoolCategory',
                         'student' => function ($query) {
                             $query->with(['address', 'photo', 'user', 'education']);
                         },
@@ -144,7 +144,7 @@ class EvaluationService
                 // 'course',
                 // 'studentCategory',
                 'academicRecord' => function ($query) {
-                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory', 'transcriptRecord' => function($q) {
+                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory', 'semester', 'schoolCategory', 'transcriptRecord' => function($q) {
                         return $q->with(['curriculum', 'studentCurriculum']);
                     }]);
                 },
