@@ -981,13 +981,14 @@ class AcademicRecordService
                 $soaBillings = Billing::where('billing_type_id', $soaBillingType)
                     ->where('student_fee_id', $billing->studentFee->id)
                     ->whereIn('billing_status_id', [$unpaidStatus, $partiallyPaidStatus])
+                    ->where('id', '!=', $billing->id)
                     ->where('is_forwarded', 0)
                     ->get();
 
                 foreach ($soaBillings as $soaBilling) {
                     $soaBilling->update([
                         'is_forwarded' => 1,
-                        'system_notes' => 'Billing No. ' . $soaBilling['billing_no'] . ' is forwarded to Billing No. '. $billing['billing_no']. ' on '.Carbon::now()->format('F d, Y')
+                        'system_notes' => 'Additional Balance forwarded to Billing ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y')
                     ]);
                 }
             }
