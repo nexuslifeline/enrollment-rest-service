@@ -67,14 +67,17 @@ class StudentFileService
                 $path = $file->store('files/student');
             }
 
-            $studentFile = StudentFile::Create(
+            $studentFile = StudentFile::create(
                 [
                     'student_id' => $studentId,
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
                     'hash_name' => $file->hashName()
                 ]
             );
+
+            $studentFile->load(['documentType']);
 
             return $studentFile;
         } catch (Exception $e) {
@@ -141,6 +144,7 @@ class StudentFileService
 
             $studentFile->update($data);
 
+            $studentFile->load(['documentType']);
             return  $studentFile;
         } catch (Exception $e) {
             Log::info('Error occured during StudentFileService preview method call: ');

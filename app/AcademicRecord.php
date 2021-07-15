@@ -33,17 +33,22 @@ class AcademicRecord extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany('App\Subject', 'academic_record_subjects', 'academic_record_id', 'subject_id')->withPivot('section_id')->withTimestamps();
+        return $this->belongsToMany('App\Subject', 'academic_record_subjects', 'academic_record_id', 'subject_id')->withPivot('section_id','is_dropped')->withTimestamps();
     }
 
     public function application()
     {
-        return $this->belongsTo('App\Application');
+        return $this->hasOne('App\Application');
     }
 
-    public function admission()
+    // public function admission()
+    // {
+    //     return $this->hasOne('App\Admission');
+    // }
+
+    public function evaluation()
     {
-        return $this->belongsTo('App\Admission');
+        return $this->hasOne('App\Evaluation');
     }
 
     public function studentFee()
@@ -100,5 +105,25 @@ class AcademicRecord extends Model
     {
         return $this->belongsToMany('App\GradingPeriod', 'student_grades', 'academic_record_id', 'grading_period_id')
         ->withPivot('subject_id','grade','personnel_id','student_grade_status_id');
+    }
+
+    public function curriculum()
+    {
+        return $this->belongsTo('App\Curriculum');
+    }
+
+    public function studentCurriculum()
+    {
+        return $this->belongsTo('App\Curriculum', 'student_curriculum_id');
+    }
+
+    public function transcriptRecord()
+    {
+        return $this->belongsTo('App\TranscriptRecord');
+    }
+
+    public function billings()
+    {
+        return $this->hasMany('App\Billing');
     }
 }

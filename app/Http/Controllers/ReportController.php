@@ -24,6 +24,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\PaymentResource;
 use App\Services\AcademicRecordService;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\ValidationException;
 
 class ReportController extends Controller
 {
@@ -70,6 +73,13 @@ class ReportController extends Controller
                 return $query->with(['term', 'schoolFee'])
                     ->orderBy('term_id', 'DESC');
             }]);
+
+        if ($data['billing']->billing_type_id !== Config::get('constants.billing_type.SOA')) {
+            throw ValidationException::withMessages([
+                'non_field_error' => ['Not a valid SOA.']
+            ]);
+        }
+
         $data['student'] = $data['billing']->student()->first();
         $data['academicRecord'] = $data['billing']->studentFee()->first()->academicRecord()
             ->with([
@@ -170,7 +180,11 @@ class ReportController extends Controller
             ->whereDate('billings.created_at', '<=', $asOfDate);
 
         $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
-            return $q->where('school_year_id', $schoolYearId);
+            return $q->whereHas('studentFee', function ($q) use ($schoolYearId) {
+                return $q->whereHas('academicRecord', function ($q) use ($schoolYearId) {
+                    return $q->where('school_year_id', $schoolYearId);
+                });
+            });
         });
 
         $payments = Payment::select(
@@ -219,8 +233,6 @@ class ReportController extends Controller
             'schoolCategory',
             'studentCategory',
             'studentType',
-            'application',
-            'admission',
             'student' => function ($query) {
                 $query->with(['address']);
             },
@@ -287,18 +299,22 @@ class ReportController extends Controller
         return $schoolYear;
     }
 
-    public function enrolledList(Request $request)
+    public function enrolledList(Request $request, int $schoolYearId)
     {
         // $academicRecord = AcademicRecord::find($academicRecordId);
         $academicRecordService = new AcademicRecordService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        
         $filters = $request->except('per_page', 'paginate');
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        $filters = Arr::add($filters, 'academic_record_status_id', $enrolledStatus);
+        $filters = Arr::add($filters, 'school_year_id', $schoolYearId);
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $data['academicRecords'] = $academicRecordService->list($isPaginated, $perPage, $filters);
 
         $data['schoolCategory'] =  $request->school_category_id ? SchoolCategory::find($request->school_category_id) : null;
-        $data['schoolYear'] =  $request->school_year_id ? SchoolYear::find($request->school_year_id) : 'All';
+        $data['schoolYear'] =  SchoolYear::find($schoolYearId);
         $data['level'] =  $request->level_id ? Level::find($request->level_id) : 'All';
         $data['course'] =  $request->course_id ? Course::find($request->course_id) : (in_array($request->school_category_id, [4, 5, 6]) ? 'All' : null);
         $data['semester'] =  $request->semester_id ? Course::find($request->semester_id) : (in_array($request->school_category_id, [4, 5, 6]) ? 'All' : null);

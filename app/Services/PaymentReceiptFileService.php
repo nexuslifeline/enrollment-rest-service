@@ -66,6 +66,7 @@ class PaymentReceiptFileService
                     'path' => $path,
                     'name' => $file->getClientOriginalName(),
                     'hash_name' => $file->hashName(),
+                    'size' => $file->getSize(),
                     'student_id' => $studentId
                 ]
             );

@@ -21,18 +21,18 @@ class Subject extends Model
         'deleted_by'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::addGlobalScope(new SchoolCategoryScope);
-    }
+    //     static::addGlobalScope(new SchoolCategoryScope);
+    // }
 
     public function levels()
     {
         return $this->belongsToMany(
             'App\Level',
-            'level_subjects',
+            'curriculum_subjects',
             'subject_id',
             'level_id'
         );
@@ -40,17 +40,28 @@ class Subject extends Model
 
     public function courses()
     {
-        return $this->belongsToMany('App\Course', 'level_subjects', 'subject_id', 'course_id');
+        return $this->belongsToMany('App\Course', 'curriculum_subjects', 'subject_id', 'course_id');
     }
 
     public function semesters()
     {
-        return $this->belongsToMany('App\Semester', 'level_subjects', 'subject_id', 'semester_id');
+        return $this->belongsToMany('App\Semester', 'curriculum_subjects', 'subject_id', 'semester_id');
     }
 
     public function department()
     {
         return $this->belongsTo('App\Department');
+    }
+
+    public function curriculums()
+    {
+        return $this->belongsToMany(
+            'App\Curriculum',
+            'curriculum_subjects',
+            'subject_id',
+            'curriculum_id'
+        )->withPivot(['level_id', 'semester_id', 'course_id', 'school_category_id'])
+        ->withTimestamps();
     }
 
     public function schoolCategory()

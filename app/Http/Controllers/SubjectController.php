@@ -128,8 +128,9 @@ class SubjectController extends Controller
     {
         $subjectService = new SubjectService();
         $perPage = $request->per_page ?? 20;
+        $filters = $request->all();
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
-        $subjects = $subjectService->getSubjectsOfTranscriptRecord($transcriptRecordId, $isPaginated, $perPage);
+        $subjects = $subjectService->getSubjectsOfTranscriptRecord($filters, $transcriptRecordId, $isPaginated, $perPage);
         return SubjectResource::collection($subjects);
     }
 
@@ -143,7 +144,7 @@ class SubjectController extends Controller
         return SubjectResource::collection($subjects);
     }
 
-    public function getSectionUnscheduledSubjects($evaluationId, Request $request)
+    public function getSectionUnscheduledSubjects($transcriptRecordId, Request $request)
     {
         $subjectService = new SubjectService();
         $perPage = $request->per_page ?? 20;
@@ -154,7 +155,7 @@ class SubjectController extends Controller
         $curriculumId =  $request->curriculum_id ?? null;
 
         $subjects = $subjectService->getSectionUnscheduledSubjects(
-            $evaluationId,
+            $transcriptRecordId,
             $studentId,
             $curriculumId,
             $isPaginated,
@@ -184,5 +185,4 @@ class SubjectController extends Controller
         );
         return SubjectResource::collection($subjects);
     }
-
 }

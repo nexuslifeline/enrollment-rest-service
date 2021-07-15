@@ -65,6 +65,8 @@ class EnrollmentClearData extends Command
         DB::table('student_clearances')->truncate();
         DB::table('student_clearance_signatories')->truncate();
         DB::table('student_grades')->truncate();
+        DB::table('student_grade_statuses')->truncate();
+        DB::table('student_grade_periods')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         DB::statement('SET SQL_SAFE_UPDATES = 0;');
         DB::table('users')->where('userable_type', "App\\Student")->delete();

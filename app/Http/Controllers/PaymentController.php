@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PaymentApproveRequest;
 use App\Http\Requests\PaymentStoreRequest;
 use App\Http\Requests\PaymentUpdateRequest;
+use App\Http\Requests\SubmitPaymentRequest;
 use App\Payment;
 use App\PaymentFile;
 use App\Student;
@@ -90,6 +92,47 @@ class PaymentController extends Controller
     {
         $paymentService = new PaymentService();
         $paymentService->delete($id);
+        return response()->json([], 204);
+    }
+
+    public function submitPayment(SubmitPaymentRequest $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $payment = $paymentService->submitPayment($data, $id);
+
+        return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function approve(PaymentApproveRequest $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $payment = $paymentService->approve($data, $id);
+
+        return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function reject(Request $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $payment = $paymentService->reject($data, $id);
+
+        return (new PaymentResource($payment))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function cancel(Request $request, int $id)
+    {
+        $paymentService = new PaymentService();
+        $data = $request->all();
+        $paymentService->cancel($data, $id);
         return response()->json([], 204);
     }
 }

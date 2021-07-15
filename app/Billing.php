@@ -18,6 +18,8 @@ class Billing extends Model
         'deleted_by'
     ];
 
+    protected $appends = ['total_amount_due', 'total_remaining_due'];
+
     public function student()
     {
         return $this->belongsTo('App\Student');
@@ -65,6 +67,18 @@ class Billing extends Model
     public function getSubmittedPaymentsAttribute() {
         $submittedStatus = 4;
         return  $this->payments->where('payment_status_id', $submittedStatus);
+    }
+
+    public function getTotalAmountDueAttribute() {
+        return $this->total_amount + $this->previous_balance;
+    }
+
+    public function getTotalRemainingDueAttribute() {
+        return $this->total_amount_due - $this->total_paid;
+    }
+
+    public function academicRecord() {
+        return $this->belongsTo('App\AcademicRecord');
     }
 
 }

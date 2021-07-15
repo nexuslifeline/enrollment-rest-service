@@ -52,7 +52,7 @@ class PersonnelService
     public function get(int $id)
     {
         try {
-            $personnel = Personnel::find($id);
+            $personnel = Personnel::find($id)->makeVisible(['created_at', 'updated_at']);
             $personnel->load(['photo','user' => function($query) {
                 $query->with('userGroup');
             }]);

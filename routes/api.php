@@ -21,6 +21,7 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', 'AuthController@login'); // for student
     Route::post('/personnel/login', 'AuthController@loginPersonnel'); // for personnels
     Route::post('/register', 'AuthController@register');
+    Route::resource('/subjects', 'SubjectController');
 
     Route::group(['middleware' => ['auth:api']], function () {
         // secured endpoints here
@@ -29,6 +30,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/me', 'AuthController@getAuthUser');
         Route::post('/logout', 'AuthController@logout');
         // students
+        Route::patch('/students/{id}', 'StudentController@patch');
         Route::resource('/students', 'StudentController');
         Route::post('/students/manual-registration', 'StudentController@manualRegister');
         Route::post('/students/{studentId}/enroll', 'StudentController@enroll');
@@ -41,6 +43,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/students/{studentId}/user', 'StudentController@storeUser');
         Route::get('/students/{studentId}/student-fees', 'StudentFeeController@getStudentFeesOfStudent');
         Route::get('/students/{studentId}/academic-records', 'StudentController@getAcademicRecords');
+        Route::get('/me/students', 'StudentController@getStudentsOfPersonnel');
 
         // student file
         Route::get('/students/{studentId}/files', 'StudentFileController@index');
@@ -99,6 +102,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/admissions/{admissionId}/files/{fileId}/preview', 'AdmissionFileController@preview');
         Route::delete('/admissions/{admissionId}/files/{fileId}', 'AdmissionFileController@destroy');
         // academic records
+        Route::patch('/academic-records/{id}', 'AcademicRecordController@patch');
         Route::resource('/academic-records', 'AcademicRecordController');
         Route::get('/academic-records/subjects/{subjectId}/sections/{sectionId}', 'AcademicRecordController@getGradesOfAcademicRecords');
         Route::post('academic-records/grade-batch-updates', 'AcademicRecordController@gradeBatchUpdate');
@@ -108,6 +112,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::put('/academic-records/{academicRecordId}/subjects/{subjectId}', 'AcademicRecordController@updateSubject');
         //Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord'); // should be removed once frontend is updated
         Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
+        Route::post('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@syncSubjectsOfAcademicRecord');
+        Route::get('/academic-records/{academicRecordId}/initial-billing', 'AcademicRecordController@getInitialBilling');
 
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
@@ -163,6 +169,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
         Route::resource('evaluations', 'EvaluationController');
+        Route::post('/evaluations/{id}/approve', 'EvaluationController@approve');
+        Route::post('/evaluations/{id}/reject', 'EvaluationController@reject');
         // // evaluations
         // Route::resource('evaluations', 'EvaluationController');
         // pera padala accounts
@@ -175,7 +183,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('student-ledger/{studentId}', 'ReportController@studentLedger');
         Route::get('registration-form/{academicRecordId}', 'ReportController@registrationForm');
         Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');
-        Route::get('enrolled-list', 'ReportController@enrolledList');
+        Route::get('school-years/{schoolYearId}/enrolled', 'ReportController@enrolledList');
         // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
 
@@ -192,7 +200,10 @@ Route::group(['prefix' => 'v1'], function () {
         //transcript-records
         Route::resource('/transcript-records', 'TranscriptRecordController');
         Route::get('/transcript-records/{transcriptRecordId}/subjects', 'SubjectController@getSubjectsOfTranscriptRecord');
+        Route::put('/transcript-records/{transcriptRecordId}/subjects', 'TranscriptRecordController@updateSubjects');
         Route::get('/transcript-records/{transcriptRecordId}/unscheduled-subjects', 'SubjectController@getSectionUnscheduledSubjects');
+        Route::get('/transcript-records/{transcriptRecordId}/levels', 'TranscriptRecordController@getLevels');
+        Route::post('/transcript-records/create-active', 'TranscriptRecordController@activeFirstOrCreate');
 
         //document types
         Route::resource('/document-types', 'DocumentTypeController');
@@ -217,6 +228,29 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/signatories', 'StudentClearanceController@signatoriesList');
         Route::post('/student-clearances/batch-store', 'StudentClearanceController@batchStore');
         Route::post('/signatories/update', 'StudentClearanceController@signatoriesUpdate');
+        Route::post('/students/{id}/quick-enroll', 'AcademicRecordController@quickEnroll');
+
+        //academic-record
+        Route::post('/academic-records/{id}/request-evaluation', 'AcademicRecordController@requestEvaluation');
+        Route::post('/academic-records/{id}/submit-application', 'AcademicRecordController@submit');
+        Route::post('/academic-records/{id}/approve-enlistment', 'AcademicRecordController@approveEnlistment');
+        Route::post('/academic-records/{id}/reject-enlistment', 'AcademicRecordController@rejectEnlistment');
+        Route::post('/academic-records/{id}/approve-assessment', 'AcademicRecordController@approveAssessment');
+        Route::post('/academic-records/{id}/reject-assessment', 'AcademicRecordController@rejectAssessment');
+        Route::post('/academic-records/{id}/request-assessment', 'AcademicRecordController@requestAssessment');
+        Route::post('/academic-records/{id}/generate-billing', 'AcademicRecordController@generateBilling');
+
+        //payment
+        Route::post('/payments/{id}/submit', 'PaymentController@submitPayment');
+        Route::post('/payments/{id}/approve', 'PaymentController@approve');
+        Route::post('/payments/{id}/reject', 'PaymentController@reject');
+        Route::post('/payments/{id}/cancel', 'PaymentController@cancel');
+
+        //billing
+        Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
+
+        //school year
+        Route::post('school-years/{id}/generate-batch-billing', 'SchoolYearController@generateBatchBilling');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

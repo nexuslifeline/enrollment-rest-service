@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Payment;
 use App\Student;
 use App\StudentFee;
+use Carbon\Carbon;
 use Exception;
+use Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +20,7 @@ class PaymentService
             //added billing related model
             //10 10 2020
             $query = Payment::with(['paymentMode', 'billing', 'student' => function ($query) {
-                $query->with(['address', 'photo']);
+                $query->with(['address', 'photo', 'user']);
             }])
                 ->where('payment_status_id', '!=', 1);
             //filter
@@ -100,7 +103,7 @@ class PaymentService
         DB::beginTransaction();
         try {
             $payment = Payment::create($data);
-
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
             $billing = $payment->billing;
             //check if billing is initial
             if ($billing->billing_type_id === 1) {
@@ -108,22 +111,22 @@ class PaymentService
                 $academicRecord = $student->academicRecords()->get()->last();
                 // update application status and step to completed and waiting
                 if ($academicRecord['is_manual'] === 1) {
-                    $academicRecord->application->update([
-                        'application_status_id' => 7,
-                        'application_step_id' => 10
-                    ]);
+                    // $academicRecord->application->update([
+                    //     'application_status_id' => 7,
+                    //     'application_step_id' => 10
+                    // ]);
 
                     //update academic record status to enrolled
                     $academicRecord->update([
-                        'academic_record_status_id' => 3
+                        'academic_record_status_id' => $enrolledStatus
                     ]);
                 }
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])
-                        ->whereHas('academicRecords', function ($query) {
+                        ->whereHas('academicRecords', function ($query) use ($enrolledStatus) {
                             return $query->where('student_category_id', 1)
-                                ->where('academic_record_status_id', 3);
+                                ->where('academic_record_status_id', $enrolledStatus);
                         })
                         ->get();
 
@@ -155,6 +158,7 @@ class PaymentService
         try {
             $payment = Payment::find($id);
             $payment->update($data);
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
             $paymentStatusId = $data['payment_status_id'] ?? false;
             if ($paymentStatusId === 2) {
                 $student = $payment->student()->first();
@@ -162,9 +166,9 @@ class PaymentService
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])
-                        ->whereHas('academicRecords', function ($query) {
+                        ->whereHas('academicRecords', function ($query) use ($enrolledStatus) {
                             return $query->where('student_category_id', 1)
-                                ->where('academic_record_status_id', 3);
+                                ->where('academic_record_status_id', $enrolledStatus);
                         })
                         ->get();
 
@@ -198,6 +202,152 @@ class PaymentService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PaymentService delete method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function submitPayment(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $data['payment_status_id'] = Config::get('constants.payment_status.PENDING');
+            $payment->update($data);
+
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            $billing = $payment->billing;
+            $studentFee = $billing->studentFee;
+            if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $paymentSubmitted = Config::get('constants.academic_record_status.PAYMENT_SUBMITTED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $paymentSubmitted
+                ]);
+            }
+
+            $student = $payment->student;
+            if ($student && $student->is_onboarding) {
+                $paymentInReview = Config::get('constants.onboarding_step.PAYMENT_IN_REVIEW');
+                $student->update([
+                    'onboarding_step_id' => $paymentInReview
+                ]);
+            }
+            DB::commit();
+            return $payment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function approve(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
+            $data['approved_date'] = Carbon::now();
+            $data['approved_by'] = Auth::id();
+            $payment->update($data);
+            $billing = $payment->billing;
+
+            $billingStatusPaid = Config::get('constants.billing_status.PAID');
+            $billingStatusPartiallyPaid = Config::get('constants.billing_status.PARTIALLY_PAID');
+
+            $billing->update([
+                'billing_status_id' => $payment->amount < $billing->total_amount ? $billingStatusPartiallyPaid : $billingStatusPaid
+            ]);
+
+            $studentFee = $billing->studentFee;
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            if ($billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                $academicRecord = $studentFee->academicRecord;
+                $student = $academicRecord->student;
+                $academicRecord = $student->academicRecords()->get()->last();
+                //check if student is new or old
+                if ($academicRecord['student_category_id'] === 1) {
+                    $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                    $students = Student::with(['academicRecords'])
+                    ->whereHas('academicRecords', function ($query) use ($enrolledStatus) {
+                        return $query->where('student_category_id', 1)
+                        ->where('academic_record_status_id', $enrolledStatus);
+                    })
+                        ->get();
+
+                    $student->update([
+                        'student_no' => '11' . str_pad(count($students) + 1, 8, '0', STR_PAD_LEFT)
+                    ]);
+                }
+
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $enrolledStatus,
+                    'is_initial_billing_paid' => 1
+                ]);
+
+                $studentFee->recomputeTerms($payment->amount);
+            }
+            DB::commit();
+            return $payment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function reject(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $data['payment_status_id'] = Config::get('constants.payment_status.REJECTED');
+            $data['disapproved_date'] = Carbon::now();
+            $data['disapproved_by'] = Auth::id();
+            $payment->update($data);
+            $student = $payment->student;
+            if($student && $student->is_onboarding) {
+                $payments = Config::get('constants.onboarding_step.PAYMENTS');
+                $student->update([
+                    'onboarding_step_id' => $payments
+                ]);
+            }
+
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            $billing = $payment->billing;
+            $studentFee = $billing->studentFee;
+            if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $paymentSubmitted = Config::get('constants.academic_record_status.PAYMENT_SUBMITTED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $paymentSubmitted
+                ]);
+            }
+            
+            DB::commit();
+            return $payment;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function cancel(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $payment = Payment::find($id);
+            $payment->update($data);
+            $payment->billing->studentFee->recomputeTerms();
+            $payment->delete();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during PaymentService cancel method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

@@ -20,7 +20,6 @@ class SchoolCategoryScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
-        $userGroupId = Auth::user()->user_group_id ?? false;
 
         $user = Auth::user();
         if ($user->userable_type === 'App\Student') {
@@ -30,7 +29,8 @@ class SchoolCategoryScope implements Scope
         $userGroup = $user->userGroup()->first();
         if ($userGroup) {
             $schoolCategories = $userGroup->schoolCategories()->get()->pluck(['id']);
-            $builder->whereIn($model->getTable() . '.school_category_id', $schoolCategories);
+            $builder->whereIn($model->getTable() . '.school_category_id', $schoolCategories)
+            ->orWhereNull($model->getTable() . '.school_category_id');
         }
     }
 }

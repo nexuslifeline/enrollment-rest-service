@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\TranscriptRecordResource;
-use App\Services\TranscriptRecordService;
+use App\AcademicRecord;
+use App\Http\Requests\TranscriptRecordPatchRequest;
 use Illuminate\Http\Request;
+use App\Services\TranscriptRecordService;
+use App\Http\Resources\TranscriptRecordResource;
+use App\Http\Requests\TranscriptSubjectsUpdateRequest;
 
 class TranscriptRecordController extends Controller
 {
@@ -84,7 +87,7 @@ class TranscriptRecordController extends Controller
         $data = $request->except('subjects');
         $subjects = $request->subjects ?? [];
         $requirements = $request->requirements ?? [];
-        $transcriptRecord = $transcriptRecordService->update($data, $subjects, $requirements, $id);
+        $transcriptRecord = $transcriptRecordService->update($data, $subjects, $id);
         return new TranscriptRecordResource($transcriptRecord);
     }
 
@@ -97,5 +100,34 @@ class TranscriptRecordController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getLevels(Request $request, $id)
+    {
+        $transcriptRecordService = new transcriptRecordService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $levels = $transcriptRecordService->getLevels($id, $isPaginated, $perPage, $filters);
+
+        return TranscriptRecordResource::collection(
+            $levels
+        );
+    }
+
+    public function updateSubjects(TranscriptSubjectsUpdateRequest $request, $id)
+    {
+        $transcriptRecordService = new TranscriptRecordService();
+        $subjects = $request->all();
+        $transcriptRecord = $transcriptRecordService->updateSubjects($subjects, $id);
+        return new TranscriptRecordResource($transcriptRecord);
+    }
+
+    public function activeFirstOrCreate(Request $request)
+    {
+        $transcriptRecordService = new TranscriptRecordService();
+        $academicRecord = new AcademicRecord($request->all());
+        $transcriptRecord = $transcriptRecordService->activeFirstOrCreate($academicRecord);
+        return new TranscriptRecordResource($transcriptRecord);
     }
 }

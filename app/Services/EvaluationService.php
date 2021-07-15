@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Evaluation;
 use App\Student;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -16,17 +19,12 @@ class EvaluationService
         try {
             $query = Evaluation::with([
                 'lastSchoolLevel',
-                'level',
-                'course',
-                'studentCategory',
-                'curriculum',
-                'studentCurriculum',
-                'transcriptRecord',
-                'student' => function ($query) {
-                    $query->with(['address', 'photo']);
+                'academicRecord' => function ($query) {
+                    $query->with(['schoolYear', 'level', 'course', 'studentCategory','semester', 'schoolCategory', 'student' => function ($q) {
+                        return $q->with(['address', 'photo', 'user']);
+                    }]);
                 }
-            ])
-                ->where('evaluation_status_id', '!=', 1);
+            ]);
 
             // filters
             // student
@@ -37,53 +35,36 @@ class EvaluationService
                 });
             });
 
-            // school year
-            $schoolYearId = $filters['school_year_id'] ?? false;
-            $query->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->where('school_year_id', $schoolYearId);
-            });
 
-            //school category
-            $schoolCategoryId = $filters['school_category_id'] ?? false;
-            $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
-                return $q->where('school_category_id', $schoolCategoryId);
-            });
+             // academic record status, school year, school cateogry, level, course
+             $academicStatusId = $filters['academic_record_status_id'] ?? false;
+             $schoolYearId = $filters['school_year_id'] ?? false;
+             $courseId = $filters['course_id'] ?? false;
+             $schoolCategoryId = $filters['school_category_id'] ?? false;
+             $levelId = $filters['level_id'] ?? false;
 
-            // course
-            $courseId = $filters['course_id'] ?? false;
-            $query->when($courseId, function ($q) use ($courseId) {
-                return $q->whereHas('course', function ($query) use ($courseId) {
-                    return $query->where('course_id', $courseId);
-                });
-            });
-
-            // level
-            $levelId = $filters['level_id'] ?? false;
-            $query->when($levelId, function ($q) use ($levelId) {
-                return $q->whereHas('level', function ($query) use ($levelId) {
-                    return $query->where('level_id', $levelId);
-                });
-            });
-
-            // evaluation status
-            $evaluationStatusId = $filters['evaluation_status_id'] ?? false;
-            $query->when($evaluationStatusId, function ($query) use ($evaluationStatusId) {
-                return $query->where('evaluation_status_id', $evaluationStatusId);
-            });
+             $query->when(
+                $academicStatusId || $schoolYearId || $courseId || $schoolCategoryId || $levelId,
+                function ($q) use ($academicStatusId, $schoolYearId, $courseId, $schoolCategoryId, $levelId) {
+                    return $q->whereHas(
+                        'academicRecord',
+                        function ($query) use ($academicStatusId, $schoolYearId, $courseId, $schoolCategoryId, $levelId) {
+                            if ($academicStatusId) $query->whereIn('academic_record_status_id', $academicStatusId);
+                            if ($schoolYearId) $query->where('school_year_id', $schoolYearId);
+                            if ($courseId) $query->where('course_id', $courseId);
+                            if ($schoolCategoryId) $query->where('school_category_id', $schoolCategoryId);
+                            if ($levelId) $query->where('level_id', $levelId);
+                            $query->where('is_manual', false);
+                            return $query;
+                        }
+                    );
+                }
+            );
 
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($q) use ($criteria) {
                 return $q->whereHas('student', function ($query) use ($criteria) {
-                    // return $query->where(function ($q) use ($criteria, $query) {
-                    //     // return $q->where('name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('student_no', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('first_name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('middle_name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('last_name', 'like', '%' . $criteria . '%')
-                    //     //     ->orWhere('email', 'like', '%' . $criteria . '%');
-                    // });
-
                     //scopedWhereLike on student model
                     return  $query->whereLike($criteria);
                 });
@@ -112,16 +93,16 @@ class EvaluationService
         try {
             $evaluation = Evaluation::find($id);
             $evaluation->load([
-                // 'subjects' => function ($query) {
-                //     $query->with('prerequisites');
-                // },
-                'studentCategory',
-                'course',
-                'level',
-                'transcriptRecord',
-                'student' => function ($query) {
-                    $query->with(['address', 'photo']);
-                }
+                'academicRecord' => function ($query) {
+                    $query->with(['schoolYear', 'level', 'course', 'studentCategory','semester', 'schoolCategory',
+                        'student' => function ($query) {
+                            $query->with(['address', 'photo', 'user', 'education']);
+                        },
+                        'transcriptRecord' => function($q) {
+                        return $q->with(['curriculum', 'studentCurriculum']);
+                    }]);
+                },
+                // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
             ]);
             return $evaluation;
         } catch (Exception $e) {
@@ -138,29 +119,35 @@ class EvaluationService
             $evaluation = Evaluation::find($id);
             $evaluation->update($data);
 
-            if (count($transcriptData) > 0) {
-                $transcriptRecord = $evaluation->transcriptRecord;
-                $transcriptRecord->update($transcriptData);
-                if ($subjects) {
-                    $items = [];
-                    foreach ($subjects as $subject) {
-                        $items[$subject['subject_id']] = [
-                            'level_id' => $subject['level_id'],
-                            'semester_id' => $subject['semester_id'],
-                            'is_taken' => $subject['is_taken'],
-                            'grade' => $subject['grade'],
-                            'notes' => $subject['notes']
-                        ];
-                    }
-                    $transcriptRecord->subjects()->sync($items);
-                }
-            }
+            //disabled for adjustment on transcript record 5/15/2021
+            // if (count($transcriptData) > 0) {
+            //     $transcriptRecord = $evaluation->transcriptRecord;
+            //     $transcriptRecord->update($transcriptData);
+            //     if ($subjects) {
+            //         $items = [];
+            //         foreach ($subjects as $subject) {
+            //             $items[$subject['subject_id']] = [
+            //                 'level_id' => $subject['level_id'],
+            //                 'semester_id' => $subject['semester_id'],
+            //                 'is_taken' => $subject['is_taken'],
+            //                 'grade' => $subject['grade'],
+            //                 'notes' => $subject['notes']
+            //             ];
+            //         }
+            //         $transcriptRecord->subjects()->sync($items);
+            //     }
+            // }
 
             $evaluation->load([
                 'lastSchoolLevel',
-                'level',
-                'course',
-                'studentCategory',
+                // 'level',
+                // 'course',
+                // 'studentCategory',
+                'academicRecord' => function ($query) {
+                    $query->with(['curriculum', 'schoolYear', 'level', 'course', 'studentCategory', 'semester', 'schoolCategory', 'transcriptRecord' => function($q) {
+                        return $q->with(['curriculum', 'studentCurriculum']);
+                    }]);
+                },
                 'student' => function ($query) {
                     $query->with(['address', 'photo']);
                 }
@@ -201,6 +188,75 @@ class EvaluationService
             return $evaluations;
         } catch (Exception $e) {
             Log::info('Error occured during EvaluationService getEvaluationOfStudent method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function approve(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            // POST -> payload is { approval_notes: '' } /evaluations/:evaluationId/approve -> update academic record status to Evaluation Approved(id 4) 
+            // then update approval_notes, approved_date, approved_by in evaluation. also if there is an application update the application step id to Academic Record Application(id 7)
+
+            $evaluation = Evaluation::find($id);
+            $data['approved_date'] = Carbon::now();
+            $data['approved_by'] = Auth::user()->id;
+            $evaluation->update($data);
+            $evaluationApprovedStatus = Config::get('constants.academic_record_status.EVALUATION_APPROVED');
+
+            $academicRecord = $evaluation->academicRecord;
+            $academicRecord->update([
+                'academic_record_status_id' => $evaluationApprovedStatus
+            ]);
+
+            $student = $academicRecord->student;
+            if ($student && $student->is_onboarding) {
+                $academicRecordApplicationStep = Config::get('constants.onboarding_step.ACADEMIC_RECORD_APPLICATION');
+                $student->update([                 
+                    'onboarding_step_id' => $academicRecordApplicationStep
+                ]);
+            }
+
+            DB::commit();
+            return $evaluation;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during EvaluationService reject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function reject(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $evaluation = Evaluation::find($id);
+            $data['disapproved_date'] = Carbon::now();
+            $data['disapproved_by'] = Auth::user()->id;
+            $evaluation->update($data);
+            $evaluationRejectedStatus = Config::get('constants.academic_record_status.EVALUATION_REJECTED');
+
+            $academicRecord = $evaluation->academicRecord;
+            $academicRecord->update([
+                'academic_record_status_id' => $evaluationRejectedStatus
+            ]);
+
+            $student = $academicRecord->student;
+            if ($student && $student->is_onboarding) {
+                $requestEvaluationStep = Config::get('constants.onboarding_step.REQUEST_EVALUATION');
+                $student->update([
+                    'onboarding_step_id' => $requestEvaluationStep
+                ]);
+            }
+            
+            DB::commit();
+            return $evaluation;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during EvaluationService reject method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

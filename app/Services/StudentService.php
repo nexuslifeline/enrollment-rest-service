@@ -17,6 +17,7 @@ use App\TranscriptRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -27,14 +28,18 @@ class StudentService
     {
         DB::beginTransaction();
         try {
+            // Note! this should be move in Config/Constants
             $academicRecordStatusId = 1;
-            $evaluationStatusId = 1;
+            // $evaluationStatusId = 1;
             $transcriptRecordStatusId = 1; //1 = draft
-            $isEnrolled = $data['is_enrolled'];
+            // $isEnrolled = $data['is_enrolled'];
+            $isAdmission = $data['is_admission'] ?? 0;
 
             $activeSchoolYear = SchoolYear::where('is_active', 1)->first();
             if (!$activeSchoolYear) {
-                throw new Exception('No active school year found!');
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['No Active SY found!']
+                ]);
             }
 
             $student = Student::create([
@@ -43,15 +48,22 @@ class StudentService
                 'middle_name' => $data['middle_name'],
                 'last_name' => $data['last_name'],
                 'mobile_no' => $data['mobile_no'],
-                'email' => $data['username']
+                'email' => $data['username'],
+                'is_onboarding' => 1
             ]);
 
-            //create transcript record
             $transcriptRecord = $student->transcriptRecords()->create([
                 'student_id' => $student->id,
                 'transcript_record_status_id' => $transcriptRecordStatusId
             ]);
 
+
+            // $evaluation = $student->evaluations()->create([
+            //     'student_id' => $student->id,
+            //     // 'student_category_id' => $studentCategoryId, //remove on evaluation table 5/22021
+            //     // 'evaluation_status_id' => $evaluationStatusId,
+            //     // 'transcript_record_id' => $transcriptRecord->id
+            // ]);
 
             // student category
             // 1 - new
@@ -59,102 +71,108 @@ class StudentService
             // 3 - transferee
             $studentCategoryId = $data['student_category_id'];
 
-            if ($isEnrolled) {
-                $student->applications()->create([
-                    'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                    'application_step_id' => 1,
-                    'application_status_id' => 2
-                ])->academicRecord()->create([
-                    'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                    'student_id' => $student->id,
-                    'student_category_id' => $studentCategoryId,
-                    'academic_record_status_id' => $academicRecordStatusId
-                ]);
+            $academicRecord = $student->academicRecords()->create([
+                'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+                'student_id' => $student->id,
+                'student_category_id' => $studentCategoryId,
+                'academic_record_status_id' => $academicRecordStatusId,
+                'transcript_record_id' => $transcriptRecord->id,
+                'is_admission' => $isAdmission,
+                'student_type_id' => Config::get('constants.student_type.REGULAR')
+            ]);
 
-                $student->evaluations()->create([
-                    'student_id' => $student->id,
-                    'student_category_id' => $studentCategoryId,
-                    'evaluation_status_id' => $evaluationStatusId,
-                    'transcript_record_id' => $transcriptRecord->id
-                ]);
-            } else {
-                if ($studentCategoryId === 2) {
-                    $student->applications()->create([
-                        'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                        'application_step_id' => 1,
-                        'application_status_id' => 2
-                    ])->academicRecord()->create([
-                        'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                        'student_id' => $student->id,
-                        'student_category_id' => $studentCategoryId,
-                        'academic_record_status_id' => $academicRecordStatusId
-                    ]);
+            $academicRecord->application()->create([
+                // 'is_admission' => $isAdmission
+            ]);
+            $academicRecord->evaluation()->create([]);
 
-                    $student->evaluations()->create([
-                        'student_id' => $student->id,
-                        'student_category_id' => $studentCategoryId,
-                        'evaluation_status_id' => $evaluationStatusId,
-                        'transcript_record_id' => $transcriptRecord->id
-                    ]);
-                } else {
-                    if ($studentCategoryId === 2) {
-                        $student->applications()->create([
-                            'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                            'application_step_id' => 1,
-                            'application_status_id' => 2
-                        ])->academicRecord()->create([
-                            'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                            'student_id' => $student->id,
-                            'student_category_id' => $studentCategoryId,
-                            'academic_record_status_id' => $academicRecordStatusId
-                        ]);
+            $academicRecord->studentFee()->create([]);
 
-                        $student->evaluations()->create([
-                            'student_id' => $student->id,
-                            'student_category_id' => $studentCategoryId,
-                            'evaluation_status_id' => $evaluationStatusId
-                        ]);
-                    } else {
-                        if ($studentCategoryId === 2) {
-                            $student->applications()->create([
-                                'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                                'application_step_id' => 1,
-                                'application_status_id' => 2
-                            ])->academicRecord()->create([
-                                'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                                'student_id' => $student->id,
-                                'student_category_id' => $studentCategoryId,
-                                'academic_record_status_id' => $academicRecordStatusId
-                            ]);
+            // if ($isEnrolled) {
+            //     //
+            //     $student->applications()->create([
+            //         // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //         'is_admission' => $isAdmission
+            //         // 'application_step_id' => 1,
+            //         // 'application_status_id' => 2
+            //     ])->academicRecord()->create([
+            //         'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //         'student_id' => $student->id,
+            //         'student_category_id' => $studentCategoryId,
+            //         'academic_record_status_id' => $academicRecordStatusId,
+            //         'transcript_record_id' => $transcriptRecord->id,
+            //         'evaluation_id' =>  $evaluation->id
+            //     ]);
+            // } else {
+            //     if ($studentCategoryId === 2) {
 
-                            $student->evaluations()->create([
-                                'student_id' => $student->id,
-                                'student_category_id' => $studentCategoryId,
-                                'evaluation_status_id' => $evaluationStatusId
-                            ]);
-                        } else {
-                            $student->admission()->create([
-                                'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
-                                'admission_step_id' => 1,
-                                'application_status_id' => 2
-                            ])->academicRecord()->create([
-                                'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
-                                'student_id' => $student->id,
-                                'student_category_id' => $studentCategoryId,
-                                'academic_record_status_id' => $academicRecordStatusId
-                            ]);
+            //         $student->applications()->create([
+            //             // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //             'is_admission' => $isAdmission
+            //             // 'application_step_id' => 1,
+            //             // 'application_status_id' => 2
+            //         ])->academicRecord()->create([
+            //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //             'student_id' => $student->id,
+            //             'student_category_id' => $studentCategoryId,
+            //             'academic_record_status_id' => $academicRecordStatusId,
+            //             'transcript_record_id' => $transcriptRecord->id,
+            //             'evaluation_id' =>  $evaluation->id
+            //         ]);
 
-                            $student->evaluations()->create([
-                                'student_id' => $student->id,
-                                'student_category_id' => $studentCategoryId,
-                                'evaluation_status_id' => $evaluationStatusId,
-                                'transcript_record_id' => $transcriptRecord->id
 
-                            ]);
-                        }
-                    }
-                }
-            }
+            //     } else {
+            //         // if ($studentCategoryId === 2) {
+
+            //             $student->applications()->create([
+            //                 // 'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //                 'is_admission' => $isAdmission
+            //                 // 'application_step_id' => 1,
+            //                 // 'application_status_id' => 2
+            //             ])->academicRecord()->create([
+            //                 'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //                 'student_id' => $student->id,
+            //                 'student_category_id' => $studentCategoryId,
+            //                 'academic_record_status_id' => $academicRecordStatusId,
+            //                 'transcript_record_id' => $transcriptRecord->id,
+            //                 'evaluation_id' =>  $evaluation->id
+            //             ]);
+
+            //         // } else {
+            //         //     if ($studentCategoryId === 2) {
+
+            //         //         $student->applications()->create([
+            //         //             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //         //             'is_admission' => $isAdmission
+            //         //             // 'application_step_id' => 1,
+            //         //             // 'application_status_id' => 2
+            //         //         ])->academicRecord()->create([
+            //         //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //         //             'student_id' => $student->id,
+            //         //             'student_category_id' => $studentCategoryId,
+            //         //             'academic_record_status_id' => $academicRecordStatusId,
+            //         //             'transcript_record_id' => $transcriptRecord->id,
+            //         //             'evaluation_id' =>  $evaluation->id
+            //         //         ]);
+
+            //         //     } else {
+
+            //         //         $student->admission()->create([
+            //         //             'school_year_id' =>  $activeSchoolYear['id'], // active_school_year_id
+            //         //             'admission_step_id' => 1,
+            //         //             // 'application_status_id' => 2
+            //         //         ])->academicRecord()->create([
+            //         //             'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
+            //         //             'student_id' => $student->id,
+            //         //             'student_category_id' => $studentCategoryId,
+            //         //             'academic_record_status_id' => $academicRecordStatusId,
+            //         //             'transcript_record_id' => $transcriptRecord->id,
+            //         //             'evaluation_id' =>  $evaluation->id
+            //         //         ]);
+            //         //     }
+            //         // }
+            //     }
+            // }
             $user = $student->user()->create([
                 'username' => $data['username'],
                 'password' => Hash::make($data['password'])
@@ -215,9 +233,9 @@ class StudentService
                 if ($application) {
                     $activeApplication = $student->applications()->create([
                         'applied_date' => Carbon::now(),
-                        'school_year_id' => $application['school_year_id'],
-                        'application_status_id' => $application['application_status_id'],
-                        'application_step_id' => $application['application_step_id'],
+                        // 'school_year_id' => $application['school_year_id'],
+                        // 'application_status_id' => $application['application_status_id'],
+                        // 'application_step_id' => $application['application_step_id'],
                         'approved_by' => Auth::user()->id,
                         'approved_date' => Carbon::now()
                     ]);
@@ -226,52 +244,53 @@ class StudentService
                 }
             }
 
-            if ($transcriptRecord) {
-                $schoolCategoryId = $academicRecord['school_category_id'];
-                if ($schoolCategoryId === 4 || $schoolCategoryId === 5) {
-                    $activeTranscript = $student->transcriptRecords()
-                        ->where('school_category_id', $schoolCategoryId)
-                        ->where('course_id', $academicRecord['course_id'])
-                        ->where('transcript_record_status_id', 1)
-                        ->first();
-                    if ($activeTranscript) {
-                        $activeTranscript->update($transcriptRecord);
-                        $transcript = $activeTranscript;
-                    } else {
-                        $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
-                    }
-                } else {
-                    $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
-                }
-                if ($transcriptSubjects) {
-                    $items = [];
-                    foreach ($transcriptSubjects as $subject) {
-                        $items[$subject['subject_id']] = [
-                            'level_id' => $subject['level_id'],
-                            'semester_id' => $subject['semester_id'],
-                            'is_taken' => $subject['is_taken'],
-                            'grade' => $subject['grade'],
-                            'notes' => $subject['notes']
-                        ];
-                    }
-                    $transcript->subjects()->sync($items);
-                }
-                if ($evaluation) {
-                    $student->evaluations()->updateOrCreate(['id' => $evaluation['id']], [
-                        'student_id' => $student->id,
-                        'student_curriculum_id' => $evaluation['student_curriculum_id'],
-                        'curriculum_id' => $evaluation['curriculum_id'],
-                        'student_category_id' => $evaluation['student_category_id'],
-                        'school_category_id' => $evaluation['school_category_id'],
-                        'level_id' => $evaluation['level_id'],
-                        'semester_id' => $evaluation['semester_id'],
-                        'course_id' => $evaluation['course_id'],
-                        'evaluation_status_id' => $evaluation['evaluation_status_id'],
-                        'transcript_record_id' => $transcript->id,
-                        'school_year_id' => $evaluation['school_year_id'],
-                    ]);
-                }
-            }
+            //disabled for adjustment on transcript record 5/15/2021
+            // if ($transcriptRecord) {
+            //     $schoolCategoryId = $academicRecord['school_category_id'];
+            //     if ($schoolCategoryId === 4 || $schoolCategoryId === 5) {
+            //         $activeTranscript = $student->transcriptRecords()
+            //             ->where('school_category_id', $schoolCategoryId)
+            //             ->where('course_id', $academicRecord['course_id'])
+            //             ->where('transcript_record_status_id', 1)
+            //             ->first();
+            //         if ($activeTranscript) {
+            //             $activeTranscript->update($transcriptRecord);
+            //             $transcript = $activeTranscript;
+            //         } else {
+            //             $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
+            //         }
+            //     } else {
+            //         $transcript = $student->transcriptRecords()->updateOrCreate(['id' => $transcriptRecord['id']], $transcriptRecord);
+            //     }
+            //     if ($transcriptSubjects) {
+            //         $items = [];
+            //         foreach ($transcriptSubjects as $subject) {
+            //             $items[$subject['subject_id']] = [
+            //                 'level_id' => $subject['level_id'],
+            //                 'semester_id' => $subject['semester_id'],
+            //                 'is_taken' => $subject['is_taken'],
+            //                 'grade' => $subject['grade'],
+            //                 'notes' => $subject['notes']
+            //             ];
+            //         }
+            //         $transcript->subjects()->sync($items);
+            //     }
+            //     if ($evaluation) {
+            //         $student->evaluations()->updateOrCreate(['id' => $evaluation['id']], [
+            //             'student_id' => $student->id,
+            //             'student_curriculum_id' => $evaluation['student_curriculum_id'],
+            //             'curriculum_id' => $evaluation['curriculum_id'],
+            //             'student_category_id' => $evaluation['student_category_id'],
+            //             'school_category_id' => $evaluation['school_category_id'],
+            //             'level_id' => $evaluation['level_id'],
+            //             'semester_id' => $evaluation['semester_id'],
+            //             'course_id' => $evaluation['course_id'],
+            //             'evaluation_status_id' => $evaluation['evaluation_status_id'],
+            //             // 'transcript_record_id' => $transcript->id,
+            //             'school_year_id' => $evaluation['school_year_id'],
+            //         ]);
+            //     }
+            // }
 
 
             if ($user) {
@@ -299,22 +318,17 @@ class StudentService
             $query = Student::with(['address', 'family', 'education', 'photo', 'user']);
 
             $sectionId = $filters['section_id'] ?? false;
-            $query->when($sectionId, function ($q) use ($sectionId) {
-                return $q->whereHas('academicRecords', function ($query) use ($sectionId) {
-                    return $query->where('academic_record_status_id', 3)->latest()
-                    ->whereHas('subjects', function ($q) use ($sectionId) {
-                        return $q->where('section_id', $sectionId);
-                    });
-                });
-            });
-
             $levelId = $filters['level_id'] ?? false;
             $courseId = $filters['course_id'] ?? false;
             $semesterId = $filters['semester_id'] ?? false;
-
-            $query->when($levelId, function ($q) use ($levelId, $courseId, $semesterId) {
-                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId) {
-                    return $query->where('academic_record_status_id', 3)->latest()->limit(1)
+            $subjectId = $filters['subject_id'] ?? false;
+            $withTheSubject = $filters['with_the_subject'] ?? false;
+            $isDropped = isset($filters['is_dropped']) && in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
+            // return $isDropped;
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus) {
+                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus) {
+                    return $query->where('academic_record_status_id', $enrolledStatus)->latest()->limit(1)
                     ->when($levelId, function ($q) use ($levelId) {
                         return $q->where('level_id', $levelId);
                     })
@@ -323,18 +337,27 @@ class StudentService
                     })
                     ->when($semesterId, function ($q) use ($semesterId) {
                         return $q->where('semester_id', $semesterId);
+                    })
+                    ->whereHas('subjects', function ($q) use ($sectionId, $subjectId, $isDropped) {
+                        $q->when($sectionId, function ($q) use ($sectionId) {
+                            return $q->where('section_id', $sectionId);
+                        })->when($subjectId, function ($q) use ($subjectId) {
+                            return $q->where('subject_id', $subjectId);
+                        })->when(in_array($isDropped, [0, 1]), function ($q) use ($isDropped) {
+                            return $q->where('is_dropped', $isDropped);
+                        });
                     });
                 });
             });
 
-            $subjectId = $filters['subject_id'] ?? false;
-            $query->when($subjectId, function ($q) use ($subjectId) {
-                return $q->whereHas('academicRecords', function ($query) use ($subjectId) {
-                    return $query->where('academic_record_status_id', 3)->latest()
-                    ->whereHas('subjects', function ($q) use ($subjectId) {
-                        return $q->where('subject_id', $subjectId);
-                    });
-                });
+            $query->when($withTheSubject && $subjectId, function ($q) use ($subjectId, $enrolledStatus) {
+                return $q->with(['academicRecords' => function ($q) use ($subjectId, $enrolledStatus) {
+                    return $q->where('academic_record_status_id', $enrolledStatus)
+                    ->latest()
+                        ->with(['subjects' => function ($q) use ($subjectId) {
+                            return $q->where('subject_id', $subjectId);
+                        }]);
+                }]);
             });
 
             $criteria = $filters['criteria'] ?? false;
@@ -358,7 +381,7 @@ class StudentService
                 ? $query->paginate($perPage)
                 : $query->get();
 
-            $students->append(['latest_academic_record']);
+            $students->append(['latest_academic_record', 'has_open_academic_record']);
 
             return $students;
         } catch (Exception $e) {
@@ -371,9 +394,9 @@ class StudentService
     public function get(int $id)
     {
         try {
-            $student = Student::find($id);
+            $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
             $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
-            $student->append('active_application', 'active_admission', 'academic_record', 'active_transcript_record', 'evaluation');
+            $student->append('latest_academic_record', 'has_open_academic_record');
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -412,35 +435,43 @@ class StudentService
             $student = Student::find($id);
             $student->update($data);
 
-            $activeApplication = $studentInfo['active_application'] ?? false;
-            if ($activeApplication) {
-                $application = Application::find($activeApplication['id']);
-                if ($application) {
-                    $application->update($activeApplication);
-                }
-            }
+            // $activeApplication = $studentInfo['active_application'] ?? false;
+            // if ($activeApplication) {
+            //     $application = Application::find($activeApplication['id']);
+            //     if ($application) {
+            //         $application->update($activeApplication);
+            //     }
+            // }
 
-            $activeAdmission = $studentInfo['active_admission'] ?? false;
-            if ($activeAdmission) {
-                $admission = Admission::find($activeAdmission['id']);
-                if ($admission) {
-                    $admission->update($activeAdmission);
-                }
-            }
+            // $activeAdmission = $studentInfo['active_admission'] ?? false;
+            // if ($activeAdmission) {
+            //     $admission = Admission::find($activeAdmission['id']);
+            //     if ($admission) {
+            //         $admission->update($activeAdmission);
+            //     }
+            // }
 
-            $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
-            if ($activeTranscriptRecord) {
-                $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
-                if ($transcriptRecord) {
-                    $transcriptRecord->update($activeTranscriptRecord);
-                }
-            }
+            //disabled for adjustment on transcript record 5/15/2021
+            // $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+            // if ($activeTranscriptRecord) {
+            //     $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+            //     if ($transcriptRecord) {
+            //         $transcriptRecord->update($activeTranscriptRecord);
+            //     }
+            // }
 
+            //to be handled in academic record model ?
             $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
             if ($activeAcademicRecord) {
                 $academicRecord = AcademicRecord::find($activeAcademicRecord['id']);
                 if ($academicRecord) {
                     $academicRecord->update($activeAcademicRecord);
+
+                    //update transcript record school category
+                    $academicRecord->transcriptRecord()->update([
+                        'school_category_id' => $academicRecord->school_category_id
+                    ]);
+
                     $subjects = $studentInfo['subjects'] ?? false;
                     if ($subjects) {
                         $academicRecord->subjects()->sync($subjects);
@@ -448,7 +479,7 @@ class StudentService
                 }
             }
 
-            $activeEvaluation = $studentInfo['evaluation'] ?? false;
+            $activeEvaluation = $studentInfo['active_evaluation'] ?? false;
             if ($activeEvaluation) {
                 $evaluation = Evaluation::find($activeEvaluation['id']);
                 if ($evaluation) {
@@ -514,7 +545,15 @@ class StudentService
             }
 
             $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
-            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
+            $student->append([
+                'latest_academic_record',
+                'has_open_academic_record'
+                // 'active_application',
+                // 'academic_record',
+                // 'active_transcript_record',
+                // 'active_evaluation',
+                //'evaluation'
+            ]);
             DB::commit();
             return $student;
         } catch (Exception $e) {
@@ -538,34 +577,57 @@ class StudentService
         }
     }
 
-    public function getBillingsOfStudent($id)
+    public function getBillingsOfStudent(array $filters, int $id)
     {
         try {
-            //soa billing type id
-            $billingTypeId = 2;
-            $soaBillings = Billing::where('billing_type_id', $billingTypeId)
-                ->where('student_id', $id)
-                ->latest()
-                ->take(1)
-                ->get();
+            //soa billing
+            $billingTypeId = $filters['billing_type_id'] ?? false;
+            $billingStatusId = $filters['billing_status_id'] ?? false;
+            $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
+            $soa = Config::get('constants.billing_type.SOA');
+            $other = Config::get('constants.billing_type.BILL');
 
-            $soaBillings->append(['total_paid', 'submitted_payments']);
+            $soaBillings = collect();
+            $initialBillings = collect();
+            $otherBillings = collect();
 
-            //soa billing type id
-            $billingTypeId = 1;
-            $initialBilling = Billing::where('billing_type_id', $billingTypeId)
-                ->where('student_id', $id)
-                ->get();
-            $initialBilling->append(['total_paid', 'submitted_payments']);
+            if (!$billingTypeId || $billingTypeId == $soa) {
+                //soa
+                $soaBillings = Billing::where('billing_type_id', $soa)
+                    ->where('student_id', $id)
+                    ->when($billingStatusId, function ($q) use ($billingStatusId) {
+                        return $q->where('billing_status_id', $billingStatusId);
+                    })
+                    ->latest()
+                    ->take(1)
+                    ->get();
+                $soaBillings->append(['total_paid', 'submitted_payments']);
+            }
 
-            //other billing type id
-            $billingTypeId = 3;
-            $otherBillings = Billing::where('billing_type_id', $billingTypeId)
-                ->where('student_id', $id)->get();
-            $otherBillings->append(['total_paid','submitted_payments']);
+            if (!$billingTypeId || $billingTypeId == $initialFee) {
+                //initial billing
+                $initialBillings = Billing::where('billing_type_id', $initialFee)
+                    ->where('student_id', $id)
+                    ->when($billingStatusId, function ($q) use ($billingStatusId) {
+                        return $q->where('billing_status_id', $billingStatusId);
+                    })
+                    ->get();
+                $initialBillings->append(['total_paid', 'submitted_payments']);
+            }
 
+            if (!$billingTypeId && $billingTypeId == $initialFee) {
+                //other billing
+                $otherBillings = Billing::where('billing_type_id', $other)
+                    ->where('student_id', $id)
+                    ->when($billingStatusId, function ($q) use ($billingStatusId) {
+                        return $q->where('billing_status_id', $billingStatusId);
+                    })
+                    ->get();
 
-            $billings = $soaBillings->merge($initialBilling)->merge($otherBillings);
+                $otherBillings->append(['total_paid', 'submitted_payments']);
+            }
+            $billings = $soaBillings->merge($initialBillings)->merge($otherBillings);
+            
 
             return $billings->sortBy('due_date');
         } catch (Exception $e) {
@@ -582,9 +644,9 @@ class StudentService
         DB::beginTransaction();
 
         try {
-
-            $academicRecordStatusId = 1; //pending
-            $evaluationStatusId = 1; // pending
+            // Note! should be moved in constants
+            $academicRecordStatusId = 1; // draft
+            // $evaluationStatusId = 1; // pending
             $transcriptRecordStatusId = 1; //1 = draft
             $studentCategoryId = 2; //old
             $isManual = 1;
@@ -602,9 +664,9 @@ class StudentService
 
                 //do if no active application
                 $student->applications()->create([
-                    'school_year_id' =>  $activeSchoolYear['id'],
-                    'application_step_id' =>  $activeApplication['application_step_id'],
-                    'application_status_id' =>  $activeApplication['application_status_id'],
+                    // 'school_year_id' =>  $activeSchoolYear['id'],
+                    // 'application_step_id' =>  $activeApplication['application_step_id'],
+                    // 'application_status_id' =>  $activeApplication['application_status_id'],
                     'is_manual' =>  $isManual
                 ])->academicRecord()->create([
                     'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
@@ -629,9 +691,8 @@ class StudentService
                         // $activeEvaluation->transcript_record_id = $transcriptRecord['id'];
                         // $activeEvaluation->student_curriculum_id = $transcriptRecord['student_curriculum_id'];
                         // $activeEvaluation->curriculum_id = $transcriptRecord['curriculum_id'];
-                        $transcriptRecord->evaluations()->create([
+                        $student->create([
                             'student_category_id' => $activeEvaluation['student_category_id'],
-                            'student_id' => $student->id,
                             'student_curriculum_id' => $transcriptRecord->student_curriculum_id,
                             'curriculum_id' => $transcriptRecord->curriculum_id,
                             'school_year_id' => $activeEvaluation['school_year_id'],
@@ -673,13 +734,14 @@ class StudentService
                     $application->update($activeApplication);
                 }
 
-                $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
-                if ($activeTranscriptRecord) {
-                    $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
-                    if ($transcriptRecord) {
-                        $transcriptRecord->update($activeTranscriptRecord);
-                    }
-                }
+                //disabled for adjustment on transcript record 5/15/2021
+                // $activeTranscriptRecord = $studentInfo['active_transcript_record'] ?? false;
+                // if ($activeTranscriptRecord) {
+                //     $transcriptRecord = TranscriptRecord::find($activeTranscriptRecord['id']);
+                //     if ($transcriptRecord) {
+                //         $transcriptRecord->update($activeTranscriptRecord);
+                //     }
+                // }
 
                 $activeAcademicRecord = $studentInfo['academic_record'] ?? false;
                 if ($activeAcademicRecord) {
@@ -704,7 +766,7 @@ class StudentService
 
 
             $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
-            $student->append(['active_admission', 'active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
+            $student->append(['active_application', 'academic_record', 'active_transcript_record', 'evaluation']);
             DB::commit();
             return $student;
         } catch (Exception $e) {
@@ -734,7 +796,11 @@ class StudentService
                 ->whereDate('billings.created_at', '<=', $asOfDate);
 
             $billings->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->where('school_year_id', $schoolYearId);
+                return $q->whereHas('studentFee', function ($q) use ($schoolYearId) {
+                    return $q->whereHas('academicRecord', function ($q) use ($schoolYearId) {
+                        return $q->where('school_year_id', $schoolYearId);
+                    });
+                });
             });
 
             $payments = Payment::select(

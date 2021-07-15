@@ -28,7 +28,7 @@ class StudentUpdateRequest extends FormRequest
     public function rules()
     {
         $activeApplication = $this->active_application ?? false;
-        $activeAdmission = $this->active_admission ?? false;
+        // $activeAdmission = $this->active_admission ?? false;
 
         return [
             'active_application.*' => [
@@ -38,19 +38,20 @@ class StudentUpdateRequest extends FormRequest
                     }
                 }
             ],
-            'active_admission.*' => [
-                function ($attribute, $value, $fail) use($activeAdmission) {
-                    if ($activeAdmission && !Arr::get($activeAdmission, 'id')) {
-                        $fail('Admission id is required.');
-                    }
-                }
-              ],
+            // 'active_admission.*' => [
+            //     function ($attribute, $value, $fail) use($activeAdmission) {
+            //         if ($activeAdmission && !Arr::get($activeAdmission, 'id')) {
+            //             $fail('Admission id is required.');
+            //         }
+            //     }
+            //   ],
             // student
-            'student_no' => 'sometimes|nullable|string',
+            'student_no' => 'sometimes|required|string',
             'first_name' => 'sometimes|required|string|max:255',
             'last_name' => 'sometimes|required|string|max:255',
             'birth_date' => 'sometimes|required|date',
             'civil_status_id' => 'sometimes|required',
+            'email' => 'sometimes|required|string|email:filter|max:255|unique:users,username,' . $this->id . ',userable_id',
             // student address
             'address.current_house_no_street' => 'sometimes|required|string|max:255',
             'address.current_barangay' => 'sometimes|required|string|max:255',
@@ -76,11 +77,11 @@ class StudentUpdateRequest extends FormRequest
             'family.parent_guardian_name' => 'sometimes|required|string|max:255',
             'family.parent_guardian_contact_no' => 'sometimes|required|string|max:255',
             // academicRecord
-            'academicRecord.level_id' => 'sometimes|required',
             // remove required 07-27-2020
             // 'academicRecord.section_id' => 'sometimes|required',
-            'academicRecord.course_id' => 'sometimes|required_if:academicRecord.school_category_id,4,5,6',
-            'academicRecord.semester_id' => 'sometimes|required_if:academicRecord.school_category_id,4,5,6',
+            'academic_record.level_id' => 'sometimes|required',
+            'academic_record.course_id' => 'sometimes|required_if:academic_record.school_category_id,4,5,6',
+            'academic_record.semester_id' => 'sometimes|required_if:academic_record.school_category_id,4,5,6',
             'subjects' => 'sometimes|array|min:1',
             // user account
             'user.username' => 'sometimes|required|string|email:filter|max:255|unique:users,username,'.$this->id.',userable_id',
@@ -92,9 +93,9 @@ class StudentUpdateRequest extends FormRequest
             'evaluation.last_school_year_to' => 'sometimes|required',
             'evaluation.last_school_level_id' => 'sometimes|required',
             // 'evaluation.enrolled_year' => 'sometimes|required_if:evaluation.student_category_id,2',
-            'evaluation.level_id' => 'sometimes|required',
-            'evaluation.course_id' => 'sometimes|required_if:evaluation.school_category_id,4,5,6',
-            'evaluation.semester_id' => 'sometimes|required_if:evaluation.school_category_id,4,5',
+            // 'evaluation.level_id' => 'sometimes|required', //remove evaluation enhancement
+            // 'evaluation.course_id' => 'sometimes|required_if:evaluation.school_category_id,4,5,6', //remove evaluation enhancement
+            // 'evaluation.semester_id' => 'sometimes|required_if:evaluation.school_category_id,4,5', //remove evaluation enhancement
         ];
     }
 
@@ -124,10 +125,10 @@ class StudentUpdateRequest extends FormRequest
             'family.mother_email' => 'email',
             'family.parent_guardian_name' => 'parent/guardian name',
             'family.parent_guardian_contact_no' => 'parent/guardian contact no.',
-            'academicRecord.level_id' => 'level',
-            'academicRecord.section_id' => 'section',
-            'academicRecord.course_id' => 'course',
-            'academicRecord.semester_id' => 'semester',
+            'academic_record.level_id' => 'level',
+            'academic_record.section_id' => 'section',
+            'academic_record.course_id' => 'course',
+            'academic_record.semester_id' => 'semester',
             'user.username' => 'username',
             'user.old_password' => 'old password',
             'user.password' => 'password',

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\AcademicRecord;
 use App\SchoolYear;
 use App\Student;
 use App\Term;
@@ -156,8 +157,7 @@ class TermService
     public function getStudentFeeTermsOfStudent(int $studentId, array $filters)
     {
         try {
-            $query = Student::findOrFail($studentId)
-                ->studentFees();
+            $query = AcademicRecord::where('student_id', $studentId);
 
             // school year
             $schoolYearId = $filters['school_year_id'] ?? false;
@@ -170,11 +170,14 @@ class TermService
                 return $q->where('semester_id', $semesterId);
             });
 
-            $studentFee = $query->first();
+            $studentFee = $query->first()->studentFee;
+            Log::info($query->first()->studentFee);
             $terms = [];
             if ($studentFee) {
+                Log::info($studentFee->id);
                 $terms = $studentFee->terms()->get();
                 $terms->append('previous_balance');
+                $terms->load(['schoolYear', 'semester']);
             }
             return $terms;
         } catch (Exception $e) {

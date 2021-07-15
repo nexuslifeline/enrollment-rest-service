@@ -71,10 +71,9 @@ class UserService
             if ($user->userable_type === 'App\\Student') {
                 $user->userable->load('academicRecords');
                 $user->userable->append([
-                  'active_admission',
-                  'active_application',
-                  'academic_record',
-                  'active_transcript_record',
+                    // 'active_application',
+                    'latest_academic_record',
+                    // 'active_transcript_record',
                 ]);
             } else {
                 $user->load(['userGroup' => function ($q) {

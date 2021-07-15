@@ -84,7 +84,39 @@ class StudentController extends Controller
     public function update(StudentUpdateRequest $request, int $id)
     {
         $related = ['address', 'family', 'education'];
-        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record', 'requirements'];
+        $except = ['address',
+            'family',
+            'education',
+            // 'active_application',
+            'academic_record',
+            'subjects',
+            'user',
+            // 'active_evaluation',
+            'active_transcript_record',
+            'requirements'
+        ];
+        $studentService = new StudentService();
+        $studentInfo = $request->only($except);
+        $data = $request->except($except);
+        $student = $studentService->update($data, $studentInfo, $related, $id);
+        return new StudentResource($student);
+    }
+
+    public function patch(Request $request, int $id)
+    {
+        $related = ['address', 'family', 'education'];
+        $except = [
+            'address',
+            'family',
+            'education',
+            // 'active_application',
+            'academic_record',
+            'subjects',
+            'user',
+            // 'active_evaluation',
+            'active_transcript_record',
+            'requirements'
+        ];
         $studentService = new StudentService();
         $studentInfo = $request->only($except);
         $data = $request->except($except);
@@ -105,10 +137,11 @@ class StudentController extends Controller
         return response()->json([], 204);
     }
 
-    public function getBillingsOfStudent(int $id)
+    public function getBillingsOfStudent(Request $request, int $id)
     {
         $studentService = new StudentService();
-        $billings = $studentService->getBillingsOfStudent($id);
+        $data = $request->all();
+        $billings = $studentService->getBillingsOfStudent($data, $id);
 
         return BillingResource::collection(
             $billings
@@ -128,7 +161,7 @@ class StudentController extends Controller
     public function enroll(Request $request, int $id)
     {
         $related = ['address', 'family', 'education'];
-        $except = ['address', 'family', 'education', 'active_application', 'active_admission', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record'];
+        $except = ['address', 'family', 'education', 'academic_record', 'subjects', 'user', 'evaluation', 'active_transcript_record'];
         $studentService = new StudentService();
         $studentInfo = $request->only($except);
         $data = $request->except($except);

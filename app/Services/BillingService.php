@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\AcademicRecord;
 use App\Billing;
+use App\SchoolYear;
 use App\Term;
 use Exception;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -31,15 +34,19 @@ class BillingService
             // school year
             $schoolYearId = $filters['school_year_id'] ?? false;
             $query->when($schoolYearId, function ($q) use ($schoolYearId) {
-                return $q->whereHas('schoolYear', function ($query) use ($schoolYearId) {
-                    return $query->where('school_year_id', $schoolYearId);
+                return $q->whereHas('academicRecord', function ($q) use ($schoolYearId) {
+                    return $q->whereHas('schoolYear', function ($query) use ($schoolYearId) {
+                        return $query->where('school_year_id', $schoolYearId);
+                    });
                 });
             });
             // semester
             $semesterId = $filters['semester_id'] ?? false;
             $query->when($semesterId, function ($q) use ($semesterId) {
-                return $q->whereHas('semester', function ($query) use ($semesterId) {
-                    return $query->where('semester_id', $semesterId);
+                return $q->whereHas('academicRecord', function ($q) use ($semesterId) {
+                    return $q->whereHas('semester', function ($query) use ($semesterId) {
+                        return $query->where('semester_id', $semesterId);
+                    });
                 });
             });
             // school category
@@ -125,9 +132,11 @@ class BillingService
                 ->wherePivot('is_billed', 0);
 
             $levelId = $data['level_id'] ?? false;
-            $studentFees->when($levelId, function ($query) use ($levelId) {
-                $query->whereHas('academicRecord', function ($q) use ($levelId) {
-                    return $q->where('level_id', $levelId);
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $studentFees->when($levelId, function ($query) use ($levelId, $enrolledStatus) {
+                $query->whereHas('academicRecord', function ($q) use ($levelId, $enrolledStatus) {
+                    return $q->where('level_id', $levelId)
+                    ->where('academic_record_status_id', $enrolledStatus);
                 });
             });
 
@@ -145,8 +154,9 @@ class BillingService
                     'term_id' => $data['term_id'],
                     'billing_type_id' => 2,
                     'billing_status_id' => 2,
-                    'school_year_id' => $studentFee->school_year_id,
-                    'semester_id' => $studentFee->semester_id,
+                    'academic_record_id' => $studentFee->academic_record_id,
+                    // 'school_year_id' => $studentFee->school_year_id,
+                    // 'semester_id' => $studentFee->semester_id,
                     'student_fee_id' => $studentFee->id,
                     'previous_balance' => $studentFee->getPreviousBalance()
                 ]);
@@ -183,8 +193,10 @@ class BillingService
     {
         DB::beginTransaction();
         try {
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
             $academicRecords = AcademicRecord::where('school_category_id', $data['school_category_id'])
-                ->where('school_year_id', $data['school_year_id']);
+                ->where('school_year_id', $data['school_year_id'])
+                ->where('academic_record_status_id', $enrolledStatus);
 
             $levelId = $data['level_id'] ?? false;
             $academicRecords->when($levelId, function ($query) use ($levelId) {
@@ -206,11 +218,12 @@ class BillingService
                 $billing = Billing::create([
                     'due_date' => $data['due_date'],
                     'total_amount' => $data['total_amount'],
-                    'student_id' => $academicRecord->student_id,
+                    'student_id' => $academicRecord['student_id'],
                     'billing_type_id' => $data['billing_type_id'],
                     'billing_status_id' => $data['billing_status_id'],
-                    'school_year_id' => $data['school_year_id'],
-                    'semester_id' => $data['semester_id']
+                    'academic_record_id' => $academicRecord['id']
+                    // 'school_year_id' => $data['school_year_id'],
+                    // 'semester_id' => $data['semester_id']
                 ]);
                 $billing->update([
                     'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
@@ -316,6 +329,56 @@ class BillingService
             return $billingItems;
         } catch (Exception $e) {
             Log::info('Error occured during BillingService get method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function postPayment(array $data, int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $billing = Billing::find($id);
+            
+            $schoolYearId = $data['school_year_id'] ?? null;
+            if (!$schoolYearId) {
+                $schoolYearId = SchoolYear::where('is_active', 1)->first()->id;
+            }
+            $schoolYearId = $schoolYearId ?? $billing->school_year_id;
+            $paymentModeId = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
+
+            $data = Arr::add($data, 'school_year_id', $schoolYearId);
+            $data = Arr::add($data, 'payment_mode_id', $paymentModeId);
+            $data = Arr::add($data, 'payment_status_id', Config::get('constants.payment_status.APPROVED'));
+            $data = Arr::add($data, 'student_id', $billing->student_id);
+
+            // $data['school_year_id'] = $schoolYearId ?? $billing->school_year_id;
+            // $data['payment_mode_id'] = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
+            // $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
+            // $data['student_id'] = $billing->student_id;
+            $payment = $billing->payments()->create($data);
+
+            $billingStatusPaid = Config::get('constants.billing_status.PAID');
+            $billing->update([
+                'billing_status_id' => $billingStatusPaid
+            ]);
+            $studentFee = $billing->studentFee;
+            $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+            if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
+                $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+                $studentFee->academicRecord->update([
+                    'academic_record_status_id' => $enrolledStatus,
+                    'is_initial_billing_paid' => 1
+                ]);
+
+                $studentFee->recomputeTerms($payment->amount);
+            }
+
+            DB::commit();
+            return $billing;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during BillingService postPayment method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

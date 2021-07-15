@@ -10,6 +10,7 @@ use App\AcademicRecord;
 use App\SectionSchedule;
 use App\TranscriptRecord;
 use App\TranscriptRecordSubject;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -25,6 +26,35 @@ class SubjectService
             $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
                 return $q->where('school_category_id', $schoolCategoryId);
             });
+
+            $sectionId = $filters['section_id'] ?? false;
+            $query->when($sectionId, function ($q) use ($sectionId) {
+                return $q->whereHas('schedules', function ($q) use ($sectionId) {
+                    return $q->where('section_id', $sectionId);
+                });
+            });
+
+            $curriculumId = $filters['curriculum_id'] ?? false;
+            $levelId = $filters['level_id'] ?? false;
+            $courseId = $filters['course_id'] ?? false;
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($curriculumId, function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
+                return $q->whereHas('curriculums', function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
+                    return $q->where('curriculum_id', $curriculumId)
+                        ->when($levelId, function ($q) use ($levelId) {
+                            return $q->where('level_id', $levelId);
+                        })
+                        ->when($courseId, function ($q) use ($courseId) {
+                            return $q->where('course_id', $courseId);
+                        })
+                        ->when($semesterId, function ($q) use ($semesterId) {
+                            return $q->where('semester_id', $semesterId);
+                        })
+                        ->schoolCategoryFilter();
+                });
+            });
+            
+            
 
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($query) use ($criteria) {
@@ -170,7 +200,7 @@ class SubjectService
         }
     }
 
-    public function getSubjectsOfTranscriptRecord(int $transcriptRecordId, bool $isPaginated, int $perPage)
+    public function getSubjectsOfTranscriptRecord(array $filters, int $transcriptRecordId, bool $isPaginated, int $perPage)
     {
         try {
             $transriptRecord = TranscriptRecord::find($transcriptRecordId);
@@ -180,6 +210,18 @@ class SubjectService
                         $query->where('curriculum_id', $transriptRecord->curriculum_id);
                     }]);
                 }]);
+
+            $query->when(Arr::exists($filters, 'is_completed'), function ($q) use ($filters) {
+                $isCompleted = $filters['is_completed'] ?? false;
+                if ($isCompleted === 'true') {
+                    Log::info('true');
+                    return $q->where('grade', '>', 74.4);
+                } else {
+                    Log::info('false');
+                    return $q->where('grade', '<', 74.4);
+                }
+                
+            });
 
             $subjects = $isPaginated
                 ? $query->paginate($perPage)
@@ -331,29 +373,52 @@ class SubjectService
 
     private function isTaken(int $studentId, int $subjectId)
     {
-        $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
-            ->get()
-            ->pluck('id');
+        //disabled this for now for checking purposes
+        //because it returns error on this part
+        //need further debugging
+        // return false;
+        // $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
+        //     ->get()
+        //     ->pluck('id')
+        //     ->flatten();
 
-        return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
-            ->where('subject_id', $subjectId)
-            ->where('is_taken', 1)
-            ->get()
-            ->count() > 0;
+        $transcriptRecords = TranscriptRecord::where('student_id', $studentId)
+            ->whereHas('subjects', function ($q) use ($subjectId) {
+                return $q->where('subject_id', $subjectId)
+                ->where('is_taken', 1);
+            })
+            ->get();
+
+        return $transcriptRecords->count() > 0;
+        // $transcriptRecordSubjects = TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
+            // ->where('subject_id', $subjectId)
+            // ->where('is_taken', 1)
+            // ->get()
+            // ->count() > 0;
     }
 
     // return true if grade is passed, if not taken yet this will return false
     private function isPassed(int $studentId, int $subjectId)
     {
-        $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
-            ->get()
-            ->pluck('id');
+        // $transcriptRecordIds = TranscriptRecord::where('student_id', $studentId)
+        //     ->get()
+        //     ->pluck('id')
+        //     ->flatten();
 
-        return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
-            ->where('subject_id', $subjectId)
-            ->where('grade', '>', 74)
-            ->get()
-            ->count() > 0;
+        $transcriptRecords = TranscriptRecord::where('student_id', $studentId)
+            ->whereHas('subjects', function ($q) use ($subjectId) {
+                return $q->where('subject_id', $subjectId)
+                ->where('grade', '>', 74.4);
+            })
+            ->get();
+
+        return $transcriptRecords->count() > 0;
+
+        // return TranscriptRecordSubject::whereIn('transcript_record_id', $transcriptRecordIds)
+        //     ->where('subject_id', $subjectId)
+        //     ->where('grade', '>', 74.4)
+        //     ->get()
+        //     ->count() > 0;
     }
 
     private function arePrereqPassed(int $studentId, int $subjectId, int $curriculumId)
