@@ -230,6 +230,9 @@ class AcademicRecordService
 
             $schoolCategoryId  = $data['school_category_id'];
             $schoolYearId  = $data['school_year_id'];
+            $levelId  = $data['level_id'] ?? null;
+            $courseId  = $data['course_id'] ?? null;
+            $semesterId  = $data['semester_id'] ?? null;
 
             if (!$studentId) {
                 throw new Exception('Student id not found!');
@@ -242,6 +245,25 @@ class AcademicRecordService
             if (!$schoolYearId) {
                 throw new Exception('School Year id not found!');
             }
+
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $academicRecords = AcademicRecord::when($levelId, function ($q) use ($levelId) {
+                return $q->where('level_id', $levelId);
+            })->when($schoolYearId, function ($q) use ($schoolYearId){
+                return $q->where('school_year_id', $schoolYearId);
+            })->when($courseId, function ($q) use ($courseId) {
+                return $q->where('course_id', $courseId);
+            })->when($semesterId, function ($q) use ($semesterId) {
+                return $q->where('semester_id', $semesterId);
+            })->where('academic_record_status_id', $enrolledStatus)
+                ->count();
+
+            if ($academicRecords > 0) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Student is already been enrolled.']
+                ]);
+            }
+            
 
             $transcriptRecord = Student::find($studentId)->transcriptRecords()
                 ->where('transcript_record_status_id', 1) //active transcript

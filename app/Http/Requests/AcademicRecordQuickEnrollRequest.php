@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\IsLevelValidInSchoolCategory;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AcademicRecordQuickEnrollRequest extends FormRequest
@@ -25,7 +26,13 @@ class AcademicRecordQuickEnrollRequest extends FormRequest
     {
         return [
             'school_year_id' => 'required|not_in:0',
-            'school_category_id' => 'required|not_in:0'
+            'school_category_id' => 'required|not_in:0',
+            'level_id' => ['sometimes','required','not_in:0', new IsLevelValidInSchoolCategory(
+                $this->level_id,
+                $this->school_category_id
+            )],
+            'semester_id' => 'required_if:school_category_id,4,5,6|not_in:0',
+            'course_id' => 'required_if:school_category_id,4,5,6|not_in:0',
         ];
     }
 
@@ -40,7 +47,8 @@ class AcademicRecordQuickEnrollRequest extends FormRequest
     public function messages()
     {
         return [
-            'not_in' => 'The :attribute field is required.'
+            'not_in' => 'The :attribute field is required.',
+            'required_if' => 'The :attribute field is required.'
         ];
     }
 }
