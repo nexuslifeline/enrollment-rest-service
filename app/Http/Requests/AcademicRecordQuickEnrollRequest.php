@@ -27,7 +27,7 @@ class AcademicRecordQuickEnrollRequest extends FormRequest
         return [
             'school_year_id' => 'required|not_in:0',
             'school_category_id' => 'required|not_in:0',
-            'level_id' => ['sometimes','required','not_in:0', new IsLevelValidInSchoolCategory(
+            'level_id' => ['required','not_in:0', new IsLevelValidInSchoolCategory(
                 $this->level_id,
                 $this->school_category_id
             )],
