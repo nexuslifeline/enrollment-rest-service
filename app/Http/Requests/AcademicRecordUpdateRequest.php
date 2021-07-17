@@ -44,7 +44,7 @@ class AcademicRecordUpdateRequest extends FormRequest
                 function ($attribute, $value, $fail) use ($transcriptRecord) {
                     $curriculumId = Arr::get($transcriptRecord, 'curriculum_id');
                     // check if curriculum_id exists
-                    if ($transcriptRecord && !$curriculumId) {
+                    if (!$curriculumId) {
                         $fail('The curriculum field is required.');
                     }
 
