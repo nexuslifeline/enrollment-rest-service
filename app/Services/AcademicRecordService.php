@@ -59,6 +59,14 @@ class AcademicRecordService
                 });
             });
 
+            // section
+            $sectionId = $filters['section_id'] ?? false;
+            $query->when($sectionId, function ($q) use ($sectionId) {
+                return $q->whereHas('section', function ($query) use ($sectionId) {
+                    return $query->where('section_id', $sectionId);
+                });
+            });
+
 
             // school category
             $schoolCategoryId = $filters['school_category_id'] ?? false;

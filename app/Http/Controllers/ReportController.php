@@ -310,6 +310,7 @@ class ReportController extends Controller
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
         $filters = Arr::add($filters, 'academic_record_status_id', $enrolledStatus);
         $filters = Arr::add($filters, 'school_year_id', $schoolYearId);
+        $filters = Arr::add($filters, 'section_id', $schoolYearId);
         $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
         $data['academicRecords'] = $academicRecordService->list($isPaginated, $perPage, $filters);
 
