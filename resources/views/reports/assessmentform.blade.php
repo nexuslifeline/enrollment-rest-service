@@ -163,7 +163,7 @@
             </tr>
 
             <tr>
-                <td>{{ $academicRecord->student->address ? $academicRecord->student->address->current_complete_address : '' }}</td>
+                <td>{{ $academicRecord->student->current_address ? $academicRecord->student->current_address : $academicRecord->student->permanent_address }}</td>
                 <td style="text-transform: none;">{{ $academicRecord->semester_id ? $academicRecord->semester->name.' /' : '' }} {{ $academicRecord->schoolYear->name }}</td>
             </tr>
 
