@@ -56,7 +56,7 @@ class AcademicRecordUpdateRequest extends FormRequest
                                 ->where('curriculum_subjects.school_category_id', $this->school_category_id);
                         })->get()->pluck('id')->flatten();
                         if (!in_array($curriculumId, $curriculumIds->all())) {
-                            $fail('The curriculum is not applicable.');
+                            $fail('The curriculum is not a valid curriculum of selected level or course.');
                         }
                     }
                 }

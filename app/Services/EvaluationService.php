@@ -96,7 +96,7 @@ class EvaluationService
                 'academicRecord' => function ($query) {
                     $query->with(['schoolYear', 'level', 'course', 'studentCategory','semester', 'schoolCategory',
                         'student' => function ($query) {
-                            $query->with(['address', 'photo', 'user', 'education']);
+                            $query->with(['address', 'photo', 'user', 'education', 'family']);
                         },
                         'transcriptRecord' => function($q) {
                         return $q->with(['curriculum', 'studentCurriculum']);
