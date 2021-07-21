@@ -293,7 +293,7 @@ class PaymentService
             return $payment;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info('Error occured during PaymentService approve method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -330,7 +330,7 @@ class PaymentService
             return $payment;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during PaymentService submitPayment method call: ');
+            Log::info('Error occured during PaymentService reject method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

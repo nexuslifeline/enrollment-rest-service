@@ -582,6 +582,7 @@ class StudentService
         try {
             //soa billing
             $billingTypeId = $filters['billing_type_id'] ?? false;
+            $showAll = $filters['show_all'] ?? false;
             $billingStatusId = $filters['billing_status_id'] ?? false;
             $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
             $soa = Config::get('constants.billing_type.SOA');
@@ -593,14 +594,16 @@ class StudentService
 
             if (!$billingTypeId || $billingTypeId == $soa) {
                 //soa
-                $soaBillings = Billing::where('billing_type_id', $soa)
+                $query = Billing::where('billing_type_id', $soa)
                     ->where('student_id', $id)
                     ->when($billingStatusId, function ($q) use ($billingStatusId) {
                         return $q->where('billing_status_id', $billingStatusId);
-                    })
-                    ->latest()
-                    ->take(1)
-                    ->get();
+                    });
+                if ($showAll) {
+                    $soaBillings = $query->get();
+                } else {
+                    $soaBillings = $query->latest()->take(1)->get();
+                }
                 $soaBillings->append(['total_paid', 'submitted_payments']);
             }
 
@@ -830,7 +833,7 @@ class StudentService
 
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during StudentService getBillingsOfStudent method call: ');
+            Log::info('Error occured during StudentService getLedgerOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
