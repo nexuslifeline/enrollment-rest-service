@@ -255,7 +255,9 @@ class AcademicRecordService
                 return $q->where('course_id', $courseId);
             })->when($semesterId, function ($q) use ($semesterId) {
                 return $q->where('semester_id', $semesterId);
-            })->where('academic_record_status_id', $enrolledStatus)
+            })
+            ->where('academic_record_status_id', $enrolledStatus)
+            ->where('student_id', $studentId)
                 ->count();
 
             if ($academicRecords > 0) {
