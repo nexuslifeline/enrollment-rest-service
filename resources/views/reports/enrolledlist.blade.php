@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>List of Enrolled Student</title>
 
@@ -9,30 +10,37 @@
             margin: 0.4in;
             size: landscape;
         }
-        body{
+
+        body {
             font-family: Calibri;
             font-size: 9pt;
         }
+
         .table__header {
             width: 100%;
             margin-bottom: 10px;
         }
+
         .table__header tr .td__logo {
             width: 20%;
             text-align: right
         }
+
         .table__header tr .td__info {
             text-align: center;
             width: 60%
         }
+
         .header__name {
             font-size: 13pt;
             font-weight: bold;
         }
+
         .header__details {
             font-size: 11pt;
             font-weight: bold;
         }
+
         .title {
             font-size: 12pt;
             font-weight: bold;
@@ -60,6 +68,7 @@
         .text-left {
             text-align: left;
         }
+
         .text-center {
             text-align: center;
         }
@@ -69,6 +78,7 @@
         }
     </style>
 </head>
+
 <body>
     <table class="table__header">
         <tr>
@@ -105,23 +115,25 @@
             <th class="text-left" style="width: 20%;"> Contact </th>
         </tr>
         @foreach ($academicRecords as $academicRecord)
-            <tr>
-                <td>
-                    <div> <strong>{{ $academicRecord->student->name }}</strong></div>
-                    <div> {{ $academicRecord->student->student_no }} </div>
-                    <div> {{ $academicRecord->student->current_address }} </div>
-                </td>
-                <td>
-                    <div> {{ $academicRecord->level ? $academicRecord->level->name : '' }} </div>
-                    <div> {{ $academicRecord->course ? $academicRecord->course->name : '' }}  {{ $academicRecord->semester ? $academicRecord->semester->name : '' }}</div>
-                    <div> {{ $academicRecord->schoolYear ? $academicRecord->schoolYear->name : '' }}
-                </td>
-                <td>
-                    <div> {{ $academicRecord->student->email }}
-                    <div> {{ $academicRecord->student->mobile_no }}
-                </td>
-            </tr>
+        <tr>
+            <td>
+                <div> <strong>{{ $academicRecord->student->name }}</strong></div>
+                <div> {{ $academicRecord->student->student_no }} </div>
+                <div> {{ $academicRecord->student->current_address }} </div>
+            </td>
+            <td>
+                <div> {{ $academicRecord->level ? $academicRecord->level->name : '' }} </div>
+                <div> {{ $academicRecord->course ? $academicRecord->course->name : '' }} {{ $academicRecord->semester ? $academicRecord->semester->name : '' }}</div>
+                <div> {{ $academicRecord->schoolYear ? $academicRecord->schoolYear->name : '' }}</div>
+                <div> {{ $academicRecord->section ? $academicRecord->section->name : '' }}</div>
+            </td>
+            <td>
+                <div> {{ $academicRecord->student->email }}</div>
+                <div> {{ $academicRecord->student->mobile_no }}</div>
+            </td>
+        </tr>
         @endforeach
     </table>
 </body>
+
 </html>

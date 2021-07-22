@@ -11,6 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class BillingService
 {
@@ -302,9 +303,35 @@ class BillingService
             DB::beginTransaction();
             $billing = Billing::find($id);
             // if billing is soa update student_fee_term is_billed to 0 so you can create it again
-            if ($billing->billing_type_id === 2) {
+            $soa = Config::get('constants.billing_type.SOA');
+            if ($billing->billing_type_id === $soa) {
+                
+                $latestBilling = Billing::where('billing_type_id', $soa)
+                ->where('student_id', $billing->student_id)
+                ->where('billing_type_id', $soa)
+                ->latest()
+                ->first();
+
+                if ($latestBilling->id !== $billing->id) {
+                    throw ValidationException::withMessages([
+                        'non_field_error' => ["You can't delete this soa. It's already forwarded."]
+                    ]);
+                }
+
                 $billing->studentFee()->first()->terms()->wherePivot('term_id', $billing->term_id)
                     ->update(['is_billed' => 0]);
+
+                $newLatestBilling = Billing::where('billing_type_id', $soa)
+                    ->where('student_id', $billing->student_id)
+                    ->where('billing_type_id', $soa)
+                    ->where('id', '!=', $billing->id)
+                    ->latest()
+                    ->first();
+
+                $newLatestBilling->update([
+                    'is_forwarded' => 0,
+                    'system_notes' => ''
+                ]);
             }
             $billing->delete();
             DB::commit();

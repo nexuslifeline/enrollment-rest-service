@@ -38,17 +38,21 @@ class SubjectService
             $levelId = $filters['level_id'] ?? false;
             $courseId = $filters['course_id'] ?? false;
             $semesterId = $filters['semester_id'] ?? false;
-            $query->when($curriculumId, function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
+            $query->when($curriculumId || $levelId || $courseId || $semesterId, function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
                 return $q->whereHas('curriculums', function ($q) use ($curriculumId, $levelId, $courseId, $semesterId) {
-                    return $q->where('curriculum_id', $curriculumId)
-                        ->when($levelId, function ($q) use ($levelId) {
-                            return $q->where('level_id', $levelId);
+                    return $q->when($curriculumId, function($q) use($curriculumId){
+                            return $q->where('curriculum_id', $curriculumId);
                         })
-                        ->when($courseId, function ($q) use ($courseId) {
-                            return $q->where('course_id', $courseId);
-                        })
-                        ->when($semesterId, function ($q) use ($semesterId) {
-                            return $q->where('semester_id', $semesterId);
+                        ->whereHas('subjects', function ($q) use ($levelId, $courseId, $semesterId) {
+                            return $q->when($levelId, function ($q) use ($levelId) {
+                                return $q->where('level_id', $levelId);
+                            })
+                            ->when($courseId, function ($q) use ($courseId) {
+                                return $q->where('course_id', $courseId);
+                            })
+                            ->when($semesterId, function ($q) use ($semesterId) {
+                                return $q->where('semester_id', $semesterId);
+                            });
                         })
                         ->schoolCategoryFilter();
                 });
