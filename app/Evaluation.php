@@ -53,7 +53,7 @@ class Evaluation extends Model
     //     return $this->belongsTo('App\StudentCategory');
     // }
 
-    public function lastSchoollevel()
+    public function lastSchoolLevel()
     {
         return $this->belongsTo('App\Level', 'last_school_level_id');
     }

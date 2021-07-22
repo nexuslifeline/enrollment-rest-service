@@ -102,6 +102,7 @@ class EvaluationService
                         return $q->with(['curriculum', 'studentCurriculum']);
                     }]);
                 },
+                'lastSchoolLevel',
                 // 'transcriptRecord', //disabled for adjustment on transcript record 5/15/2021
             ]);
             return $evaluation;
