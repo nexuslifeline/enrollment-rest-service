@@ -304,6 +304,7 @@ class BillingService
             $billing = Billing::find($id);
             // if billing is soa update student_fee_term is_billed to 0 so you can create it again
             $soa = Config::get('constants.billing_type.SOA');
+            $unpaid = Config::get('constants.billing_status.UNPAID');
             if ($billing->billing_type_id === $soa) {
                 
                 $latestBilling = Billing::where('billing_type_id', $soa)
@@ -315,6 +316,12 @@ class BillingService
                 if ($latestBilling->id !== $billing->id) {
                     throw ValidationException::withMessages([
                         'non_field_error' => ["You can't delete this soa. It's already forwarded."]
+                    ]);
+                }
+
+                if ($latestBilling->billing_status_id !== $unpaid ) {
+                    throw ValidationException::withMessages([
+                        'non_field_error' => ["SOA cannot be deleted because it has a payment already. You need to cancel the payment first."]
                     ]);
                 }
 
@@ -406,6 +413,39 @@ class BillingService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during BillingService postPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function updateInitialBilling(array $data, int $academicRecordId, int $billingId)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            if ($academicRecord->academic_record_status_id === Config::get('constants.academic_record_status.ENROLLED')) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ["Initial/Registration Fee cannot be updated because the student is already been enrolled."]
+                ]);
+            }
+            $billing = Billing::find($billingId);
+            if ($billing->billing_type_id !== Config::get('constants.billing_type.INITIAL_FEE')) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ["This billing is not an Initial/Registration Fee."]
+                ]);
+            }
+
+            $billing->update($data);
+            if (Arr::exists($data, 'total_amount')) {
+                $billing->billingItems()->where('item', 'Registration Fee')->first()->update([
+                    'amount' => $data['total_amount']
+                ]);
+            }
+            DB::commit();
+            return $billing;
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::info('Error occured during AcademicRecordService updateInitialBilling method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

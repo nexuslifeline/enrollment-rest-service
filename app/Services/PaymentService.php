@@ -197,7 +197,13 @@ class PaymentService
         DB::beginTransaction();
         try {
             $payment = Payment::find($id);
+            $billing = $payment->billing;
             $payment->delete();
+            $totalPayments = $billing->payments->sum('amount');
+            $billingStatusId = $totalPayments > 0 ? Config::get('constants.billing_status.PARTIALLY_PAID') : Config::get('constants.billing_status.UNPAID');
+            $billing->update([
+                'billing_status_id' => $billingStatusId
+            ]);
             DB::commit();
         } catch (Exception $e) {
             DB::rollback();
@@ -343,7 +349,13 @@ class PaymentService
             $payment = Payment::find($id);
             $payment->update($data);
             $payment->billing->studentFee->recomputeTerms();
+            $billing = $payment->billing;
             $payment->delete();
+            $totalPayments = $billing->payments->sum('amount');
+            $billingStatusId = $totalPayments > 0 ? Config::get('constants.billing_status.PARTIALLY_PAID') : Config::get('constants.billing_status.UNPAID');
+            $billing->update([
+                'billing_status_id' => $billingStatusId
+            ]);
             DB::commit();
         } catch (Exception $e) {
             DB::rollback();

@@ -248,6 +248,7 @@ Route::group(['prefix' => 'v1'], function () {
 
         //billing
         Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
+        Route::put('academic-records/{academicRecordId}/billings/{billingId}', 'BillingController@updateInitialBilling');
 
         //school year
         Route::post('school-years/{id}/generate-batch-billing', 'SchoolYearController@generateBatchBilling');

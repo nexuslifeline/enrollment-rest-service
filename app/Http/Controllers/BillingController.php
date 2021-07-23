@@ -137,4 +137,14 @@ class BillingController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function updateInitialBilling(Request $request, int $academicRecordId, int $id)
+    {
+        $billingService = new BillingService();
+        $data = $request->all();
+        $billing = $billingService->updateInitialBilling($data, $academicRecordId, $id);
+        return (new BillingResource($billing))
+            ->response()
+            ->setStatusCode(200);
+    }
 }
