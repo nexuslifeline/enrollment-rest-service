@@ -258,6 +258,9 @@ Route::group(['prefix' => 'v1'], function () {
     // Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');
 });
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
+Route::group(['prefix' => 'v2'], function () {
+
+    Route::group(['middleware' => ['auth:api']], function () {
+        Route::get('/students/{studentId}/billings', 'StudentController@getBillingsOfStudentV2');
+    });
+});

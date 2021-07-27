@@ -148,6 +148,21 @@ class StudentController extends Controller
         );
     }
 
+    public function getBillingsOfStudentV2(Request $request, int $id)
+    {
+        $studentService = new StudentService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $billings = $studentService->getBillingsOfStudentV2($isPaginated, $perPage, $filters, $id);
+
+        return BillingResource::collection(
+            $billings
+        )->additional(['meta' => [
+            'total_remaining_balance' => $billings->sum('total_amount') - $billings->sum('total_paid'),
+        ]]);;
+    }
+
     public function manualRegister(ManualRegisterRequest $request)
     {
         $studentService = new StudentService();

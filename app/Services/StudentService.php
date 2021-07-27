@@ -641,6 +641,46 @@ class StudentService
         }
     }
 
+    public function getBillingsOfStudentV2(bool $isPaginated, int $perPage, array $filters, int $id)
+    {
+        try {
+            //soa billing
+            $billingTypeId = $filters['billing_type_id'] ?? false;
+            // $showAll = $filters['show_all'] ?? false;
+            $billingStatusId = $filters['billing_status_id'] ?? false;
+            $isForwarded = $filters['is_forwarded'] ?? false;
+
+            $query = Billing::where('student_id', $id);
+            //billing type id
+            $query->when($billingTypeId, function ($q) use ($billingTypeId) {
+                if (!is_array($billingTypeId)) {
+                    return $q->where('billing_type_id', $billingTypeId);
+                } else {
+                    return $q->whereIn('billing_type_id', $billingTypeId);
+                }
+            });
+            //billing status id
+            $query->when($billingStatusId, function ($q) use ($billingStatusId) {
+                return $q->where('billing_status_id', $billingStatusId);
+            });
+            //is forwarded
+            $query->when($isForwarded, function ($q) use ($isForwarded) {
+                return $q->where('is_forwarded', $isForwarded);
+            });
+
+            $billings = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            $billings->append(['total_paid', 'submitted_payments']);
+            return $billings;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during StudentService getBillingsOfStudent method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function enroll(array $data, array $studentInfo, array $related, int $id)
     {
 
