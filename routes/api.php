@@ -168,6 +168,7 @@ Route::group(['prefix' => 'v1'], function () {
         // school fee categories
         Route::resource('school-fee-categories', 'SchoolFeeCategoryController');
         // evaluations
+        Route::patch('/evaluations/{id}', 'EvaluationController@patch');
         Route::resource('evaluations', 'EvaluationController');
         Route::post('/evaluations/{id}/approve', 'EvaluationController@approve');
         Route::post('/evaluations/{id}/reject', 'EvaluationController@reject');
@@ -249,6 +250,7 @@ Route::group(['prefix' => 'v1'], function () {
         //billing
         Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
         Route::put('academic-records/{academicRecordId}/billings/{billingId}', 'BillingController@updateInitialBilling');
+        Route::get('/students/{studentId}/all-billings', 'StudentController@getAllBillingsOfStudent');
 
         //school year
         Route::post('school-years/{id}/generate-batch-billing', 'SchoolYearController@generateBatchBilling');
@@ -256,11 +258,4 @@ Route::group(['prefix' => 'v1'], function () {
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
     // Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');
-});
-
-Route::group(['prefix' => 'v2'], function () {
-
-    Route::group(['middleware' => ['auth:api']], function () {
-        Route::get('/students/{studentId}/billings', 'StudentController@getBillingsOfStudentV2');
-    });
 });

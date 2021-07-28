@@ -641,7 +641,7 @@ class StudentService
         }
     }
 
-    public function getBillingsOfStudentV2(bool $isPaginated, int $perPage, array $filters, int $id)
+    public function getAllBillingsOfStudent(bool $isPaginated, int $perPage, array $filters, int $id)
     {
         try {
             //soa billing
@@ -649,6 +649,7 @@ class StudentService
             // $showAll = $filters['show_all'] ?? false;
             $billingStatusId = $filters['billing_status_id'] ?? false;
             $isForwarded = $filters['is_forwarded'] ?? false;
+            $criteria = $filters['criteria'] ?? false;
 
             $query = Billing::where('student_id', $id);
             //billing type id
@@ -668,6 +669,15 @@ class StudentService
                 return $q->where('is_forwarded', $isForwarded);
             });
 
+            //criteria or search
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->where('billing_no', 'like', '%' . $criteria . '%')
+                    ->orWhere('system_notes', 'like', '%' . $criteria . '%')
+                    ->orWhereHas('term', function ($q) use ($criteria) {
+                        return $q->where('name', 'like', '%' . $criteria . '%');
+                    });
+            });
+
             $billings = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
@@ -675,7 +685,7 @@ class StudentService
             return $billings;
         } catch (Exception $e) {
             DB::rollback();
-            Log::info('Error occured during StudentService getBillingsOfStudent method call: ');
+            Log::info('Error occured during StudentService getAllBillingsOfStudent method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -892,6 +902,33 @@ class StudentService
             return $academicRecord;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService getAcademicRecords method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getTotalRemainingBalance(int $studentId)
+    {
+        try {
+            // initial billing must include prev balance
+            $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
+            $initialBillings = Billing::where('student_id', $studentId)
+                ->where('billing_type_id', $initialFee)
+                ->get();
+
+            $initialBillings->append(['total_paid']);
+
+            $billings = Billing::where('student_id', $studentId)
+                ->where('billing_type_id', '!=', $initialFee)
+                ->get();
+
+            $initialBillingBalance = ($initialBillings->sum('total_amount') + $initialBillings->sum('previous_balance')) - $initialBillings->sum('total_paid');
+            $billingBalance = $billings->sum('total_amount') - $billings->sum('total_paid');
+            $totalRemainingBalance = $initialBillingBalance + $billingBalance;
+
+            return $totalRemainingBalance;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService getTotalRemainingBalance method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

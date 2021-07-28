@@ -70,6 +70,16 @@ class EvaluationController extends Controller
         return new EvaluationResource($evaluation);
     }
 
+    public function patch(Request $request, int $id)
+    {
+        $evaluationService = new EvaluationService();
+        $data = $request->except('subjects', 'transcript_record');
+        $transcriptData = $request->transcript_record ?? [];
+        $subjects = $request->subjects ?? [];
+        $evaluation = $evaluationService->update($data, $subjects, $transcriptData, $id);
+        return new EvaluationResource($evaluation);
+    }
+
     /**
      * Remove the specified resource from storage.
      *

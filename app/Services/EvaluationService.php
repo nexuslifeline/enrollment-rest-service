@@ -149,9 +149,9 @@ class EvaluationService
                         return $q->with(['curriculum', 'studentCurriculum']);
                     }]);
                 },
-                'student' => function ($query) {
-                    $query->with(['address', 'photo']);
-                }
+                // 'student' => function ($query) {
+                //     $query->with(['address', 'photo']);
+                // }
             ])->fresh();
             DB::commit();
             return $evaluation;
