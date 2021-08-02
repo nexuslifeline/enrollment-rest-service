@@ -160,6 +160,7 @@ class StudentController extends Controller
             $billings
         )->additional(['meta' => [
             'total_remaining_balance' => $studentService->getTotalRemainingBalance($id),
+            'pending_payments_count' => $studentService->getPendingPaymentsCount($id),
         ]]);;
     }
 

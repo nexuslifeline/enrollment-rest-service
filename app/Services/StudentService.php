@@ -935,4 +935,20 @@ class StudentService
         }
     }
 
+    public function getPendingPaymentsCount(int $studentId)
+    {
+        try {
+            $pending = Config::get('constants.payment_status.PENDING');
+            $paymentsCount = Payment::where('student_id', $studentId)
+                ->where('payment_status_id', $pending)
+                ->count();
+            
+            return $paymentsCount;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService getPendingPaymentsCount method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
 }
