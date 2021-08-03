@@ -682,7 +682,7 @@ class StudentService
             $billings = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();
-            $billings->append(['total_paid', 'submitted_payments']);
+            $billings->append(['total_paid', 'submitted_payments','pending_payments_count']);
             return $billings;
         } catch (Exception $e) {
             DB::rollback();
@@ -935,20 +935,20 @@ class StudentService
         }
     }
 
-    public function getPendingPaymentsCount(int $studentId)
-    {
-        try {
-            $pending = Config::get('constants.payment_status.PENDING');
-            $paymentsCount = Payment::where('student_id', $studentId)
-                ->where('payment_status_id', $pending)
-                ->count();
+    // public function getPendingPaymentsCount(int $studentId)
+    // {
+    //     try {
+    //         $pending = Config::get('constants.payment_status.PENDING');
+    //         $paymentsCount = Payment::where('student_id', $studentId)
+    //             ->where('payment_status_id', $pending)
+    //             ->count();
             
-            return $paymentsCount;
-        } catch (Exception $e) {
-            Log::info('Error occured during StudentService getPendingPaymentsCount method call: ');
-            Log::info($e->getMessage());
-            throw $e;
-        }
-    }
+    //         return $paymentsCount;
+    //     } catch (Exception $e) {
+    //         Log::info('Error occured during StudentService getPendingPaymentsCount method call: ');
+    //         Log::info($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
 }

@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Config;
 
 class Billing extends Model
 {
@@ -79,6 +80,12 @@ class Billing extends Model
 
     public function academicRecord() {
         return $this->belongsTo('App\AcademicRecord');
+    }
+
+    public function getPendingPaymentsCountAttribute() {
+        $pending = Config::get('constants.payment_status.PENDING');
+        return  $this->payments->where('payment_status_id', $pending)
+            ->count();
     }
 
 }
