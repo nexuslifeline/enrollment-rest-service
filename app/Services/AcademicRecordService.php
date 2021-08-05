@@ -692,7 +692,7 @@ class AcademicRecordService
             }
 
             DB::commit();
-            return $evaluation->load('academicRecord');
+            return $evaluation->load(['academicRecord', 'lastSchoolLevel']);
         } catch (Exception $e) {
             DB::rollBack();
             Log::info('Error occured during AcademicRecordService requestEvaluation method call: ');
