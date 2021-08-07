@@ -176,11 +176,23 @@ class AcademicRecordService
             });
 
             // order by
-            $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
-                $sort = $filters['sort'] ?? 'ASC';
-                return $q->orderBy($orderBy, $sort);
-            });
+            // $orderBy = $filters['order_by'] ?? false;
+            // $query->when($orderBy, function ($q) use ($orderBy, $filters) {
+            //     $sort = $filters['sort'] ?? 'ASC';
+            //     return $q->orderBy($orderBy, $sort);
+            // });
+
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering, '-');
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+
+            $query->orderBy($orderBy, $sort);
 
             $academicRecords = $isPaginated
                 ? $query->paginate($perPage)
