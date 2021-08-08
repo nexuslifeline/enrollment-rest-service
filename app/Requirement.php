@@ -22,4 +22,19 @@ class Requirement extends Model
     {
         return $this->belongsTo('App\SchoolCategory');
     }
+
+    public function documentType()
+    {
+        return $this->belongsTo('App\DocumentType');
+    }
+
+    public function getIsSubmittedAttribute()
+    {
+        return $this->attributes['is_submitted'];
+    }
+
+    public function setIsSubmittedAttribute($value)
+    {
+        $this->attributes['is_submitted'] = $value;
+    }
 }

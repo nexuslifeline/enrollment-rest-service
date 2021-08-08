@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RequirementStoreRequest;
+use App\Http\Requests\RequirementUpdateRequest;
+use App\Http\Requests\StudentRequirementUpdateRequest;
 use App\Http\Resources\RequirementResource;
 use App\Requirement;
 use App\Services\RequirementService;
@@ -42,9 +45,13 @@ class RequirementController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(RequirementStoreRequest $request)
     {
-        //
+        $requirementService = new RequirementService();
+        $requirementService = $requirementService->store($request->all());
+        return (new RequirementResource($requirementService))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -53,9 +60,11 @@ class RequirementController extends Controller
      * @param  \App\Requirement  $requirement
      * @return \Illuminate\Http\Response
      */
-    public function show(Requirement $requirement)
+    public function show(int $id)
     {
-        //
+        $requirementService = new RequirementService();
+        $requirement = $requirementService->get($id);
+        return new RequirementResource($requirement);
     }
 
     /**
@@ -76,9 +85,22 @@ class RequirementController extends Controller
      * @param  \App\Requirement  $requirement
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Requirement $requirement)
+    public function update(RequirementUpdateRequest $request, int $id)
     {
-        //
+        $requirementService = new RequirementService();
+        $requirement = $requirementService->update($request->all(), $id);
+        return (new RequirementResource($requirement))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function patch(Request $request, int $id)
+    {
+        $requirementService = new RequirementService();
+        $requirement = $requirementService->update($request->all(), $id);
+        return (new RequirementResource($requirement))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -103,6 +125,25 @@ class RequirementController extends Controller
         $requirements = $requirementService->updateCreateMultiple($schoolCategoryId, $data);
 
         return (new RequirementResource($requirements))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function getStudentRequirements(int $studentId, int $schoolCategoryId)
+    {
+        $requirementService = new RequirementService();
+        $requirements = $requirementService->getStudentRequirements($studentId, $schoolCategoryId);
+        return RequirementResource::collection(
+            $requirements
+        );
+    }
+
+    public function updateStudentRequirements(int $studentId, int $schoolCategoryId, int $requirementId, StudentRequirementUpdateRequest $request)
+    {
+        $requirementService = new RequirementService();
+        $data = $request->all();
+        $requirement = $requirementService->updateStudentRequirements($studentId, $schoolCategoryId, $requirementId, $data);
+        return (new RequirementResource($requirement))
             ->response()
             ->setStatusCode(200);
     }

@@ -213,8 +213,11 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/approval-count', 'AcademicRecordController@getPendingApprovalCount');
 
         //requirements
+        Route::patch('/requirements/{id}', 'RequirementController@patch');
         Route::resource('requirements', 'RequirementController');
         Route::post('requirements/update-create-multiple/{schoolCategoryId}', 'RequirementController@updateCreateMultiple');
+        Route::get('students/{studentId}/school-categories/{schoolCategoryId}/requirements', 'RequirementController@getStudentRequirements');
+        Route::put('students/{studentId}/school-categories/{schoolCategoryId}/requirements/{requirementId}', 'RequirementController@updateStudentRequirements');
 
         //general settings
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');

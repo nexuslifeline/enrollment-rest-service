@@ -261,7 +261,7 @@ class Student extends Model
             'student_requirements',
             'student_id',
             'requirement_id'
-        )->withPivot('school_category_id')->withTimestamps();
+        )->withPivot('school_category_id', 'is_submitted')->withTimestamps();
     }
 
     public function scopeWhereLike($query, $value) {
