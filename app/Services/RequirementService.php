@@ -163,8 +163,6 @@ class RequirementService
       //   ->where('school_category_id', $schoolCategoryId)
       //   ->first()
       //   ->latest();
-        
-
       DB::commit();
       return $requirement;
     } catch (Exception $e) {
@@ -208,7 +206,7 @@ class RequirementService
         return true;
       }
     }
-    
+
     return false;
   }
 }
