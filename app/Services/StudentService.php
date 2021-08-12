@@ -315,7 +315,8 @@ class StudentService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Student::with(['address', 'family', 'education', 'photo', 'user']);
+            $query = Student::with(['address', 'family', 'education', 'photo', 'user'])
+            ->select('students.*');
 
             $sectionId = $filters['section_id'] ?? false;
             $levelId = $filters['level_id'] ?? false;
@@ -375,6 +376,25 @@ class StudentService
                 //scopedWhereLike on student model
                 $query->whereLike($criteria);
             });
+
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering, '-');
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $addressFields = ['address'];
+
+            if (in_array($orderBy, $addressFields)) {
+                $query->leftJoin('student_addresses', 'student_addresses.student_id', '=', 'students.id')
+                ->leftJoin('countries', 'countries.id', '=', 'student_addresses.current_country_id')
+                ->orderByRaw('CONCAT_WS(current_house_no_street, current_barangay, current_city_town, current_province, countries.name) '.$sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
 
             $students = $isPaginated

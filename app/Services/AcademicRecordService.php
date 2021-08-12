@@ -38,9 +38,9 @@ class AcademicRecordService
                 'application',
                 'studentFee',
                 'student' => function ($query) {
-                    $query->with(['address', 'photo', 'user']);
+                    $query->orderBy('first_name', 'ASC')->with(['address', 'photo', 'user']);
                 }
-            ]);
+            ])->select('academic_records.*');
 
             // filters
             // student
@@ -192,7 +192,23 @@ class AcademicRecordService
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
 
-            $query->orderBy($orderBy, $sort);
+            $studentFields = ['first_name', 'last_name'];
+            $courseFields = ['course_name'];
+            $levelFields = ['level_name'];
+
+            if (in_array($orderBy, $studentFields)) {
+                $query->leftJoin('students', 'students.id', '=', 'student_id')
+                    ->orderBy('students.' . $orderBy, $sort);
+            } else if (in_array($orderBy, $courseFields)) {
+                $query->leftJoin('courses', 'courses.id', '=', 'course_id')
+                    ->orderBy('courses.name', $sort);
+            } else if (in_array($orderBy, $levelFields)) {
+                $query->leftJoin('levels', 'levels.id', '=', 'level_id')
+                    ->orderBy('levels.name', $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
+            
 
             $academicRecords = $isPaginated
                 ? $query->paginate($perPage)

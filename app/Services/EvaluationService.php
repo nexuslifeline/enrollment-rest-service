@@ -24,7 +24,7 @@ class EvaluationService
                         return $q->with(['address', 'photo', 'user']);
                     }]);
                 }
-            ]);
+            ])->select('evaluations.*');
 
             // filters
             // student
@@ -71,11 +71,40 @@ class EvaluationService
             });
 
             // order by
-            $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
-                $sort = $filters['sort'] ?? 'ASC';
-                return $q->orderBy($orderBy, $sort);
-            });
+            // $orderBy = $filters['order_by'] ?? false;
+            // $query->when($orderBy, function ($q) use ($orderBy, $filters) {
+            //     $sort = $filters['sort'] ?? 'ASC';
+            //     return $q->orderBy($orderBy, $sort);
+            // });
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering, '-');
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+
+            $studentFields = ['first_name', 'last_name'];
+            $courseFields = ['course_name'];
+            $levelFields = ['level_name'];
+
+            if (in_array($orderBy, $studentFields)) {
+                $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
+                    ->leftJoin('students', 'students.id', '=', 'academic_records.student_id')
+                    ->orderBy('students.' . $orderBy, $sort);
+            } else if (in_array($orderBy, $courseFields)) {
+                $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
+                    ->leftJoin('courses', 'courses.id', '=', 'academic_records.course_id')
+                    ->orderBy('courses.name', $sort);
+            } else if (in_array($orderBy, $levelFields)) {
+                $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
+                    ->leftJoin('levels', 'levels.id', '=', 'academic_records.level_id')
+                    ->orderBy('levels.name', $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
             $evaluations = $isPaginated
                 ? $query->paginate($perPage)
