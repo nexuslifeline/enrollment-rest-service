@@ -113,7 +113,6 @@ Route::group(['prefix' => 'v1'], function () {
         //Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord'); // should be removed once frontend is updated
         Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
         Route::post('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@syncSubjectsOfAcademicRecord');
-        Route::get('/academic-records/{academicRecordId}/initial-billing', 'AcademicRecordController@getInitialBilling');
 
         // user groups
         Route::resource('/user-groups', 'UserGroupController');
@@ -252,8 +251,11 @@ Route::group(['prefix' => 'v1'], function () {
 
         //billing
         Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
-        Route::put('academic-records/{academicRecordId}/billings/{billingId}', 'BillingController@updateInitialBilling');
         Route::get('/students/{studentId}/all-billings', 'StudentController@getAllBillingsOfStudent');
+
+        // initial billing
+        Route::get('/academic-records/{academicRecordId}/initial-billing', 'AcademicRecordController@getInitialBilling');
+        Route::put('/academic-records/{academicRecordId}/initial-billing/{billingId}', 'BillingController@updateInitialBilling');
 
         //school year
         Route::post('school-years/{id}/generate-batch-billing', 'SchoolYearController@generateBatchBilling');
