@@ -252,6 +252,7 @@ Route::group(['prefix' => 'v1'], function () {
         //billing
         Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
         Route::get('/students/{studentId}/all-billings', 'StudentController@getAllBillingsOfStudent');
+        Route::post('billings/{id}/cancel-payments', 'BillingController@cancelPayments');
 
         // initial billing
         Route::get('/academic-records/{academicRecordId}/initial-billing', 'AcademicRecordController@getInitialBilling');

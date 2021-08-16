@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RequirementStoreRequest extends FormRequest
 {
@@ -25,14 +26,15 @@ class RequirementStoreRequest extends FormRequest
     {
         return [
             'school_category_id' => 'required|not_in:0',
-            'document_type_id' => 'required|not_in:0'
+            'document_type_id' => 'required|not_in:0|' . Rule::unique('requirements', 'document_type_id')->where('school_category_id', $this->school_category_id)
         ];
     }
 
     public function messages()
     {
         return [
-            'not_in' => 'The :attribute field is required.'
+            'not_in' => 'The :attribute field is required.',
+            'document_type_id.unique' => 'This document type is already added.'
         ];
     }
 

@@ -147,4 +147,14 @@ class BillingController extends Controller
             ->response()
             ->setStatusCode(200);
     }
+
+    public function cancelPayments(int $id)
+    {
+        $billingService = new BillingService();
+        $billing = $billingService->cancelPayments($id);
+
+        return (new BillingResource($billing))
+            ->response()
+            ->setStatusCode(201);
+    }
 }

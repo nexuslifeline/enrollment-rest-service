@@ -450,4 +450,49 @@ class BillingService
             throw $e;
         }
     }
+
+    public function cancelPayments(int $id)
+    {
+        DB::beginTransaction();
+        try {
+            $billing = Billing::find($id);
+            $soa = Config::get('constants.billing_type.SOA');
+            $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
+            $latestBilling = Billing::where('billing_type_id', $soa)
+            ->where('student_id', $billing->student_id)
+                ->where('billing_type_id', $soa)
+                ->latest()
+                ->first();
+                
+            // check billing if initial fee
+            if ($billing->billing_type_id === $initialFee) {
+                $academicRecord = $billing->academicRecord;
+                if ($academicRecord->academic_record_status_id === Config::get('constants.academic_record_status.ENROLLED')) {
+                    throw ValidationException::withMessages([
+                        'non_field_error' => ["Initial/Registration Fee payment(s) cannot be cancelled because the student is already been enrolled."]
+                    ]);
+                }
+            }
+            
+            // check if billing soa is latest
+            if ($latestBilling && $latestBilling->id !== $billing->id) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ["Sorry, cancellation of payment is not allowed if there are new billing already created. You need to cancel/remove first all billing that were created."]
+                ]);
+            }
+
+            $billing->payments()->delete();
+            $billingStatusId = Config::get('constants.billing_status.UNPAID');
+            $billing->update([
+                'billing_status_id' => $billingStatusId
+            ]);
+            DB::commit();
+            return $billing;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during BillingService postPayment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }
