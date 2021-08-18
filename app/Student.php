@@ -158,7 +158,9 @@ class Student extends Model
             'level',
             'course',
             'semester',
-            'evaluation',
+            'evaluation' => function ($q) {
+                return $q->with('lastSchoolLevel');
+            },
             'application',
             'section',
             'studentType',
