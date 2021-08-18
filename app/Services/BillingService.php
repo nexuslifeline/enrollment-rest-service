@@ -484,7 +484,8 @@ class BillingService
             $billing->payments()->delete();
             $billingStatusId = Config::get('constants.billing_status.UNPAID');
             $billing->update([
-                'billing_status_id' => $billingStatusId
+                'billing_status_id' => $billingStatusId,
+                'is_forwarded' => 0
             ]);
             DB::commit();
             return $billing;
