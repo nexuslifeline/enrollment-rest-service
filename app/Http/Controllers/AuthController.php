@@ -86,6 +86,9 @@ class AuthController extends Controller
         // 'active_application',
         'has_open_academic_record',
         'latest_academic_record',
+        'is_promote_candidate',
+        'promote_level',
+        'promote_semester'
         // 'active_transcript_record',
         // 'active_evaluation'
       ]);

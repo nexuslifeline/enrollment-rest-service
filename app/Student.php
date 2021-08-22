@@ -280,4 +280,56 @@ class Student extends Model
     {
         return $this->hasMany('App\StudentGrade');
     }
+
+    public function getIsPromoteCandidateAttribute()
+    {
+        return true;
+    }
+
+    public function getPromoteLevelAttribute()
+    {
+        if ($this->is_promote_candidate) {
+            $currentLevelId = $this->latest_academic_record->level_id;
+            $currentSemesterId = $this->latest_academic_record->semester_id;
+            $semesters = Semester::where('id', '>', $currentSemesterId)->get();
+
+            if ($currentLevelId) {
+                // check if has next semester if not promote level
+                if (!$semesters) {
+                    return Level::where('id', '>', $currentLevelId)->first();
+                }
+
+                // check if next semester has subjects in curriculum
+                $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
+                $subjectsCount = $curriculum->subjects()->where('level_id', $currentLevelId)
+                    ->whereIn('semester_id', $semesters->pluck('id'))
+                    ->count();
+                if ($subjectsCount === 0) {
+                    return Level::where('id', '>', $currentLevelId)->first();
+                }
+            }
+        }
+        return null;
+    }
+
+    public function getPromoteSemesterAttribute()
+    {
+        if ($this->is_promote_candidate) {
+            $currentLevelId = $this->latest_academic_record->level_id;
+            $currentSemesterId = $this->latest_academic_record->semester_id;
+            if ($currentSemesterId) {
+                if ($this->promote_level) {
+                    return Semester::first();
+                } else {
+                    $semesters = Semester::where('id', '>', $currentSemesterId);
+                    $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
+                    $semesterId = $curriculum->subjects()->where('level_id', $currentLevelId)
+                    ->whereIn('semester_id', $semesters->pluck('id'))
+                    ->min('semester_id');
+                    return Semester::find($semesterId);
+                }
+            }
+        }
+        return null;
+    }
 }
