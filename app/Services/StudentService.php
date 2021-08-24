@@ -193,7 +193,7 @@ class StudentService
         DB::beginTransaction();
         try {
             $studentId = $data['id'] ?? null;
-            $isManual = $studentId ? 1 : 0; // set is_manual for manually registered
+            // $isManual = $studentId ? 1 : 0; // set is_manual for manually registered
             $academicRecord = $data['academic_record'] ?? false;
             $academicRecordSubjects = $data['academic_record_subjects'] ?? false;
             $user = $data['user'] ?? false;
@@ -210,8 +210,8 @@ class StudentService
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'middle_name' => $data['middle_name'],
-                'mobile_no' => $data['mobile_no'],
-                'is_manual' =>  $isManual
+                'mobile_no' => $data['mobile_no']
+                // 'is_manual' =>  $isManual
             ]);
 
             if ($academicRecord) {
@@ -386,12 +386,10 @@ class StudentService
                 $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
-            $addressFields = ['address'];
+            $studentFields = ['complete_address', 'city', 'barangay', 'region'];
 
-            if (in_array($orderBy, $addressFields)) {
-                $query->leftJoin('student_addresses', 'student_addresses.student_id', '=', 'students.id')
-                ->leftJoin('countries', 'countries.id', '=', 'student_addresses.current_country_id')
-                ->orderByRaw('CONCAT_WS(current_house_no_street, current_barangay, current_city_town, current_province, countries.name) '.$sort);
+            if (in_array($orderBy, $studentFields)) {
+                $query->orderByStudent($orderBy, $sort);
             } else {
                 $query->orderBy($orderBy, $sort);
             }
@@ -753,7 +751,7 @@ class StudentService
                     // 'school_year_id' =>  $activeSchoolYear['id'],
                     // 'application_step_id' =>  $activeApplication['application_step_id'],
                     // 'application_status_id' =>  $activeApplication['application_status_id'],
-                    'is_manual' =>  $isManual
+                    // 'is_manual' =>  $isManual
                 ])->academicRecord()->create([
                     'school_year_id' => $activeSchoolYear['id'], // active_school_year_id
                     'student_id' => $student->id,

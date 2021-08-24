@@ -53,6 +53,21 @@ class CurriculumService
 
             $query->schoolCategoryFilter();
 
+            // order by
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with(
+                    $ordering,
+                    '-'
+                );
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $query->orderBy($orderBy, $sort);
+
             $curriculums = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();

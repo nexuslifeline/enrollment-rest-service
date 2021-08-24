@@ -54,7 +54,6 @@ class EvaluationService
                             if ($courseId) $query->where('course_id', $courseId);
                             if ($schoolCategoryId) $query->where('school_category_id', $schoolCategoryId);
                             if ($levelId) $query->where('level_id', $levelId);
-                            $query->where('is_manual', false);
                             return $query;
                         }
                     );
@@ -86,22 +85,23 @@ class EvaluationService
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
 
-            $studentFields = ['first_name', 'last_name'];
+            $studentFields = ['first_name', 'last_name', 'complete_address', 'city', 'barangay', 'region'];
             $courseFields = ['course_name'];
             $levelFields = ['level_name'];
+            $studentCategoryFields = ['student_category_name'];
 
             if (in_array($orderBy, $studentFields)) {
                 $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
-                    ->leftJoin('students', 'students.id', '=', 'academic_records.student_id')
-                    ->orderBy('students.' . $orderBy, $sort);
+                    ->orderByStudent($orderBy, $sort);
             } else if (in_array($orderBy, $courseFields)) {
                 $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
-                    ->leftJoin('courses', 'courses.id', '=', 'academic_records.course_id')
-                    ->orderBy('courses.name', $sort);
+                    ->orderByCourse($orderBy, $sort);
             } else if (in_array($orderBy, $levelFields)) {
                 $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
-                    ->leftJoin('levels', 'levels.id', '=', 'academic_records.level_id')
-                    ->orderBy('levels.name', $sort);
+                    ->orderByLevel($orderBy, $sort);
+            } else if (in_array($orderBy, $studentCategoryFields)) {
+                $query->leftJoin('academic_records', 'academic_records.id', '=', 'academic_record_id')
+                    ->orderByStudentCategory($orderBy, $sort);
             } else {
                 $query->orderBy($orderBy, $sort);
             }

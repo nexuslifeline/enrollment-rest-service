@@ -29,6 +29,21 @@ class CourseService
                 });
             });
 
+            // order by
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with(
+                    $ordering,
+                    '-'
+                );
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $query->orderBy($orderBy, $sort);
+
             $courses = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();

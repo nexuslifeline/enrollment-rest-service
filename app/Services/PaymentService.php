@@ -66,11 +66,24 @@ class PaymentService
             });
 
             // order by
-            $orderBy = $filters['order_by'] ?? false;
-            $query->when($orderBy, function ($q) use ($orderBy, $filters) {
-                $sort = $filters['sort'] ?? 'ASC';
-                return $q->orderBy($orderBy, $sort);
-            });
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering,
+                    '-'
+                );
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $studentFields = ['first_name', 'last_name', 'complete_address', 'city', 'barangay', 'region'];
+
+            if (in_array($orderBy, $studentFields)) {
+                $query->orderByStudent($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
             $payments = $isPaginated
                 ? $query->paginate($perPage)
@@ -110,17 +123,17 @@ class PaymentService
                 $student = $payment->student;
                 $academicRecord = $student->academicRecords()->get()->last();
                 // update application status and step to completed and waiting
-                if ($academicRecord['is_manual'] === 1) {
-                    // $academicRecord->application->update([
-                    //     'application_status_id' => 7,
-                    //     'application_step_id' => 10
-                    // ]);
+                // if ($academicRecord['is_manual'] === 1) {
+                //     // $academicRecord->application->update([
+                //     //     'application_status_id' => 7,
+                //     //     'application_step_id' => 10
+                //     // ]);
 
-                    //update academic record status to enrolled
-                    $academicRecord->update([
-                        'academic_record_status_id' => $enrolledStatus
-                    ]);
-                }
+                //     //update academic record status to enrolled
+                //     $academicRecord->update([
+                //         'academic_record_status_id' => $enrolledStatus
+                //     ]);
+                // }
                 //check if student is new or old
                 if ($academicRecord['student_category_id'] === 1) {
                     $students = Student::with(['academicRecords'])

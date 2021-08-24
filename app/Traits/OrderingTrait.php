@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Traits;
+
+use Illuminate\Support\Facades\Log;
+
+trait OrderingTrait
+{
+  public function scopeOrderByStudent($query, $orderBy, $sort)
+  {
+    $addressFields = ['complete_address', 'city', 'barangay', 'region', 'province'];
+    if ($this->getTable() !== 'students') {
+      $query->leftJoin('students', 'students.id', '=', 'student_id');
+    }
+    if (!in_array($orderBy, $addressFields)) {
+      return $query->orderBy('students.' . $orderBy, $sort);
+    } else {
+      return $query->leftJoin('student_addresses', 'student_addresses.student_id', '=', 'students.id')
+        ->orderBy('student_addresses.current_'.$orderBy, $sort);
+    }
+  }
+
+  public function scopeOrderByLevel($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'level_name' ? 'name' : $orderBy;
+    $query->leftJoin('levels', 'levels.id', '=', 'level_id')
+      ->orderBy($orderBy, $sort);
+  }
+
+  public function scopeOrderByCourse($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'course_name' ? 'name' : $orderBy;
+    return $query->leftJoin('courses', 'courses.id', '=', 'course_id')
+      ->orderBy($orderBy, $sort);
+  }
+
+  public function scopeOrderByStudentCategory($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'student_category_name' ? 'name' : $orderBy;
+    return $query->leftJoin('student_categories', 'student_categories.id', '=', 'student_category_id')
+    ->orderBy($orderBy, $sort);
+  }
+}

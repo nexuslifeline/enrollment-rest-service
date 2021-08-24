@@ -67,5 +67,36 @@ return [
   'student_type' => [
     'REGULAR' => 1,
     'IRREGULAR' => 2
-  ]
+  ],
+  'semesters' => [
+    ['id' => 1, 'name' => '1st Sem', 'description' => 'First Semester'],
+    ['id' => 2, 'name' => '2nd Sem', 'description' => 'Second Semester'],
+    ['id' => 3, 'name' => '3rd Sem', 'description' => 'Third Semester'],
+    ['id' => 4, 'name' => '4th Sem', 'description' => 'Summer']
+  ],
+  'levels' => [
+    ['id' => 1, 'name' => 'Kinder 1'],
+    ['id' => 2, 'name' => 'Kinder 2'],
+    ['id' => 3, 'name' => 'Grade 1'],
+    ['id' => 4, 'name' => 'Grade 2'],
+    ['id' => 5, 'name' => 'Grade 3'],
+    ['id' => 6, 'name' => 'Grade 4'],
+    ['id' => 7, 'name' => 'Grade 5'],
+    ['id' => 8, 'name' => 'Grade 6'],
+    ['id' => 9, 'name' => 'Grade 7'],
+    ['id' => 10, 'name' => 'Grade 8'],
+    ['id' => 11, 'name' => 'Grade 9'],
+    ['id' => 12, 'name' => 'Grade 10'],
+    ['id' => 13, 'name' => 'Grade 11'],
+    ['id' => 14, 'name' => 'Grade 12'],
+    ['id' => 15, 'name' => 'First Year College'],
+    ['id' => 16, 'name' => 'Second Year College'],
+    ['id' => 17, 'name' => 'Third Year College'],
+    ['id' => 18, 'name' => 'Fourth Year College'],
+    ['id' => 19, 'name' => 'Fifth Year College'],
+    ['id' => 20, 'name' => 'Masters Degree'],
+    ['id' => 21, 'name' => 'Doctorate Degree'],
+    ['id' => 22, 'name' => 'Short Term Program'],
+    ['id' => 23, 'name' => 'Nursery'],
+  ],
 ];

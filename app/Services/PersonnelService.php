@@ -38,6 +38,21 @@ class PersonnelService
                 return $q->studentGrades($studentGradesStatusId);
             });
 
+            // order by
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filter['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with(
+                    $ordering,
+                    '-'
+                );
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $query->orderBy($orderBy, $sort);
+
             $personnels = $isPaginated
                 ? $query->paginate($perPage)
                 : $query->get();

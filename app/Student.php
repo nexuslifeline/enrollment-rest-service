@@ -10,13 +10,15 @@ use App\StudentFamily;
 use App\StudentAddress;
 use Illuminate\Support\Arr;
 use App\StudentPreviousEducation;
+use App\Traits\OrderingTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class Student extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, OrderingTrait;
     protected $guarded = ['id', 'name', 'current_address']; //added name on guarded to prevent updating, coz we already have name attrib
     protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'requirement_percentage'];
     protected $hidden = [
@@ -283,7 +285,7 @@ class Student extends Model
 
     public function getIsPromoteCandidateAttribute()
     {
-        return true;
+        return $this->latest_academic_record ? true : false;
     }
 
     public function getPromoteLevelAttribute()
@@ -291,12 +293,12 @@ class Student extends Model
         if ($this->is_promote_candidate) {
             $currentLevelId = $this->latest_academic_record->level_id;
             $currentSemesterId = $this->latest_academic_record->semester_id;
-            $semesters = Semester::where('id', '>', $currentSemesterId)->get();
-
+            $semesters = $currentSemesterId ? collect(Config::get('constants.semesters'))->where('id', '>', $currentSemesterId) : null;
+            $levels = collect(Config::get('constants.levels'));
             if ($currentLevelId) {
                 // check if has next semester if not promote level
                 if (!$semesters) {
-                    return Level::where('id', '>', $currentLevelId)->first();
+                    return $levels->where('id', '>', $currentLevelId)->first();
                 }
 
                 // check if next semester has subjects in curriculum
@@ -305,7 +307,7 @@ class Student extends Model
                     ->whereIn('semester_id', $semesters->pluck('id'))
                     ->count();
                 if ($subjectsCount === 0) {
-                    return Level::where('id', '>', $currentLevelId)->first();
+                    return $levels->where('id', '>', $currentLevelId)->first();
                 }
             }
         }
@@ -317,16 +319,17 @@ class Student extends Model
         if ($this->is_promote_candidate) {
             $currentLevelId = $this->latest_academic_record->level_id;
             $currentSemesterId = $this->latest_academic_record->semester_id;
+            $semesters = collect(Config::get('constants.semesters'));
             if ($currentSemesterId) {
                 if ($this->promote_level) {
-                    return Semester::first();
+                    return $semesters->first();
                 } else {
-                    $semesters = Semester::where('id', '>', $currentSemesterId);
+                    $semesters = $semesters->where('id', '>', $currentSemesterId);
                     $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
                     $semesterId = $curriculum->subjects()->where('level_id', $currentLevelId)
                     ->whereIn('semester_id', $semesters->pluck('id'))
                     ->min('semester_id');
-                    return Semester::find($semesterId);
+                    return $semesters->where('id', $semesterId)->first();
                 }
             }
         }

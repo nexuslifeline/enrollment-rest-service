@@ -142,10 +142,10 @@ class AcademicRecordService
             // });
 
             //is manual
-            $isManual = $filters['is_manual'] ?? false;
-            $query->when($isManual, function ($query) use ($isManual) {
-                return $query->where('is_manual', $isManual);
-            });
+            // $isManual = $filters['is_manual'] ?? false;
+            // $query->when($isManual, function ($query) use ($isManual) {
+            //     return $query->where('is_manual', $isManual);
+            // });
 
             //manual steps
             $manualStepId = $filters['manual_step_id'] ?? false;
@@ -193,20 +193,21 @@ class AcademicRecordService
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
 
-            $studentFields = ['first_name', 'last_name'];
+            $studentFields = ['first_name', 'last_name', 'complete_address', 'city', 'barangay', 'region'];
             $courseFields = ['course_name'];
             $levelFields = ['level_name'];
-
+            $studentCategoryFields = ['student_category_name'];
+            
             if (in_array($orderBy, $studentFields)) {
-                $query->leftJoin('students', 'students.id', '=', 'student_id')
-                    ->orderBy('students.' . $orderBy, $sort);
+                $query->orderByStudent($orderBy, $sort);
             } else if (in_array($orderBy, $courseFields)) {
-                $query->leftJoin('courses', 'courses.id', '=', 'course_id')
-                    ->orderBy('courses.name', $sort);
+                $query->orderByCourse($orderBy, $sort);
             } else if (in_array($orderBy, $levelFields)) {
-                $query->leftJoin('levels', 'levels.id', '=', 'level_id')
-                    ->orderBy('levels.name', $sort);
-            } else {
+                $query->orderByLevel($orderBy, $sort);
+            } else if (in_array($orderBy, $studentCategoryFields)) {
+                $query->orderByStudentCategory($orderBy, $sort);
+            } 
+            else {
                 $query->orderBy($orderBy, $sort);
             }
             
@@ -323,8 +324,7 @@ class AcademicRecordService
                 'school_category_id' => $schoolCategoryId,
                 'school_year_id' => $schoolYearId,
                 'academic_record_status_id' => 1,
-                'manual_step_id' => 1,
-                'is_manual' => 1
+                'manual_step_id' => 1
             ]);
 
             DB::commit();
