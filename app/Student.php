@@ -285,54 +285,99 @@ class Student extends Model
 
     public function getIsPromoteCandidateAttribute()
     {
-        return $this->latest_academic_record ? true : false;
+        if (!$this->latest_academic_record) {
+            return false;
+        }
+
+        $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+        if (!$this->latest_academic_record->academic_record_status !== $enrolledStatus) {
+            return false;
+        }
+
+        // Note! add other criteria here
+        // ie. completed curriculum, no failing grades, clearance, etc.
+
+        return true;
     }
 
     public function getPromoteLevelAttribute()
     {
-        if ($this->is_promote_candidate) {
-            $currentLevelId = $this->latest_academic_record->level_id;
-            $currentSemesterId = $this->latest_academic_record->semester_id;
-            $semesters = $currentSemesterId ? collect(Config::get('constants.semesters'))->where('id', '>', $currentSemesterId) : null;
-            $levels = collect(Config::get('constants.levels'));
-            if ($currentLevelId) {
-                // check if has next semester if not promote level
-                if (!$semesters) {
-                    return $levels->where('id', '>', $currentLevelId)->first();
-                }
-
-                // check if next semester has subjects in curriculum
-                $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
-                $subjectsCount = $curriculum->subjects()->where('level_id', $currentLevelId)
-                    ->whereIn('semester_id', $semesters->pluck('id'))
-                    ->count();
-                if ($subjectsCount === 0) {
-                    return $levels->where('id', '>', $currentLevelId)->first();
-                }
-            }
+        if (!$this->is_promote_candidate) {
+            return null;
         }
-        return null;
+
+        $currentLevelId = $this->latest_academic_record->level_id;
+        if (!$currentLevelId) {
+            return null;
+        }
+
+        $currentSemesterId = $this->latest_academic_record->semester_id;
+        $semesters = $currentSemesterId
+            ? collect(Config::get('constants.semesters'))->where('id', '>', $currentSemesterId)
+            : null;
+        $levels = collect(Config::get('constants.levels'));
+
+        if (!$semesters) {
+            return $levels->where('id', '>', $currentLevelId)->first();
+        }
+
+        // check if next semester has subjects in curriculum
+        $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
+
+        if (!$curriculum) {
+            return null;
+        }
+
+        $subjects = $curriculum->subjects();
+        if (!$subjects) {
+            return null;
+        }
+
+        $subjectsCount = $subjects->where('level_id', $currentLevelId)
+            ->whereIn('semester_id', $semesters->pluck('id'))
+            ->count();
+
+        if ($subjectsCount === 0) {
+            return $levels->where('id', '>', $currentLevelId)->first();
+        }
+
     }
 
     public function getPromoteSemesterAttribute()
     {
-        if ($this->is_promote_candidate) {
-            $currentLevelId = $this->latest_academic_record->level_id;
-            $currentSemesterId = $this->latest_academic_record->semester_id;
-            $semesters = collect(Config::get('constants.semesters'));
-            if ($currentSemesterId) {
-                if ($this->promote_level) {
-                    return $semesters->first();
-                } else {
-                    $semesters = $semesters->where('id', '>', $currentSemesterId);
-                    $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
-                    $semesterId = $curriculum->subjects()->where('level_id', $currentLevelId)
-                    ->whereIn('semester_id', $semesters->pluck('id'))
-                    ->min('semester_id');
-                    return $semesters->where('id', $semesterId)->first();
-                }
-            }
+        if (!$this->is_promote_candidate) {
+            return null;
         }
-        return null;
+
+        $currentLevelId = $this->latest_academic_record->level_id;
+        if (!$currentLevelId) {
+            return null;
+        }
+
+        $currentSemesterId = $this->latest_academic_record->semester_id;
+        if (!$currentSemesterId) {
+            return null;
+        }
+
+        $semesters = collect(Config::get('constants.semesters'));
+        if ($this->promote_level) {
+            return $semesters->first();
+        }
+
+        $availableSems = $semesters->where('id', '>', $currentSemesterId);
+        $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
+        if (!$curriculum) {
+            return null;
+        }
+
+        $subjects = $curriculum->subjects();
+        if (!$subjects) {
+            return null;
+        }
+
+        $semesterId = $subjects->where('level_id', $currentLevelId)
+            ->whereIn('semester_id', $availableSems->pluck('id'))
+            ->min('semester_id');
+        return $availableSems->where('id', $semesterId)->first();
     }
 }
