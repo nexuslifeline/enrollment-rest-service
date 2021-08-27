@@ -709,15 +709,17 @@ class AcademicRecordService
             $data['school_category_id'] = $level->school_category_id;
 
             if ($academicRecord->is_admission) {
-                $curriculum = Curriculum::where('course_id', $academicRecord->course_id)
-                    ->whereHas('subjects', function ($q) use ($academicRecord) {
-                        return $q->where('level_id', $academicRecord->level_id)
-                            ->where('semester_id', $academicRecord->semester_id)
-                            ->where('curriculum_subjects.school_category_id', $academicRecord->school_category_id);
+                $curriculum = Curriculum::where('course_id', $data['course_id'])
+                    ->whereHas('subjects', function ($q) use ($data, $level) {
+                        return $q->where('level_id', $data['level_id'])
+                            ->where('semester_id', $data['semester_id'])
+                            ->where('curriculum_subjects.school_category_id', $level->school_category_id);
                     })->where('active', 1)->first();
-                $academicRecord->transcriptRecord->update([
-                    'curriculum_id' => $curriculum->id
-                ]);
+                if ($curriculum) {
+                    $academicRecord->transcriptRecord->update([
+                        'curriculum_id' => $curriculum->id
+                    ]);
+                }
             }
 
             $academicRecord->update($data);
