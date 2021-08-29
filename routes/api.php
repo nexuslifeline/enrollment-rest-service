@@ -110,6 +110,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/academic-records/{academicRecordId}/student-fees', 'StudentFeeController@getStudentFeeOfAcademicRecord');
         Route::get('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@getSubjects');
         Route::put('/academic-records/{academicRecordId}/subjects/{subjectId}', 'AcademicRecordController@updateSubject');
+        Route::delete('/academic-records/{academicRecordId}/subjects/{subjectId}', 'AcademicRecordController@deleteSubject');
         //Route::get('/academic-records/{academicRecordId}/subjects', 'SubjectController@getSubjectsOfAcademicRecord'); // should be removed once frontend is updated
         Route::get('/academic-records/{academicRecordId}/academic-subject-schedules', 'SubjectController@getSubjectsOfAcademicRecordWithSchedules');
         Route::post('/academic-records/{academicRecordId}/subjects', 'AcademicRecordController@syncSubjectsOfAcademicRecord');
@@ -260,6 +261,9 @@ Route::group(['prefix' => 'v1'], function () {
 
         //school year
         Route::post('school-years/{id}/generate-batch-billing', 'SchoolYearController@generateBatchBilling');
+
+        //student
+        Route::get('sections/{sectionId}/subjects/{subjectId}/students', 'StudentController@getStudentOfSectionAndSubject');
     });
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');

@@ -221,4 +221,17 @@ class StudentController extends Controller
         );
     }
 
+    public function getStudentOfSectionAndSubject(int $sectionId, int $subjectId, Request $request)
+    {
+        $studentService = new StudentService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $students = $studentService->getStudentOfSectionAndSubject($sectionId, $subjectId, $isPaginated, $perPage, $filters);
+
+        return StudentResource::collection(
+            $students
+        );
+    }
+
 }

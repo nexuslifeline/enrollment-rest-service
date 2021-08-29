@@ -201,6 +201,13 @@ class AcademicRecordController extends Controller
         return new AcademicRecordResource($academicRecord);
     }
 
+    public function deleteSubject($academicRecordId, $subjectId)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $academicRecordService->deleteSubject($academicRecordId, $subjectId);
+        return response()->json([], 204);
+    }
+
     public function quickEnroll(AcademicRecordQuickEnrollRequest $request, int $studentId)
     {
         $academicRecordService = new AcademicRecordService();

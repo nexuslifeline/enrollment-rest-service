@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Scopes\SchoolCategoryScope;
+use App\Traits\OrderingTrait;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class Curriculum extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, OrderingTrait;
     protected $table = 'curriculums';
     protected $guarded = ['id'];
     protected $hidden = [

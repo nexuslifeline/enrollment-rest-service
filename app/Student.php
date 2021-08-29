@@ -176,6 +176,12 @@ class Student extends Model
         return $academicRecord->latest()->first();
     }
 
+    public function getHasInitialBillingAttribute()
+    {
+        $academicRecord = $this->latest_academic_record->append('has_initial_billing');
+        return $academicRecord->has_initial_billing;
+    }
+
     public function getIsEnrolledInActiveSyAttribute()
     {
         return $this->latest_academic_record->schoolYear->is_active ? true : false;

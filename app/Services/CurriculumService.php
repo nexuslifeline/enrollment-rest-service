@@ -20,7 +20,7 @@ class CurriculumService
                 return $q->whereHas('schoolCategories', function ($q) use ($schoolCategoryId) {
                     return $q->where('school_category_id', $schoolCategoryId);
                 });
-            });
+            })->select('curriculums.*');
 
             $courseId = $filters['course_id'] ?? false;
             $query->when($courseId, function($q) use ($courseId) {
@@ -66,7 +66,18 @@ class CurriculumService
                 $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
-            $query->orderBy($orderBy, $sort);
+
+            $schoolCategoryFields = ['school_category_name'];
+            $courseFields = ['course_name'];
+            // if (in_array($orderBy, $schoolCategoryFields)) {
+            //     $query->orderBySchoolCategory($orderBy, $sort);
+            // } else 
+            if (in_array($orderBy, $courseFields)) {
+                $query->orderByCourse($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
+
 
             $curriculums = $isPaginated
                 ? $query->paginate($perPage)

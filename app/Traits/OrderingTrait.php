@@ -40,4 +40,18 @@ trait OrderingTrait
     return $query->leftJoin('student_categories', 'student_categories.id', '=', 'student_category_id')
     ->orderBy($orderBy, $sort);
   }
+
+  public function scopeOrderBySchoolCategory($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'school_category_name' ? 'name' : $orderBy;
+    if ($this->getTable() == 'curriculums') {
+      // $query->join('curriculum_subjects', 'curriculum_subjects.curriculum_id', '=', 'curriculums.id')
+      // ->leftJoin('school_categories', 'school_categories.id', '=', 'school_category_id')
+      // ->orderBy('school_categories.' . $orderBy, $sort)
+      // ->groupBy('curriculums.id');
+    } else {
+      return $query->leftJoin('school_categories', 'school_categories.id', '=', 'school_category_id')
+        ->orderBy('school_categories.' . $orderBy, $sort);
+    }
+  }
 }

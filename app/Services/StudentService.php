@@ -414,7 +414,8 @@ class StudentService
         try {
             $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
             $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
-            $student->append('latest_academic_record', 'has_open_academic_record');
+            $student->append('latest_academic_record', 'has_open_academic_record', 'has_initial_billing');
+            
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -972,7 +973,7 @@ class StudentService
     //         $paymentsCount = Payment::where('student_id', $studentId)
     //             ->where('payment_status_id', $pending)
     //             ->count();
-            
+
     //         return $paymentsCount;
     //     } catch (Exception $e) {
     //         Log::info('Error occured during StudentService getPendingPaymentsCount method call: ');
@@ -980,5 +981,63 @@ class StudentService
     //         throw $e;
     //     }
     // }
+
+    public function getStudentOfSectionAndSubject(int $sectionId, int $subjectId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = Student::with(['address', 'family', 'education', 'photo', 'user'
+            ])
+            ->select('students.*');
+
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $query->whereHas('academicRecords', function ($query) use ($sectionId, $subjectId, $enrolledStatus) {
+                return $query->where('academic_record_status_id', $enrolledStatus)->latest()->limit(1)
+                    ->whereHas('subjects', function ($q) use ($sectionId, $subjectId) {
+                        $q->when($sectionId, function ($q) use ($sectionId) {
+                            return $q->where('section_id', $sectionId);
+                        })->when($subjectId,
+                            function ($q) use ($subjectId) {
+                                return $q->where('subject_id', $subjectId);
+                            }
+                        );
+                    });
+            });
+
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function ($query) use ($criteria) {
+                $query->whereLike($criteria);
+            });
+
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering, '-');
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $studentFields = ['complete_address', 'city', 'barangay', 'region'];
+
+            if (in_array($orderBy, $studentFields)) {
+                $query->orderByStudent($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
+
+
+            $students = $isPaginated
+            ? $query->paginate($perPage)
+                : $query->get();
+
+            $students->append(['latest_academic_record', 'has_open_academic_record']);
+
+            return $students;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService getStudentOfSectionAndSubject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 
 }

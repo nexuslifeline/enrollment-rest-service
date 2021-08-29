@@ -610,8 +610,17 @@ class AcademicRecordService
     public function updateSubject(array $data = [], int $academicRecordId, int $subjectId)
     {
         try {
-            $subject = AcademicRecord::find($academicRecordId)
-                ->subjects()
+            $academicRecord = AcademicRecord::find($academicRecordId);
+
+            if (Arr::exists($data, 'is_dropped') && $data['is_dropped'] === 1) {
+                if (!$academicRecord->schoolYear->is_active) {
+                    throw ValidationException::withMessages([
+                        'non_field_error' => ["Subject cannot be mark as dropped because the subject's academic school year is not active."]
+                    ]);
+                }
+            }
+
+            $subject = $academicRecord->subjects()
                 ->where('subject_id', $subjectId)
                 ->first();
 
@@ -631,6 +640,33 @@ class AcademicRecordService
             throw $e;
         }
 
+    }
+
+    public function deleteSubject(int $academicRecordId, int $subjectId)
+    {
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $academicRecordStatuses = [
+                Config::get('constants.academic_record_status.ASSESSMENT_APPROVED'),
+                Config::get('constants.academic_record_status.PAYMENT_SUBMITTED'),
+                Config::get('constants.academic_record_status.ENROLLED'),
+                Config::get('constants.academic_record_status.CLOSED'),
+            ];
+            if (in_array($academicRecord->academic_record_status_id, $academicRecordStatuses)) {
+                if (!$academicRecord->schoolYear->is_active) {
+                    throw ValidationException::withMessages([
+                        'non_field_error' => ["Subject cannot be deleted."]
+                    ]);
+                }
+            }
+            $academicRecord->subjects()
+                ->wherePivot('subject_id', $subjectId)
+                ->detach();
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjects method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
     }
 
     public function syncSubjectsOfAcademicRecord(int $academicRecordId, array $subjects)

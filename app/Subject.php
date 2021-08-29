@@ -4,13 +4,14 @@ namespace App;
 
 use App\Section;
 use App\Scopes\SchoolCategoryScope;
+use App\Traits\OrderingTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subject extends Model
 {
     //
-    use SoftDeletes;
+    use SoftDeletes, OrderingTrait;
     protected $guarded = ['id'];
     protected $hidden = [
         'created_at',

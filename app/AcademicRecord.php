@@ -6,6 +6,8 @@ use App\Scopes\SchoolCategoryScope;
 use App\Traits\OrderingTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class AcademicRecord extends Model
 {
@@ -126,5 +128,12 @@ class AcademicRecord extends Model
     public function billings()
     {
         return $this->hasMany('App\Billing');
+    }
+
+    public function getHasInitialBillingAttribute()
+    {
+        $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
+        Log::info($this->billings->where('billing_type_id', $initialBillingType) ? true : false);
+        return true;
     }
 }

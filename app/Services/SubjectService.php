@@ -25,7 +25,7 @@ class SubjectService
             $schoolCategoryId = $filters['school_category_id'] ?? false;
             $query->when($schoolCategoryId, function ($q) use ($schoolCategoryId) {
                 return $q->where('school_category_id', $schoolCategoryId);
-            });
+            })->select('subjects.*');
 
             $sectionId = $filters['section_id'] ?? false;
             $query->when($sectionId, function ($q) use ($sectionId) {
@@ -82,7 +82,14 @@ class SubjectService
                 $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
-            $query->orderBy($orderBy, $sort);
+
+            $schoolCategoryFields = ['school_category_name'];
+
+            if (in_array($orderBy, $schoolCategoryFields)) {
+                $query->orderBySchoolCategory($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
             $subjects = $isPaginated
                 ? $query->paginate($perPage)
