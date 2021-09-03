@@ -20,7 +20,7 @@ class Student extends Model
 {
     use SoftDeletes, OrderingTrait;
     protected $guarded = ['id', 'name', 'current_address']; //added name on guarded to prevent updating, coz we already have name attrib
-    protected $appends = ['name', 'age', 'current_address', 'permanent_address', 'latest_academic_record', 'requirement_percentage'];
+    protected $appends = ['name', 'age', 'current_address', 'permanent_address'];
     protected $hidden = [
         'created_at',
         'deleted_at',
@@ -150,41 +150,50 @@ class Student extends Model
     {
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
         $closedStatus = Config::get('constants.academic_record_status.CLOSED');
-        return $this->latest_academic_record && !in_array($this->latest_academic_record->academic_record_status_id, [$enrolledStatus, $closedStatus]) ? true : false ;
+
+        $latestAcademicRecord = $this->latestAcademicRecord()->first();
+        return $latestAcademicRecord && !in_array($latestAcademicRecord->academic_record_status_id, [$enrolledStatus, $closedStatus]) ? true : false ;
     }
 
-    public function getLatestAcademicRecordAttribute()
+    public function latestAcademicRecord()
     {
-        $academicRecord = $this->academicRecords();
-        $academicRecord->with([
-            'level',
-            'course',
-            'semester',
-            'evaluation' => function ($q) {
-                return $q->with('lastSchoolLevel');
-            },
-            'application',
-            'section',
-            'studentType',
-            'studentFee',
-            'schoolCategory',
-            'transcriptRecord' => function ($q) {
-                return $q->with('curriculum');
-            },
-            'schoolYear'
-        ]);
-        return $academicRecord->latest()->first();
+        // return $this->hasOne('App\AcademicRecord')->latest()->first();
+        return $this->hasOne('App\AcademicRecord')->latest();
     }
 
-    public function getHasInitialBillingAttribute()
-    {
-        $academicRecord = $this->latest_academic_record->append('has_initial_billing');
-        return $academicRecord->has_initial_billing;
-    }
+    // public function getLatestAcademicRecordAttribute()
+    // {
+    //     $academicRecord = $this->academicRecords();
+    //     $academicRecord->with([
+    //         'level',
+    //         'course',
+    //         'semester',
+    //         'evaluation' => function ($q) {
+    //             return $q->with('lastSchoolLevel');
+    //         },
+    //         'application',
+    //         'section',
+    //         'studentType',
+    //         'studentFee',
+    //         'schoolCategory',
+    //         'transcriptRecord' => function ($q) {
+    //             return $q->with('curriculum');
+    //         },
+    //         'schoolYear'
+    //     ]);
+    //     return $academicRecord->latest()->first();
+    // }
+
+    // public function getHasInitialBillingAttribute()
+    // {
+    //     $academicRecord = $this->latest_academic_record->append('has_initial_billing');
+    //     return $academicRecord->has_initial_billing;
+    // }
 
     public function getIsEnrolledInActiveSyAttribute()
     {
-        return $this->latest_academic_record->schoolYear->is_active ? true : false;
+        $latestAcademicRecord = $this->latestAcademicRecord()->first();
+        return $latestAcademicRecord->schoolYear->is_active ? true : false;
     }
 
     // public function getActiveAcademicRecordAttribute()
@@ -250,19 +259,19 @@ class Student extends Model
         return null;
     }
 
-    public function getRequirementPercentageAttribute()
-    {
-        $academicRecord = $this->getLatestAcademicRecordAttribute();
-        $percentage = 0;
-        if ($academicRecord) {
-            $count = Requirement::where('school_category_id', $academicRecord->school_category_id)->count();
-            $studentRequirements = $this->requirements()->wherePivot('school_category_id', $academicRecord->school_category_id)->count();
-            if ($count > 0) {
-                $percentage = number_format(($studentRequirements / $count) * 100, 2);
-            }
-        }
-        return $percentage;
-    }
+    // public function getRequirementPercentageAttribute()
+    // {
+    //     $academicRecord = $this->getLatestAcademicRecordAttribute();
+    //     $percentage = 0;
+    //     if ($academicRecord) {
+    //         $count = Requirement::where('school_category_id', $academicRecord->school_category_id)->count();
+    //         $studentRequirements = $this->requirements()->wherePivot('school_category_id', $academicRecord->school_category_id)->count();
+    //         if ($count > 0) {
+    //             $percentage = number_format(($studentRequirements / $count) * 100, 2);
+    //         }
+    //     }
+    //     return $percentage;
+    // }
 
     public function requirements()
     {
@@ -291,12 +300,13 @@ class Student extends Model
 
     public function getIsPromoteCandidateAttribute()
     {
-        if (!$this->latest_academic_record) {
+        $latestAcademicRecord =$this->latestAcademicRecord()->first(); 
+        if (!$latestAcademicRecord) {
             return false;
         }
 
         $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
-        if (!$this->latest_academic_record->academic_record_status !== $enrolledStatus) {
+        if (!$latestAcademicRecord->academic_record_status !== $enrolledStatus) {
             return false;
         }
 
@@ -312,12 +322,14 @@ class Student extends Model
             return null;
         }
 
-        $currentLevelId = $this->latest_academic_record->level_id;
+        $latestAcademicRecord =$this->latestAcademicRecord()->first();
+
+        $currentLevelId = $latestAcademicRecord->level_id;
         if (!$currentLevelId) {
             return null;
         }
 
-        $currentSemesterId = $this->latest_academic_record->semester_id;
+        $currentSemesterId = $latestAcademicRecord->semester_id;
         $semesters = $currentSemesterId
             ? collect(Config::get('constants.semesters'))->where('id', '>', $currentSemesterId)
             : null;
@@ -328,7 +340,7 @@ class Student extends Model
         }
 
         // check if next semester has subjects in curriculum
-        $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
+        $curriculum = $latestAcademicRecord->transcriptRecord->curriculum;
 
         if (!$curriculum) {
             return null;
@@ -355,12 +367,13 @@ class Student extends Model
             return null;
         }
 
-        $currentLevelId = $this->latest_academic_record->level_id;
+        $latestAcademicRecord =$this->latestAcademicRecord()->first();
+        $currentLevelId = $latestAcademicRecord->level_id;
         if (!$currentLevelId) {
             return null;
         }
 
-        $currentSemesterId = $this->latest_academic_record->semester_id;
+        $currentSemesterId = $latestAcademicRecord->semester_id;
         if (!$currentSemesterId) {
             return null;
         }
@@ -371,7 +384,7 @@ class Student extends Model
         }
 
         $availableSems = $semesters->where('id', '>', $currentSemesterId);
-        $curriculum = $this->latest_academic_record->transcriptRecord->curriculum;
+        $curriculum = $latestAcademicRecord->transcriptRecord->curriculum;
         if (!$curriculum) {
             return null;
         }

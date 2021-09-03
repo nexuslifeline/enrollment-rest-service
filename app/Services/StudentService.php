@@ -315,7 +315,7 @@ class StudentService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-            $query = Student::with(['address', 'family', 'education', 'photo', 'user'])
+            $query = Student::with(['address', 'family', 'education', 'photo', 'user', 'latestAcademicRecord'])
             ->select('students.*');
 
             $sectionId = $filters['section_id'] ?? false;
@@ -399,7 +399,10 @@ class StudentService
                 ? $query->paginate($perPage)
                 : $query->get();
 
-            $students->append(['latest_academic_record', 'has_open_academic_record']);
+            foreach($students as $student) {
+                $student->latestAcademicRecord->load(['level', 'course', 'semester']);
+            }
+            $students->append(['has_open_academic_record']);
 
             return $students;
         } catch (Exception $e) {
@@ -413,9 +416,32 @@ class StudentService
     {
         try {
             $student = Student::find($id)->makeVisible(['created_at', 'updated_at']);
-            $student->load(['address', 'family', 'education', 'photo', 'user', 'requirements', 'files']);
-            $student->append('latest_academic_record', 'has_open_academic_record', 'has_initial_billing');
-            
+            $student->load([
+                'address',
+                'family',
+                'education',
+                'photo',
+                'user',
+                'requirements',
+                'files',
+                'latestAcademicRecord'
+            ]);
+            // $student->append('latest_academic_record', 'has_open_academic_record');
+            $student->latestAcademicRecord->load([
+                'level',
+                'course',
+                'semester',
+                'evaluation' => function ($q) {
+                    return $q->with('lastSchoolLevel');
+                },
+                'application',
+                'section',
+                'studentType',
+                'schoolCategory',
+                'schoolYear'
+            ]);
+            $student->latestAcademicRecord->append(['has_initial_billing']);
+
             return $student;
         } catch (Exception $e) {
             Log::info('Error occured during StudentService get method call: ');
@@ -563,16 +589,29 @@ class StudentService
                 }
             }
 
-            $student->load(['address', 'family', 'education', 'photo', 'user',])->fresh();
-            $student->append([
-                'latest_academic_record',
-                'has_open_academic_record'
-                // 'active_application',
-                // 'academic_record',
-                // 'active_transcript_record',
-                // 'active_evaluation',
-                //'evaluation'
+            $student->load([
+                'address',
+                'family',
+                'education',
+                'photo',
+                'user',
+                'latestAcademicRecord'
+            ])->fresh();
+            $student->latestAcademicRecord->load([
+                'level',
+                'course',
+                'semester',
+                'evaluation' => function ($q) {
+                    return $q->with('lastSchoolLevel');
+                },
+                'application',
+                'section',
+                'studentType',
+                'schoolCategory',
+                'schoolYear'
             ]);
+            $student->latestAcademicRecord->append(['has_initial_billing']);
+            $student->append(['has_open_academic_record']);
             DB::commit();
             return $student;
         } catch (Exception $e) {

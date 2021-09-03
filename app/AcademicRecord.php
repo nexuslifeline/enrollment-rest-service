@@ -133,7 +133,7 @@ class AcademicRecord extends Model
     public function getHasInitialBillingAttribute()
     {
         $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
-        Log::info($this->billings->where('billing_type_id', $initialBillingType) ? true : false);
-        return true;
+        // Log::info($this->billings->where('billing_type_id', $initialBillingType) ? true : false);
+        return $this->billings->where('billing_type_id', $initialBillingType)->count() > 0;
     }
 }
