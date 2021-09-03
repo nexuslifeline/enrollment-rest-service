@@ -438,7 +438,8 @@ class StudentService
                 'section',
                 'studentType',
                 'schoolCategory',
-                'schoolYear'
+                'schoolYear',
+                'transcriptRecord'
             ]);
             $student->latestAcademicRecord->append(['has_initial_billing']);
 
@@ -608,7 +609,8 @@ class StudentService
                 'section',
                 'studentType',
                 'schoolCategory',
-                'schoolYear'
+                'schoolYear',
+                'transcriptRecord'
             ]);
             $student->latestAcademicRecord->append(['has_initial_billing']);
             $student->append(['has_open_academic_record']);
