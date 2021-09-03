@@ -80,6 +80,7 @@ class AuthController extends Controller
     $user->load(['userable', 'userable.photo']);
 
     if ($user->userable_type === 'App\\Student') {
+      $user->userable->load(['latestAcademicRecord']);
       $user->userable->append([
         'has_open_academic_record',
         'is_promote_candidate',
