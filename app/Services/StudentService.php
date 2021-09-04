@@ -400,7 +400,9 @@ class StudentService
                 : $query->get();
 
             foreach($students as $student) {
-                $student->latestAcademicRecord->load(['level', 'course', 'semester']);
+                if ($student->latestAcademicRecord) {
+                    $student->latestAcademicRecord->load(['level', 'course', 'semester']);
+                }
             }
             $students->append(['has_open_academic_record']);
 

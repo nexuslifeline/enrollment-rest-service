@@ -164,7 +164,7 @@ class SchoolYearService
 
                 $levelId = $data['level_id'] ?? false;
                 $studentFees->when($levelId, function ($query) use ($levelId, $schoolYearId, $enrolledStatus) {
-                    $query->whereHas('academicRecord', function ($q) use ($levelId, $enrolledStatus) {
+                    $query->whereHas('academicRecord', function ($q) use ($levelId, $enrolledStatus, $schoolYearId) {
                         return $q->where('level_id', $levelId)
                         ->where('school_year_id', $schoolYearId)
                         ->where('academic_record_status_id', $enrolledStatus);
@@ -172,7 +172,6 @@ class SchoolYearService
                 });
 
                 foreach ($studentFees->get() as $studentFee) {
-                    Log::info('1');
                     $billing = Billing::create([
                         'total_amount' => $studentFee->pivot->amount + $totalBillingItems,
                         'student_id' => $studentFee->academicRecord->student_id,
@@ -190,7 +189,10 @@ class SchoolYearService
                     ]);
 
                     foreach ($otherFees as $item) {
-                        $billing->billingItems()->create($item);
+                        $billing->billingItems()->create([
+                            'school_fee_id' => $item['school_fee_id'],
+                            'amount' => $item['amount']
+                        ]);
                     }
 
                     $billing->billingItems()->create([
@@ -238,7 +240,10 @@ class SchoolYearService
                     ]);
 
                     foreach ($otherFees as $item) {
-                        $billing->billingItems()->create($item);
+                        $billing->billingItems()->create([
+                            'school_fee_id' => $item['school_fee_id'],
+                            'amount' => $item['amount']
+                        ]);
                     }
                     $billings[] = $billing;
                 }
