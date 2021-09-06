@@ -324,7 +324,10 @@ class AcademicRecordService
                 'school_category_id' => $schoolCategoryId,
                 'school_year_id' => $schoolYearId,
                 'academic_record_status_id' => 1,
-                'manual_step_id' => 1
+                'manual_step_id' => 1,
+                'level_id' => $levelId,
+                'course_id' => $courseId,
+                'semester_id' => $semesterId
             ]);
 
             DB::commit();
