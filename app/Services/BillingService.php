@@ -335,10 +335,12 @@ class BillingService
                     ->latest()
                     ->first();
 
-                $newLatestBilling->update([
-                    'is_forwarded' => 0,
-                    'system_notes' => ''
-                ]);
+                if ($newLatestBilling) {
+                    $newLatestBilling->update([
+                        'is_forwarded' => 0,
+                        'system_notes' => ''
+                    ]);
+                }
             }
             $billing->delete();
             DB::commit();
@@ -393,9 +395,12 @@ class BillingService
             $payment = $billing->payments()->create($data);
 
             $billingStatusPaid = Config::get('constants.billing_status.PAID');
+            $billingStatusPartiallyPaid = Config::get('constants.billing_status.PARTIALLY_PAID');
+
             $billing->update([
-                'billing_status_id' => $billingStatusPaid
+                'billing_status_id' => $payment->amount < $billing->total_amount + $billing->previous_balance ? $billingStatusPartiallyPaid : $billingStatusPaid
             ]);
+            
             $studentFee = $billing->studentFee;
             $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
             if ($billing && $billing->billing_type_id === $initialBillingType && $studentFee && $studentFee->academicRecord) {
