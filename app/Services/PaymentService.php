@@ -276,7 +276,7 @@ class PaymentService
             $billingStatusPartiallyPaid = Config::get('constants.billing_status.PARTIALLY_PAID');
 
             $billing->update([
-                'billing_status_id' => $payment->amount < $billing->total_amount ? $billingStatusPartiallyPaid : $billingStatusPaid
+                'billing_status_id' => $payment->amount < $billing->total_amount + $billing->previous_balance ? $billingStatusPartiallyPaid : $billingStatusPaid
             ]);
 
             $studentFee = $billing->studentFee;
