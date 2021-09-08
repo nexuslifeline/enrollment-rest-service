@@ -7,6 +7,7 @@ use App\Billing;
 use Exception;
 use App\SchoolYear;
 use App\Term;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -125,6 +126,7 @@ class SchoolYearService
             $soaBillingType = Config::get('constants.billing_type.SOA');
             $otherBillingType = Config::get('constants.billing_type.BILL');
             $unpaidStatus = Config::get('constants.billing_status.UNPAID');
+            $partiallyPaidStatus = Config::get('constants.billing_status.PARTIALLY_PAID');
             $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
 
             if ($data['billing_type_id'] === $otherBillingType && !$otherFees) {
@@ -199,6 +201,20 @@ class SchoolYearService
                         'term_id' => $billing->term_id,
                         'amount' => $studentFee->pivot->amount
                     ]);
+
+                    $soaBillings = Billing::where('billing_type_id', $soaBillingType)
+                    ->where('student_fee_id', $billing->studentFee->id)
+                    ->whereIn('billing_status_id', [$unpaidStatus, $partiallyPaidStatus])
+                    ->where('id', '!=', $billing->id)
+                    ->where('is_forwarded', 0)
+                    ->get();
+
+                    foreach ($soaBillings as $soaBilling) {
+                        $soaBilling->update([
+                            'is_forwarded' => 1,
+                            'system_notes' => 'Balance forwarded to Billing ' . $billing['billing_no'] . ' on ' . Carbon::now()->format('F d, Y')
+                        ]);
+                    }
 
                     $billings[] = $billing;
                 }

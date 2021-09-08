@@ -520,8 +520,8 @@ class AcademicRecordService
         $draft = Config::get('constants.academic_record_status.DRAFT');
         $evaluationPending = Config::get('constants.academic_record_status.EVALUATION_PENDING');
         $pendingStatus = Config::get('constants.payment_status.PENDING');
-        $evaluation = Evaluation::whereHas('academicRecord', function ($q) use ($draft, $evaluationPending) {
-            return $q->whereIn('academic_record_status_id', [$draft, $evaluationPending]);
+        $evaluation = Evaluation::whereHas('academicRecord', function ($q) use ($evaluationPending) {
+            return $q->whereIn('academic_record_status_id', [$evaluationPending]);
         })
         ->when($schoolYearId, function($q) use($schoolYearId) {
             return $q->whereHas('academicRecord', function ($query) use($schoolYearId) {
@@ -540,7 +540,8 @@ class AcademicRecordService
             return $q->where('school_year_id', $schoolYearId);
         });
 
-        $data['payment'] = Payment::where('payment_status_id', $pendingStatus)->count();
+        $data['payment'] = Payment::where('payment_status_id', $pendingStatus)
+        ->count();
 
 
         $data['evaluation'] = $evaluation->count();

@@ -49,6 +49,7 @@ class StudentService
                 'last_name' => $data['last_name'],
                 'mobile_no' => $data['mobile_no'],
                 'email' => $data['username'],
+                'civil_status_id' => Config::get('constants.civil_status.SINGLE'),
                 'is_onboarding' => 1
             ]);
 

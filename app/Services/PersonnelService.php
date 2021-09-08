@@ -15,16 +15,16 @@ class PersonnelService
     {
         try {
             $query = Personnel::with(['photo','department', 'user' => function ($query) {
-              $query->with('userGroup');
-            }]);
+                $query->with('userGroup');
+            }])->select('personnels.*');
 
             $userGroupId = $filter['user_group_id'] ?? false;
             $query->when($userGroupId, function($q) use ($userGroupId) {
-              return $q->whereHas('user', function($query) use ($userGroupId) {
-                return $query->whereHas('userGroup', function($q) use ($userGroupId) {
-                  return $q->where('user_group_id', $userGroupId);
+                return $q->whereHas('user', function($query) use ($userGroupId) {
+                    return $query->whereHas('userGroup', function($q) use ($userGroupId) {
+                        return $q->where('user_group_id', $userGroupId);
+                    });
                 });
-              });
             });
 
             $departmentId = $filter['department_id'] ?? false;
@@ -51,7 +51,17 @@ class PersonnelService
                 $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
-            $query->orderBy($orderBy, $sort);
+
+            $userGroupFields = ['user_group_name'];
+            $departmentFields = ['department_name'];
+
+            if (in_array($orderBy, $userGroupFields)) {
+                $query->orderByUserGroup($orderBy, $sort);
+            } else if (in_array($orderBy, $departmentFields)) {
+                $query->orderByDepartment($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
             $personnels = $isPaginated
                 ? $query->paginate($perPage)

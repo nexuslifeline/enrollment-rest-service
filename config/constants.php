@@ -99,4 +99,10 @@ return [
     ['id' => 22, 'name' => 'Short Term Program'],
     ['id' => 23, 'name' => 'Nursery'],
   ],
+  'civil_status' => [
+    'SINGLE' => 1,
+    'MARRIED' => 2,
+    'DIVORCED' => 3,
+    'WIDOWED' => 4
+  ],
 ];

@@ -2,13 +2,14 @@
 
 namespace App;
 
+use App\Traits\OrderingTrait;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Personnel extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, OrderingTrait;
     protected $guarded = ['id'];
     protected $appends = ['name'];
     protected $hidden = [

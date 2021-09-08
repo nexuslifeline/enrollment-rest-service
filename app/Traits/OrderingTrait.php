@@ -54,4 +54,19 @@ trait OrderingTrait
         ->orderBy('school_categories.' . $orderBy, $sort);
     }
   }
+
+  public function scopeOrderByUserGroup($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'user_group_name' ? 'name' : $orderBy;
+    return $query->leftJoin('users', 'users.userable_id', '=', 'personnels.id')
+    ->leftJoin('user_groups', 'users.id', '=', 'user_group_id')
+    ->orderBy($orderBy, $sort);
+  }
+
+  public function scopeOrderByDepartment($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'department_name' ? 'name' : $orderBy;
+    return $query->leftJoin('departments', 'departments.id', '=', 'department_id')
+    ->orderBy($orderBy, $sort);
+  }
 }
