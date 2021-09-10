@@ -34,7 +34,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/students', 'StudentController');
         Route::post('/students/manual-registration', 'StudentController@manualRegister');
         Route::post('/students/{studentId}/enroll', 'StudentController@enroll');
-        Route::get('/students/{studentId}/billings', 'StudentController@getBillingsOfStudent');
+        Route::get('/students/{studentId}/open-billings', 'StudentController@getBillingsOfStudent');
         Route::get('/students/{studentId}/evaluations', 'EvaluationController@getEvaluationsOfStudent');
         Route::get('/students/{studentId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfStudent');
         Route::post('/students/{studentId}/photos', 'StudentPhotoController@store');

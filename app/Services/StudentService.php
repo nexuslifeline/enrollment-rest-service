@@ -650,6 +650,7 @@ class StudentService
             $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
             $soa = Config::get('constants.billing_type.SOA');
             $other = Config::get('constants.billing_type.BILL');
+            $billingStatusPaid = Config::get('constants.billing_status.PAID');
 
             $soaBillings = collect();
             $initialBillings = collect();
@@ -659,6 +660,8 @@ class StudentService
                 //soa
                 $query = Billing::where('billing_type_id', $soa)
                     ->where('student_id', $id)
+                    ->where('is_forwarded', 0)
+                    ->where('billing_status_id', '!=', $billingStatusPaid)
                     ->when($billingStatusId, function ($q) use ($billingStatusId) {
                         return $q->where('billing_status_id', $billingStatusId);
                     });
@@ -674,6 +677,8 @@ class StudentService
                 //initial billing
                 $initialBillings = Billing::where('billing_type_id', $initialFee)
                     ->where('student_id', $id)
+                    ->where('is_forwarded', 0)
+                    ->where('billing_status_id', '!=', $billingStatusPaid)
                     ->when($billingStatusId, function ($q) use ($billingStatusId) {
                         return $q->where('billing_status_id', $billingStatusId);
                     })
@@ -685,6 +690,8 @@ class StudentService
                 //other billing
                 $otherBillings = Billing::where('billing_type_id', $other)
                     ->where('student_id', $id)
+                    ->where('is_forwarded', 0)
+                    ->where('billing_status_id', '!=', $billingStatusPaid)
                     ->when($billingStatusId, function ($q) use ($billingStatusId) {
                         return $q->where('billing_status_id', $billingStatusId);
                     })
