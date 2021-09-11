@@ -686,7 +686,7 @@ class StudentService
                 $initialBillings->append(['total_paid', 'submitted_payments']);
             }
 
-            if (!$billingTypeId && $billingTypeId == $initialFee) {
+            if (!$billingTypeId || $billingTypeId == $other) {
                 //other billing
                 $otherBillings = Billing::where('billing_type_id', $other)
                     ->where('student_id', $id)
