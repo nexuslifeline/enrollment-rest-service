@@ -51,6 +51,11 @@ class CurriculumService
                 }]);
             });
 
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function ($query) use ($criteria) {
+                $query->whereLike($criteria);
+            });
+
             $query->schoolCategoryFilter();
 
             // order by

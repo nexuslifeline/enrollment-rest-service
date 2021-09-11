@@ -38,6 +38,11 @@ class PersonnelService
                 return $q->studentGrades($studentGradesStatusId);
             });
 
+            $criteria = $filter['criteria'] ?? false;
+            $query->when($criteria, function ($query) use ($criteria) {
+                $query->whereLike($criteria);
+            });
+
             // order by
             $orderBy = 'id';
             $sort = 'DESC';
