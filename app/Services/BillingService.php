@@ -19,9 +19,15 @@ class BillingService
     {
         try {
             $query = Billing::with([
-                'schoolYear', 'semester', 'billingType', 'studentFee', 'payments',
-                'student' => function ($query) {
-                    return $query->with(['address', 'photo']);
+                'billingType',
+                'studentFee',
+                'payments',
+                'term',
+                'academicRecord'  => function ($q) {
+                    return $q->with(['semester', 'schoolYear', 'level']);
+                },
+                'student' => function ($q) {
+                    return $q->with(['photo']);
                 }
             ]);
             // filters
