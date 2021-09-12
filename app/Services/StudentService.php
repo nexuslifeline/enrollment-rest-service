@@ -728,8 +728,9 @@ class StudentService
 
             $query = Billing::with([
                 'billingItems',
+                'term',
                 'academicRecord' => function($q) {
-                    return $q->with(['schoolYear', 'term', 'level', 'semester']);
+                    return $q->with(['schoolYear', 'level', 'semester']);
                 }
             ])->where('student_id', $id);
             //billing type id
