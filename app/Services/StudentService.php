@@ -726,8 +726,12 @@ class StudentService
             $isForwarded = $filters['is_forwarded'] ?? false;
             $criteria = $filters['criteria'] ?? false;
 
-            $query = Billing::with('billingItems')
-                ->where('student_id', $id);
+            $query = Billing::with([
+                'billingItems',
+                'academicRecord' => function($q) {
+                    return $q->with(['schoolYear', 'term', 'level', 'semester']);
+                }
+            ])->where('student_id', $id);
             //billing type id
             $query->when($billingTypeId, function ($q) use ($billingTypeId) {
                 if (!is_array($billingTypeId)) {
