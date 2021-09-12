@@ -362,6 +362,11 @@ class StudentService
                 }]);
             });
 
+            $isOnboarding = isset($filters['is_onboarding']) && in_array($filters['is_onboarding'], [0, 1]) ? $filters['is_onboarding'] : false;
+            $query->when(in_array($isOnboarding, [0, 1]), function ($q) use ($isOnboarding) {
+                return $q->where('is_onboarding', $isOnboarding);
+            });
+
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($query) use ($criteria) {
                 // return $query->where(function ($q) use ($criteria) {

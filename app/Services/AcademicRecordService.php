@@ -142,9 +142,9 @@ class AcademicRecordService
             // });
 
             //is manual
-            $isManual = $filters['is_manual'] ?? false;
-            $query->when($isManual, function ($query) use ($isManual) {
-                return $query->where('is_manual', $isManual);
+            $isManual = isset($filters['is_manual']) && in_array($filters['is_manual'], [0, 1]) ? $filters['is_manual'] : false;
+            $query->when(in_array($isManual, [0, 1]), function ($q) use ($isManual) {
+                return $q->where('is_manual', $isManual);
             });
 
             //manual steps

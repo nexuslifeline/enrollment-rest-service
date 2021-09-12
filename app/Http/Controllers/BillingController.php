@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\BillingService;
 use App\Http\Resources\BillingResource;
 use App\Http\Requests\BillingStoreRequest;
+use App\Http\Requests\BillingUpdateRequest;
 use App\Http\Resources\BillingItemResource;
 
 class BillingController extends Controller
@@ -96,12 +97,12 @@ class BillingController extends Controller
      * @param  \App\Billing  $billing
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, int $id)
+    public function update(BillingUpdateRequest $request, int $id)
     {
         $billingService = new BillingService();
-        $data = $request->except('billing_items');
-        $billingItems = $request->billing_items ?? [];
-        $billing = $billingService->update($id, $data, $billingItems);
+        $data = $request->except('other_fees');
+        $otherFees = $request->other_fees ?? [];
+        $billing = $billingService->update($data, $otherFees, $id);
         return (new BillingResource($billing))
             ->response()
             ->setStatusCode(200);

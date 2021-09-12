@@ -93,7 +93,8 @@ class BillingService
                         ->orWhere('first_name', 'like', '%' . $criteria . '%')
                         ->orWhere('middle_name', 'like', '%' . $criteria . '%')
                         ->orWhere('last_name', 'like', '%' . $criteria . '%');
-                });
+                })->orWhere('system_notes', 'like', '%' . $criteria . '%');
+
             });
 
             $orderBy = $filters['order_by'] ?? false;
@@ -280,18 +281,46 @@ class BillingService
         }
     }
 
-    public function update(int $id, array $data, array $billingItems)
+    public function update(array $data, array $otherFees, int $id)
     {
         DB::beginTransaction();
         try {
 
             $billing = Billing::find($id);
+            $academicRecord = AcademicRecord::find($billing->academic_record_id);
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
 
+            if ($academicRecord->academic_record_status_id !== $enrolledStatus) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Academic record is not enrolled yet.']
+                ]);
+            }
+
+            if (!$academicRecord->schoolYear->is_active) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Academic record is not enrolled in current active school year.']
+                ]);
+            }
+
+            $soaBillingType = Config::get('constants.billing_type.SOA');
+            $otherBillingType = Config::get('constants.billing_type.BILL');
+            if ($data['billing_type_id'] === $otherBillingType && !$otherFees) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Other Fees must have atleast one item.']
+                ]);
+            }
+
+            $amount = Arr::pull($data, 'amount');
+            $totalAmount = $data['billing_type_id'] === $soaBillingType ? collect($otherFees)->sum('amount') + $amount : collect($otherFees)->sum('amount');
+            $data = Arr::add($data, 'total_amount', $totalAmount);
             $billing->update($data);
 
             $billing->billingItems()->delete();
-            foreach ($billingItems as $item) {
-                $billing->billingItems()->create($item);
+            foreach ($otherFees as $item) {
+                $billing->billingItems()->create([
+                    'amount' => $item['amount'],
+                    'school_fee_id' => $item['school_fee_id']
+                ]);
             }
             DB::commit();
             return $billing;

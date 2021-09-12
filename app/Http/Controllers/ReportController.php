@@ -166,7 +166,7 @@ class ReportController extends Controller
 
         $content = view('reports.collections')->with($data);
         $mpdf->WriteHTML($content);
-        // return $mpdf->Output();
+        return $mpdf->Output();
         return $mpdf->Output('', 'S');
     }
 
