@@ -54,6 +54,23 @@ class ReportController extends Controller
         return $mpdf->Output('', 'S');
     }
 
+    public function otherBilling($billingId)
+    {
+        $data['billing'] = Billing::with(['student',
+            'billingItems' => function ($q) {
+                return $q->with('schoolFee');
+            },
+            'academicRecord' => function($q) {
+                return $q->with('course', 'level');
+            }])->find($billingId);
+        $data['organization'] = OrganizationSetting::find(1)->load('organizationLogo');
+        $mpdf = new Mpdf();
+        $content = view('reports.otherbilling')->with($data);
+        $mpdf->WriteHTML($content);
+        return $mpdf->Output('', 'S');
+    }
+
+
     public function requirementList()
     {
         $mpdf = new Mpdf();
@@ -326,4 +343,21 @@ class ReportController extends Controller
         $mpdf->WriteHTML($content);
         return $mpdf->Output('', 'S');
     }
+
+    public function previewBilling(int $billingId)
+    {
+        $billing = Billing::find($billingId);
+        $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
+        $soa = Config::get('constants.billing_type.SOA');
+        $other = Config::get('constants.billing_type.BILL');
+        if ($billing->billing_type_id === $initialFee) {
+            return $this->assessmentForm($billing->academic_record_id);
+        }
+        if ($billing->billing_type_id === $soa) {
+            return $this->statementOfAccount($billing->id);
+        } 
+        if ($billing->billing_type_id === $other) {
+            return $this->otherBilling($billing->id);
+        }
+    } 
 }

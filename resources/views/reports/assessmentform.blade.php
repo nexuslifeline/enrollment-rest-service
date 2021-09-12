@@ -66,7 +66,7 @@
             }
             .table__categories {
                 width: 80%;
-                font-size: 9pt;s
+                font-size: 9pt;
                 margin: auto;
                 /* margin-bottom: 10px; */
                 /* border: 0.5px solid gray; */

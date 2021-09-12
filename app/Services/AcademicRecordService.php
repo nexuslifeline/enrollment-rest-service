@@ -1106,7 +1106,7 @@ class AcademicRecordService
                 foreach ($soaBillings as $soaBilling) {
                     $soaBilling->update([
                         'is_forwarded' => 1,
-                        'system_notes' => 'Balance forwarded to Billing ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y')
+                        'system_notes' => 'Balance forwarded to Billing ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y') . ' amounting to ' . number_format($soaBilling->total_remaining_due, 2)
                     ]);
                 }
             }

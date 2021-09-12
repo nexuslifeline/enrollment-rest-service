@@ -185,6 +185,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('registration-form/{academicRecordId}', 'ReportController@registrationForm');
         Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');
         Route::get('school-years/{schoolYearId}/enrolled', 'ReportController@enrolledList');
+        Route::get('billings/{billingId}/preview', 'ReportController@previewBilling');
         // permission-groups
         Route::resource('permission-groups', 'PermissionGroupController');
 
@@ -265,6 +266,7 @@ Route::group(['prefix' => 'v1'], function () {
         //student
         Route::get('sections/{sectionId}/subjects/{subjectId}/students', 'StudentController@getStudentOfSectionAndSubject');
     });
+    // Route::get('billings/{billingId}/preview', 'ReportController@previewBilling');
     // Route::get('requirement-list', 'ReportController@requirementList');
     // Route::get('statement-of-account/{billingId}', 'ReportController@statementOfAccount');
     // Route::get('transcript-record/{transcriptRecordId}', 'ReportController@transcriptRecord');

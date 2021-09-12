@@ -63,9 +63,9 @@ class SubjectService
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($query) use ($criteria) {
                 return $query->where(function ($q) use ($criteria) {
-                    return $q->where('name', 'like', '%' . $criteria . '%')
-                        ->orWhere('description', 'like', '%' . $criteria . '%')
-                        ->orWhere('code', 'like', '%' . $criteria . '%');
+                    return $q->where('subjects.name', 'like', '%' . $criteria . '%')
+                        ->orWhere('subjects.description', 'like', '%' . $criteria . '%')
+                        ->orWhere('subjects.code', 'like', '%' . $criteria . '%');
                 });
             });
 
