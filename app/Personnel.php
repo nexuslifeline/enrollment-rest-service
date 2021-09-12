@@ -60,4 +60,13 @@ class Personnel extends Model
     {
         return "{$this->first_name} {$this->middle_name} {$this->last_name}";
     }
+
+    public function scopeWhereLike($query, $value)
+    {
+        return $query->where('name', 'like', '%' . $value . '%')
+            ->orWhere('first_name', 'like', '%' . $value . '%')
+            ->orWhere('middle_name', 'like', '%' . $value . '%')
+            ->orWhere('last_name', 'like', '%' . $value . '%')
+            ->orWhereRaw('CONCAT(first_name, " ", coalesce(concat(middle_name, " "),""), last_name) like' .  "'%" .  $value  . "%'");
+    }
 }

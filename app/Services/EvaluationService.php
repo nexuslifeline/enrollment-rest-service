@@ -63,9 +63,11 @@ class EvaluationService
             // filter by student name
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($q) use ($criteria) {
-                return $q->whereHas('student', function ($query) use ($criteria) {
-                    //scopedWhereLike on student model
-                    return  $query->whereLike($criteria);
+                return $q->whereHas('academicRecord', function ($q) use ($criteria) {
+                    return $q->whereHas('student', function ($query) use ($criteria) {
+                        //scopedWhereLike on student model
+                        return  $query->whereLike($criteria);
+                    });
                 });
             });
 

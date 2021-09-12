@@ -28,4 +28,11 @@ class Course extends Model
     {
         return $this->belongsToMany('App\SchoolCategory', 'level_courses', 'course_id','school_category_id');
     }
+
+    public function scopeWhereLike($query, $value)
+    {
+        return $query->where('name', 'like', '%' . $value . '%')
+            ->orWhere('description', 'like', '%' . $value . '%')
+            ->orWhere('major', 'like', '%' . $value . '%');
+    }
 }

@@ -108,4 +108,15 @@ class Curriculum extends Model
             'school_category_id'
         );
     }
+
+    public function scopeWhereLike($query, $value)
+    {
+        return $query->where('name', 'like', '%' . $value . '%')
+            ->orWhere('description', 'like', '%' . $value . '%')
+            ->orWhere('effective_year', 'like', '%' . $value . '%')
+            ->orWhere('notes', 'like', '%' . $value . '%')
+            ->orWhereHas('course', function ($q) use ($value) {
+                return $q->where('name', $value);
+            });
+    }
 }

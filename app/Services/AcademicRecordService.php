@@ -142,10 +142,10 @@ class AcademicRecordService
             // });
 
             //is manual
-            // $isManual = $filters['is_manual'] ?? false;
-            // $query->when($isManual, function ($query) use ($isManual) {
-            //     return $query->where('is_manual', $isManual);
-            // });
+            $isManual = $filters['is_manual'] ?? false;
+            $query->when($isManual, function ($query) use ($isManual) {
+                return $query->where('is_manual', $isManual);
+            });
 
             //manual steps
             $manualStepId = $filters['manual_step_id'] ?? false;
@@ -1106,11 +1106,11 @@ class AcademicRecordService
                 foreach ($soaBillings as $soaBilling) {
                     $soaBilling->update([
                         'is_forwarded' => 1,
-                        'system_notes' => 'Balance forwarded to ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y')
+                        'system_notes' => 'Balance forwarded to ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y') . ' amounting to ' . number_format($soaBilling->total_remaining_due, 2)
                     ]);
                 }
             }
-            
+
 
             foreach ($otherFees as $item) {
                 $billing->billingItems()->create([
