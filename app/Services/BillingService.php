@@ -163,7 +163,7 @@ class BillingService
                 ]);
 
                 $billing->update([
-                    'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                 ]);
 
                 foreach ($billingItems as $item) {
@@ -227,7 +227,7 @@ class BillingService
                     // 'semester_id' => $data['semester_id']
                 ]);
                 $billing->update([
-                    'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                 ]);
 
                 foreach ($billingItems as $item) {
@@ -251,7 +251,7 @@ class BillingService
         try {
             $billing = Billing::create($data);
             $billing->update([
-                'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
 
             foreach ($billingItems as $item) {

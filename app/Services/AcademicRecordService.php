@@ -416,7 +416,7 @@ class AcademicRecordService
                 }
 
                 $billing->update([
-                    'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                    'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                 ]);
             }
 
@@ -973,7 +973,7 @@ class AcademicRecordService
             ]);
 
             $billing->update([
-                'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
 
             $billing->payments()->updateOrCreate(['billing_id' => $billing->id],
@@ -1084,7 +1084,7 @@ class AcademicRecordService
             $data = Arr::add($data, 'total_amount', $totalAmount);
             $billing = $academicRecord->billings()->create($data);
             $billing->update([
-                'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
             ]);
 
 
@@ -1106,7 +1106,7 @@ class AcademicRecordService
                 foreach ($soaBillings as $soaBilling) {
                     $soaBilling->update([
                         'is_forwarded' => 1,
-                        'system_notes' => 'Balance forwarded to Billing ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y')
+                        'system_notes' => 'Balance forwarded to ' . $billing['billing_no'] .' on '.Carbon::now()->format('F d, Y')
                     ]);
                 }
             }

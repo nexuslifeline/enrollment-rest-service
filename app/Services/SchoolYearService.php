@@ -187,7 +187,7 @@ class SchoolYearService
                     ]);
 
                     $billing->update([
-                        'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                        'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                     ]);
 
                     foreach ($otherFees as $item) {
@@ -212,7 +212,7 @@ class SchoolYearService
                     foreach ($soaBillings as $soaBilling) {
                         $soaBilling->update([
                             'is_forwarded' => 1,
-                            'system_notes' => 'Balance forwarded to Billing ' . $billing['billing_no'] . ' on ' . Carbon::now()->format('F d, Y')
+                            'system_notes' => 'Balance forwarded to ' . $billing['billing_no'] . ' on ' . Carbon::now()->format('F d, Y')
                         ]);
                     }
 
@@ -252,7 +252,7 @@ class SchoolYearService
                         'academic_record_id' => $academicRecord['id']
                     ]);
                     $billing->update([
-                        'billing_no' => 'BILL-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
+                        'billing_no' => 'BN-' . date('Y') . '-' . str_pad($billing->id, 7, '0', STR_PAD_LEFT)
                     ]);
 
                     foreach ($otherFees as $item) {
