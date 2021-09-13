@@ -114,7 +114,9 @@ class BillingService
     {
         try {
             $billing = Billing::find($id);
-            $billing->load(['billingType', 'student', 'billingItems' => function ($q) {
+            $billing->load(['billingType', 'student' => function($q) {
+                return $q->with('latestAcademicRecord');
+            }, 'billingItems' => function ($q) {
                 return $q->with('schoolFee');
             }]);
             $billing->append(['total_paid']);
@@ -337,7 +339,6 @@ class BillingService
             $soa = Config::get('constants.billing_type.SOA');
             $unpaid = Config::get('constants.billing_status.UNPAID');
             if ($billing->billing_type_id === $soa) {
-                
                 $latestBilling = Billing::where('billing_type_id', $soa)
                 ->where('student_id', $billing->student_id)
                 ->where('billing_type_id', $soa)
