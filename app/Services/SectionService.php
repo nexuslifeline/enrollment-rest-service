@@ -49,8 +49,8 @@ class SectionService
           $criteria = $filters['criteria'] ?? false;
           $query->when($criteria, function($q) use ($criteria) {
             return $q->where(function($q) use ($criteria) {
-                return $q->where('name', 'like', '%'.$criteria.'%')
-                    ->orWhere('description', 'like', '%'.$criteria.'%')
+                return $q->where('sections.name', 'like', '%'.$criteria.'%')
+                    ->orWhere('sections.description', 'like', '%'.$criteria.'%')
                     ->orWhereHas('schoolYear', function($query) use ($criteria) {
                         return $query->where('name', 'like', '%'.$criteria.'%');
                     })

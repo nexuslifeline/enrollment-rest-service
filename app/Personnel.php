@@ -63,10 +63,10 @@ class Personnel extends Model
 
     public function scopeWhereLike($query, $value)
     {
-        return $query->where('name', 'like', '%' . $value . '%')
-            ->orWhere('first_name', 'like', '%' . $value . '%')
-            ->orWhere('middle_name', 'like', '%' . $value . '%')
-            ->orWhere('last_name', 'like', '%' . $value . '%')
-            ->orWhereRaw('CONCAT(first_name, " ", coalesce(concat(middle_name, " "),""), last_name) like' .  "'%" .  $value  . "%'");
+        return $query->where('personnels.name', 'like', '%' . $value . '%')
+            ->orWhere('personnels.first_name', 'like', '%' . $value . '%')
+            ->orWhere('personnels.middle_name', 'like', '%' . $value . '%')
+            ->orWhere('personnels.last_name', 'like', '%' . $value . '%')
+            ->orWhereRaw('CONCAT(personnels.first_name, " ", coalesce(concat(personnels.middle_name, " "),""), personnels.last_name) like' .  "'%" .  $value  . "%'");
     }
 }

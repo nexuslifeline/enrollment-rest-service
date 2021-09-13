@@ -265,6 +265,12 @@ Route::group(['prefix' => 'v1'], function () {
 
         //student
         Route::get('sections/{sectionId}/subjects/{subjectId}/students', 'StudentController@getStudentOfSectionAndSubject');
+
+        //student fee terms
+        Route::get('academic-records/{academicRecordId}/terms', 'TermController@getStudentFeeTermsOfAcademicRecord');
+        Route::put('academic-records/{academicRecordId}/terms/{termId}', 'TermController@updateStudentFeeTermsOfAcademicRecord');
+        Route::delete('academic-records/{academicRecordId}/terms/{termId}', 'TermController@deleteStudentFeeTermsOfAcademicRecord');
+        Route::post('academic-records/{academicRecordId}/terms/', 'TermController@storeStudentFeeTermsOfAcademicRecord');
     });
     // Route::get('billings/{billingId}/preview', 'ReportController@previewBilling');
     // Route::get('requirement-list', 'ReportController@requirementList');

@@ -111,12 +111,12 @@ class Curriculum extends Model
 
     public function scopeWhereLike($query, $value)
     {
-        return $query->where('name', 'like', '%' . $value . '%')
-            ->orWhere('description', 'like', '%' . $value . '%')
-            ->orWhere('effective_year', 'like', '%' . $value . '%')
-            ->orWhere('notes', 'like', '%' . $value . '%')
+        return $query->where('curriculums.name', 'like', '%' . $value . '%')
+            ->orWhere('curriculums.description', 'like', '%' . $value . '%')
+            ->orWhere('curriculums.effective_year', 'like', '%' . $value . '%')
+            ->orWhere('curriculums.notes', 'like', '%' . $value . '%')
             ->orWhereHas('course', function ($q) use ($value) {
-                return $q->where('name', $value);
+                return $q->where('courses.name', $value);
             });
     }
 }

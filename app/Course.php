@@ -31,8 +31,8 @@ class Course extends Model
 
     public function scopeWhereLike($query, $value)
     {
-        return $query->where('name', 'like', '%' . $value . '%')
-            ->orWhere('description', 'like', '%' . $value . '%')
-            ->orWhere('major', 'like', '%' . $value . '%');
+        return $query->where('courses.name', 'like', '%' . $value . '%')
+            ->orWhere('courses.description', 'like', '%' . $value . '%')
+            ->orWhere('courses.major', 'like', '%' . $value . '%');
     }
 }

@@ -284,13 +284,13 @@ class Student extends Model
     }
 
     public function scopeWhereLike($query, $value) {
-        return $query->where('name', 'like', '%' . $value . '%')
-            ->orWhere('first_name', 'like', '%' . $value . '%')
-            ->orWhere('middle_name', 'like', '%' . $value . '%')
-            ->orWhere('student_no', 'like', '%' . $value . '%')
-            ->orWhere('last_name', 'like', '%' . $value . '%')
-            ->orWhere('email', 'like', '%' . $value . '%')
-            ->orWhereRaw('CONCAT(first_name, " ", coalesce(concat(middle_name, " "),""), last_name) like' .  "'%" .  $value  . "%'");
+        return $query->where('students.name', 'like', '%' . $value . '%')
+            ->orWhere('students.first_name', 'like', '%' . $value . '%')
+            ->orWhere('students.middle_name', 'like', '%' . $value . '%')
+            ->orWhere('students.student_no', 'like', '%' . $value . '%')
+            ->orWhere('students.last_name', 'like', '%' . $value . '%')
+            ->orWhere('students.email', 'like', '%' . $value . '%')
+            ->orWhereRaw('CONCAT(students.first_name, " ", coalesce(concat(students.middle_name, " "),""), students.last_name) like' .  "'%" .  $value  . "%'");
     }
 
     public function studentGrades()

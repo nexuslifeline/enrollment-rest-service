@@ -107,4 +107,42 @@ class TermController extends Controller
         $terms = $termService->getStudentFeeTermsOfStudent($studentId, $filters);
         return TermResource::collection($terms);
     }
+
+    public function getStudentFeeTermsOfAcademicRecord($academicRecordId, Request $request)
+    {
+        $termService = new TermService();
+        $filters = $request->except('per_page', 'paginate');
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $terms = $termService->getStudentFeeTermsOfAcademicRecord($academicRecordId, $isPaginated, $perPage, $filters);
+        return TermResource::collection(
+            $terms
+        );
+    }
+
+    public function updateStudentFeeTermsOfAcademicRecord(Request $request, int $academicRecordId, int $termId)
+    {
+        $termService = new TermService();
+        $term = $termService->updateStudentFeeTermsOfAcademicRecord($request->all(), $academicRecordId, $termId);
+        return (new TermResource($term))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function deleteStudentFeeTermsOfAcademicRecord(int $academicRecordId, int $termId)
+    {
+        $termService = new TermService();
+        $termService->deleteStudentFeeTermsOfAcademicRecord($academicRecordId, $termId);
+        return response()->json([], 204);
+    }
+
+    public function storeStudentFeeTermsOfAcademicRecord(Request $request, int $academicRecordId)
+    {
+        $termService = new TermService();
+        $term = $termService->storeStudentFeeTermsOfAcademicRecord($request->all(), $academicRecordId);
+        return (new TermResource($term))
+            ->response()
+            ->setStatusCode(201);
+    }
+
 }

@@ -142,8 +142,8 @@ class AcademicRecordService
             // });
 
             //is manual
-            $isManual = isset($filters['is_manual']) && in_array($filters['is_manual'], [0, 1]) ? $filters['is_manual'] : false;
-            $query->when(in_array($isManual, [0, 1]), function ($q) use ($isManual) {
+            $isManual = Arr::exists($filters, 'is_manual') == 1 ? $filters['is_manual'] : false;
+            $query->when(Arr::exists($filters, 'is_manual') == 1, function ($q) use ($isManual) {
                 return $q->where('is_manual', $isManual);
             });
 
@@ -571,10 +571,7 @@ class AcademicRecordService
             $query->when($criteria, function ($q) use ($criteria) {
                 return $q->where(function ($q) use ($criteria) {
                     return $q->whereHas('student', function ($q) use ($criteria) {
-                        return $q->where('first_name', 'LIKE', '%' . $criteria . '%')
-                            ->orWhere('middle_name', 'LIKE', '%' . $criteria . '%')
-                            ->orWhere('last_name', 'LIKE', '%' . $criteria . '%')
-                            ->orWhere('student_no', 'LIKE', '%' . $criteria . '%');
+                        return $q->whereLike($criteria);
                     });
                 });
             });

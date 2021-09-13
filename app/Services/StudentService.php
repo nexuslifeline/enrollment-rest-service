@@ -14,6 +14,7 @@ use App\SchoolYear;
 use App\Application;
 use App\AcademicRecord;
 use App\TranscriptRecord;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -325,11 +326,11 @@ class StudentService
             $semesterId = $filters['semester_id'] ?? false;
             $subjectId = $filters['subject_id'] ?? false;
             $withTheSubject = $filters['with_the_subject'] ?? false;
-            $isDropped = isset($filters['is_dropped']) && in_array($filters['is_dropped'], [0,1]) ? $filters['is_dropped'] : false;
+            $isDropped = Arr::exists($filters, 'is_dropped') == 1 ? $filters['is_dropped'] : false;
             // return $isDropped;
             $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
-            $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus) {
-                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus) {
+            $query->when($levelId || $courseId || $semesterId || $sectionId || $subjectId, function ($q) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus, $filters) {
+                return $q->whereHas('academicRecords', function ($query) use ($levelId, $courseId, $semesterId, $sectionId, $subjectId, $withTheSubject, $isDropped, $enrolledStatus, $filters) {
                     return $query->where('academic_record_status_id', $enrolledStatus)->latest()->limit(1)
                     ->when($levelId, function ($q) use ($levelId) {
                         return $q->where('level_id', $levelId);
@@ -340,12 +341,12 @@ class StudentService
                     ->when($semesterId, function ($q) use ($semesterId) {
                         return $q->where('semester_id', $semesterId);
                     })
-                    ->whereHas('subjects', function ($q) use ($sectionId, $subjectId, $isDropped) {
+                    ->whereHas('subjects', function ($q) use ($sectionId, $subjectId, $isDropped, $filters) {
                         $q->when($sectionId, function ($q) use ($sectionId) {
                             return $q->where('section_id', $sectionId);
                         })->when($subjectId, function ($q) use ($subjectId) {
                             return $q->where('subject_id', $subjectId);
-                        })->when(in_array($isDropped, [0, 1]), function ($q) use ($isDropped) {
+                        })->when(Arr::exists($filters, 'is_dropped') == 1, function ($q) use ($isDropped) {
                             return $q->where('is_dropped', $isDropped);
                         });
                     });
@@ -362,8 +363,8 @@ class StudentService
                 }]);
             });
 
-            $isOnboarding = isset($filters['is_onboarding']) && in_array($filters['is_onboarding'], [0, 1]) ? $filters['is_onboarding'] : false;
-            $query->when(in_array($isOnboarding, [0, 1]), function ($q) use ($isOnboarding) {
+            $isOnboarding = Arr::exists($filters, 'is_onboarding') == 1 ? $filters['is_onboarding'] : false;
+            $query->when(Arr::exists($filters, 'is_onboarding') == 1, function ($q) use ($isOnboarding) {
                 return $q->where('is_onboarding', $isOnboarding);
             });
 
