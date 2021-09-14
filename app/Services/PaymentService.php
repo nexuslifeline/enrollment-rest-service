@@ -47,9 +47,7 @@ class PaymentService
             $criteria = $filters['criteria'] ?? false;
             $query->when($criteria, function ($q) use ($criteria) {
                 return $q->where(function ($q) use ($criteria) {
-                    return $q->where('date_paid', 'like', '%' . $criteria . '%')
-                        ->orWhere('amount', 'like', '%' . $criteria . '%')
-                        ->orWhere('reference_no', 'like', '%' . $criteria . '%')
+                    return $q->whereLike($criteria)
                         ->orWhereHas('student', function ($query) use ($criteria) {
                             // return $query->where(function ($q) use ($criteria) {
                             //     return $q->where('name', 'like', '%' . $criteria . '%')
@@ -373,6 +371,43 @@ class PaymentService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PaymentService cancel method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getPaymentsOfBilling(int $billingId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = Payment::where('billing_id', $billingId);
+
+            //payment mode 
+            $paymentModeId = $filters['payment_mode_id'] ?? false;
+            $query->when($paymentModeId, function ($q) use ($paymentModeId) {
+                return $q->where('payment_mode_id', $paymentModeId);
+            });
+
+            //payment status 
+            $paymentStatusId = $filters['payment_status_id'] ?? false;
+            $query->when($paymentStatusId, function ($q) use ($paymentStatusId) {
+                return $q->where('payment_status_id', $paymentStatusId);
+            });
+
+            //criteria
+            //criteria
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function ($q) use ($criteria) {
+                return $q->where(function ($q) use ($criteria) {
+                    return $q->whereLike($criteria);
+                });
+            });
+
+            $payments = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+            return $payments;
+        } catch (Exception $e) {
+            Log::info('Error occured during PaymentService getPaymentsOfBilling method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

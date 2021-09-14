@@ -53,4 +53,16 @@ class Payment extends Model
     {
         return $this->belongsTo('App\Billing');
     }
+
+    public function scopeWhereLike($query, $value)
+    {
+        return $query->where('date_paid', 'like', '%' . $value . '%')
+            ->orWhere('transaction_no', 'like', '%' . $value . '%')
+            ->orWhere('reference_no', 'like', '%' . $value . '%')
+            ->orWhere('amount', 'like', '%' . $value . '%')
+            ->orWhere('notes', 'like', '%' . $value . '%')
+            ->orWhere('approval_notes', 'like', '%' . $value . '%')
+            ->orWhere('disapproval_notes', 'like', '%' . $value . '%')
+            ->orWhere('reference_no', 'like', '%' . $value . '%');
+    }
 }

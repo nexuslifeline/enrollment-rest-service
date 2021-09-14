@@ -769,8 +769,17 @@ class StudentService
                 $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
                 $sort = $isDesc ? 'DESC' : 'ASC';
             }
-            
-            $query->orderBy($orderBy, $sort);
+
+            $billingStatusFields = ['billing_status_name'];
+            $billingTypeFields = ['billing_type_name'];
+
+            if (in_array($orderBy, $billingStatusFields)) {
+                $query->orderByBillingStatus($orderBy, $sort);
+            } else if (in_array($orderBy, $billingTypeFields)) {
+                $query->orderByBillingType($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
             $billings = $isPaginated
                 ? $query->paginate($perPage)

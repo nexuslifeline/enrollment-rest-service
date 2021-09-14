@@ -135,4 +135,16 @@ class PaymentController extends Controller
         $paymentService->cancel($data, $id);
         return response()->json([], 204);
     }
+
+    public function getPaymentsOfBilling(Request $request, int $billingId)
+    {
+        $paymentService = new PaymentService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $payments = $paymentService->getPaymentsOfBilling($billingId, $isPaginated, $perPage, $filters);
+        return PaymentResource::collection(
+            $payments
+        );
+    }
 }

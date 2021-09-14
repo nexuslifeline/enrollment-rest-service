@@ -69,4 +69,25 @@ trait OrderingTrait
     return $query->leftJoin('departments', 'departments.id', '=', 'department_id')
     ->orderBy('departments.'.$orderBy, $sort);
   }
+
+  public function scopeOrderByBillingStatus($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'billing_status_name' ? 'name' : $orderBy;
+    return $query->leftJoin('billing_statuses', 'billing_statuses.id', '=', 'billing_status_id')
+    ->orderBy('billing_statuses.' . $orderBy, $sort);
+  }
+
+  public function scopeOrderByBillingType($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'billing_type_name' ? 'name' : $orderBy;
+    return $query->leftJoin('billing_types', 'billing_types.id', '=', 'billing_type_id')
+    ->orderBy('billing_types.' . $orderBy, $sort);
+  }
+
+  public function scopeOrderBySemester($query, $orderBy, $sort)
+  {
+    $orderBy = $orderBy === 'semester_name' ? 'name' : $orderBy;
+    return $query->leftJoin('semesters', 'semesters.id', '=', 'semester_id')
+    ->orderBy('semesters.' . $orderBy, $sort);
+  }
 }

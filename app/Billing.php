@@ -2,13 +2,14 @@
 
 namespace App;
 
+use App\Traits\OrderingTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
 
 class Billing extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, OrderingTrait;
     protected $guarded = ['id'];
     protected $hidden = [
         'created_at',

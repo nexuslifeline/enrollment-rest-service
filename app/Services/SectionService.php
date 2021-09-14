@@ -13,61 +13,88 @@ class SectionService
     public function list(bool $isPaginated, int $perPage, array $filters)
     {
         try {
-          $query = Section::with(['schoolYear','schoolCategory','level','course','semester']);
+            $query = Section::with(['schoolYear','schoolCategory','level','course','semester']);
 
-          $schoolYearId = $filters['school_year_id'] ?? false;
-          $query->when($schoolYearId, function($q) use ($schoolYearId) {
-              return $q->where('school_year_id', $schoolYearId);
-          });
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
 
-          $schoolCategoryId = $filters['school_category_id'] ?? false;
-          $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
-              return $q->where('school_category_id', $schoolCategoryId);
-          });
+            $schoolCategoryId = $filters['school_category_id'] ?? false;
+            $query->when($schoolCategoryId, function($q) use ($schoolCategoryId) {
+                return $q->where('school_category_id', $schoolCategoryId);
+            });
 
-          $levelId = $filters['level_id'] ?? false;
-          $query->when($levelId, function($q) use ($levelId) {
-              return $q->where('level_id', $levelId);
-          });
+            $levelId = $filters['level_id'] ?? false;
+            $query->when($levelId, function($q) use ($levelId) {
+                return $q->where('level_id', $levelId);
+            });
 
-          $courseId = $filters['course_id'] ?? false;
-          $query->when($courseId, function($q) use ($courseId) {
-              return $q->where('course_id', $courseId);
-          });
+            $courseId = $filters['course_id'] ?? false;
+            $query->when($courseId, function($q) use ($courseId) {
+                return $q->where('course_id', $courseId);
+            });
 
-          $semesterId = $filters['semester_id'] ?? false;
-          $query->when($semesterId, function($q) use ($semesterId) {
-              return $q->where('semester_id', $semesterId);
-          });
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function($q) use ($semesterId) {
+                return $q->where('semester_id', $semesterId);
+            });
 
-          $schoolYearId = $filters['school_year_id'] ?? false;
-          $query->when($schoolYearId, function($q) use ($schoolYearId) {
-              return $q->where('school_year_id', $schoolYearId);
-          });
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function($q) use ($schoolYearId) {
+                return $q->where('school_year_id', $schoolYearId);
+            });
 
           //criteria
-          $criteria = $filters['criteria'] ?? false;
-          $query->when($criteria, function($q) use ($criteria) {
-            return $q->where(function($q) use ($criteria) {
-                return $q->where('sections.name', 'like', '%'.$criteria.'%')
-                    ->orWhere('sections.description', 'like', '%'.$criteria.'%')
-                    ->orWhereHas('schoolYear', function($query) use ($criteria) {
-                        return $query->where('name', 'like', '%'.$criteria.'%');
-                    })
-                    ->orWhereHas('schoolCategory', function($query) use ($criteria) {
-                        return $query->where('name', 'like', '%'.$criteria.'%');
-                    })
-                    ->orWhereHas('level', function($query) use ($criteria) {
-                        return $query->where('name', 'like', '%'.$criteria.'%');
-                    })
-                    ->orWhereHas('course', function($query) use ($criteria) {
-                        return $query->where('name', 'like', '%'.$criteria.'%');
-                    })
-                    ->orWhereHas('semester', function($query) use ($criteria) {
-                        return $query->where('name', 'like', '%'.$criteria.'%');
-                    });
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function($q) use ($criteria) {
+                return $q->where(function($q) use ($criteria) {
+                    return $q->where('sections.name', 'like', '%'.$criteria.'%')
+                        ->orWhere('sections.description', 'like', '%'.$criteria.'%')
+                        ->orWhereHas('schoolYear', function($query) use ($criteria) {
+                            return $query->where('name', 'like', '%'.$criteria.'%');
+                        })
+                        ->orWhereHas('schoolCategory', function($query) use ($criteria) {
+                            return $query->where('name', 'like', '%'.$criteria.'%');
+                        })
+                        ->orWhereHas('level', function($query) use ($criteria) {
+                            return $query->where('name', 'like', '%'.$criteria.'%');
+                        })
+                        ->orWhereHas('course', function($query) use ($criteria) {
+                            return $query->where('name', 'like', '%'.$criteria.'%');
+                        })
+                        ->orWhereHas('semester', function($query) use ($criteria) {
+                            return $query->where('name', 'like', '%'.$criteria.'%');
+                        });
                 });
             });
+
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering, '-');
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+
+            $schoolCategoryFields = ['school_category_name'];
+            $levelFields = ['level_name'];
+            $courseFields = ['course_name'];
+            $semesterFields = ['semester_name'];
+
+            if (in_array($orderBy, $schoolCategoryFields)) {
+                $query->orderBySchoolCategory($orderBy, $sort);
+            } else if (in_array($orderBy, $levelFields)) {
+                $query->orderByLevel($orderBy, $sort);
+            } else if (in_array($orderBy, $courseFields)) {
+                $query->orderByCourse($orderBy, $sort);
+            } else if (in_array($orderBy, $semesterFields)) {
+                $query->orderBySemester($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
 
           $sections = $isPaginated
               ? $query->paginate($perPage)

@@ -250,6 +250,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/payments/{id}/approve', 'PaymentController@approve');
         Route::post('/payments/{id}/reject', 'PaymentController@reject');
         Route::post('/payments/{id}/cancel', 'PaymentController@cancel');
+        Route::get('/billings/{billingId}/payments', 'PaymentController@getPaymentsOfBilling');
 
         //billing
         Route::post('billings/{id}/post-payment', 'BillingController@postPayment');
