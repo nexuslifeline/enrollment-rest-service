@@ -1101,7 +1101,13 @@ class StudentService
             ? $query->paginate($perPage)
                 : $query->get();
 
-            $students->append(['latest_academic_record', 'has_open_academic_record']);
+            foreach ($students as $student) {
+                if ($student->latestAcademicRecord) {
+                    $student->latestAcademicRecord->load(['level', 'course', 'semester']);
+                }
+            }
+
+            $students->append(['has_open_academic_record']);
 
             return $students;
         } catch (Exception $e) {

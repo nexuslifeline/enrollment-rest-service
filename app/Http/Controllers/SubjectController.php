@@ -185,4 +185,15 @@ class SubjectController extends Controller
         );
         return SubjectResource::collection($subjects);
     }
+
+    public function getSubjectsOfPersonnel($personnelId, Request $request)
+    {
+        $subjectService = new SubjectService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $subjects = $subjectService->getSubjectsOfPersonnel($personnelId, $isPaginated, $perPage, $filters);
+
+        return SubjectResource::collection($subjects);
+    }
 }

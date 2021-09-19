@@ -470,4 +470,44 @@ class SubjectService
 
         return $passed;
     }
+
+    public function getSubjectsOfPersonnel(int $personnelId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = Subject::whereHas('schedules', function ($q) use ($personnelId) { 
+                return $q->where('personnel_id', $personnelId)->with('section');
+            });
+
+            // filters
+            $schoolYearId = $filters['school_year_id'] ?? false;
+            $query->when($schoolYearId, function ($q) use ($schoolYearId) {
+                return $q->whereHas('schedules', function ($q) use ($schoolYearId) {
+                    return $q->whereHas('section', function ($q) use ($schoolYearId) {
+                        return $q->where('school_year_id', $schoolYearId);
+                    });
+                });
+            });
+
+            $semesterId = $filters['semester_id'] ?? false;
+            $query->when($semesterId, function ($q) use ($semesterId) {
+                return $q->whereHas('schedules', function ($q) use ($semesterId) {
+                    return $q->whereHas('section', function ($q) use ($semesterId) {
+                        return $q->where('semester_id', $semesterId);
+                    });
+                });
+            });
+
+            $subjects = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+
+            $subjects->append('section');
+
+            return $subjects;
+        } catch (Exception $e) {
+            Log::info('Error occured during SubjectService getSubjectsOfPersonnel method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }

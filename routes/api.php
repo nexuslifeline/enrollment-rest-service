@@ -59,6 +59,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/sections/{sectionId}/scheduled-subjects', 'SubjectController@getScheduledSubjectsOfSection');
         Route::get('/subjects/{subjectId}/sections', 'SectionController@getSectionsOfSubject');
         Route::get('/sections/{sectionId}/my-scheduled-subjects', 'SubjectController@getSectionScheduledSubjectsWithStatus');
+        Route::get('personnels/{personnelId}/subjects', 'SubjectController@getSubjectsOfPersonnel');
 
         // levels
         Route::resource('/levels', 'LevelController');
