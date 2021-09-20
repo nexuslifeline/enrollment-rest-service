@@ -501,9 +501,9 @@ class SubjectService
                 ? $query->paginate($perPage)
                 : $query->get();
 
-            $subjects->append('section');
+            $subjects->append('sections');
 
-            return $subjects;
+            return $subjects->unique('id');
         } catch (Exception $e) {
             Log::info('Error occured during SubjectService getSubjectsOfPersonnel method call: ');
             Log::info($e->getMessage());

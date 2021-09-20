@@ -87,8 +87,14 @@ class Subject extends Model
 
     public function getSectionAttribute()
     {
-        $sectionId = $this->pivot->section_id ?? $this->schedules->first->latest()->section_id;
+        $sectionId = $this->pivot->section_id;
         return Section::find($sectionId);
+    }
+
+    public function getSectionsAttribute()
+    {
+        $sectionIds = $this->schedules()->pluck('section_id')->flatten();
+        return Section::whereIn('id', $sectionIds)->get();
     }
 
     public function getSectionScheduleAttribute()
