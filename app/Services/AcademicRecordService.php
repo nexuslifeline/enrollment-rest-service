@@ -1125,4 +1125,60 @@ class AcademicRecordService
             throw $e;
         }
     }
+
+    public function getAcademicRecordsOfSectionAndSubject(int $sectionId, int $subjectId, bool $isPaginated, int $perPage, array $filters)
+    {
+        try {
+            $query = AcademicRecord::with([
+                'student', 'level', 'course', 'semester'
+            ])
+                ->select('academic_records.*');
+
+            $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
+            $query->where('academic_record_status_id', $enrolledStatus)->latest()->limit(1)
+                ->whereHas('subjects', function ($q) use ($sectionId, $subjectId) {
+                    $q->when($sectionId, function ($q) use ($sectionId) {
+                        return $q->where('section_id', $sectionId);
+                    })->when(
+                        $subjectId,
+                        function ($q) use ($subjectId) {
+                            return $q->where('subject_id', $subjectId);
+                        }
+                    );
+            });
+
+            $criteria = $filters['criteria'] ?? false;
+            $query->when($criteria, function ($query) use ($criteria) {
+                $query->whereLike($criteria);
+            });
+
+            $orderBy = 'id';
+            $sort = 'DESC';
+
+            $ordering = $filters['ordering'] ?? false;
+            if ($ordering) {
+                $isDesc = str_starts_with($ordering, '-');
+                $orderBy = $isDesc ? substr($ordering, 1) : $ordering;
+                $sort = $isDesc ? 'DESC' : 'ASC';
+            }
+            $studentFields = ['complete_address', 'city', 'barangay', 'region'];
+
+            if (in_array($orderBy, $studentFields)) {
+                $query->orderByStudent($orderBy, $sort);
+            } else {
+                $query->orderBy($orderBy, $sort);
+            }
+
+
+            $academicRecords = $isPaginated
+                ? $query->paginate($perPage)
+                : $query->get();
+
+            return $academicRecords;
+        } catch (Exception $e) {
+            Log::info('Error occured during AcademicRecordService getAcademicRecordsOfSectionAndSubject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }

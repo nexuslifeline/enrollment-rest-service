@@ -316,4 +316,17 @@ class AcademicRecordController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function getAcademicRecordsOfSectionAndSubject(int $sectionId, int $subjectId, Request $request)
+    {
+        $studentService = new AcademicRecordService();
+        $perPage = $request->per_page ?? 20;
+        $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
+        $filters = $request->except('per_page', 'paginate');
+        $academicRecords = $studentService->getAcademicRecordsOfSectionAndSubject($sectionId, $subjectId, $isPaginated, $perPage, $filters);
+
+        return AcademicRecordResource::collection(
+            $academicRecords
+        );
+    }
 }
