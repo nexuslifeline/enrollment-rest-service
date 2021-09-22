@@ -1134,7 +1134,7 @@ class AcademicRecordService
                     return $q->with('grades')
                         ->where('section_id', $sectionId)
                         ->where('subject_id', $subjectId)
-                        ->first();
+                        ->get();
                 }
             ])
                 ->select('academic_records.*');
