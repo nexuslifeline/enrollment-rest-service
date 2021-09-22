@@ -248,6 +248,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('/academic-records/{id}/request-assessment', 'AcademicRecordController@requestAssessment');
         Route::post('/academic-records/{id}/generate-billing', 'AcademicRecordController@generateBilling');
         Route::get('sections/{sectionId}/subjects/{subjectId}/academic-records', 'AcademicRecordController@getAcademicRecordsOfSectionAndSubject');
+        Route::post('/academic-records/{id}/add-subjects', 'AcademicRecordController@addSubjectsOfAcademicRecord');
 
         //payment
         Route::post('/payments/{id}/submit', 'PaymentController@submitPayment');

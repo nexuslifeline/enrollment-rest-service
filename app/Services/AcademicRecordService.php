@@ -600,7 +600,7 @@ class AcademicRecordService
             $subjects->append(['sectionSchedule','section']);
             return $subjects;
         } catch (Exception $e) {
-            Log::info('Error occured during SubjectService getSubjects method call: ');
+            Log::info('Error occured during AcademicRecordService getSubjects method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -636,7 +636,7 @@ class AcademicRecordService
             $subject->append('section');
             return $subject;
         } catch (Exception $e) {
-            Log::info('Error occured during SubjectService getSubjects method call: ');
+            Log::info('Error occured during AcademicRecordService updateSubject method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -664,7 +664,7 @@ class AcademicRecordService
                 ->wherePivot('subject_id', $subjectId)
                 ->detach();
         } catch (Exception $e) {
-            Log::info('Error occured during SubjectService getSubjects method call: ');
+            Log::info('Error occured during AcademicRecordService deleteSubject method call: ');
             Log::info($e->getMessage());
             throw $e;
         }
@@ -1133,8 +1133,7 @@ class AcademicRecordService
                 'student', 'level', 'course', 'semester', 'studentGrades' => function ($q) use ($sectionId, $subjectId) {
                     return $q->with('grades')
                         ->where('section_id', $sectionId)
-                        ->where('subject_id', $subjectId)
-                        ->get();
+                        ->where('subject_id', $subjectId);
                 }
             ])
                 ->select('academic_records.*');
@@ -1182,6 +1181,38 @@ class AcademicRecordService
             return $academicRecords;
         } catch (Exception $e) {
             Log::info('Error occured during AcademicRecordService getAcademicRecordsOfSectionAndSubject method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function addSubjectsOfAcademicRecord(int $academicRecordId, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+
+            $subjectCount = $academicRecord->subjects()->wherePivot('section_id', $data['section_id'])
+                ->where('subject_id', $data['subject_id'])
+                ->count();
+            
+            if ($subjectCount > 0) {
+                throw ValidationException::withMessages([
+                    'non_field_error' => ['Subject is already added.']
+                ]);
+            }
+
+            $academicRecord->subjects()->attach($data['subject_id'], [
+                'section_id' => $data['section_id']
+            ]);
+            $subject = $academicRecord->subjects()->wherePivot('section_id', $data['section_id'])
+                ->where('subject_id', $data['subject_id'])
+                ->first();
+            DB::commit();
+            return $subject;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during AcademicRecordService addSubjectsOfAcademicRecord method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

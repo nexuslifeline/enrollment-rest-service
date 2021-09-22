@@ -319,14 +319,24 @@ class AcademicRecordController extends Controller
 
     public function getAcademicRecordsOfSectionAndSubject(int $sectionId, int $subjectId, Request $request)
     {
-        $studentService = new AcademicRecordService();
+        $academicRecordService = new AcademicRecordService();
         $perPage = $request->per_page ?? 20;
         $isPaginated = !$request->has('paginate') || $request->paginate === 'true';
         $filters = $request->except('per_page', 'paginate');
-        $academicRecords = $studentService->getAcademicRecordsOfSectionAndSubject($sectionId, $subjectId, $isPaginated, $perPage, $filters);
+        $academicRecords = $academicRecordService->getAcademicRecordsOfSectionAndSubject($sectionId, $subjectId, $isPaginated, $perPage, $filters);
 
         return AcademicRecordResource::collection(
             $academicRecords
         );
+    }
+
+    public function addSubjectsOfAcademicRecord(int $academicRecordId, Request $request)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $data = $request->all();
+        $subject = $academicRecordService->addSubjectsOfAcademicRecord($academicRecordId, $data);
+        return (new SubjectResource($subject))
+            ->response()
+            ->setStatusCode(201);
     }
 }
