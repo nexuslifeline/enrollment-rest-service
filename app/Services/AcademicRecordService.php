@@ -1130,7 +1130,12 @@ class AcademicRecordService
     {
         try {
             $query = AcademicRecord::with([
-                'student', 'level', 'course', 'semester'
+                'student', 'level', 'course', 'semester', 'studentGrades' => function ($q) use ($sectionId, $subjectId) {
+                    return $q->with('grades')
+                        ->where('section_id', $sectionId)
+                        ->where('subject_id', $subjectId)
+                        ->first();
+                }
             ])
                 ->select('academic_records.*');
 

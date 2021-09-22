@@ -178,10 +178,9 @@ class StudentGradeService
             'grade' => $data['grade']
           ]
         );
-
-        $studentGrade->load('grades');
       }
       DB::commit();
+      $studentGrade->load('grades');
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();

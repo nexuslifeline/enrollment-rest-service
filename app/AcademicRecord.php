@@ -136,4 +136,9 @@ class AcademicRecord extends Model
         // Log::info($this->billings->where('billing_type_id', $initialBillingType) ? true : false);
         return $this->billings->where('billing_type_id', $initialBillingType)->count() > 0;
     }
+
+    public function studentGrades()
+    {
+        return $this->hasMany('App\StudentGrade');
+    }
 }
