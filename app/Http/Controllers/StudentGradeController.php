@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StudentGradeUpdateGradePeriodRequest;
 use App\Http\Resources\StudentGradeResource;
 use App\Services\StudentGradeService;
 use App\Student;
@@ -114,5 +115,15 @@ class StudentGradeController extends Controller
         $studentGradeService = new StudentGradeService;
         $studentGrades = $studentGradeService->batchUpdate($data);
         return StudentGradeResource::collection($studentGrades);
+    }
+
+    public function updateGradePeriod($sectionId, $subjectId, $academicRecordId, $gradingPeriodId, StudentGradeUpdateGradePeriodRequest $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->updateGradePeriod($sectionId, $subjectId, $academicRecordId, $gradingPeriodId, $data);
+        return (new StudentGradeResource($studentGrade))
+        ->response()
+        ->setStatusCode(200);
     }
 }

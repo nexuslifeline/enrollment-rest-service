@@ -224,10 +224,12 @@ Route::group(['prefix' => 'v1'], function () {
         //general settings
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
+        //student grades
         Route::resource('student-grades', 'StudentGradeController');
         Route::get('student-grades/personnels/list', 'StudentGradeController@studentGradePersonnels');
         Route::post('student-grades/{personnelId}/{sectionId}/{subjectId}', 'StudentGradeController@acceptStudentGrade');
         Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
+        Route::put('sections/{sectionId}/subjects/{subjectId}/academic-records/{academicRecordId}/grade-periods/{gradingPeriodId}', 'StudentGradeController@updateGradePeriod');
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');

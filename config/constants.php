@@ -105,4 +105,9 @@ return [
     'DIVORCED' => 3,
     'WIDOWED' => 4
   ],
+  'student_grade_status' => [
+    'PENDING' => 1,
+    'SUBMITTED' => 2,
+    'FINALIZED' => 3
+  ]
 ];

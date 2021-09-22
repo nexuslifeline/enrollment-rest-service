@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\AcademicRecord;
+use App\SectionSchedule;
 use App\StudentGrade;
 use App\TranscriptRecord;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -127,7 +130,62 @@ class StudentGradeService
       return $data;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during TermService batchUpdate method call: ');
+      Log::info('Error occured during StudentGradeService batchUpdate method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function updateGradePeriod(int $sectionId, int $subjectId, int $academicRecordId, int $gradingPeriodId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $pending = Config::get('constants.student_grade_status.PENDING');
+      $studentId = AcademicRecord::find($academicRecordId)->student_id ?? null;
+      $schedule = SectionSchedule::where('section_id', $sectionId)
+        ->where('subject_id', $subjectId)
+        ->first();
+      $studentGrade = StudentGrade::updateOrCreate(
+        [
+          'academic_record_id' => $academicRecordId,
+          'subject_id' => $subjectId,
+          'section_id' => $sectionId
+        ],
+        [
+          'personnel_id' => $schedule->personnel_id,
+          'student_grade_status_id' => $pending,
+          'student_id' => $studentId,
+          'subject_id' => $subjectId,
+          'section_id' => $sectionId
+        ]
+      );
+      $grades = $studentGrade->grades();
+      $gradingPeriod = $grades->where('grading_period_id', $gradingPeriodId)
+        ->first();
+      if ($gradingPeriod) {
+        $grades
+        ->updateExistingPivot(
+          $gradingPeriodId,
+          [
+            'grade' => $data['grade']
+          ]
+        );
+      } else {
+        $grades
+        ->attach(
+          $gradingPeriodId,
+          [
+            'grade' => $data['grade']
+          ]
+        );
+
+        $studentGrade->load('grades');
+      }
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService updateGradePeriod method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
