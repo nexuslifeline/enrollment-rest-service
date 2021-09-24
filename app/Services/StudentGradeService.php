@@ -140,7 +140,7 @@ class StudentGradeService
   {
     DB::beginTransaction();
     try {
-      $pending = Config::get('constants.student_grade_status.PENDING');
+      $draft = Config::get('constants.student_grade_status.DRAFT');
       $studentId = AcademicRecord::find($academicRecordId)->student_id ?? null;
       $schedule = SectionSchedule::where('section_id', $sectionId)
         ->where('subject_id', $subjectId)
@@ -153,7 +153,7 @@ class StudentGradeService
         ],
         [
           'personnel_id' => $schedule->personnel_id,
-          'student_grade_status_id' => $pending,
+          'student_grade_status_id' => $draft,
           'student_id' => $studentId,
           'subject_id' => $subjectId,
           'section_id' => $sectionId

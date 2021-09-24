@@ -277,6 +277,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::put('academic-records/{academicRecordId}/terms/{termId}', 'TermController@updateStudentFeeTermsOfAcademicRecord');
         Route::delete('academic-records/{academicRecordId}/terms/{termId}', 'TermController@deleteStudentFeeTermsOfAcademicRecord');
         Route::post('academic-records/{academicRecordId}/terms/', 'TermController@storeStudentFeeTermsOfAcademicRecord');
+    
+        //grade symbols
+        Route::resource('grade-symbols', 'GradeSymbolController');
     });
     // Route::get('billings/{billingId}/preview', 'ReportController@previewBilling');
     // Route::get('requirement-list', 'ReportController@requirementList');

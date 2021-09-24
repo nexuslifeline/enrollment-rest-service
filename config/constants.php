@@ -106,8 +106,9 @@ return [
     'WIDOWED' => 4
   ],
   'student_grade_status' => [
-    'PENDING' => 1,
-    'SUBMITTED' => 2,
-    'FINALIZED' => 3
+    'DRAFT' => 1,
+    'PUBLISHED' => 2,
+    'SUBMITTED_FOR_REVIEW' => 3,
+    'FINALIZED' => 4
   ]
 ];
