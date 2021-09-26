@@ -106,8 +106,8 @@ class AcademicRecord extends Model
 
     public function grades()
     {
-        return $this->belongsToMany('App\GradingPeriod', 'student_grades', 'academic_record_id', 'grading_period_id')
-        ->withPivot('subject_id','grade','personnel_id','student_grade_status_id');
+        return $this->belongsToMany('App\StudentGrade', 'student_grade_periods', 'academic_record_id', 'student_grade_id')
+        ->withPivot('grade','grading_period_id');
     }
 
     public function curriculum()
@@ -135,10 +135,5 @@ class AcademicRecord extends Model
         $initialBillingType = Config::get('constants.billing_type.INITIAL_FEE');
         // Log::info($this->billings->where('billing_type_id', $initialBillingType) ? true : false);
         return $this->billings->where('billing_type_id', $initialBillingType)->count() > 0;
-    }
-
-    public function studentGrades()
-    {
-        return $this->hasMany('App\StudentGrade');
     }
 }

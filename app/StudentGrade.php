@@ -22,7 +22,7 @@ class StudentGrade extends Model
     public function grades()
     {
         return $this->belongsToMany('App\GradingPeriod', 'student_grade_periods', 'student_grade_id', 'grading_period_id')
-            ->withPivot('grade');
+            ->withPivot('grade','academic_record_id');
     }
 
     public function personnel()
@@ -38,16 +38,6 @@ class StudentGrade extends Model
     public function subject()
     {
         return $this->belongsTo('App\Subject');
-    }
-
-    public function student()
-    {
-        return $this->belongsTo('App\Student');
-    }
-
-    public function schoolYear()
-    {
-        return $this->belongsTo('App\SchoolYear');
     }
 
     public function scopeFilters($query, $filters)

@@ -8,6 +8,7 @@ use App\StudentGrade;
 use App\TranscriptRecord;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -18,11 +19,10 @@ class StudentGradeService
   public function list(bool $isPaginated, int $perPage, array $filters)
   {
     try {
-      $query = StudentGrade::with(['grades','personnel','subject','student','schoolYear', 'section' => function ($q) {
+      $query = StudentGrade::with(['personnel','subject', 'section' => function ($q) {
         return $q->with('schoolCategory');
       }])
       ->filters($filters);
-      
 
       $studentGrades = $isPaginated
         ? $query->paginate($perPage)
@@ -141,32 +141,32 @@ class StudentGradeService
     DB::beginTransaction();
     try {
       $draft = Config::get('constants.student_grade_status.DRAFT');
-      $studentId = AcademicRecord::find($academicRecordId)->student_id ?? null;
       $schedule = SectionSchedule::where('section_id', $sectionId)
         ->where('subject_id', $subjectId)
         ->first();
       $studentGrade = StudentGrade::updateOrCreate(
         [
-          'academic_record_id' => $academicRecordId,
+          'personnel_id' => $schedule->personnel_id,
           'subject_id' => $subjectId,
           'section_id' => $sectionId
         ],
         [
           'personnel_id' => $schedule->personnel_id,
           'student_grade_status_id' => $draft,
-          'student_id' => $studentId,
           'subject_id' => $subjectId,
           'section_id' => $sectionId
         ]
       );
       $grades = $studentGrade->grades();
       $gradingPeriod = $grades->where('grading_period_id', $gradingPeriodId)
+        ->wherePivot('academic_record_id', $academicRecordId)
         ->first();
       if ($gradingPeriod) {
         $grades
         ->updateExistingPivot(
           $gradingPeriodId,
           [
+            'academic_record_id' => $academicRecordId,
             'grade' => $data['grade']
           ]
         );
@@ -175,16 +175,55 @@ class StudentGradeService
         ->attach(
           $gradingPeriodId,
           [
+            'academic_record_id' => $academicRecordId,
             'grade' => $data['grade']
           ]
         );
       }
       DB::commit();
-      $studentGrade->load('grades');
+      // $studentGrade->load('grades');
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during StudentGradeService updateGradePeriod method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function submit(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $submit = Config::get('constants.student_grade_status.SUBMITTED_FOR_REVIEW');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $submit);
+      $data = Arr::add($data, 'submitted_date', Carbon::now());
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService submit method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function finalize(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $finalize = Config::get('constants.student_grade_status.FINALIZED');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $finalize);
+      $data = Arr::add($data, 'finalized_date', Carbon::now());
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService finalize method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

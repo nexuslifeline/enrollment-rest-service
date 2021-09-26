@@ -126,4 +126,24 @@ class StudentGradeController extends Controller
         ->response()
         ->setStatusCode(200);
     }
+
+    public function submit($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->submit($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function finalize($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->finalize($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
 }
