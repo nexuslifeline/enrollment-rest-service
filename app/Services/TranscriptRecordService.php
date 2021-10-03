@@ -78,12 +78,12 @@ class TranscriptRecordService
           //   ->orWhere('email', 'like', '%' . $criteria . '%');
           return  $query->whereLike($criteria);
         })
-          ->orWhereHas('course', function ($query) use ($criteria) {
-            return $query->where('description', 'like', '%' . $criteria . '%');
-          })
-          ->orWhereHas('level', function ($query) use ($criteria) {
-            return $query->where('name', 'like', '%' . $criteria . '%');
-          })
+          // ->orWhereHas('course', function ($query) use ($criteria) {
+          //   return $query->where('description', 'like', '%' . $criteria . '%');
+          // })
+          // ->orWhereHas('level', function ($query) use ($criteria) {
+          //   return $query->where('name', 'like', '%' . $criteria . '%');
+          // })
           ->orWhereHas('curriculum', function ($query) use ($criteria) {
             return $query->where('name', 'like', '%' . $criteria . '%');
           });

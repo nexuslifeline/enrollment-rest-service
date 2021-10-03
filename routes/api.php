@@ -230,8 +230,12 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('student-grades/{personnelId}/{sectionId}/{subjectId}', 'StudentGradeController@acceptStudentGrade');
         Route::post('student-grades/batch-update', 'StudentGradeController@batchUpdate');
         Route::put('sections/{sectionId}/subjects/{subjectId}/academic-records/{academicRecordId}/grade-periods/{gradingPeriodId}', 'StudentGradeController@updateGradePeriod');
-        Route::put('student-grades/{studentGradeId}/submit', 'StudentGradeController@submit');
-        Route::put('student-grades/{studentGradeId}/finalize', 'StudentGradeController@finalize');
+        Route::post('student-grades/{studentGradeId}/submit', 'StudentGradeController@submit');
+        Route::post('student-grades/{studentGradeId}/finalize', 'StudentGradeController@finalize');
+        Route::post('student-grades/{studentGradeId}/publish', 'StudentGradeController@publish');
+        Route::post('student-grades/{studentGradeId}/unpublish', 'StudentGradeController@unpublish');
+        Route::post('student-grades/{studentGradeId}/request-edit', 'StudentGradeController@requestEdit');
+        Route::post('student-grades/{studentGradeId}/approve-edit-request', 'StudentGradeController@approveEditRequest');
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');

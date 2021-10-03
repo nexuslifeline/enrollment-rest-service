@@ -109,6 +109,8 @@ return [
     'DRAFT' => 1,
     'PUBLISHED' => 2,
     'SUBMITTED_FOR_REVIEW' => 3,
-    'FINALIZED' => 4
+    'REQUEST_EDIT' => 4,
+    'EDITING_APPROVED' => 5,
+    'FINALIZED' => 6
   ]
 ];

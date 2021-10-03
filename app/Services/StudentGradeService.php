@@ -191,6 +191,43 @@ class StudentGradeService
     }
   }
 
+  public function publish(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $publish = Config::get('constants.student_grade_status.PUBLISHED');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $publish);
+      $data = Arr::add($data, 'published_date', Carbon::now());
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService publish method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function unpublish(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $draft = Config::get('constants.student_grade_status.DRAFT');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $draft);
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService unpublish method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
   public function submit(int $studentGradeId, array $data)
   {
     DB::beginTransaction();
@@ -199,6 +236,44 @@ class StudentGradeService
       $studentGrade = StudentGrade::find($studentGradeId);
       $data = Arr::add($data, 'student_grade_status_id', $submit);
       $data = Arr::add($data, 'submitted_date', Carbon::now());
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService submit method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function requestEdit(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $requestEdit = Config::get('constants.student_grade_status.REQUEST_EDIT');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $requestEdit);
+      $data = Arr::add($data, 'edit_requested_date', Carbon::now());
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService submit method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function approveEditRequest(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $editingApproved = Config::get('constants.student_grade_status.EDITING_APPROVED');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $editingApproved);
+      $data = Arr::add($data, 'request_approved_date', Carbon::now());
       $studentGrade->update($data);
       DB::commit();
       return $studentGrade;
@@ -219,6 +294,32 @@ class StudentGradeService
       $data = Arr::add($data, 'student_grade_status_id', $finalize);
       $data = Arr::add($data, 'finalized_date', Carbon::now());
       $studentGrade->update($data);
+
+      $grades = $studentGrade->grades()->get();
+      $academicRecordIds = $grades->pluck('pivot.academic_record_id')->flatten()->unique();
+      foreach ($academicRecordIds as $academicRecordId)
+      {
+        $avgGrade = $grades->where('pivot.academic_record_id', $academicRecordId)
+          ->avg('pivot.grade');
+
+        $academicRecord = AcademicRecord::find($academicRecordId);
+
+        $transcriptRecord = $academicRecord->transcriptRecord;
+
+        $subject = $transcriptRecord->subjects()
+          ->where('id', $studentGrade->subject_id)
+          ->where('level_id', $academicRecord->level_id)
+          ->where('semester_id', $academicRecord->semester_id)
+          ->where('course_id', $academicRecord->course_id)
+          ->where('school_category_id', $academicRecord->school_category_id);
+
+        $subject->updateExistingPivot($studentGrade->subject_id, [
+          'system_notes' => 'From student_grades table with id of ' . $studentGrade->id . '. Accepted by user with id of ' . Auth::user()->id . '. Date accepted ' . Carbon::now(),
+          'grade' => $avgGrade,
+          'student_grade_id' => $studentGrade->id
+        ]);
+      }
+      
       DB::commit();
       return $studentGrade;
     } catch (Exception $e) {

@@ -137,6 +137,46 @@ class StudentGradeController extends Controller
             ->setStatusCode(200);
     }
 
+    public function publish($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->publish($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function unpublish($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->unpublish($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function requestEdit($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->requestEdit($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function approveEditRequest($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->approveEditRequest($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
     public function finalize($studentGradeId, Request $request)
     {
         $data = $request->all();
