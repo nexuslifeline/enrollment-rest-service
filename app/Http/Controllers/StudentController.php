@@ -146,7 +146,7 @@ class StudentController extends Controller
         return BillingResource::collection(
             $billings
         )->additional(['meta' => [
-            'overpay' => $studentService->getOverpay($id)
+            'paid_billings_overpay' => $studentService->getPaidBillingsOverpay($id)
         ]]);;
     }
 

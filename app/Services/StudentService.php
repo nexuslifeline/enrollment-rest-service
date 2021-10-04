@@ -994,7 +994,7 @@ class StudentService
         }
     }
 
-    public function getOverpay(int $studentId)
+    public function getPaidBillingsOverpay(int $studentId)
     {
         try {
             $paid = Config::get('constants.billing_status.PAID');
