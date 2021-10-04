@@ -651,63 +651,20 @@ class StudentService
         try {
             //soa billing
             $billingTypeId = $filters['billing_type_id'] ?? false;
-            $showAll = $filters['show_all'] ?? false;
             $billingStatusId = $filters['billing_status_id'] ?? false;
-            $initialFee = Config::get('constants.billing_type.INITIAL_FEE');
-            $soa = Config::get('constants.billing_type.SOA');
-            $other = Config::get('constants.billing_type.BILL');
             $billingStatusPaid = Config::get('constants.billing_status.PAID');
 
-            $soaBillings = collect();
-            $initialBillings = collect();
-            $otherBillings = collect();
-
-            if (!$billingTypeId || $billingTypeId == $soa) {
-                //soa
-                $query = Billing::where('billing_type_id', $soa)
-                    ->where('student_id', $id)
-                    ->where('is_forwarded', 0)
-                    ->where('billing_status_id', '!=', $billingStatusPaid)
-                    ->when($billingStatusId, function ($q) use ($billingStatusId) {
-                        return $q->where('billing_status_id', $billingStatusId);
-                    });
-                if ($showAll) {
-                    $soaBillings = $query->get();
-                } else {
-                    $soaBillings = $query->latest()->take(1)->get();
-                }
-                $soaBillings->append(['total_paid', 'submitted_payments']);
-            }
-
-            if (!$billingTypeId || $billingTypeId == $initialFee) {
-                //initial billing
-                $initialBillings = Billing::where('billing_type_id', $initialFee)
-                    ->where('student_id', $id)
-                    ->where('is_forwarded', 0)
-                    ->where('billing_status_id', '!=', $billingStatusPaid)
-                    ->when($billingStatusId, function ($q) use ($billingStatusId) {
-                        return $q->where('billing_status_id', $billingStatusId);
-                    })
-                    ->get();
-                $initialBillings->append(['total_paid', 'submitted_payments']);
-            }
-
-            if (!$billingTypeId || $billingTypeId == $other) {
-                //other billing
-                $otherBillings = Billing::where('billing_type_id', $other)
-                    ->where('student_id', $id)
-                    ->where('is_forwarded', 0)
-                    ->where('billing_status_id', '!=', $billingStatusPaid)
-                    ->when($billingStatusId, function ($q) use ($billingStatusId) {
-                        return $q->where('billing_status_id', $billingStatusId);
-                    })
-                    ->get();
-
-                $otherBillings->append(['total_paid', 'submitted_payments']);
-            }
-            $billings = $soaBillings->merge($initialBillings)->merge($otherBillings);
-            
-
+            $billings = Billing::where('student_id', $id)
+                ->where('is_forwarded', 0)
+                ->where('billing_status_id', '!=', $billingStatusPaid)
+                ->when($billingStatusId, function ($q) use ($billingStatusId) {
+                    return $q->where('billing_status_id', $billingStatusId);
+                })
+                ->when($billingTypeId, function ($q) use ($billingTypeId) {
+                    return $q->where('billing_type_id', $billingTypeId);
+                })
+                ->get();
+            $billings->append(['total_paid', 'submitted_payments']);
             return $billings->sortBy('due_date');
         } catch (Exception $e) {
             DB::rollback();

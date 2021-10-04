@@ -183,6 +183,10 @@ class StudentGradeService
       DB::commit();
       // $studentGrade->load('grades');
       return $studentGrade;
+      // return $grades->where('grading_period_id', $gradingPeriodId)
+      // ->wherePivot('academic_record_id', $academicRecordId)
+      // ->first();
+
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during StudentGradeService updateGradePeriod method call: ');
