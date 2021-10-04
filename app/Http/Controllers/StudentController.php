@@ -145,7 +145,9 @@ class StudentController extends Controller
 
         return BillingResource::collection(
             $billings
-        );
+        )->additional(['meta' => [
+            'overpay' => $studentService->getOverpay($id)
+        ]]);;
     }
 
     public function getAllBillingsOfStudent(Request $request, int $id)
@@ -160,7 +162,7 @@ class StudentController extends Controller
             $billings
         )->additional(['meta' => [
             'total_remaining_balance' => $studentService->getTotalRemainingBalance($id)
-        ]]);;
+        ]]);
     }
 
     public function manualRegister(ManualRegisterRequest $request)

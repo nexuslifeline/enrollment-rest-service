@@ -994,6 +994,26 @@ class StudentService
         }
     }
 
+    public function getOverpay(int $studentId)
+    {
+        try {
+            $paid = Config::get('constants.billing_status.PAID');
+            // $partial = Config::get('constants.billing_status.PARTIALLY_PAID');
+            $billings = Billing::where('student_id', $studentId)
+                ->where('billing_status_id', $paid)
+                ->get();
+
+            $billings->append(['total_paid']);
+
+            $overpay = max($billings->sum('total_paid') - $billings->sum('total_amount'), 0);
+            return $overpay;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService getOverpay method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
     // public function getPendingPaymentsCount(int $studentId)
     // {
     //     try {
