@@ -8,6 +8,7 @@ use App\StudentFee;
 use Carbon\Carbon;
 use Exception;
 use Auth;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -264,17 +265,37 @@ class PaymentService
         DB::beginTransaction();
         try {
             $payment = Payment::find($id);
-            $data['payment_status_id'] = Config::get('constants.payment_status.APPROVED');
-            $data['approved_date'] = Carbon::now();
-            $data['approved_by'] = Auth::id();
+            $billing = $payment->billing->append('total_paid');
+            $data = Arr::add($data, 'payment_status_id', Config::get('constants.payment_status.APPROVED'));
+            $data = Arr::add($data, 'approved_date', Carbon::now());
+            $data = Arr::add($data, 'approved_by', Auth::id());
+
+            $latestPayment = Payment::where('is_overpay_forwarded', 0)
+            ->where('overpay', '>', 0)
+            ->latest()
+                ->first();
+
+            $forwardedPayment = 0;
+
+            if ($latestPayment) {
+                $latestPayment->update([
+                    'is_overpay_forwarded' => 1
+                ]);
+                $forwardedPayment = $latestPayment['overpay'];
+                $data = Arr::add($data, 'system_notes', 'Forwarded payment from ' . $latestPayment['reference_no'] . ' paid on ' . date('F d, Y', strtotime($latestPayment['date_paid'])));
+            }
+
+            $overpay = max(($data['amount'] + $forwardedPayment) - $billing['total_remaining_due'], 0);
+
+            $data = Arr::add($data, 'forwarded_payment', $forwardedPayment);
+            $data = Arr::add($data, 'overpay', $overpay);
+
             $payment->update($data);
-            $billing = $payment->billing;
 
             $billingStatusPaid = Config::get('constants.billing_status.PAID');
             $billingStatusPartiallyPaid = Config::get('constants.billing_status.PARTIALLY_PAID');
-
             $billing->update([
-                'billing_status_id' => $payment->amount < $billing->total_amount + $billing->previous_balance ? $billingStatusPartiallyPaid : $billingStatusPaid
+                'billing_status_id' => $payment->amount + $billing->total_paid < $billing->total_amount + $billing->previous_balance ? $billingStatusPartiallyPaid : $billingStatusPaid
             ]);
 
             $studentFee = $billing->studentFee;

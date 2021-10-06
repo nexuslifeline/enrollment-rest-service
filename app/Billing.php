@@ -61,6 +61,11 @@ class Billing extends Model
         return $this->payments->where('payment_status_id', 2)->sum('amount');
     }
 
+    public function getTotalOverPayAttribute()
+    {
+        return $this->payments->where('payment_status_id', 2)->where('is_forwarded_overpay', 0)->sum('overpay');
+    }
+
     public function term()
     {
         return $this->belongsTo('App\Term');

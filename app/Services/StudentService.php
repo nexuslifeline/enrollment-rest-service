@@ -1003,10 +1003,26 @@ class StudentService
                 ->where('billing_status_id', $paid)
                 ->get();
 
-            $billings->append(['total_paid']);
+            $billings->append(['total_overpay']);
 
-            $overpay = max($billings->sum('total_paid') - $billings->sum('total_amount'), 0);
+            $overpay = max($billings->sum('total_overpay'), 0);
             return $overpay;
+        } catch (Exception $e) {
+            Log::info('Error occured during StudentService getOverpay method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function lastPaymentReference(int $studentId)
+    {
+        try{
+            $payment = Payment::where('student_id', $studentId)
+                ->where('overpay', '>', 0)
+                ->where('is_overpay_forwarded', 0)
+                ->latest()
+                ->first();
+            return $payment ? $payment->reference_no : '';
         } catch (Exception $e) {
             Log::info('Error occured during StudentService getOverpay method call: ');
             Log::info($e->getMessage());
