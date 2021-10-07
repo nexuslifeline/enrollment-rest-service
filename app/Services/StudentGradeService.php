@@ -27,7 +27,7 @@ class StudentGradeService
       $studentGrades = $isPaginated
         ? $query->paginate($perPage)
         : $query->get();
-
+      $studentGrades->append(['students']);
       return $studentGrades;
     } catch (Exception $e) {
       Log::info('Error occured during StudentGradeService list method call: ');

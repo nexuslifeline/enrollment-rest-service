@@ -35,6 +35,21 @@ class StudentGrade extends Model
         return $this->belongsTo('App\Section');
     }
 
+    public function getStudentsAttribute()
+    {
+        $sectionId = $this->section_id;
+        $subjectId = $this->subject_id;
+        return Student::whereHas('latestAcademicRecord', function ($q) use ($sectionId, $subjectId) {
+            return $q->whereHas('subjects', function ($q) use ($sectionId, $subjectId) {
+                return $q->where('section_id', $sectionId)
+                ->where('subject_id', $subjectId);
+            });
+        })
+        ->with('photo')
+        ->get(['first_name', 'middle_name', 'last_name', 'id'])
+        ->makeHidden(['address','current_address','permanent_address','age']);
+    }
+
     public function subject()
     {
         return $this->belongsTo('App\Subject');

@@ -285,7 +285,7 @@ class PaymentService
                 $data = Arr::add($data, 'system_notes', 'Forwarded payment from ' . $latestPayment['reference_no'] . ' paid on ' . date('F d, Y', strtotime($latestPayment['date_paid'])));
             }
 
-            $overpay = max(($data['amount'] + $forwardedPayment) - $billing['total_remaining_due'], 0);
+            $overpay = max(($payment['amount'] + $forwardedPayment) - $billing['total_remaining_due'], 0);
 
             $data = Arr::add($data, 'forwarded_payment', $forwardedPayment);
             $data = Arr::add($data, 'overpay', $overpay);
