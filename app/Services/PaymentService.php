@@ -271,9 +271,10 @@ class PaymentService
             $data = Arr::add($data, 'approved_by', Auth::id());
 
             $latestPayment = Payment::where('is_overpay_forwarded', 0)
+            ->where('student_id', $payment->student_id)
             ->where('overpay', '>', 0)
             ->latest()
-                ->first();
+            ->first();
 
             $forwardedPayment = 0;
 

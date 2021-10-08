@@ -417,6 +417,7 @@ class BillingService
             $paymentModeId = $data['payment_mode_id'] ?? Config::get('constants.payment_mode.CASH');
 
             $latestPayment = Payment::where('is_overpay_forwarded', 0)
+                ->where('student_id', $billing->student_id)
                 ->where('overpay', '>', 0)
                 ->latest()
                 ->first();
