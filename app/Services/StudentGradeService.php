@@ -20,7 +20,7 @@ class StudentGradeService
   {
     try {
       $query = StudentGrade::with(['personnel','subject', 'section' => function ($q) {
-        return $q->with('schoolCategory');
+        return $q->with('schoolCategory', 'schoolYear');
       }])
       ->filters($filters);
 
@@ -205,6 +205,11 @@ class StudentGradeService
       $data = Arr::add($data, 'published_date', Carbon::now());
       $studentGrade->update($data);
       DB::commit();
+
+      $studentGrade->load(['personnel','subject', 'section' => function ($q) {
+        return $q->with('schoolCategory', 'schoolYear');
+      }]);
+
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
@@ -223,6 +228,9 @@ class StudentGradeService
       $data = Arr::add($data, 'student_grade_status_id', $draft);
       $studentGrade->update($data);
       DB::commit();
+      $studentGrade->load(['personnel','subject', 'section' => function ($q) {
+        return $q->with('schoolCategory', 'schoolYear');
+      }]);
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
@@ -242,6 +250,9 @@ class StudentGradeService
       $data = Arr::add($data, 'submitted_date', Carbon::now());
       $studentGrade->update($data);
       DB::commit();
+      $studentGrade->load(['personnel','subject', 'section' => function ($q) {
+        return $q->with('schoolCategory', 'schoolYear');
+      }]);
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
@@ -261,6 +272,9 @@ class StudentGradeService
       $data = Arr::add($data, 'edit_requested_date', Carbon::now());
       $studentGrade->update($data);
       DB::commit();
+      $studentGrade->load(['personnel','subject', 'section' => function ($q) {
+        return $q->with('schoolCategory', 'schoolYear');
+      }]);
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
@@ -280,6 +294,9 @@ class StudentGradeService
       $data = Arr::add($data, 'request_approved_date', Carbon::now());
       $studentGrade->update($data);
       DB::commit();
+      $studentGrade->load(['personnel','subject', 'section' => function ($q) {
+        return $q->with('schoolCategory', 'schoolYear');
+      }]);
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
