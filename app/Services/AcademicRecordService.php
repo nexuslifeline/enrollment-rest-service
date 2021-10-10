@@ -1130,15 +1130,23 @@ class AcademicRecordService
     {
         try {
             $query = AcademicRecord::with([
-                'student', 'level', 'course', 'semester', 'grades' => function ($q) use ($sectionId, $subjectId) {
-                    return $q->where('section_id', $sectionId)
+                'student',
+                'level',
+                'course',
+                'semester',
+                'grades' => function ($q) use ($sectionId, $subjectId) {
+                    return $q
+                        ->where('section_id', $sectionId)
                         ->where('subject_id', $subjectId);
-                }
+                },
+                'subjects'
             ])
                 ->select('academic_records.*');
 
             $enrolledStatus = Config::get('constants.academic_record_status.ENROLLED');
-            $query->where('academic_record_status_id', $enrolledStatus)->latest()->limit(1)
+            $query
+                ->where('academic_record_status_id', $enrolledStatus)
+                ->latest()->limit(1)
                 ->whereHas('subjects', function ($q) use ($sectionId, $subjectId) {
                     $q->when($sectionId, function ($q) use ($sectionId) {
                         return $q->where('section_id', $sectionId);
