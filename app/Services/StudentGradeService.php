@@ -27,10 +27,41 @@ class StudentGradeService
       $studentGrades = $isPaginated
         ? $query->paginate($perPage)
         : $query->get();
-      $studentGrades->append(['students']);
+      $studentGrades->append(['students', 'grading_periods']);
       return $studentGrades;
     } catch (Exception $e) {
       Log::info('Error occured during StudentGradeService list method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function store(array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $studentGrade = StudentGrade::create($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService store method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function update(array $data, int $id)
+  {
+    DB::beginTransaction();
+    try {
+      $studentGrade = StudentGrade::find($id);
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService update method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -278,7 +309,7 @@ class StudentGradeService
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during StudentGradeService submit method call: ');
+      Log::info('Error occured during StudentGradeService requestEdit method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -291,7 +322,7 @@ class StudentGradeService
       $editingApproved = Config::get('constants.student_grade_status.EDITING_APPROVED');
       $studentGrade = StudentGrade::find($studentGradeId);
       $data = Arr::add($data, 'student_grade_status_id', $editingApproved);
-      $data = Arr::add($data, 'request_approved_date', Carbon::now());
+      $data = Arr::add($data, 'edit_approved_date', Carbon::now());
       $studentGrade->update($data);
       DB::commit();
       $studentGrade->load(['personnel','subject', 'section' => function ($q) {
@@ -300,7 +331,7 @@ class StudentGradeService
       return $studentGrade;
     } catch (Exception $e) {
       DB::rollback();
-      Log::info('Error occured during StudentGradeService submit method call: ');
+      Log::info('Error occured during StudentGradeService approveEditRequest method call: ');
       Log::info($e->getMessage());
       throw $e;
     }
@@ -346,6 +377,25 @@ class StudentGradeService
     } catch (Exception $e) {
       DB::rollback();
       Log::info('Error occured during StudentGradeService finalize method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
+  public function reject(int $studentGradeId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $rejected = Config::get('constants.student_grade_status.REJECTED');
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $data = Arr::add($data, 'student_grade_status_id', $rejected);
+      $data = Arr::add($data, 'rejected_date', Carbon::now());
+      $studentGrade->update($data);
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService reject method call: ');
       Log::info($e->getMessage());
       throw $e;
     }

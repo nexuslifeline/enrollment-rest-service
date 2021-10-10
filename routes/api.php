@@ -225,6 +225,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('general-settings/{generalSettingId}', 'GeneralSettingController@show');
         Route::put('general-settings/{generalSettingId}', 'GeneralSettingController@update');
         //student grades
+        Route::patch('/student-grades/{id}', 'StudentGradeController@patch');
         Route::resource('student-grades', 'StudentGradeController');
         Route::get('student-grades/personnels/list', 'StudentGradeController@studentGradePersonnels');
         Route::post('student-grades/{personnelId}/{sectionId}/{subjectId}', 'StudentGradeController@acceptStudentGrade');
@@ -236,6 +237,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('student-grades/{studentGradeId}/unpublish', 'StudentGradeController@unpublish');
         Route::post('student-grades/{studentGradeId}/request-edit', 'StudentGradeController@requestEdit');
         Route::post('student-grades/{studentGradeId}/approve-edit-request', 'StudentGradeController@approveEditRequest');
+        Route::post('student-grades/{studentGradeId}/reject', 'StudentGradeController@reject');
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');

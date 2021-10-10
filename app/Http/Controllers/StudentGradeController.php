@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StudentGradeStoreRequest;
 use App\Http\Requests\StudentGradeUpdateGradePeriodRequest;
+use App\Http\Requests\StudentGradeUpdateRequest;
 use App\Http\Resources\StudentGradeResource;
 use App\Services\StudentGradeService;
 use App\Student;
@@ -59,9 +61,13 @@ class StudentGradeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StudentGradeStoreRequest $request)
     {
-        //
+        $studentGradeService = new StudentGradeService();
+        $studentGrade = $studentGradeService->store($request->all());
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -93,9 +99,24 @@ class StudentGradeController extends Controller
      * @param  \App\StudentGrade  $studentGrade
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, StudentGrade $studentGrade)
+    public function update(StudentGradeUpdateRequest $request, int $id)
     {
-        //
+        $studentGradeService = new StudentGradeService();
+        $studentGrade = $studentGradeService->update($request->all(), $id);
+
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function patch(Request $request, int $id)
+    {
+        $studentGradeService = new StudentGradeService();
+        $studentGrade = $studentGradeService->update($request->all(), $id);
+
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
     }
 
     /**
@@ -182,6 +203,16 @@ class StudentGradeController extends Controller
         $data = $request->all();
         $studentGradeService = new StudentGradeService;
         $studentGrade = $studentGradeService->finalize($studentGradeId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
+    public function reject($studentGradeId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->reject($studentGradeId, $data);
         return (new StudentGradeResource($studentGrade))
             ->response()
             ->setStatusCode(200);

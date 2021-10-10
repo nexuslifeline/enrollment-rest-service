@@ -25,6 +25,14 @@ class StudentGrade extends Model
             ->withPivot('grade','academic_record_id');
     }
 
+    public function getGradingPeriodsAttribute()
+    {   
+        return GradingPeriod::where('school_year_id', $this->section->school_year_id)
+            ->where('school_category_id', $this->section->school_category_id)
+            ->where('semester_id', $this->section->semester_id)
+            ->get();
+    }
+
     public function personnel()
     {
         return $this->belongsTo('App\Personnel');
@@ -39,15 +47,22 @@ class StudentGrade extends Model
     {
         $sectionId = $this->section_id;
         $subjectId = $this->subject_id;
-        return Student::whereHas('latestAcademicRecord', function ($q) use ($sectionId, $subjectId) {
-            return $q->whereHas('subjects', function ($q) use ($sectionId, $subjectId) {
-                return $q->where('section_id', $sectionId)
-                ->where('subject_id', $subjectId);
-            });
-        })
-        ->with('photo')
-        ->get(['first_name', 'middle_name', 'last_name', 'id'])
-        ->makeHidden(['address','current_address','permanent_address','age']);
+        return Student::leftJoin('academic_records', 'academic_records.student_id', '=', 'students.id')
+            ->leftJoin('academic_record_subjects as subjects', 'subjects.academic_record_id', '=', 'academic_records.id')
+            ->where('subjects.section_id', $sectionId)
+            ->where('subjects.subject_id', $subjectId)
+            ->with('photo')
+            ->get(['first_name', 'middle_name', 'last_name', 'students.id'])
+            ->makeHidden(['address','current_address','permanent_address','age']);
+        // return Student::whereHas('latestAcademicRecord', function ($q) use ($sectionId, $subjectId) {
+        //     return $q->whereHas('subjects', function ($q) use ($sectionId, $subjectId) {
+        //         return $q->where('section_id', $sectionId)
+        //         ->where('subject_id', $subjectId);
+        //     });
+        // })
+        // ->with('photo')
+        // ->get(['first_name', 'middle_name', 'last_name', 'id'])
+        // ->makeHidden(['address','current_address','permanent_address','age']);
     }
 
     public function subject()
@@ -101,8 +116,12 @@ class StudentGrade extends Model
 
         //filter by status id
         $studentGradeStatusId = $filters['student_grade_status_id'] ?? false;
-        $query->when($studentGradeStatusId, function ($q) use ($studentGradeStatusId) {
-            return $q->where('student_grade_status_id', $studentGradeStatusId);
+        $query->when($studentGradeStatusId, function ($query) use ($studentGradeStatusId) {
+            if (!is_array($studentGradeStatusId)) {
+                return $query->where('student_grade_status_id', $studentGradeStatusId);
+            } else {
+                return $query->whereIn('student_grade_status_id', $studentGradeStatusId);
+            }
         });
 
         //filter by subject id

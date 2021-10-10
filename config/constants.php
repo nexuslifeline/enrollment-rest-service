@@ -111,6 +111,7 @@ return [
     'SUBMITTED_FOR_REVIEW' => 3,
     'REQUEST_EDIT' => 4,
     'EDITING_APPROVED' => 5,
-    'FINALIZED' => 6
+    'FINALIZED' => 6,
+    'REJECTED' => 7
   ]
 ];

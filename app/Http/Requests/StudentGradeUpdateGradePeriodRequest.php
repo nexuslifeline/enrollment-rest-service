@@ -24,7 +24,7 @@ class StudentGradeUpdateGradePeriodRequest extends FormRequest
     public function rules()
     {
         return [
-            'grade' => 'required|gte:65|lte:100'
+            // 'grade' => 'required|gte:65|lte:100'
         ];
     }
 }
