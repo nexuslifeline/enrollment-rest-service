@@ -19,15 +19,20 @@ class StudentGradeService
   public function list(bool $isPaginated, int $perPage, array $filters)
   {
     try {
-      $query = StudentGrade::with(['personnel','subject', 'section' => function ($q) {
-        return $q->with('schoolCategory', 'schoolYear');
-      }])
+      $query = StudentGrade::with([
+        'personnel',
+        'subject',
+        'section' => function ($q) {
+          return $q->with('schoolCategory', 'schoolYear');
+        }
+      ])
       ->filters($filters);
 
       $studentGrades = $isPaginated
         ? $query->paginate($perPage)
         : $query->get();
-      $studentGrades->append(['students', 'grading_periods']);
+
+      $studentGrades->append(['students']);
       return $studentGrades;
     } catch (Exception $e) {
       Log::info('Error occured during StudentGradeService list method call: ');

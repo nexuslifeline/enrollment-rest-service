@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 
 class StudentGrade extends Model
 {
@@ -47,10 +48,12 @@ class StudentGrade extends Model
     {
         $sectionId = $this->section_id;
         $subjectId = $this->subject_id;
+        $enrolled = Config::get('constants.academic_record_status.ENROLLED');
         return Student::leftJoin('academic_records', 'academic_records.student_id', '=', 'students.id')
             ->leftJoin('academic_record_subjects as subjects', 'subjects.academic_record_id', '=', 'academic_records.id')
             ->where('subjects.section_id', $sectionId)
             ->where('subjects.subject_id', $subjectId)
+            ->where('academic_records.academic_record_status_id', $enrolled)
             ->with('photo')
             ->get(['first_name', 'middle_name', 'last_name', 'students.id'])
             ->makeHidden(['address','current_address','permanent_address','age']);

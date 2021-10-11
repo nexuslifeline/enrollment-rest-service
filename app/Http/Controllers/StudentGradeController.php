@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StudentGradeApproveEditRequestRequest;
+use App\Http\Requests\StudentGradeFinalizeRequest;
+use App\Http\Requests\StudentGradeRejectRequest;
 use App\Http\Requests\StudentGradeStoreRequest;
 use App\Http\Requests\StudentGradeUpdateGradePeriodRequest;
 use App\Http\Requests\StudentGradeUpdateRequest;
@@ -188,7 +191,7 @@ class StudentGradeController extends Controller
             ->setStatusCode(200);
     }
 
-    public function approveEditRequest($studentGradeId, Request $request)
+    public function approveEditRequest($studentGradeId, StudentGradeApproveEditRequestRequest $request)
     {
         $data = $request->all();
         $studentGradeService = new StudentGradeService;
@@ -198,7 +201,7 @@ class StudentGradeController extends Controller
             ->setStatusCode(200);
     }
 
-    public function finalize($studentGradeId, Request $request)
+    public function finalize($studentGradeId, StudentGradeFinalizeRequest $request)
     {
         $data = $request->all();
         $studentGradeService = new StudentGradeService;
@@ -208,7 +211,7 @@ class StudentGradeController extends Controller
             ->setStatusCode(200);
     }
 
-    public function reject($studentGradeId, Request $request)
+    public function reject($studentGradeId, StudentGradeRejectRequest $request)
     {
         $data = $request->all();
         $studentGradeService = new StudentGradeService;
