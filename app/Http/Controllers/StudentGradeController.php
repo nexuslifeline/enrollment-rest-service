@@ -76,12 +76,14 @@ class StudentGradeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\StudentGrade  $studentGrade
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(StudentGrade $studentGrade)
+    public function show(int $id)
     {
-        //
+        $studentGradeService = new StudentGradeService();
+        $student = $studentGradeService->get($id);
+        return new StudentGradeResource($student);
     }
 
     /**

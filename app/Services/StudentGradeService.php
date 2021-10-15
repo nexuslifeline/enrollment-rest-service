@@ -41,6 +41,28 @@ class StudentGradeService
     }
   }
 
+  public function get(int $id)
+  {
+    try {
+      $studentGrade = StudentGrade::with([
+        'section',
+        'subject',
+        'personnel' => function ($q) {
+          return $q->with(['user' => function ($q) {
+            return $q->with(['userGroup']);
+          }]);
+        }
+      ])
+        ->find($id);
+      // $studentGrade->load(['schoolYear', 'schoolCategory', 'semester']);
+      return $studentGrade;
+    } catch (Exception $e) {
+      Log::info('Error occured during StudentGradeService get method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
+
   public function store(array $data)
   {
     DB::beginTransaction();
