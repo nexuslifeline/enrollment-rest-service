@@ -20,7 +20,9 @@ class StudentGradeService
   {
     try {
       $query = StudentGrade::with([
-        'personnel',
+        'personnel' => function($q) {
+          return $q->with('photo');
+        },
         'subject',
         'section' => function ($q) {
           return $q->with('schoolCategory', 'schoolYear');
@@ -48,7 +50,7 @@ class StudentGradeService
         'section',
         'subject',
         'personnel' => function ($q) {
-          return $q->with(['user' => function ($q) {
+          return $q->with(['photo', 'department','user' => function ($q) {
             return $q->with(['userGroup']);
           }]);
         }

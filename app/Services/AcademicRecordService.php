@@ -1130,7 +1130,9 @@ class AcademicRecordService
     {
         try {
             $query = AcademicRecord::with([
-                'student',
+                'student' => function($q) {
+                    return $q->with('photo');
+                },
                 'level',
                 'course',
                 'semester',
