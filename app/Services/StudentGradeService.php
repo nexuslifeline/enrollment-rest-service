@@ -429,4 +429,33 @@ class StudentGradeService
       throw $e;
     }
   }
+
+  public function updateStudentGradePeriod(int $studentGradeId, int $academicRecordId, int $gradingPeriodId, array $data)
+  {
+    DB::beginTransaction();
+    try {
+      $studentGrade = StudentGrade::find($studentGradeId);
+      $grades = $studentGrade->grades();
+      $gradingPeriod = $grades->where('grading_period_id', $gradingPeriodId)
+        ->wherePivot('academic_record_id', $academicRecordId)
+        ->first();
+      if ($gradingPeriod) {
+        $grades
+          ->updateExistingPivot(
+            $gradingPeriodId,
+            [
+              'academic_record_id' => $academicRecordId,
+              'grade' => $data['grade']
+            ]
+          );
+      } 
+      DB::commit();
+      return $studentGrade;
+    } catch (Exception $e) {
+      DB::rollback();
+      Log::info('Error occured during StudentGradeService updateStudentGradePeriod method call: ');
+      Log::info($e->getMessage());
+      throw $e;
+    }
+  }
 }

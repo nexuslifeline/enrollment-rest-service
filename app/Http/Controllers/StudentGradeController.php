@@ -153,6 +153,16 @@ class StudentGradeController extends Controller
         ->setStatusCode(200);
     }
 
+    public function updateStudentGradePeriod($studentGradeId, $academicRecordId, $gradingPeriodId, Request $request)
+    {
+        $data = $request->all();
+        $studentGradeService = new StudentGradeService;
+        $studentGrade = $studentGradeService->updateStudentGradePeriod($studentGradeId, $academicRecordId, $gradingPeriodId, $data);
+        return (new StudentGradeResource($studentGrade))
+            ->response()
+            ->setStatusCode(200);
+    }
+
     public function submit($studentGradeId, Request $request)
     {
         $data = $request->all();

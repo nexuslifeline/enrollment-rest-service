@@ -238,6 +238,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('student-grades/{studentGradeId}/request-edit', 'StudentGradeController@requestEdit');
         Route::post('student-grades/{studentGradeId}/approve-edit-request', 'StudentGradeController@approveEditRequest');
         Route::post('student-grades/{studentGradeId}/reject', 'StudentGradeController@reject');
+        Route::put('student-grades/{studentGradeId}/academic-records/{academicRecordId}/grade-periods/{gradingPeriodId}', 'StudentGradeController@updateStudentGradePeriod');
 
         //student clearances
         Route::resource('/student-clearances','StudentClearanceController');
