@@ -1226,4 +1226,38 @@ class AcademicRecordService
             throw $e;
         }
     }
+
+    public function getTimeTable(int $academicRecordId, array $filters)
+    {
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $date = $filters['date'] ?? Carbon::now();
+            $criteria = $filters['criteria'] ?? false;
+            $subjectId = $filters['subject_id'] ?? false;
+            $dayOfWeek = Carbon::parse($date)->dayOfWeek;
+            $dayId = $dayOfWeek != 0 ? $dayOfWeek : 7;
+            $subjects = $academicRecord->subjects()
+                ->with(['schedules' => function ($q) use($dayId, $criteria, $subjectId) {
+                    return $q->with(['subject','section','personnel'])
+                        ->where('day_id', $dayId)
+                        ->when($criteria, function ($q) use ($criteria) {
+                            return $q->whereHas('subject', function ($q) use ($criteria) {
+                                return $q->where('name', 'like', '%' . $criteria . '%')
+                                ->orWhere('description', 'like', '%' . $criteria . '%');
+                            });
+                        })
+                        ->when($subjectId, function ($q) use ($subjectId) {
+                            return $q->where('subject_id', $subjectId);
+                        });
+                }])
+                ->get();
+            $schedules = $subjects->pluck('schedules')->flatten();
+            return $schedules;
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::info('Error occured during AcademicRecordService getTimeTable method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
 }

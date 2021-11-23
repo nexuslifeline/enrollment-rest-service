@@ -180,4 +180,10 @@ class PersonnelController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function getPersonnelsOfAcademicRecord(int $academicRecordId) {
+        $personnelService = new PersonnelService();
+        $personnels = $personnelService->getPersonnelsOfAcademicRecord($academicRecordId);
+        return PersonnelResource::collection($personnels);
+    }
 }
