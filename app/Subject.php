@@ -141,4 +141,14 @@ class Subject extends Model
     {
         return Semester::find($this->pivot->semester_id);
     }
+
+    public function getPersonnelAttribute()
+    {
+        $schedule = $this->schedules
+            ->where('section_id', $this->pivot->section_id)
+            ->first();
+        $personnelId = $schedule ? $schedule->personnel_id : null;
+
+        return Personnel::find($personnelId);
+    }
 }

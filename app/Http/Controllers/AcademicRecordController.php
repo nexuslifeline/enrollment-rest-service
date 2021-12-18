@@ -339,4 +339,13 @@ class AcademicRecordController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function getTimeTable(int $academicRecordId, Request $request)
+    {
+        $academicRecordService = new AcademicRecordService();
+        $filters = $request->all();
+        $subjects = $academicRecordService->getTimeTable($academicRecordId, $filters);
+        // return $subjects;
+        return SubjectResource::collection($subjects);
+    }
 }

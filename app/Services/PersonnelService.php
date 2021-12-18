@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\AcademicRecord;
 use App\Personnel;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -291,6 +292,21 @@ class PersonnelService
         } catch (Exception $e) {
             DB::rollback();
             Log::info('Error occured during PersonnelService updateEmployment method call: ');
+            Log::info($e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getPersonnelsOfAcademicRecord(int $academicRecordId)
+    {
+        try {
+            $academicRecord = AcademicRecord::find($academicRecordId);
+            $subjects = $academicRecord->subjects()->get();
+            $subjects->append('personnel');
+            $personnels = $subjects->pluck('personnel')->flatten()->unique('id');
+            return $personnels;
+        } catch (Exception $e) {
+            Log::info('Error occured during PersonnelService getPersonnelsOfAcademicRecord method call: ');
             Log::info($e->getMessage());
             throw $e;
         }

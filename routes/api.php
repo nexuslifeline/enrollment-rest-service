@@ -133,6 +133,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::put('/personnels/{personnelId}/employment/{employmentId}', 'PersonnelController@updateEmployment');
         Route::delete('/personnels/{personnelId}/employment/{employmentId}', 'PersonnelController@deleteEmployment');
         Route::post('/personnels/{personnelId}/user', 'PersonnelController@storeUser');
+        Route::get('/academic-records/{academicRecordId}/personnels', 'PersonnelController@getPersonnelsOfAcademicRecord');
         // payments
         Route::resource('/payments', 'PaymentController');
         Route::get('/payments/{paymentId}/files', 'PaymentFileController@index');
@@ -289,6 +290,8 @@ Route::group(['prefix' => 'v1'], function () {
     
         //grade symbols
         Route::resource('grade-symbols', 'GradeSymbolController');
+
+        Route::get('/academic-records/{academicRecordId}/timetable', 'AcademicRecordController@getTimeTable');
     });
     // Route::get('billings/{billingId}/preview', 'ReportController@previewBilling');
     // Route::get('requirement-list', 'ReportController@requirementList');
